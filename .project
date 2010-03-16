@@ -3,6 +3,7 @@
 	<name>Simternet</name>
 	<comment></comment>
 	<projects>
+		<project>Mason</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
