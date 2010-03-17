@@ -152,7 +152,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	
 	protected void setCustomers(Class network, AbstractConsumer ac, Integer x, Integer y, Double numCustomers) {
 		Bag b = networks.getObjectsAtLocation(x,y);
-		if (b == null)
+		if (b == null) throw new RuntimeException("Setting customers at a location with no networks.");
 		
 		for(Object obj : networks.getObjectsAtLocation(x, y).objs) {
 			AbstractNetwork n = (AbstractNetwork) obj;
