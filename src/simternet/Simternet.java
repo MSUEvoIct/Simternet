@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ec.util.MersenneTwisterFast;
+import sim.app.tutorial4.Tutorial4;
 import sim.engine.SimState;
 import sim.field.grid.DoubleGrid2D;
 import sim.field.grid.IntGrid2D;
@@ -41,16 +42,9 @@ public class Simternet extends SimState {
 	}
 
 	public static void main(String[] args) {
-		Simternet s = new Simternet(System.currentTimeMillis());
-		s.start();
-		for(int step = 0; step < 10; step++) {
-			if (!s.schedule.step(s))
-				break;
-			System.out.println("Step " + step + ": " + s.nspClasses.get(0).debt );
-		}
+		doLoop(Simternet.class, args);
+        System.exit(0);
 	}
-	
-	
 	
 	public List<AbstractConsumer> getConsumerClasses() {
 		return consumerClasses;

@@ -282,6 +282,9 @@ public abstract class AbstractNetworkProvider implements Steppable {
 		serviceDebt();
 		setPrices();
 		makeNetworkInvestment();
+		//Debugging info:
+		if(state.schedule.getSteps() % 10 == 0)
+			System.out.println("Step: " + state.schedule.getSteps() + "\n Debt: " + ((Simternet)state).nspClasses.get(0).debt + "\n Assets: " + ((Simternet)state).nspClasses.get(0).liquidAssets);
 	}
 
 }
