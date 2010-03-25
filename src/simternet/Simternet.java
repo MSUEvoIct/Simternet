@@ -3,11 +3,7 @@ package simternet;
 import java.util.ArrayList;
 import java.util.List;
 
-import ec.util.MersenneTwisterFast;
-import sim.app.tutorial4.Tutorial4;
 import sim.engine.SimState;
-import sim.field.grid.DoubleGrid2D;
-import sim.field.grid.IntGrid2D;
 
 /**
  * @author kkoning
