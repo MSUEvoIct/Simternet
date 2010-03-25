@@ -1,4 +1,4 @@
-package simternet;
+package simternet.main;
 
 import java.util.Collection;
 import java.util.List;
@@ -134,7 +134,7 @@ public abstract class AbstractConsumer implements Steppable {
 	public Map<AbstractNetworkProvider, Double> getPrices(Class network,
 			Integer x, Integer y) {
 		Map<AbstractNetworkProvider, Double> prices = new TreeMap<AbstractNetworkProvider, Double>();
-		for (AbstractNetworkProvider nsp : s.getNspClasses()) {
+		for (AbstractNetworkProvider nsp : s.getNetworkServiceProviders()) {
 			prices.put(nsp, nsp.getPrice(network, this, x, y));
 		}
 

@@ -1,4 +1,4 @@
-package simternet;
+package simternet.main;
 
 import java.util.HashMap;
 import java.util.Map;

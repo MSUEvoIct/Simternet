@@ -1,4 +1,4 @@
-package simternet;
+package simternet.main;
 
 public class SimpleNetwork extends AbstractNetwork {
 

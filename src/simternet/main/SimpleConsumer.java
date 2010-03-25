@@ -1,4 +1,4 @@
-package simternet;
+package simternet.main;
 
 import java.util.Collections;
 import java.util.Map;
@@ -13,7 +13,7 @@ public class SimpleConsumer extends AbstractConsumer {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	SimpleConsumer(Simternet s) {
+	public SimpleConsumer(Simternet s) {
 		super(s);
 	}
 	
@@ -60,7 +60,7 @@ public class SimpleConsumer extends AbstractConsumer {
 		
 	}
 	
-	private Double demandSimpleNetwork(Double price, Integer x, Integer y) {
+	protected Double demandSimpleNetwork(Double price, Integer x, Integer y) {
 		Double qty = (100 - price)/100 * this.getPopulation(x, y);
 		if (qty > 0) 
 			return qty;

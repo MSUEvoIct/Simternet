@@ -1,4 +1,4 @@
-package simternet;
+package simternet.main;
 
 import java.util.Map.Entry;
 
@@ -150,7 +150,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 		return 0.0;
 	}
 	
-	protected void setCustomers(Class network, AbstractConsumer ac, Integer x, Integer y, Double numCustomers) {
+	public void setCustomers(Class network, AbstractConsumer ac, Integer x, Integer y, Double numCustomers) {
 		Bag b = networks.getObjectsAtLocation(x,y);
 		if (b == null) throw new RuntimeException("Setting customers at a location with no networks.");
 		
@@ -283,8 +283,8 @@ public abstract class AbstractNetworkProvider implements Steppable {
 		setPrices();
 		makeNetworkInvestment();
 		//Debugging info:
-		if(state.schedule.getSteps() % 10 == 0)
-			System.out.println("Step: " + state.schedule.getSteps() + "\n Debt: " + ((Simternet)state).nspClasses.get(0).debt + "\n Assets: " + ((Simternet)state).nspClasses.get(0).liquidAssets);
+		if(state.schedule.getSteps() % 1 == 0)
+			System.out.println("Step: " + state.schedule.getSteps() + "\n Debt: " + ((Simternet)state).networkServiceProviders.get(0).debt + "\n Assets: " + ((Simternet)state).networkServiceProviders.get(0).liquidAssets);
 	}
 
 }

@@ -1,4 +1,4 @@
-package simternet;
+package simternet.main;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ public class Simternet extends SimState {
 	/**
 	 * Stores a list of ALL network service providers present in the simulation.
 	 */
-	protected List<AbstractNetworkProvider> nspClasses = new ArrayList<AbstractNetworkProvider>();
+	protected List<AbstractNetworkProvider> networkServiceProviders = new ArrayList<AbstractNetworkProvider>();
 
 	
 	public Simternet(long seed) {
@@ -50,12 +50,12 @@ public class Simternet extends SimState {
 		this.consumerClasses = consumerClasses;
 	}
 
-	public List<AbstractNetworkProvider> getNspClasses() {
-		return nspClasses;
+	public List<AbstractNetworkProvider> getNetworkServiceProviders() {
+		return networkServiceProviders;
 	}
 
-	public void setNspClasses(List<AbstractNetworkProvider> nspClasses) {
-		this.nspClasses = nspClasses;
+	public void setNetworkServiceProviders(List<AbstractNetworkProvider> nspClasses) {
+		this.networkServiceProviders = nspClasses;
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class Simternet extends SimState {
 	 *   Ordering steps.
 	 * 
 	 */
-	private void addConsumerClass(AbstractConsumer cc) {
+	protected void addConsumerClass(AbstractConsumer cc) {
 		consumerClasses.add(cc);
 		schedule.scheduleRepeating(cc);
 	}
@@ -77,8 +77,8 @@ public class Simternet extends SimState {
 	 * repeat at each time step.
 	 * 
 	 */
-	private void addNetworkServiceProvider(AbstractNetworkProvider nsp) {
-		nspClasses.add(nsp);
+	protected void addNetworkServiceProvider(AbstractNetworkProvider nsp) {
+		networkServiceProviders.add(nsp);
 		schedule.scheduleRepeating(nsp);
 	}
 	
@@ -107,7 +107,7 @@ public class Simternet extends SimState {
 	/**
 	 *   Specify this somehow in parameters, rather than source.
 	 */
-	private void initConsumerClasses() {
+	protected void initConsumerClasses() {
 		AbstractConsumer cc = new SimpleConsumer(this);
 		addConsumerClass(cc);
 	}
