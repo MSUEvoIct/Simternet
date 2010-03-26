@@ -38,8 +38,9 @@ public class CournotConsumer extends SimpleConsumer{
 				//Assumption!
 				qtyDemanded = new Double( (qtyDemanded / CournotSimternet.ALPHA) * s.getPopulation(x, y));
 				//End assumption
+				qtyDemanded = new Double(.25 * s.getPopulation(x, y));
 				nsp.setCustomers(SimpleNetwork.class, this, x, y, qtyDemanded);
-				nsp.setMarketShare(nsp.getMarketShare() + qtyDemanded);
+				nsp.setTotalSubscribers(nsp.getTotalSubscribers() + qtyDemanded);
 			}
 		}
 		

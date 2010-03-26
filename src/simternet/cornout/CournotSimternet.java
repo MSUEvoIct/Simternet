@@ -26,18 +26,17 @@ public class CournotSimternet extends Simternet{
 		double sum = 0.0;
 		ArrayList<AbstractNetworkProvider> nsps = (ArrayList<AbstractNetworkProvider>) getNetworkServiceProviders();
 		for (AbstractNetworkProvider nsp : nsps){
-			if ( ((CournotNetworkServiceProvider)nsp).getPreviousMarketShare().isNaN() == false ){
-				sum += ((CournotNetworkServiceProvider)nsp).getPreviousMarketShare();
+			if ( ((CournotNetworkServiceProvider)nsp).getPreviousTotalSubscribers().isNaN() == false ){
+				sum += ((CournotNetworkServiceProvider)nsp).getPreviousTotalSubscribers();
 			}
 		}
-		if (sum == 0.0){
-			return new Double(0.0);
-		}
-		if (sum - np.getPreviousMarketShare() == 0.0){
-			return new Double(1.0);
-		}
 		
-		Double marketShare = new Double((sum-np.getPreviousMarketShare())/sum);
+		if(sum == 0)
+			return new Double(0.0);
+		if(sum - np.getTotalSubscribers() == 0)
+			return new Double(0.0);
+		
+		Double marketShare = new Double((sum-np.getPreviousTotalSubscribers()) / getPopulation());
 		return marketShare;
 	}
 	
@@ -45,18 +44,16 @@ public class CournotSimternet extends Simternet{
 		double sum = 0.0;
 		ArrayList<AbstractNetworkProvider> nsps = (ArrayList<AbstractNetworkProvider>) getNetworkServiceProviders();
 		for (AbstractNetworkProvider nsp : nsps){
-			if ( ((CournotNetworkServiceProvider)nsp).getMarketShare().isNaN() == false ){
-				sum += ((CournotNetworkServiceProvider)nsp).getMarketShare();
+			if ( ((CournotNetworkServiceProvider)nsp).getTotalSubscribers().isNaN() == false ){
+				sum += ((CournotNetworkServiceProvider)nsp).getTotalSubscribers();
 			}
 		}
-		if (sum == 0.0){
-			return new Double(0.0);
-		}
-		if (sum - np.getMarketShare() == 0.0){
-			return new Double(1.0);
-		}
 		
-		Double marketShare = new Double((sum-np.getMarketShare())/sum);
+		if(sum == 0)
+			return new Double(0.0);
+		if(sum - np.getTotalSubscribers() == 0)
+			return new Double(0.0);
+		Double marketShare = new Double((sum-np.getTotalSubscribers())/getPopulation());
 		return marketShare;
 	}
 	

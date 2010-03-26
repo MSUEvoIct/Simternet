@@ -12,8 +12,8 @@ public class CournotNetworkServiceProvider extends AbstractNetworkProvider{
 
 	private Double price = 0.0;
 	
-	private Double marketShare = 0.0;
-	private Double previousMarketShare = Double.NaN;
+	private Double totalSubscribers = 0.0;
+	private Double previousTotalSubscribers = Double.NaN;
 	
 	public CournotNetworkServiceProvider(Simternet s) {
 		super(s);
@@ -46,34 +46,35 @@ public class CournotNetworkServiceProvider extends AbstractNetworkProvider{
 	 */
 	@Override
 	protected void setPrices() {
-		price = new Double( (CournotSimternet.ALPHA - getPrice()) / 2 );
+		System.out.println(((CournotSimternet)s).getPreviousMarketSharePercentage(this));
+		price = new Double( (CournotSimternet.ALPHA - ((CournotSimternet)s).getPreviousMarketSharePercentage(this)) / 2 );
 	}
 
 	public Double getPrice() {
 		return price;
 	}
 
-	public void setMarketShare(Double marketShare) {
-		this.marketShare = marketShare;
+	public void setTotalSubscribers(Double marketShare) {
+		this.totalSubscribers = marketShare;
 	}
 
-	public Double getMarketShare() {
-		return marketShare;
+	public Double getTotalSubscribers() {
+		return totalSubscribers;
 	}
 
-	public Double getPreviousMarketShare() {
-		return previousMarketShare;
+	public Double getPreviousTotalSubscribers() {
+		return previousTotalSubscribers;
 	}
 	
 	public void advanceOneStep(){
-		previousMarketShare = marketShare;
-		marketShare = ZERO;
+		previousTotalSubscribers = totalSubscribers;
+		totalSubscribers = ZERO;
 	}
 	
 	@Override
 	public void step(SimState state) {
 		super.step(state);
-		System.out.println("    Market Share = " + getMarketShare() + " out of " + s.getPopulation());
+		System.out.println("    Market Share = " + getTotalSubscribers() + " out of " + s.getPopulation());
 		System.out.println("    Market Share = " + ((CournotSimternet)s).getCurrentMarketSharePercentage(this));
 		System.out.println("    Price = " + getPrice());
 		advanceOneStep();
