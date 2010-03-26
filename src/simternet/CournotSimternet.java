@@ -8,8 +8,8 @@ import simternet.nsp.AbstractNetworkProvider;
 import simternet.nsp.CournotNetworkServiceProvider;
 
 public class CournotSimternet extends Simternet{
-
-	public final static Double ALPHA = 15.0;
+	
+	public final static Double ALPHA = 100.0;
 	
 	/**
 	 * 
@@ -63,19 +63,18 @@ public class CournotSimternet extends Simternet{
 	public void start() {
         // reset schedule
         schedule.reset();
-        
-		initConsumerClasses();
+		
 		initNetworkServiceProviders();
+		initConsumerClasses();
 	}
 	
-	protected void initConsumerClasses() {
-		addConsumerClass(new CournotConsumer(this));
+	protected void initConsumerClasses() {        
+		addConsumerClass(new CournotConsumer(this), 2, 1);
 	}
 	
 	private void initNetworkServiceProviders() {
-		addNetworkServiceProvider(new CournotNetworkServiceProvider(this));
-		addNetworkServiceProvider(new CournotNetworkServiceProvider(this));
-		addNetworkServiceProvider(new CournotNetworkServiceProvider(this));
+		addNetworkServiceProvider(new CournotNetworkServiceProvider(this), 1, 1);
+		addNetworkServiceProvider(new CournotNetworkServiceProvider(this), 1, 1);
+		addNetworkServiceProvider(new CournotNetworkServiceProvider(this), 1, 1);
 	}
-	
 }

@@ -96,6 +96,32 @@ public class Simternet extends SimState {
 	}
 	
 	/**
+	 * Track this consumer class and schedule it to repeat at each step.
+	 *   
+	 * @param cc		Consumer class to add to the schedule
+	 * @param ordering	The order (> 0) in which the item should run
+	 * @param interval	The interval (> 0) after which the object should be run	
+	 * 
+	 */
+	protected void addConsumerClass(AbstractConsumerClass cc, int ordering, double interval) {
+		consumerClasses.add(cc);
+		schedule.scheduleRepeating(cc, ordering, interval);
+	}
+	
+	/**
+	 * Track this Network Service Provider class and schedule it to repeat at each step.
+	 *   
+	 * @param nsp		Network Service Provider class to add to the schedule
+	 * @param ordering	The order (> 0) in which the item should run
+	 * @param interval	The interval (> 0) after which the object should be run	
+	 * 
+	 */
+	protected void addNetworkServiceProvider(AbstractNetworkProvider nsp, int ordering, double interval) {
+		networkServiceProviders.add(nsp);
+		schedule.scheduleRepeating(nsp, ordering, interval);
+	}
+	
+	/**
 	 * @return The total population of All consumers at ALL locations.
 	 */
 	public Double getPopulation() {

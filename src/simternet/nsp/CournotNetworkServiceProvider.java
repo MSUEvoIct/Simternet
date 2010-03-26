@@ -7,8 +7,6 @@ import simternet.network.SimpleNetwork;
 
 public class CournotNetworkServiceProvider extends AbstractNetworkProvider{
 	private static final long serialVersionUID = -9165331810723302112L;
-
-	private static final Double ZERO = 0.0;
 	
 	private Boolean built = false;
 
@@ -16,6 +14,8 @@ public class CournotNetworkServiceProvider extends AbstractNetworkProvider{
 	
 	private Double totalSubscribers = 0.0;
 	private Double previousTotalSubscribers = Double.NaN;
+	
+	private Boolean priceSet = false;
 	
 	public CournotNetworkServiceProvider(Simternet s) {
 		super(s);
@@ -48,8 +48,8 @@ public class CournotNetworkServiceProvider extends AbstractNetworkProvider{
 	 */
 	@Override
 	protected void setPrices() {
-		System.out.println(((CournotSimternet)simternet).getPreviousMarketSharePercentage(this));
-		price = new Double( (CournotSimternet.ALPHA - ((CournotSimternet)simternet).getPreviousMarketSharePercentage(this)) / 2 );
+		price = (CournotSimternet.ALPHA - (((CournotSimternet)simternet).getPreviousMarketSharePercentage(this)*100)) / 2;
+		priceSet = true;
 	}
 
 	public Double getPrice() {
@@ -70,16 +70,17 @@ public class CournotNetworkServiceProvider extends AbstractNetworkProvider{
 	
 	public void advanceOneStep(){
 		previousTotalSubscribers = totalSubscribers;
-		totalSubscribers = ZERO;
+		totalSubscribers = 0.0;
+		priceSet = false;
 	}
 	
 	@Override
 	public void step(SimState state) {
 		super.step(state);
-		System.out.println("    Market Share = " + getTotalSubscribers() + " out of " + simternet.getPopulation());
-		System.out.println("    Market Share = " + ((CournotSimternet)simternet).getCurrentMarketSharePercentage(this));
-		System.out.println("    Price = " + getPrice());
-		advanceOneStep();
+	}
+
+	public Boolean isPriceSet() {
+		return priceSet;
 	}
 	
 }
