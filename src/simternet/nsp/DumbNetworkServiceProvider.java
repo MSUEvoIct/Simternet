@@ -1,4 +1,9 @@
-package simternet.main;
+package simternet.nsp;
+
+import simternet.Simternet;
+import simternet.consumer.AbstractConsumerClass;
+import simternet.network.AbstractNetwork;
+import simternet.network.SimpleNetwork;
 
 /**
  * @author kkoning
@@ -49,10 +54,13 @@ public class DumbNetworkServiceProvider extends AbstractNetworkProvider {
 		// Do nothing, price is always fixed.
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Double getPrice(Class cl, AbstractConsumer cc, int x, int y) {
-		return price;
+	public Double getPrice(Class<? extends AbstractNetwork> cl,
+			AbstractConsumerClass cc, int x, int y) {
+		if (this.hasNetworkAt(cl, x, y))
+			return price;
+		else
+			return null;
 	}
 	
 

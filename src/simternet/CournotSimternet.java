@@ -1,8 +1,11 @@
-package simternet.cornout;
+package simternet;
 
 import java.util.ArrayList;
 
-import simternet.main.*;
+import simternet.*;
+import simternet.consumer.CournotConsumer;
+import simternet.nsp.AbstractNetworkProvider;
+import simternet.nsp.CournotNetworkServiceProvider;
 
 public class CournotSimternet extends Simternet{
 

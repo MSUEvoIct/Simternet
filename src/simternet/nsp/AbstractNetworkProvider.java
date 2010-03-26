@@ -1,4 +1,4 @@
-package simternet.main;
+package simternet.nsp;
 
 import java.util.Map.Entry;
 
@@ -6,6 +6,10 @@ import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.grid.SparseGrid2D;
 import sim.util.Bag;
+import simternet.Exogenous;
+import simternet.Simternet;
+import simternet.consumer.AbstractConsumerClass;
+import simternet.network.AbstractNetwork;
 
 /**
  * @author kkoning
@@ -25,13 +29,13 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	protected Double debt = 0.0;
 	protected Double liquidAssets = 0.0;
 	protected SparseGrid2D networks;
-	protected Simternet s = null;
+	protected Simternet simternet = null;
 	protected Double totalCapitalExpenditures = 0.0;
 	protected Double totalInterestPaid = 0.0;
 	protected Double totalRevenueCollected = 0.0;
 
 	public AbstractNetworkProvider(Simternet s) {
-		this.s = s;
+		this.simternet = s;
 		liquidAssets += Exogenous.nspEndowment;
 		networks = new SparseGrid2D(Exogenous.landscapeX,
 				Exogenous.landscapeY);
@@ -42,10 +46,10 @@ public abstract class AbstractNetworkProvider implements Steppable {
 		for(Object obj : networks.allObjects.objs) {
 			if (obj == null) continue;
 			AbstractNetwork n = (AbstractNetwork) obj;
-			for (Entry<AbstractConsumer,Double> e : n.getCustomers().entrySet()) {
-				AbstractConsumer cc = e.getKey();
+			for (Entry<AbstractConsumerClass,Double> e : n.getCustomers().entrySet()) {
+				AbstractConsumerClass cc = e.getKey();
 				Double numCustomers = e.getValue();
-				Double price = this.getPrice(n.getClass(), cc, n.locationX, n.locationY);
+				Double price = this.getPrice(n.getClass(), cc, n.getLocationX(), n.getLocationY());
 				Double revenue = numCustomers * price;
 				earn(revenue);
 			}
@@ -57,7 +61,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	 * 
 	 * Get the total number of customers the provider currently has.
 	 */
-	protected Double getCustomers() {
+	public Double getCustomers() {
 		Double numCustomers = 0.0;
 		for (int x = 0; x < Exogenous.landscapeX; x++)
 			for (int y = 0; y < Exogenous.landscapeY; y++)
@@ -65,18 +69,30 @@ public abstract class AbstractNetworkProvider implements Steppable {
 		return numCustomers;
 	}
 	
-	public boolean hasNetworkAt(Class network, int x, int y) {
-		
-		Bag nets = networks.getObjectsAtLocation(x, y);
-		if (nets == null) return false;
-		if (nets.isEmpty()) return false;
-		
-		for(Object obj : nets.objs) {
+	public AbstractNetwork getNetworkAt(Class<? extends AbstractNetwork> net,
+			int x, int y) {
+		Bag nets = networks.getObjectsAtLocation(x, y); // All of our nets at
+														// this loc
+		if (nets == null) // we have no nets at this loc
+			return null;
+		if (nets.isEmpty()) // we have no nets at this loc
+			return null;
+
+		for (Object obj : nets.objs) {
 			AbstractNetwork n = (AbstractNetwork) obj;
-			if (n.getClass().equals(network)) return true;
+			if (n.getClass().equals(net))
+				return n;
 		}
-		
-		return false;
+		return null;
+	}
+	
+	public boolean hasNetworkAt(Class<? extends AbstractNetwork> net,
+			Integer x, Integer y) {
+		AbstractNetwork an = this.getNetworkAt(net, x, y);
+		if (an == null)
+			return false;
+		else
+			return true;
 	}
 	
 	/**
@@ -84,7 +100,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	 * @param y
 	 * @return Get the total number of customers at the specified location.
 	 */
-	protected Double getCustomers(Integer x, Integer y) {
+	public Double getCustomers(Integer x, Integer y) {
 		Double numCustomers = 0.0;
 		for(AbstractNetwork n : (AbstractNetwork[]) networks.getObjectsAtLocation(x, y).objs) {
 			numCustomers += n.getTotalCustomers();
@@ -92,7 +108,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 		return numCustomers;
 	}
 	
-	protected Double getCustomers(AbstractConsumer ac) {
+	public Double getCustomers(AbstractConsumerClass ac) {
 		Double numCustomers = 0.0;
 		for (int x = 0; x < Exogenous.landscapeX; x++)
 			for (int y = 0; y < Exogenous.landscapeY; y++)
@@ -107,7 +123,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	 * @return The number of subscriptions from this consumer group at this location.
 	 * Because each member of the consumer group may subscribe to more than one service
 	 */
-	protected Double getCustomers(AbstractConsumer ac, Integer x, Integer y) {
+	public Double getCustomers(AbstractConsumerClass ac, Integer x, Integer y) {
 		Double numCustomers = 0.0;
 		for(AbstractNetwork n : (AbstractNetwork[]) networks.getObjectsAtLocation(x, y).objs) {
 			numCustomers += n.getCustomers(ac);
@@ -123,7 +139,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	 * all consumer classes at the specified location.
 	 */
 	@SuppressWarnings("unchecked")
-	protected Double getCustomers(Class network, Integer x, Integer y) {
+	public Double getCustomers(Class network, Integer x, Integer y) {
 		for(AbstractNetwork n : (AbstractNetwork[]) networks.getObjectsAtLocation(x, y).objs) {
 			if (network.isInstance(n)) {
 				return n.getTotalCustomers();
@@ -141,8 +157,13 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	 * to the specified network at the specified location.
 	 */
 	@SuppressWarnings("unchecked")
-	protected Double getCustomers(Class network, AbstractConsumer ac, Integer x, Integer y) {
-		for(AbstractNetwork n : (AbstractNetwork[]) networks.getObjectsAtLocation(x, y).objs) {
+	public Double getCustomers(Class network, AbstractConsumerClass ac, Integer x, Integer y) {
+		Bag b = networks.getObjectsAtLocation(x, y);
+		if (b == null) return 0.0;
+		Object[] objs = b.objs;
+		for(Object obj : objs ) {
+			if (obj == null) continue;
+			AbstractNetwork n = (AbstractNetwork) obj;
 			if (network.isInstance(n)) {
 				return n.getCustomers(ac);
 			}
@@ -150,7 +171,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 		return 0.0;
 	}
 	
-	public void setCustomers(Class network, AbstractConsumer ac, Integer x, Integer y, Double numCustomers) {
+	public void setCustomers(Class<? extends AbstractNetwork> network, AbstractConsumerClass ac, Integer x, Integer y, Double numCustomers) {
 		Bag b = networks.getObjectsAtLocation(x,y);
 		if (b == null) throw new RuntimeException("Setting customers at a location with no networks.");
 		
@@ -174,7 +195,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	protected void buildAtHalfMaxPop(Class network) {
 		for (int x = 0; x < Exogenous.landscapeX; x++)
 			for (int y = 0; y < Exogenous.landscapeY; y++)
-				if (s.getPopulation(x,y) >= (Exogenous.maxPopulation / 2))
+				if (simternet.getPopulation(x,y) >= (Exogenous.maxPopulation / 2))
 					buildNetwork(network, x, y);
 	}
 
@@ -184,7 +205,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	 * Utility method:  build the specified network everywhere.
 	 * 
 	 */
-	protected void buildEverywhere(Class network) {
+	protected void buildEverywhere(Class<? extends AbstractNetwork> network) {
 		for (int x = 0; x < Exogenous.landscapeX; x++)
 			for (int y = 0; y < Exogenous.landscapeY; y++)
 				buildNetwork(network, x, y);
@@ -196,7 +217,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	 * 
 	 * Future: verify provider is not building network twice?
 	 */
-	private void buildNetwork(Class cl, Integer x, Integer y) {
+	private void buildNetwork(Class<? extends AbstractNetwork> cl, Integer x, Integer y) {
 		try {
 			AbstractNetwork network = (AbstractNetwork) cl.newInstance(); // Create a new network, but of the specified type.
 			network.init(this, x, y); // give this network information about its position and owner.
@@ -235,9 +256,13 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	 * at this location.  This method should be overridden if NSPs to not set prices
 	 * in individual network objects.
 	 */
-	@SuppressWarnings("unchecked")
-	public Double getPrice(Class cl, AbstractConsumer cc, int x, int y) {
-		for(AbstractNetwork n : (AbstractNetwork[]) this.networks.getObjectsAtLocation(x, y).objs) {
+	public Double getPrice(Class<? extends AbstractNetwork> cl, AbstractConsumerClass cc, int x, int y) {
+		
+		Object[] objs = this.networks.getObjectsAtLocation(x, y).objs;
+		
+		for(Object obj : objs ) {
+			if (obj == null) continue;
+			AbstractNetwork n = (AbstractNetwork) obj;
 			if (cl.isInstance(n)) {
 				return n.getPrice(cc);
 			}
@@ -269,7 +294,19 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	
 	protected abstract void setPrices();
 	
-	
+	/**
+	 * @return The simulation in which this network service provider is 
+	 * participating.
+	 * 
+	 * This method exists as a memory-saving convienence, so that other
+	 * objects (i.e., networks) need not store a reference to both their
+	 * owning NSP -and- the simternet object.  This saves memory at least 
+	 * equal to sizeof(pointer) * #NSPs * Avg. networks per NSP.
+	 */
+	public Simternet getSimternet() {
+		return simternet;
+	}
+
 	/**
 	 * NOTE:  The order in which this function is called vis-a-vis other
 	 * agents is unspecified.
@@ -280,11 +317,12 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	public void step(SimState state) {
 		billCustomers();
 		serviceDebt();
-		setPrices();
 		makeNetworkInvestment();
-		//Debugging info:
-		if(state.schedule.getSteps() % 1 == 0)
-			System.out.println("Step: " + state.schedule.getSteps() + "\n Debt: " + ((Simternet)state).networkServiceProviders.get(0).debt + "\n Assets: " + ((Simternet)state).networkServiceProviders.get(0).liquidAssets);
+		setPrices();
+		System.out.println("NSP: " + this.getClass().getSimpleName() + "-"
+				+ this.hashCode() + ", totalRev = "
+				+ this.totalRevenueCollected + ", liquidAssets = "
+				+ this.liquidAssets);
 	}
 
 }

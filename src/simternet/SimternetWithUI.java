@@ -1,4 +1,4 @@
-package simternet.main;
+package simternet;
 
 import java.awt.Color;
 

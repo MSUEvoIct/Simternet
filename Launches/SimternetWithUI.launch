@@ -2,11 +2,11 @@
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <stringAttribute key="bad_container_name" value="/Simternet/Launche"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/Simternet/src/simternet/main/SimternetWithUI.java"/>
+<listEntry value="/Simternet/src/simternet/SimternetWithUI.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
 </listAttribute>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="simternet.main.SimternetWithUI"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="simternet.SimternetWithUI"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Simternet"/>
 </launchConfiguration>

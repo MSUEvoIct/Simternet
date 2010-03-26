@@ -1,10 +1,13 @@
-package simternet.cornout;
+package simternet.consumer;
 
 import java.util.Collections;
 import java.util.Map;
 
 import sim.engine.SimState;
-import simternet.main.*;
+import simternet.*;
+import simternet.network.SimpleNetwork;
+import simternet.nsp.AbstractNetworkProvider;
+import simternet.nsp.CournotNetworkServiceProvider;
 
 public class CournotConsumer extends SimpleConsumer{
 

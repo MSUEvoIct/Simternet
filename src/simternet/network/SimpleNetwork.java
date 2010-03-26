@@ -1,4 +1,7 @@
-package simternet.main;
+package simternet.network;
+
+import simternet.Exogenous;
+import simternet.consumer.AbstractConsumerClass;
 
 public class SimpleNetwork extends AbstractNetwork {
 
@@ -7,7 +10,7 @@ public class SimpleNetwork extends AbstractNetwork {
 	@Override
 	public Double getBuildCost() {
 		Double cost = 0.0;
-		Double population = nsp.s.getPopulation(this.locationX, this.locationY);
+		Double population = nsp.getSimternet().getPopulation(this.locationX, this.locationY);
 		
 		cost += Exogenous.netCostSimpleArea;
 		cost += population * Exogenous.netCostSimpleUser;
@@ -22,12 +25,12 @@ public class SimpleNetwork extends AbstractNetwork {
 	 * 
 	 */
 	@Override
-	public Double getPrice(AbstractConsumer cc) {
+	public Double getPrice(AbstractConsumerClass cc) {
 		return price;
 	}
 
 	@Override
-	public void setPrice(AbstractConsumer cc, Double price) {
+	public void setPrice(AbstractConsumerClass cc, Double price) {
 		this.price = price;
 	}
 
