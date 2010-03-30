@@ -42,7 +42,6 @@ public class Simternet extends SimState {
 	 * Stores a list of ALL network service providers present in the simulation.
 	 */
 	protected Set<AbstractNetworkProvider> networkServiceProviders = new HashSet<AbstractNetworkProvider>();
-
 	
 	public Simternet(long seed) {
 		super(seed);
@@ -57,16 +56,8 @@ public class Simternet extends SimState {
 		return consumerClasses;
 	}
 
-	public void setConsumerClasses(Set<AbstractConsumerClass> consumerClasses) {
-		this.consumerClasses = consumerClasses;
-	}
-
 	public Set<AbstractNetworkProvider> getNetworkServiceProviders() {
 		return networkServiceProviders;
-	}
-
-	public void setNetworkServiceProviders(Set<AbstractNetworkProvider> nspClasses) {
-		this.networkServiceProviders = nspClasses;
 	}
 
 	/**
