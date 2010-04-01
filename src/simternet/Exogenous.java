@@ -16,11 +16,11 @@ public class Exogenous {
 	
 	public static final double netCostSimpleArea = 10000;
 	public static final double netCostSimpleUser = 10;
-	public static final double nspEndowment = 100000;
+	public static final double nspEndowment = 11000;
 	public static final double paybackRate = 0.05;
 	public static final double interestRate = 0.07;
-	public static final int landscapeX = 2;
-	public static final int landscapeY = 2;
+	public static final int landscapeX = 3;
+	public static final int landscapeY = 3;
 	public static final double maxPopulation = 1000;
 	
 	public static final double maxPrice = 200;
