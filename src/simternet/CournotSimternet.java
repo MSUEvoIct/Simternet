@@ -1,8 +1,10 @@
 package simternet;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import simternet.*;
+import simternet.arbiter.Arbiter;
 import simternet.consumer.CournotConsumer;
 import simternet.nsp.AbstractNetworkProvider;
 import simternet.nsp.CournotNetworkServiceProvider;
@@ -25,9 +27,9 @@ public class CournotSimternet extends Simternet{
         System.exit(0);
 	}
 	
-	public Double getPreviousMarketSharePercentage(CournotNetworkServiceProvider np){
+	public Double getCombinedCompetitorsMarketShare(CournotNetworkServiceProvider np){
 		double sum = 0.0;
-		ArrayList<AbstractNetworkProvider> nsps = (ArrayList<AbstractNetworkProvider>) getNetworkServiceProviders();
+		Set<AbstractNetworkProvider> nsps = getNetworkServiceProviders();
 		for (AbstractNetworkProvider nsp : nsps){
 			if ( ((CournotNetworkServiceProvider)nsp).getPreviousTotalSubscribers().isNaN() == false ){
 				sum += ((CournotNetworkServiceProvider)nsp).getPreviousTotalSubscribers();
@@ -36,45 +38,27 @@ public class CournotSimternet extends Simternet{
 		
 		if(sum == 0)
 			return new Double(0.0);
-		if(sum - np.getTotalSubscribers() == 0)
+		if(sum - np.getPreviousTotalSubscribers() == 0)
 			return new Double(0.0);
-		
-		Double marketShare = new Double((sum-np.getPreviousTotalSubscribers()) / getPopulation());
-		return marketShare;
-	}
-	
-	public Double getCurrentMarketSharePercentage(CournotNetworkServiceProvider np){
-		double sum = 0.0;
-		ArrayList<AbstractNetworkProvider> nsps = (ArrayList<AbstractNetworkProvider>) getNetworkServiceProviders();
-		for (AbstractNetworkProvider nsp : nsps){
-			if ( ((CournotNetworkServiceProvider)nsp).getTotalSubscribers().isNaN() == false ){
-				sum += ((CournotNetworkServiceProvider)nsp).getTotalSubscribers();
-			}
-		}
-		
-		if(sum == 0)
-			return new Double(0.0);
-		if(sum - np.getTotalSubscribers() == 0)
-			return new Double(0.0);
-		Double marketShare = new Double((sum-np.getTotalSubscribers())/getPopulation());
+		Double marketShare = new Double((sum-np.getPreviousTotalSubscribers())/getPopulation());
 		return marketShare;
 	}
 	
 	public void start() {
         // reset schedule
         schedule.reset();
-		
 		initNetworkServiceProviders();
 		initConsumerClasses();
+		schedule.scheduleRepeating(new Arbiter(), 99999999, 1);
 	}
 	
-	protected void initConsumerClasses() {        
-		addConsumerClass(new CournotConsumer(this), 2, 1);
+	protected void initConsumerClasses() {
+		addConsumerClass(new CournotConsumer(this));
 	}
 	
 	private void initNetworkServiceProviders() {
-		addNetworkServiceProvider(new CournotNetworkServiceProvider(this), 1, 1);
-		addNetworkServiceProvider(new CournotNetworkServiceProvider(this), 1, 1);
-		addNetworkServiceProvider(new CournotNetworkServiceProvider(this), 1, 1);
+		addNetworkServiceProvider(new CournotNetworkServiceProvider(this));
+		addNetworkServiceProvider(new CournotNetworkServiceProvider(this));
+		addNetworkServiceProvider(new CournotNetworkServiceProvider(this));
 	}
 }

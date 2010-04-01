@@ -2,6 +2,8 @@ package simternet.nsp;
 
 import java.util.Set;
 
+import javax.activation.UnsupportedDataTypeException;
+
 import sim.engine.SimState;
 import simternet.CournotSimternet;
 import simternet.Exogenous;
@@ -32,7 +34,7 @@ public class RepeatedStackelburgNSP extends AbstractNetworkProvider {
 
 	@Override
 	protected void setPrices() {
-		for (Object obj : networks.allObjects.objs) { // for all our networks
+		for (Object obj : networkGrid.allObjects.objs) { // for all our networks
 			if (obj == null)
 				continue;
 			AbstractNetwork an = (AbstractNetwork) obj;
@@ -59,7 +61,7 @@ public class RepeatedStackelburgNSP extends AbstractNetworkProvider {
 //		System.out.println("    Market Share = " + getTotalSubscribers() + " out of " + simternet.getPopulation());
 //		System.out.println("    Market Share = " + ((CournotSimternet)simternet).getCurrentMarketSharePercentage(this));
 		System.out.print("  Prices = ");
-		for (Object obj : networks.allObjects.objs) { // for all our networks
+		for (Object obj : networkGrid.allObjects.objs) { // for all our networks
 			if (obj == null)
 				continue;
 			AbstractNetwork an = (AbstractNetwork) obj;
@@ -69,7 +71,7 @@ public class RepeatedStackelburgNSP extends AbstractNetworkProvider {
 		}
 		System.out.print("\n");
 		System.out.print("  Customers = ");
-		for (Object obj : networks.allObjects.objs) { // for all our networks
+		for (Object obj : networkGrid.allObjects.objs) { // for all our networks
 			if (obj == null)
 				continue;
 			AbstractNetwork an = (AbstractNetwork) obj;
@@ -78,6 +80,13 @@ public class RepeatedStackelburgNSP extends AbstractNetworkProvider {
 			System.out.print(an.getLocationX() + "x" + an.getLocationY() + "=" + an.getTotalCustomers() + ", ");
 		}
 		System.out.print("\n");
+	}
+
+	@Override
+	public void updateData(SimState state) throws UnsupportedDataTypeException {
+		System.out.println("Error! Sam added a new implementation in AbstractNetworProvider and didn't bother to update RepeatedStackelburg. How rude.");
+		System.exit(0);
+		
 	}
 
 }

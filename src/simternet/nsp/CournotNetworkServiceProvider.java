@@ -1,5 +1,7 @@
 package simternet.nsp;
 
+import javax.activation.UnsupportedDataTypeException;
+
 import sim.engine.SimState;
 import simternet.*;
 import simternet.consumer.AbstractConsumerClass;
@@ -10,15 +12,21 @@ public class CournotNetworkServiceProvider extends AbstractNetworkProvider{
 	
 	private Boolean built = false;
 
-	private Double price = 0.0;
+	private Temporal<Double> price = new Temporal<Double>(0.0, 0.0);
 	
-	private Double totalSubscribers = 0.0;
-	private Double previousTotalSubscribers = Double.NaN;
+	private Temporal<Double> totalSubscribers = new Temporal<Double>(0.0, 0.0);
 	
-	private Boolean priceSet = false;
-	
-	public CournotNetworkServiceProvider(Simternet s) {
+	public CournotNetworkServiceProvider(Simternet s){
 		super(s);
+		setPrices();
+		try {
+			price.update();
+		} catch (UnsupportedDataTypeException e) {
+			//Shouldn't have caught this in the first place, but step() can't throw anything unless
+			//I modify the source of Mason :\
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -37,41 +45,30 @@ public class CournotNetworkServiceProvider extends AbstractNetworkProvider{
 
 	@SuppressWarnings("unchecked")
 	public Double getPrice(Class cl, AbstractConsumerClass cc, int x, int y) {
-		return price;
+		return getPrice();
 	}
 	
-	/* 
-	 * Set the price in every square to the same static value.  Since we're
-	 * building everywhere, don't bother only setting prices in locations at
-	 * which we've built.
-	 * 
-	 */
+	public Double getPrice() {
+		return new Double(price.getOld());
+	}
+	
 	@Override
 	protected void setPrices() {
-		price = (CournotSimternet.ALPHA - (((CournotSimternet)simternet).getPreviousMarketSharePercentage(this)*100)) / 2;
-		priceSet = true;
+		Double p;
+		p = new Double((CournotSimternet.ALPHA - (((CournotSimternet)simternet).getCombinedCompetitorsMarketShare(this)*100)) / 2);
+		price.setNew(p);
 	}
 
-	public Double getPrice() {
-		return price;
-	}
-
-	public void setTotalSubscribers(Double marketShare) {
-		this.totalSubscribers = marketShare;
+	public void setTotalSubscribers(Double totalSubscribers) {
+		this.totalSubscribers.setNew(totalSubscribers);
 	}
 
 	public Double getTotalSubscribers() {
-		return totalSubscribers;
+		return new Double(totalSubscribers.getNew());
 	}
 
 	public Double getPreviousTotalSubscribers() {
-		return previousTotalSubscribers;
-	}
-	
-	public void advanceOneStep(){
-		previousTotalSubscribers = totalSubscribers;
-		totalSubscribers = 0.0;
-		priceSet = false;
+		return new Double(totalSubscribers.getOld());
 	}
 	
 	@Override
@@ -79,8 +76,10 @@ public class CournotNetworkServiceProvider extends AbstractNetworkProvider{
 		super.step(state);
 	}
 
-	public Boolean isPriceSet() {
-		return priceSet;
+	@Override
+	public void updateData(SimState state) throws UnsupportedDataTypeException {
+		totalSubscribers.update();
+		price.update();
 	}
 	
 }

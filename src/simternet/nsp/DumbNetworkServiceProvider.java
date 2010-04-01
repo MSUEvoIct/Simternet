@@ -1,5 +1,8 @@
 package simternet.nsp;
 
+import javax.activation.UnsupportedDataTypeException;
+
+import sim.engine.SimState;
 import simternet.Simternet;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.network.AbstractNetwork;
@@ -62,6 +65,12 @@ public class DumbNetworkServiceProvider extends AbstractNetworkProvider {
 		else
 			return null;
 	}
+
+	@Override
+	public void updateData(SimState state) throws UnsupportedDataTypeException {
+		// Do nothing, there are no temporally updated variables in this class
+	}
+	
 	
 
 }

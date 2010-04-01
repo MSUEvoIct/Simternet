@@ -1,5 +1,7 @@
 package simternet;
 
+import javax.activation.UnsupportedDataTypeException;
+
 import sim.engine.SimState;
 
 /**
@@ -12,6 +14,6 @@ import sim.engine.SimState;
  * decision process from the resulting changes to data structures.
  *
  */
-public interface AsyncUpdater {
-	public void updateData(SimState state);
+public interface AsynchronouslyUpdatable {
+	public void updateData(SimState state) throws UnsupportedDataTypeException;
 }

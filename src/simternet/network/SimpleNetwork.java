@@ -34,4 +34,14 @@ public class SimpleNetwork extends AbstractNetwork {
 		this.price = price;
 	}
 
+//	public SimpleNetwork deepCopy(){
+//		SimpleNetwork ret = new SimpleNetwork();
+//		ret.setLocationX(locationX);
+//		ret.setLocationY(locationY);
+//		for (Entry<AbstractConsumerClass, Double> e: getCustomers().entrySet()){
+//			ret.setCustomers(cc, numCustomers)
+//		}
+//		return ret;
+//	}
+	
 }

@@ -6,6 +6,7 @@ import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.grid.SparseGrid2D;
 import sim.util.Bag;
+import simternet.AsynchronouslyUpdatable;
 import simternet.Exogenous;
 import simternet.Simternet;
 import simternet.consumer.AbstractConsumerClass;
@@ -19,7 +20,7 @@ import simternet.network.AbstractNetwork;
  * executed once each time step of the model.
  *
  */
-public abstract class AbstractNetworkProvider implements Steppable {
+public abstract class AbstractNetworkProvider implements Steppable, AsynchronouslyUpdatable {
 
 	/**
 	 * 
@@ -28,7 +29,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	
 	protected Double debt = 0.0;
 	protected Double liquidAssets = 0.0;
-	protected SparseGrid2D networks;
+	protected SparseGrid2D networkGrid;
 	protected Simternet simternet = null;
 	protected Double totalCapitalExpenditures = 0.0;
 	protected Double totalInterestPaid = 0.0;
@@ -37,13 +38,13 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	public AbstractNetworkProvider(Simternet s) {
 		this.simternet = s;
 		liquidAssets += Exogenous.nspEndowment;
-		networks = new SparseGrid2D(Exogenous.landscapeX,
+		networkGrid = new SparseGrid2D(Exogenous.landscapeX,
 				Exogenous.landscapeY);
 	}
 
 	protected void billCustomers() {
 		// Iterate through all the networks this provider owns
-		for(Object obj : networks.allObjects.objs) {
+		for(Object obj : networkGrid.allObjects.objs) {
 			if (obj == null) continue;
 			AbstractNetwork n = (AbstractNetwork) obj;
 			for (Entry<AbstractConsumerClass,Double> e : n.getCustomers().entrySet()) {
@@ -71,7 +72,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	
 	public AbstractNetwork getNetworkAt(Class<? extends AbstractNetwork> net,
 			int x, int y) {
-		Bag nets = networks.getObjectsAtLocation(x, y); // All of our nets at
+		Bag nets = networkGrid.getObjectsAtLocation(x, y); // All of our nets at
 														// this loc
 		if (nets == null) // we have no nets at this loc
 			return null;
@@ -102,7 +103,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	 */
 	public Double getCustomers(Integer x, Integer y) {
 		Double numCustomers = 0.0;
-		for(AbstractNetwork n : (AbstractNetwork[]) networks.getObjectsAtLocation(x, y).objs) {
+		for(AbstractNetwork n : (AbstractNetwork[]) networkGrid.getObjectsAtLocation(x, y).objs) {
 			numCustomers += n.getTotalCustomers();
 		}
 		return numCustomers;
@@ -125,7 +126,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	 */
 	public Double getCustomers(AbstractConsumerClass ac, Integer x, Integer y) {
 		Double numCustomers = 0.0;
-		for(AbstractNetwork n : (AbstractNetwork[]) networks.getObjectsAtLocation(x, y).objs) {
+		for(AbstractNetwork n : (AbstractNetwork[]) networkGrid.getObjectsAtLocation(x, y).objs) {
 			numCustomers += n.getCustomers(ac);
 		}
 		return numCustomers;
@@ -140,7 +141,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	 */
 	@SuppressWarnings("unchecked")
 	public Double getCustomers(Class network, Integer x, Integer y) {
-		for(AbstractNetwork n : (AbstractNetwork[]) networks.getObjectsAtLocation(x, y).objs) {
+		for(AbstractNetwork n : (AbstractNetwork[]) networkGrid.getObjectsAtLocation(x, y).objs) {
 			if (network.isInstance(n)) {
 				return n.getTotalCustomers();
 			}
@@ -158,7 +159,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	 */
 	@SuppressWarnings("unchecked")
 	public Double getCustomers(Class network, AbstractConsumerClass ac, Integer x, Integer y) {
-		Bag b = networks.getObjectsAtLocation(x, y);
+		Bag b = networkGrid.getObjectsAtLocation(x, y);
 		if (b == null) return 0.0;
 		Object[] objs = b.objs;
 		for(Object obj : objs ) {
@@ -172,10 +173,10 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	}
 	
 	public void setCustomers(Class<? extends AbstractNetwork> network, AbstractConsumerClass ac, Integer x, Integer y, Double numCustomers) {
-		Bag b = networks.getObjectsAtLocation(x,y);
+		Bag b = networkGrid.getObjectsAtLocation(x,y);
 		if (b == null) throw new RuntimeException("Setting customers at a location with no networks.");
 		
-		for(Object obj : networks.getObjectsAtLocation(x, y).objs) {
+		for(Object obj : networkGrid.getObjectsAtLocation(x, y).objs) {
 			AbstractNetwork n = (AbstractNetwork) obj;
 			if (network.isInstance(n)) {
 				n.setCustomers(ac, numCustomers);
@@ -222,7 +223,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 			AbstractNetwork network = (AbstractNetwork) cl.newInstance(); // Create a new network, but of the specified type.
 			network.init(this, x, y); // give this network information about its position and owner.
 			Double buildCost = network.getBuildCost(); 
-			networks.setObjectLocation(network, x, y); // Add the network to our collection.
+			networkGrid.setObjectLocation(network, x, y); // Add the network to our collection.
 			capitalize(buildCost);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -258,7 +259,7 @@ public abstract class AbstractNetworkProvider implements Steppable {
 	 */
 	public Double getPrice(Class<? extends AbstractNetwork> cl, AbstractConsumerClass cc, int x, int y) {
 		
-		Object[] objs = this.networks.getObjectsAtLocation(x, y).objs;
+		Object[] objs = this.networkGrid.getObjectsAtLocation(x, y).objs;
 		
 		for(Object obj : objs ) {
 			if (obj == null) continue;

@@ -17,28 +17,13 @@ public class CournotConsumer extends SimpleConsumer{
 	}
 	
 	public void step(SimState state){
-		//Sanity check:
-		//Make sure all network providers have set their prices
-		for(AbstractNetworkProvider np : s.getNetworkServiceProviders()){
-			CournotNetworkServiceProvider nsp = (CournotNetworkServiceProvider)np;
-			if(nsp.isPriceSet().booleanValue() == false){
-				System.out.println("Consumer can not be run before all NSPs have run");
-				System.exit(0);
-			}
-		}
-		
 		makePurchaseDecisions();
 		for(AbstractNetworkProvider n: s.getNetworkServiceProviders()) {
 			CournotNetworkServiceProvider nsp = (CournotNetworkServiceProvider)n;
 			System.out.println("Market Share: " + (nsp.getTotalSubscribers() / s.getPopulation()) + "\nPrice: " + nsp.getPrice());
 		}
-		System.out.println("----------------");
 		
-		//reset network service providers
-		for(AbstractNetworkProvider np : s.getNetworkServiceProviders()){
-			CournotNetworkServiceProvider nsp = (CournotNetworkServiceProvider)np;
-			nsp.advanceOneStep();
-		}
+		System.out.println("----------------");
 	}
 	
 	protected void makePurchaseDecisions() {
@@ -59,9 +44,7 @@ public class CournotConsumer extends SimpleConsumer{
 			if(nsp.hasNetworkAt(SimpleNetwork.class, x, y)){
 				int numberOfProviders = s.getNetworkServiceProviders().size();
 				Double qtyDemanded = new Double( (CournotSimternet.ALPHA - nsp.getPrice()) / numberOfProviders );
-				//Assumption!
 				qtyDemanded = new Double( (qtyDemanded / CournotSimternet.ALPHA) * s.getPopulation(x, y));
-				//End assumption
 				//qtyDemanded = new Double(.25 * s.getPopulation(x, y));
 				nsp.setCustomers(SimpleNetwork.class, this, x, y, qtyDemanded);
 				nsp.setTotalSubscribers(nsp.getTotalSubscribers() + qtyDemanded);

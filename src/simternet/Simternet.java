@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 import sim.engine.Schedule;
 import sim.engine.SimState;
+import simternet.arbiter.Arbiter;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.consumer.IndifferentLazyConsumer;
 import simternet.consumer.SimpleConsumer;
@@ -158,8 +159,13 @@ public class Simternet extends SimState {
 		super.start();
 		initConsumerClasses();
 		initNetworkServiceProviders();
+		initArbiter();
 	}
 	
+	private void initArbiter() {
+		schedule.scheduleRepeating(new Arbiter(), 99999999, 1);
+	}
+
 	/**
 	 * @param net
 	 * @param x
