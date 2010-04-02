@@ -13,7 +13,6 @@ public class CournotConsumer extends SimpleConsumer{
 
 	public CournotConsumer(Simternet s) {
 		super(s);
-		// TODO Auto-generated constructor stub
 	}
 	
 	public void step(SimState state){

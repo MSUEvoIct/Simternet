@@ -83,7 +83,6 @@ public class SimpleConsumer extends AbstractConsumerClass {
 
 	@Override
 	protected void initNetData() {
-		// TODO Auto-generated method stub
 		
 	}
 

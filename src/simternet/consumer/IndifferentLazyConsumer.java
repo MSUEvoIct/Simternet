@@ -27,7 +27,6 @@ public class IndifferentLazyConsumer extends AbstractConsumerClass {
 
 	@Override
 	protected void initNetData() {
-		// TODO Auto-generated method stub
 
 	}
 

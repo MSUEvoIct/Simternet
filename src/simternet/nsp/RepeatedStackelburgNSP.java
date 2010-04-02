@@ -56,7 +56,6 @@ public class RepeatedStackelburgNSP extends AbstractNetworkProvider {
 
 	@Override
 	public void step(SimState state) {
-		// TODO Auto-generated method stub
 		super.step(state);
 //		System.out.println("    Market Share = " + getTotalSubscribers() + " out of " + simternet.getPopulation());
 //		System.out.println("    Market Share = " + ((CournotSimternet)simternet).getCurrentMarketSharePercentage(this));

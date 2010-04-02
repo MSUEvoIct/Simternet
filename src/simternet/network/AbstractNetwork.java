@@ -66,4 +66,5 @@ public abstract class AbstractNetwork {
 		this.locationY = locationY;
 	}
 	
+	public abstract AbstractNetwork deepCopy();
 }

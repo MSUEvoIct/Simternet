@@ -4,13 +4,13 @@ import java.util.Map.Entry;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.field.grid.SparseGrid2D;
 import sim.util.Bag;
 import simternet.AsynchronouslyUpdatable;
 import simternet.Exogenous;
 import simternet.Simternet;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.network.AbstractNetwork;
+import simternet.network.Network2D;
 
 /**
  * @author kkoning
@@ -29,7 +29,7 @@ public abstract class AbstractNetworkProvider implements Steppable, Asynchronous
 	
 	protected Double debt = 0.0;
 	protected Double liquidAssets = 0.0;
-	protected SparseGrid2D networkGrid;
+	protected Network2D networkGrid;
 	protected Simternet simternet = null;
 	protected Double totalCapitalExpenditures = 0.0;
 	protected Double totalInterestPaid = 0.0;
@@ -38,7 +38,7 @@ public abstract class AbstractNetworkProvider implements Steppable, Asynchronous
 	public AbstractNetworkProvider(Simternet s) {
 		this.simternet = s;
 		liquidAssets += Exogenous.nspEndowment;
-		networkGrid = new SparseGrid2D(Exogenous.landscapeX,
+		networkGrid = new Network2D(Exogenous.landscapeX,
 				Exogenous.landscapeY);
 	}
 

@@ -36,6 +36,11 @@ public class Simternet extends SimState {
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * Constant used in Cournot competition
+	 */
+	public final static Double ALPHA = 100.0;
+	
+	/**
 	 * Stores a list of ALL consumer classes present in the simulation.
 	 */
 	protected Set<AbstractConsumerClass> consumerClasses = new HashSet<AbstractConsumerClass>();
