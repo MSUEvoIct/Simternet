@@ -1,85 +1,72 @@
 package simternet.nsp;
 
-import javax.activation.UnsupportedDataTypeException;
-
 import sim.engine.SimState;
-import simternet.*;
+import simternet.CournotSimternet;
+import simternet.Simternet;
 import simternet.consumer.AbstractConsumerClass;
-import simternet.network.SimpleNetwork;
+import simternet.temporal.Temporal;
 
-public class CournotNetworkServiceProvider extends AbstractNetworkProvider{
+public class CournotNetworkServiceProvider extends AbstractNetworkProvider {
 	private static final long serialVersionUID = -9165331810723302112L;
-	
-	private Boolean built = false;
 
-	private Temporal<Double> price = new Temporal<Double>(0.0, 0.0);
-	
-	private Temporal<Double> totalSubscribers = new Temporal<Double>(0.0, 0.0);
-	
-	public CournotNetworkServiceProvider(Simternet s){
+	private Temporal<Double> price = new Temporal<Double>(0.0);
+	private Temporal<Double> totalSubscribers = new Temporal<Double>(0.0);
+
+	public CournotNetworkServiceProvider(Simternet s) {
 		super(s);
-		setPrices();
-		try {
-			price.update();
-		} catch (UnsupportedDataTypeException e) {
-			//Shouldn't have caught this in the first place, but step() can't throw anything unless
-			//I modify the source of Mason :\
-			e.printStackTrace();
-			System.exit(1);
-		}
+		this.investmentStrategy = new BuildEverywhereStrategy(this,
+				this.networks);
+		this.setPrices();
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see simternet.NetworkServiceProvider#makeNetworkInvestment()
 	 * 
-	 * Build a network at each and every location on the map.  Only
-	 * do it once.
-	 * 
+	 * Build a network at each and every location on the map. Only do it once.
 	 */
-	@Override
-	protected void makeNetworkInvestment() {
-		if (built == false)
-			super.buildEverywhere(SimpleNetwork.class);
-		built = true;
+
+	public Double getPreviousTotalSubscribers() {
+		return new Double(this.totalSubscribers.get());
 	}
 
+	public Double getPrice() {
+		return new Double(this.price.get());
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public Double getPrice(Class cl, AbstractConsumerClass cc, int x, int y) {
-		return getPrice();
-	}
-	
-	public Double getPrice() {
-		return new Double(price.getOld());
-	}
-	
-	@Override
-	protected void setPrices() {
-		Double p;
-		p = new Double((CournotSimternet.ALPHA - (((CournotSimternet)simternet).getCombinedCompetitorsMarketShare(this)*100)) / 2);
-		price.setNew(p);
-	}
-
-	public void setTotalSubscribers(Double totalSubscribers) {
-		this.totalSubscribers.setNew(totalSubscribers);
+		return this.getPrice();
 	}
 
 	public Double getTotalSubscribers() {
-		return new Double(totalSubscribers.getNew());
+		return new Double(this.totalSubscribers.get());
 	}
 
-	public Double getPreviousTotalSubscribers() {
-		return new Double(totalSubscribers.getOld());
+	@Override
+	protected void setPrices() {
+		Double p;
+		p = new Double(
+				(CournotSimternet.ALPHA - (((CournotSimternet) this.simternet)
+						.getCombinedCompetitorsMarketShare(this) * 100)) / 2);
+		this.price.set(p);
 	}
-	
+
+	public void setTotalSubscribers(Double totalSubscribers) {
+		this.totalSubscribers.set(totalSubscribers);
+	}
+
 	@Override
 	public void step(SimState state) {
 		super.step(state);
 	}
 
 	@Override
-	public void updateData(SimState state) throws UnsupportedDataTypeException {
-		totalSubscribers.update();
-		price.update();
+	public void update() {
+		this.totalSubscribers.update();
+		this.price.update();
 	}
-	
+
 }

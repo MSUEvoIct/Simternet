@@ -18,14 +18,15 @@ import simternet.nsp.AbstractNetworkProvider;
 public abstract class AbstractConsumerClass implements Steppable {
 
 	protected Set<Class<? extends AbstractNetwork>> networkTypesDemanded = new HashSet<Class<? extends AbstractNetwork>>();
+
 	/**
 	 * The # of individuals in this consumer class in each landscape pixel.
 	 */
 	protected DoubleGrid2D population;
 	protected Simternet s;
 	/**
-	 * Total # of consumers of this class who subscribe to the network at each
-	 * location
+	 * Total # of consumers of this class who subscribe to the network type at
+	 * each location (all providers)
 	 */
 	private Map<Class<? extends AbstractNetwork>, DoubleGrid2D> totalLocalSubscriptionsCache;
 	private Map<Class<? extends AbstractNetwork>, boolean[][]> totalLocalSubscriptionsCacheDirty;
@@ -76,10 +77,10 @@ public abstract class AbstractConsumerClass implements Steppable {
 					veryDirtyCache[x][y] = true;
 				}
 			totalLocalSubscriptionsCacheDirty.put(an, veryDirtyCache);
-			
+
 		}
 	}
-	
+
 	public Double getTotalLocalSubscriptions(
 			Class<? extends AbstractNetwork> an, Integer x, Integer y) {
 		Set<AbstractNetworkProvider> nsps = this.s.getNetworkServiceProviders();
@@ -93,7 +94,6 @@ public abstract class AbstractConsumerClass implements Steppable {
 
 		return runningTotal;
 	}
-	
 
 	/**
 	 * @param an
@@ -105,16 +105,16 @@ public abstract class AbstractConsumerClass implements Steppable {
 	 *         total market demand, not how that demand is allocated among
 	 *         providers.
 	 */
-	protected abstract Double demand(Class<? extends AbstractNetwork> an, Double price, Integer x,
-			Integer y);
+	protected abstract Double demand(Class<? extends AbstractNetwork> an,
+			Double price, Integer x, Integer y);
 
-	protected Double getNumSubscriptions(Class<? extends AbstractNetwork> n, AbstractNetworkProvider nsp,
-			Integer x, Integer y) {
-		
+	protected Double getNumSubscriptions(Class<? extends AbstractNetwork> n,
+			AbstractNetworkProvider nsp, Integer x, Integer y) {
+
 		AbstractNetwork an = nsp.getNetworkAt(n, x, y);
 		if (an == null) // provider has no network, we can't subscribe to it
 			return 0.0;
-	
+
 		return an.getCustomers(this);
 	}
 
@@ -146,15 +146,15 @@ public abstract class AbstractConsumerClass implements Steppable {
 	}
 
 	protected abstract void initNetData();
-	
+
 	/**
 	 * @param pd
 	 * 
 	 *            Initialize the population distribution using the specified
 	 *            method. If none is specified, use
 	 *            Exogenous.defaultPopulationDistribution.
-	 *  
-	 *  To Do:  Consider (static) factory pattern?
+	 * 
+	 *            To Do: Consider (static) factory pattern?
 	 */
 	protected void initPopulation(PopulationDistribution pd) {
 		if (pd == null) {
@@ -179,12 +179,21 @@ public abstract class AbstractConsumerClass implements Steppable {
 				makeConsumptionDecisionAt(x, y);
 	}
 
+	/**
+	 * @param n
+	 * @param nsp
+	 * @param x
+	 * @param y
+	 * @param numSubs
+	 * 
+	 * Sets the actual consumption variables.  These are stored in the 
+	 * 
+	 */
 	protected void setNumSubscriptions(Class<? extends AbstractNetwork> n,
 			AbstractNetworkProvider nsp, Integer x, Integer y, Double numSubs) {
 		AbstractNetwork an = nsp.getNetworkAt(n, x, y);
 		if (an != null)
-//			throw new RuntimeException("Consuming on a non-existing network");
-		an.setCustomers(this, numSubs);
+			an.setCustomers(this, numSubs);
 	}
 
 	protected void setPopulation(int x, int y, Double pop) {
@@ -194,7 +203,7 @@ public abstract class AbstractConsumerClass implements Steppable {
 
 	public void step(SimState state) {
 		makeConsumptionDecisions();
-		System.out.println("Consumer");
+//		System.out.println("Consumer");
 	}
 
 }

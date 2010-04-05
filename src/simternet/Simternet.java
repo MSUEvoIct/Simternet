@@ -8,7 +8,6 @@ import java.util.TreeMap;
 
 import sim.engine.Schedule;
 import sim.engine.SimState;
-import simternet.arbiter.Arbiter;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.consumer.IndifferentLazyConsumer;
 import simternet.consumer.SimpleConsumer;
@@ -16,6 +15,7 @@ import simternet.network.AbstractNetwork;
 import simternet.nsp.AbstractNetworkProvider;
 import simternet.nsp.DumbNetworkServiceProvider;
 import simternet.nsp.RepeatedStackelburgNSP;
+import simternet.temporal.Arbiter;
 
 /**
  * @author kkoning
@@ -64,6 +64,14 @@ public class Simternet extends SimState {
 
 	public Set<AbstractNetworkProvider> getNetworkServiceProviders() {
 		return networkServiceProviders;
+	}
+	
+	public Integer getNumNetworks(Class<? extends AbstractNetwork> net, Integer x, Integer y) {
+		Integer num = 0;
+		for (AbstractNetworkProvider nsp : this.networkServiceProviders)
+			if (nsp.hasNetworkAt(net, x, y))
+				num++;
+		return num;
 	}
 
 	/**
@@ -144,8 +152,7 @@ public class Simternet extends SimState {
 	 *   Specify this somehow in parameters, rather than source.
 	 */
 	protected void initConsumerClasses() {
-//		AbstractConsumerClass cc = new SimpleConsumer(this);
-//		addConsumerClass(cc);
+//		addConsumerClass(new SimpleConsumer(this));
 		addConsumerClass(new IndifferentLazyConsumer(this));
 	}
 	
@@ -153,8 +160,8 @@ public class Simternet extends SimState {
 	 * DO:  Specify this somehow in parameters, rather than source.
 	 */
 	private void initNetworkServiceProviders() {
-//		AbstractNetworkProvider nsp = new DumbNetworkServiceProvider(this);
-//		addNetworkServiceProvider(nsp);
+//		addNetworkServiceProvider(new DumbNetworkServiceProvider(this));
+//		addNetworkServiceProvider(new DumbNetworkServiceProvider(this));
 		addNetworkServiceProvider(new RepeatedStackelburgNSP(this));
 		addNetworkServiceProvider(new RepeatedStackelburgNSP(this));
 		addNetworkServiceProvider(new RepeatedStackelburgNSP(this));

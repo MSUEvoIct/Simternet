@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import simternet.*;
-import simternet.arbiter.Arbiter;
 import simternet.consumer.CournotConsumer;
 import simternet.nsp.AbstractNetworkProvider;
 import simternet.nsp.CournotNetworkServiceProvider;
+import simternet.temporal.Arbiter;
 
 public class CournotSimternet extends Simternet{
 	
