@@ -67,7 +67,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	 */
 	@SuppressWarnings("unchecked")
 	protected void billCustomers() {
-		Iterator<? extends AbstractNetwork> nets = this.networks.iterator();
+		Iterator<AbstractNetwork> nets = this.networks.iterator();
 		while (nets.hasNext()) {
 			AbstractNetwork an = nets.next();
 			Double revenue = an.billCustomers();
