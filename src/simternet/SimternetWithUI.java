@@ -4,82 +4,86 @@ import java.awt.Color;
 
 import javax.swing.JFrame;
 
-import sim.app.tutorial1and2.Tutorial1;
-import sim.app.tutorial1and2.Tutorial2;
-import sim.app.tutorial4.BigParticle;
-import sim.app.tutorial4.BigParticleInspector;
-import sim.app.tutorial4.Particle;
-import sim.app.tutorial4.Tutorial4;
-import sim.app.tutorial4.Tutorial4WithUI;
 import sim.display.Console;
 import sim.display.Controller;
 import sim.display.Display2D;
 import sim.display.GUIState;
 import sim.engine.SimState;
-import sim.portrayal.Inspector;
-import sim.portrayal.LocationWrapper;
+import sim.portrayal.grid.FastValueGridPortrayal2D;
 
-public class SimternetWithUI extends GUIState{
-	
-    public Display2D display;
-    public JFrame displayFrame;
+public class SimternetWithUI extends GUIState {
 
-	public SimternetWithUI(){ super(new Simternet(System.currentTimeMillis())); }
+	public static Object getInfo() {
+		return "<H2>Simternet</H2><p>Simulates the growth of the Internet.";
+	}
 
-	public SimternetWithUI(SimState state){ super(state); }
+	public static String getName() {
+		return "Simternet";
+	}
 
-	public static void main(String[] args)
-	{
+	public static void main(String[] args) {
 		SimternetWithUI sim = new SimternetWithUI();
 		Console c = new Console(sim);
 		c.setVisible(true);
 	}
 
-	///////////////////
+	public Display2D display;
 
-	public static String getName() { return "Simternet"; }
+	public JFrame displayFrame;
 
-//	public void setupPortrayals()
-//	{
-//		// tell the portrayals what to portray and how to portray them
-//		gridPortrayal.setField(((Tutorial1)state).grid);
-//		gridPortrayal.setMap(
-//				new sim.util.gui.SimpleColorMap(
-//						new Color[] {new Color(0,0,0,0), Color.blue}));
-//	}
+	public FastValueGridPortrayal2D populationPortrayal = new FastValueGridPortrayal2D(
+			"Population");
 
-	public void start()
-	{
-		super.start();      
-//		setupPortrayals();  // set up our portrayals
-		display.reset();    // reschedule the displayer
-		display.repaint();  // redraw the display
+	public SimternetWithUI() {
+		super(new Simternet(System.currentTimeMillis()));
 	}
 
-	public void init(Controller c)
-	{
+	public SimternetWithUI(SimState state) {
+		super(state);
+	}
+
+	@Override
+	public void init(Controller c) {
 		super.init(c);
-
-//		// Make the Display2D.  We'll have it display stuff later.
-//		Tutorial1 tut = (Tutorial1)state;
-//		display = new Display2D(tut.gridWidth * 4, tut.gridHeight * 4,this,1);
-//		displayFrame = display.createFrame();
-//		c.registerFrame(displayFrame);   // register the frame so it appears in the "Display" list
-//		displayFrame.setVisible(true);
-//
-//		// attach the portrayals
-//		display.attach(gridPortrayal,"Life");
-//
-//		// specify the backdrop color  -- what gets painted behind the displays
-//		display.setBackdrop(Color.black);
+		this.display = new Display2D(400, 400, this, 1);
+		this.displayFrame = this.display.createFrame();
+		c.registerFrame(this.displayFrame);
+		this.displayFrame.setVisible(true);
+		this.display.setBackdrop(Color.black);
+		this.display.attach(this.populationPortrayal, "Population");
 	}
 
-	public void load(SimState state)
-	{
+	@Override
+	public void load(SimState state) {
 		super.load(state);
-//		setupPortrayals();  // we now have new grids.  Set up the portrayals to reflect this
-		display.reset();    // reschedule the displayer
-		display.repaint();  // redraw the display
+		this.setupPortrayals();
+	}
+
+	@Override
+	public void quit() {
+		super.quit();
+
+		if (this.displayFrame != null)
+			this.displayFrame.dispose();
+		// Allow garbage collection
+		this.displayFrame = null;
+		this.display = null;
+	}
+
+	public void setupPortrayals() {
+		// tell the portrayals what to
+		// portray and how to portray them
+		this.populationPortrayal.setField(((Simternet) this.state)
+				.getPopulationGrid());
+		this.populationPortrayal.setMap(new sim.util.gui.SimpleColorMap(0.0,
+				Exogenous.maxPopulation, Color.black, Color.white));
+
+	}
+
+	@Override
+	public void start() {
+		super.start();
+		this.setupPortrayals(); // set up our portrayals
 	}
 
 }
