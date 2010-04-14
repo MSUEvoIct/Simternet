@@ -203,9 +203,17 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	 */
 	public Double getCustomers(Integer x, Integer y) {
 		Double numCustomers = 0.0;
-		for (AbstractNetwork n : (AbstractNetwork[]) this.networks
-				.getObjectsAtLocation(x, y).objs)
-			numCustomers += n.getTotalCustomers();
+		if (this.networks.getObjectsAtLocation(x, y) == null)
+			return numCustomers;
+		for (int i = 0; i < this.networks.getObjectsAtLocation(x, y).size(); i++)
+			if (this.networks.getObjectsAtLocation(x, y).get(i) != null)
+				numCustomers += ((AbstractNetwork) this.networks.allObjects
+						.get(i)).getTotalCustomers();
+		// TODO: Why didn't the below code work? Suspicion: Bags suck.
+		// for (AbstractNetwork n : (AbstractNetwork[]) this.networks
+		// .getObjectsAtLocation(x, y).objs)
+		// if (n != null)
+		// numCustomers += n.getTotalCustomers();
 		return numCustomers;
 	}
 
@@ -362,8 +370,8 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 
 		this.billCustomers(); // Bill customers who are subscribed this period
 		this.setPrices(); // Set prices for the next period.
-
-		this.printInfo();
+		if (this.simternet.debug == true)
+			this.printInfo();
 
 	}
 

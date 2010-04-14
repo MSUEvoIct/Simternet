@@ -48,6 +48,8 @@ public class Simternet extends SimState {
 	 */
 	protected Set<AbstractConsumerClass> consumerClasses = new HashSet<AbstractConsumerClass>();
 
+	public boolean debug = false;
+
 	/**
 	 * Stores a list of ALL network service providers present in the simulation.
 	 */
@@ -55,6 +57,11 @@ public class Simternet extends SimState {
 
 	public Simternet(long seed) {
 		super(seed);
+	}
+
+	public Simternet(long seed, boolean debug) {
+		super(seed);
+		this.debug = debug;
 	}
 
 	/**
@@ -118,6 +125,29 @@ public class Simternet extends SimState {
 		this.schedule.scheduleRepeating(nsp, ordering, interval);
 	}
 
+	/**
+	 * This is only used by the user interface, and therefor efficiency is not a
+	 * priority
+	 * 
+	 * @return A grid containing the number of active subscribers in each
+	 *         square.
+	 */
+	public DoubleGrid2D getActiveSubscribersGrid() {
+		final Double initValue = 0.0;
+		DoubleGrid2D ret = new DoubleGrid2D(Exogenous.landscapeX,
+				Exogenous.landscapeY, initValue);
+		System.out.println("Start new one");
+		for (AbstractNetworkProvider nsp : this.networkServiceProviders) {
+			System.out.println("new nsp");
+			for (int i = 0; i < ret.getWidth(); i++)
+				for (int j = 0; j < ret.getHeight(); j++) {
+					ret.set(i, j, ret.get(i, j) + nsp.getCustomers(i, j));
+					System.out.println(ret.get(i, j));
+				}
+		}
+		return ret;
+	}
+
 	public Set<AbstractConsumerClass> getConsumerClasses() {
 		return this.consumerClasses;
 	}
@@ -157,6 +187,12 @@ public class Simternet extends SimState {
 		return pop;
 	}
 
+	/**
+	 * This is only used by the user interface, and therefor efficiency is not a
+	 * priority
+	 * 
+	 * @return A grid containing the population of each square.
+	 */
 	public DoubleGrid2D getPopulationGrid() {
 		DoubleGrid2D ret = new DoubleGrid2D(Exogenous.landscapeX,
 				Exogenous.landscapeY);

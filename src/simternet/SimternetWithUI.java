@@ -9,7 +9,7 @@ import sim.display.Controller;
 import sim.display.Display2D;
 import sim.display.GUIState;
 import sim.engine.SimState;
-import sim.portrayal.grid.FastValueGridPortrayal2D;
+import simternet.ui.ActiveCustomersPortrayal2D;
 
 public class SimternetWithUI extends GUIState {
 
@@ -31,15 +31,18 @@ public class SimternetWithUI extends GUIState {
 
 	public JFrame displayFrame;
 
-	public FastValueGridPortrayal2D populationPortrayal = new FastValueGridPortrayal2D(
-			"Population");
+	public ActiveCustomersPortrayal2D populationPortrayal = null;
 
 	public SimternetWithUI() {
 		super(new Simternet(System.currentTimeMillis()));
+		this.populationPortrayal = new ActiveCustomersPortrayal2D(
+				"Active Subscribers", (Simternet) this.state);
 	}
 
 	public SimternetWithUI(SimState state) {
 		super(state);
+		this.populationPortrayal = new ActiveCustomersPortrayal2D(
+				"Active Subscribers", (Simternet) this.state);
 	}
 
 	@Override
@@ -50,7 +53,7 @@ public class SimternetWithUI extends GUIState {
 		c.registerFrame(this.displayFrame);
 		this.displayFrame.setVisible(true);
 		this.display.setBackdrop(Color.black);
-		this.display.attach(this.populationPortrayal, "Population");
+		this.display.attach(this.populationPortrayal, "Active Subscribers");
 	}
 
 	@Override
@@ -74,7 +77,7 @@ public class SimternetWithUI extends GUIState {
 		// tell the portrayals what to
 		// portray and how to portray them
 		this.populationPortrayal.setField(((Simternet) this.state)
-				.getPopulationGrid());
+				.getActiveSubscribersGrid());
 		this.populationPortrayal.setMap(new sim.util.gui.SimpleColorMap(0.0,
 				Exogenous.maxPopulation, Color.black, Color.white));
 

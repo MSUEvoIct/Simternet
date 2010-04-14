@@ -60,39 +60,24 @@ public abstract class AbstractConsumerClass implements Steppable {
 	 */
 	protected AbstractConsumerClass(Simternet s, PopulationDistribution pd) {
 		this.s = s;
-		population = new DoubleGrid2D(Exogenous.landscapeX,
+		this.population = new DoubleGrid2D(Exogenous.landscapeX,
 				Exogenous.landscapeY, 0.0);
-		initPopulation(pd);
-		totalSubscriptions = new HashMap<Class<? extends AbstractNetwork>, Double>();
-		totalLocalSubscriptionsCache = new HashMap<Class<? extends AbstractNetwork>, DoubleGrid2D>();
-		totalLocalSubscriptionsCacheDirty = new HashMap<Class<? extends AbstractNetwork>, boolean[][]>();
+		this.initPopulation(pd);
+		this.totalSubscriptions = new HashMap<Class<? extends AbstractNetwork>, Double>();
+		this.totalLocalSubscriptionsCache = new HashMap<Class<? extends AbstractNetwork>, DoubleGrid2D>();
+		this.totalLocalSubscriptionsCacheDirty = new HashMap<Class<? extends AbstractNetwork>, boolean[][]>();
 
-		for (Class<? extends AbstractNetwork> an : networkTypesDemanded) {
-			totalSubscriptions.put(an, 0.0);
-			totalLocalSubscriptionsCache.put(an, new DoubleGrid2D(
+		for (Class<? extends AbstractNetwork> an : this.networkTypesDemanded) {
+			this.totalSubscriptions.put(an, 0.0);
+			this.totalLocalSubscriptionsCache.put(an, new DoubleGrid2D(
 					Exogenous.landscapeX, Exogenous.landscapeY, 0.0));
 			boolean[][] veryDirtyCache = new boolean[Exogenous.landscapeX][Exogenous.landscapeY];
 			for (int x = 0; x < Exogenous.landscapeX; x++)
-				for (int y = 0; y < Exogenous.landscapeY; y++) {
+				for (int y = 0; y < Exogenous.landscapeY; y++)
 					veryDirtyCache[x][y] = true;
-				}
-			totalLocalSubscriptionsCacheDirty.put(an, veryDirtyCache);
+			this.totalLocalSubscriptionsCacheDirty.put(an, veryDirtyCache);
 
 		}
-	}
-
-	public Double getTotalLocalSubscriptions(
-			Class<? extends AbstractNetwork> an, Integer x, Integer y) {
-		Set<AbstractNetworkProvider> nsps = this.s.getNetworkServiceProviders();
-		double runningTotal = 0.0;
-
-		for (AbstractNetworkProvider nsp : nsps) {
-			Double foo = this.getNumSubscriptions(an, nsp, x, y);
-			if (foo != null)
-				runningTotal += foo;
-		}
-
-		return runningTotal;
 	}
 
 	/**
@@ -125,7 +110,7 @@ public abstract class AbstractConsumerClass implements Steppable {
 	 *         location.
 	 */
 	public Double getPopulation(Integer x, Integer y) {
-		return population.field[x][y];
+		return this.population.field[x][y];
 	}
 
 	/**
@@ -133,16 +118,29 @@ public abstract class AbstractConsumerClass implements Steppable {
 	 *         locations.
 	 */
 	public Double getPopultation() {
-		if (!totalPopulationCacheDirty) {
-			return totalPopulationCached;
-		}
+		if (!this.totalPopulationCacheDirty)
+			return this.totalPopulationCached;
 		Double pop = new Double(0);
 		for (int x = 0; x < Exogenous.landscapeX; x++)
 			for (int y = 0; y < Exogenous.landscapeY; y++)
-				pop += getPopulation(x, y);
-		totalPopulationCached = pop;
-		totalPopulationCacheDirty = false;
+				pop += this.getPopulation(x, y);
+		this.totalPopulationCached = pop;
+		this.totalPopulationCacheDirty = false;
 		return pop;
+	}
+
+	public Double getTotalLocalSubscriptions(
+			Class<? extends AbstractNetwork> an, Integer x, Integer y) {
+		Set<AbstractNetworkProvider> nsps = this.s.getNetworkServiceProviders();
+		double runningTotal = 0.0;
+
+		for (AbstractNetworkProvider nsp : nsps) {
+			Double foo = this.getNumSubscriptions(an, nsp, x, y);
+			if (foo != null)
+				runningTotal += foo;
+		}
+
+		return runningTotal;
 	}
 
 	protected abstract void initNetData();
@@ -157,15 +155,14 @@ public abstract class AbstractConsumerClass implements Steppable {
 	 *            To Do: Consider (static) factory pattern?
 	 */
 	protected void initPopulation(PopulationDistribution pd) {
-		if (pd == null) {
+		if (pd == null)
 			pd = Exogenous.defaultPopulationDistribution;
-		}
 
 		switch (pd) {
 		case RANDOM_FLAT: {
 			for (int x = 0; x < Exogenous.landscapeX; x++)
 				for (int y = 0; y < Exogenous.landscapeY; y++)
-					population.field[x][y] = s.random.nextDouble()
+					this.population.field[x][y] = this.s.random.nextDouble()
 							* Exogenous.maxPopulation;
 		}
 		}
@@ -176,7 +173,7 @@ public abstract class AbstractConsumerClass implements Steppable {
 	protected void makeConsumptionDecisions() {
 		for (int x = 0; x < Exogenous.landscapeX; x++)
 			for (int y = 0; y < Exogenous.landscapeY; y++)
-				makeConsumptionDecisionAt(x, y);
+				this.makeConsumptionDecisionAt(x, y);
 	}
 
 	/**
@@ -186,7 +183,7 @@ public abstract class AbstractConsumerClass implements Steppable {
 	 * @param y
 	 * @param numSubs
 	 * 
-	 * Sets the actual consumption variables.  These are stored in the 
+	 *            Sets the actual consumption variables. These are stored in the
 	 * 
 	 */
 	protected void setNumSubscriptions(Class<? extends AbstractNetwork> n,
@@ -197,13 +194,13 @@ public abstract class AbstractConsumerClass implements Steppable {
 	}
 
 	protected void setPopulation(int x, int y, Double pop) {
-		population.field[x][y] = pop;
-		totalPopulationCacheDirty = true;
+		this.population.field[x][y] = pop;
+		this.totalPopulationCacheDirty = true;
 	}
 
 	public void step(SimState state) {
-		makeConsumptionDecisions();
-//		System.out.println("Consumer");
+		this.makeConsumptionDecisions();
+		// System.out.println("Consumer");
 	}
 
 }
