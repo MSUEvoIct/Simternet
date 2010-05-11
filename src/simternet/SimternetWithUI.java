@@ -27,33 +27,35 @@ public class SimternetWithUI extends GUIState {
 		c.setVisible(true);
 	}
 
-	public Display2D display;
+	public JFrame displayFrameOverallActiveCustomers;
 
-	public JFrame displayFrame;
+	public Display2D displayOverallActiveCustomers;
 
-	public ActiveCustomersPortrayal2D populationPortrayal = null;
+	public ActiveCustomersPortrayal2D overallActiveCustomersPortrayal = null;
+	public Simternet s = null;
 
 	public SimternetWithUI() {
-		super(new Simternet(System.currentTimeMillis()));
-		this.populationPortrayal = new ActiveCustomersPortrayal2D(
-				"Active Subscribers", (Simternet) this.state);
+		this(new Simternet(System.currentTimeMillis()));
 	}
 
 	public SimternetWithUI(SimState state) {
 		super(state);
-		this.populationPortrayal = new ActiveCustomersPortrayal2D(
-				"Active Subscribers", (Simternet) this.state);
+		this.s = (Simternet) state;
+		this.overallActiveCustomersPortrayal = new ActiveCustomersPortrayal2D(
+				"All Active Subscribers", (Simternet) this.state);
 	}
 
 	@Override
 	public void init(Controller c) {
 		super.init(c);
-		this.display = new Display2D(400, 400, this, 1);
-		this.displayFrame = this.display.createFrame();
-		c.registerFrame(this.displayFrame);
-		this.displayFrame.setVisible(true);
-		this.display.setBackdrop(Color.black);
-		this.display.attach(this.populationPortrayal, "Active Subscribers");
+		this.displayOverallActiveCustomers = new Display2D(400, 400, this, 1);
+		this.displayFrameOverallActiveCustomers = this.displayOverallActiveCustomers
+				.createFrame();
+		c.registerFrame(this.displayFrameOverallActiveCustomers);
+		this.displayFrameOverallActiveCustomers.setVisible(true);
+		this.displayOverallActiveCustomers.setBackdrop(Color.black);
+		this.displayOverallActiveCustomers.attach(
+				this.overallActiveCustomersPortrayal, "All Active Subscribers");
 	}
 
 	@Override
@@ -66,21 +68,19 @@ public class SimternetWithUI extends GUIState {
 	public void quit() {
 		super.quit();
 
-		if (this.displayFrame != null)
-			this.displayFrame.dispose();
+		if (this.displayFrameOverallActiveCustomers != null)
+			this.displayFrameOverallActiveCustomers.dispose();
 		// Allow garbage collection
-		this.displayFrame = null;
-		this.display = null;
+		this.displayFrameOverallActiveCustomers = null;
+		this.displayOverallActiveCustomers = null;
 	}
 
 	public void setupPortrayals() {
 		// tell the portrayals what to
 		// portray and how to portray them
-		this.populationPortrayal.setField(((Simternet) this.state)
-				.getActiveSubscribersGrid());
-		this.populationPortrayal.setMap(new sim.util.gui.SimpleColorMap(0.0,
-				Exogenous.maxPopulation, Color.black, Color.white));
-
+		this.overallActiveCustomersPortrayal
+				.setMap(new sim.util.gui.SimpleColorMap(0.0,
+						Exogenous.maxPopulation, Color.black, Color.white));
 	}
 
 	@Override

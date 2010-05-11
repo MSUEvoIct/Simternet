@@ -16,10 +16,7 @@ public class ActiveCustomersPortrayal2D extends FastValueGridPortrayal2D {
 
 	@Override
 	public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
-		this.setField(this.simternet.getActiveSubscribersGrid());
-		// for (int i = 0; i < ((DoubleGrid2D) this.field).getWidth(); i++)
-		// for (int j = 0; j < ((DoubleGrid2D) this.field).getHeight(); j++)
-		// System.out.println(((DoubleGrid2D) this.field).get(i, j));
+		this.setField(this.simternet.getAllActiveSubscribersGrid());
 		super.draw(object, graphics, info);
 	}
 }

@@ -207,8 +207,8 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 			return numCustomers;
 		for (int i = 0; i < this.networks.getObjectsAtLocation(x, y).size(); i++)
 			if (this.networks.getObjectsAtLocation(x, y).get(i) != null)
-				numCustomers += ((AbstractNetwork) this.networks.allObjects
-						.get(i)).getTotalCustomers();
+				numCustomers += ((AbstractNetwork) this.networks
+						.getObjectsAtLocation(x, y).get(i)).getTotalCustomers();
 		// TODO: Why didn't the below code work? Suspicion: Bags suck.
 		// for (AbstractNetwork n : (AbstractNetwork[]) this.networks
 		// .getObjectsAtLocation(x, y).objs)

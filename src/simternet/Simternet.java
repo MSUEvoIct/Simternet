@@ -56,7 +56,7 @@ public class Simternet extends SimState {
 	protected Set<AbstractNetworkProvider> networkServiceProviders = new HashSet<AbstractNetworkProvider>();
 
 	public Simternet(long seed) {
-		super(seed);
+		this(seed, false);
 	}
 
 	public Simternet(long seed, boolean debug) {
@@ -126,13 +126,13 @@ public class Simternet extends SimState {
 	}
 
 	/**
-	 * This is only used by the user interface, and therefor efficiency is not a
-	 * priority
+	 * This is only used by the user interface, and therefore efficiency is not
+	 * a priority
 	 * 
 	 * @return A grid containing the number of active subscribers in each
 	 *         square.
 	 */
-	public DoubleGrid2D getActiveSubscribersGrid() {
+	public DoubleGrid2D getAllActiveSubscribersGrid() {
 		final Double initValue = 0.0;
 		DoubleGrid2D ret = new DoubleGrid2D(Exogenous.landscapeX,
 				Exogenous.landscapeY, initValue);
@@ -150,6 +150,20 @@ public class Simternet extends SimState {
 
 	public Set<AbstractConsumerClass> getConsumerClasses() {
 		return this.consumerClasses;
+	}
+
+	public DoubleGrid2D getMyActiveSubscribersGrid(AbstractNetworkProvider np) {
+		final Double initValue = 0.0;
+		DoubleGrid2D ret = new DoubleGrid2D(Exogenous.landscapeX,
+				Exogenous.landscapeY, initValue);
+		for (AbstractNetworkProvider nsp : this.networkServiceProviders)
+			if (this.networkServiceProviders == np)
+				for (int i = 0; i < ret.getWidth(); i++)
+					for (int j = 0; j < ret.getHeight(); j++) {
+						ret.set(i, j, ret.get(i, j) + nsp.getCustomers(i, j));
+						System.out.println(ret.get(i, j));
+					}
+		return ret;
 	}
 
 	public Set<AbstractNetworkProvider> getNetworkServiceProviders() {
