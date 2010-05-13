@@ -1,5 +1,7 @@
 package simternet.temporal;
 
+import java.io.Serializable;
+
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import simternet.Simternet;
@@ -24,7 +26,7 @@ import simternet.nsp.AbstractNetworkProvider;
  * @author kkoning
  * 
  */
-public class Arbiter implements Steppable {
+public class Arbiter implements Steppable, Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Override

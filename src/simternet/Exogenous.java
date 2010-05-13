@@ -1,12 +1,14 @@
 package simternet;
 
+import java.io.Serializable;
+
 /**
  * @author kkoning
  * 
  *         This class contains all exogenous model variables.
  * 
  */
-public class Exogenous {
+public class Exogenous implements Serializable {
 
 	public static final double closeEnoughPrice = 0.1;
 

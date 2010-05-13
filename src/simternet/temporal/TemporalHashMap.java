@@ -1,5 +1,6 @@
 package simternet.temporal;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +51,8 @@ import java.util.Map;
  *            detection of the value class was used instead, with a negligible
  *            performance penalty for non- AsyncUpdate types.
  */
-public class TemporalHashMap<K, V> extends HashMap<K, V> implements AsyncUpdate {
+public class TemporalHashMap<K, V> extends HashMap<K, V> implements
+		AsyncUpdate, Serializable {
 
 	private static final long serialVersionUID = 1L;
 

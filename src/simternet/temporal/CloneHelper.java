@@ -1,5 +1,7 @@
 package simternet.temporal;
 
+import java.io.Serializable;
+
 /**
  * Static factory methods to clone objects which we cannot extend to implement
  * AsyncUpdate.
@@ -11,7 +13,12 @@ package simternet.temporal;
  * @author kkoning
  * 
  */
-public class CloneHelper {
+public class CloneHelper implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public static Double cloneDouble(Double obj) {
 		return new Double(obj);
 	}

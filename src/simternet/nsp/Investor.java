@@ -1,11 +1,13 @@
 package simternet.nsp;
 
+import java.io.Serializable;
+
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import simternet.Exogenous;
 
-public class Investor implements Steppable {
-	
+public class Investor implements Steppable, Serializable {
+
 	private static final long serialVersionUID = 1L;
 	/**
 	 * Represents the outstanding balance the NSP owes the investor.
@@ -13,7 +15,7 @@ public class Investor implements Steppable {
 	protected Double balance;
 	protected Double interestRate;
 	protected AbstractNetworkProvider nsp;
-	
+
 	protected Double payoffRate;
 	/**
 	 * Represents the total amount borrowed by the NSP.
@@ -22,15 +24,16 @@ public class Investor implements Steppable {
 	/**
 	 * Represents the sum of all payments by the NSP back to the Investor.
 	 */
-	protected Double totalAmountReceived;	
-	
+	protected Double totalAmountReceived;
+
 	protected Double totalInterestReceived;
-	
+
 	public Investor(AbstractNetworkProvider nsp) {
-		this(nsp,Exogenous.interestRate,Exogenous.paybackRate);
+		this(nsp, Exogenous.interestRate, Exogenous.paybackRate);
 	}
-	
-	public Investor(AbstractNetworkProvider nsp, Double interestRate, Double payoffRate) {
+
+	public Investor(AbstractNetworkProvider nsp, Double interestRate,
+			Double payoffRate) {
 		this.nsp = nsp;
 		this.interestRate = interestRate;
 		this.payoffRate = payoffRate;
@@ -38,41 +41,42 @@ public class Investor implements Steppable {
 		this.totalAmountBorrowed = new Double(0.0);
 		this.totalAmountReceived = new Double(0.0);
 	}
-	
+
 	/**
-	 * @param amount  The amount the NSP wishes to finance
+	 * @param amount
+	 *            The amount the NSP wishes to finance
 	 * @return The actual amount financed.
 	 * 
-	 * The NSP calls this method when it wants to actually borrow money.
+	 *         The NSP calls this method when it wants to actually borrow money.
 	 */
 	public void finance(Double amount) {
 		Double maxAvailable = this.getAvailableFinancing();
-		if (amount > maxAvailable) 
+		if (amount > maxAvailable)
 			throw new RuntimeException("Financing more than available.");
-		
+
 		this.totalAmountBorrowed += amount;
 		this.balance += amount;
 	}
+
 	/**
-	 * @return The maximum amount of money this investor is willing to lend
-	 * to the NSP at the current time step.
+	 * @return The maximum amount of money this investor is willing to lend to
+	 *         the NSP at the current time step.
 	 */
 	public Double getAvailableFinancing() {
-//		return 2e20;
-		Double liquidAssets = nsp.getLiquidAssets();
-		Double revenue = nsp.getOnePeriodRevenue();
+		// return 2e20;
+		Double liquidAssets = this.nsp.getLiquidAssets();
+		Double revenue = this.nsp.getOnePeriodRevenue();
 		return (2 * liquidAssets) + (2 * revenue) - this.balance;
 	}
 
 	public Double getBalance() {
-		return balance;
-	}
-	
-	public Double getInterestRate() {
-		return interestRate;
+		return this.balance;
 	}
 
-	
+	public Double getInterestRate() {
+		return this.interestRate;
+	}
+
 	/**
 	 * @return The amount the NSP owes
 	 */
@@ -81,15 +85,15 @@ public class Investor implements Steppable {
 	}
 
 	public Double getPayoffRate() {
-		return payoffRate;
+		return this.payoffRate;
 	}
 
 	public Double getTotalAmountBorrowed() {
-		return totalAmountBorrowed;
+		return this.totalAmountBorrowed;
 	}
 
 	public Double getTotalAmountReceived() {
-		return totalAmountReceived;
+		return this.totalAmountReceived;
 	}
 
 	public void makePayment(Double amount) {
@@ -101,11 +105,9 @@ public class Investor implements Steppable {
 	public void step(SimState state) {
 		// Charge interest
 		this.balance += (this.balance * this.interestRate);
-		
+
 		// To do: Foreclose on hopeless/bankrupt NSPs.
-		
+
 	}
-	
-	
 
 }

@@ -1,5 +1,6 @@
 package simternet.nsp;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import sim.engine.SimState;
@@ -22,7 +23,8 @@ import simternet.temporal.TemporalSparseGrid2D;
  *         which MASON executed once each time step of the model.
  * 
  */
-public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate {
+public abstract class AbstractNetworkProvider implements Steppable,
+		AsyncUpdate, Serializable {
 
 	/**
 	 * 

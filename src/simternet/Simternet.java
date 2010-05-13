@@ -1,5 +1,6 @@
 package simternet;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -23,7 +24,7 @@ import simternet.temporal.Arbiter;
  * 
  * 
  */
-public class Simternet extends SimState {
+public class Simternet extends SimState implements Serializable {
 
 	/**
 	 * Constant used in Cournot competition
@@ -248,6 +249,11 @@ public class Simternet extends SimState {
 		this.addConsumerClass(new IndifferentLazyConsumer(this));
 	}
 
+	public void initData() {
+		this.consumerClasses = new HashSet<AbstractConsumerClass>();
+		this.networkServiceProviders = new HashSet<AbstractNetworkProvider>();
+	}
+
 	/**
 	 * DO: Specify this somehow in parameters, rather than source.
 	 */
@@ -262,6 +268,7 @@ public class Simternet extends SimState {
 	@Override
 	public void start() {
 		super.start();
+		this.initData();
 		this.initConsumerClasses();
 		this.initNetworkServiceProviders();
 		this.initArbiter();

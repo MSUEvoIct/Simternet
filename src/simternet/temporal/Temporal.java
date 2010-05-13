@@ -1,5 +1,6 @@
 package simternet.temporal;
 
+import java.io.Serializable;
 
 /**
  * The Temporal class was designed to hold a current and future state of any
@@ -28,8 +29,12 @@ package simternet.temporal;
  *            <li>Double</li> <li>Integer</li>
  *            </ol>
  */
-public class Temporal<T> implements AsyncUpdate {
+public class Temporal<T> implements AsyncUpdate, Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private T current = null;
 	private T future = null;
 	private T resetValue = null;

@@ -1,5 +1,6 @@
 package simternet.network;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -8,8 +9,12 @@ import simternet.nsp.AbstractNetworkProvider;
 import simternet.temporal.AsyncUpdate;
 import simternet.temporal.TemporalHashMap;
 
-public abstract class AbstractNetwork implements AsyncUpdate {
+public abstract class AbstractNetwork implements AsyncUpdate, Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	protected Map<AbstractConsumerClass, Double> customers;
 	protected Integer locationX;
 	protected Integer locationY;

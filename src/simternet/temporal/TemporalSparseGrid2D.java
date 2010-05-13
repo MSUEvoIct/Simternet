@@ -1,5 +1,6 @@
 package simternet.temporal;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -36,7 +37,8 @@ import sim.util.Int2D;
  * @see simternet.temporal.TemporalHashMap
  * @see simternet.temporal.Arbiter
  */
-public class TemporalSparseGrid2D extends SparseGrid2D implements AsyncUpdate {
+public class TemporalSparseGrid2D extends SparseGrid2D implements AsyncUpdate,
+		Serializable {
 	private class LocatedObject {
 		Int2D location;
 		Object obj;
@@ -47,7 +49,7 @@ public class TemporalSparseGrid2D extends SparseGrid2D implements AsyncUpdate {
 		}
 	}
 
-	private static final long serialVersionUID = 7260152817905845782L;
+	private static final long serialVersionUID = 1L;
 
 	private List<Object> toRemove = null;
 	private List<Int2D> toRemoveLoc = null;

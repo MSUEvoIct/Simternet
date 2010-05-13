@@ -1,10 +1,16 @@
 package simternet.network;
 
+import java.io.Serializable;
+
 import simternet.Exogenous;
 import simternet.consumer.AbstractConsumerClass;
 
-public class SimpleNetwork extends AbstractNetwork {
+public class SimpleNetwork extends AbstractNetwork implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Double price = null;
 
 	// Kludge... deepCopy is replicating the PARENT class's items...

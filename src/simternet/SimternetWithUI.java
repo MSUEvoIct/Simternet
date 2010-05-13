@@ -1,6 +1,7 @@
 package simternet;
 
 import java.awt.Color;
+import java.io.Serializable;
 
 import javax.swing.JFrame;
 
@@ -11,7 +12,12 @@ import sim.display.GUIState;
 import sim.engine.SimState;
 import simternet.ui.ActiveCustomersPortrayal2D;
 
-public class SimternetWithUI extends GUIState {
+public class SimternetWithUI extends GUIState implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	public static Object getInfo() {
 		return "<H2>Simternet</H2><p>Simulates the growth of the Internet.";
@@ -32,7 +38,6 @@ public class SimternetWithUI extends GUIState {
 	public Display2D displayOverallActiveCustomers;
 
 	public ActiveCustomersPortrayal2D overallActiveCustomersPortrayal = null;
-	public Simternet s = null;
 
 	public SimternetWithUI() {
 		this(new Simternet(System.currentTimeMillis()));
@@ -40,7 +45,6 @@ public class SimternetWithUI extends GUIState {
 
 	public SimternetWithUI(SimState state) {
 		super(state);
-		this.s = (Simternet) state;
 		this.overallActiveCustomersPortrayal = new ActiveCustomersPortrayal2D(
 				"All Active Subscribers", (Simternet) this.state);
 	}
@@ -81,6 +85,12 @@ public class SimternetWithUI extends GUIState {
 		this.overallActiveCustomersPortrayal
 				.setMap(new sim.util.gui.SimpleColorMap(0.0,
 						Exogenous.maxPopulation, Color.black, Color.white));
+
+		// reschedule the displayer
+		this.displayOverallActiveCustomers.reset();
+
+		// redraw the display
+		this.displayOverallActiveCustomers.repaint();
 	}
 
 	@Override

@@ -1,12 +1,18 @@
 package simternet.nsp;
 
+import java.io.Serializable;
+
 import simternet.consumer.AbstractConsumerClass;
 import simternet.network.AbstractNetwork;
 
-public class ConstantPricingStrategy implements PricingStrategy {
+public class ConstantPricingStrategy implements PricingStrategy, Serializable {
 
-	protected Double price;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	protected AbstractNetworkProvider nsp;
+	protected Double price;
 
 	public ConstantPricingStrategy(AbstractNetworkProvider nsp, Double price) {
 		this.nsp = nsp;

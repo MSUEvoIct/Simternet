@@ -1,5 +1,7 @@
 package simternet.nsp;
 
+import java.io.Serializable;
+
 import simternet.Simternet;
 
 /**
@@ -10,7 +12,8 @@ import simternet.Simternet;
  * 
  */
 @SuppressWarnings("serial")
-public class DumbNetworkServiceProvider extends AbstractNetworkProvider {
+public class DumbNetworkServiceProvider extends AbstractNetworkProvider
+		implements Serializable {
 
 	/**
 	 * DumbNetworkServiceProviders always offer service for exactly 15.0

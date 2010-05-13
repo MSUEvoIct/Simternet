@@ -1,5 +1,6 @@
 package simternet.nsp;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,14 +16,19 @@ import simternet.network.SimpleNetwork;
  *         sequentially, starting at 0.0.
  * 
  */
-public class BuildEverywhereStrategy implements InvestmentStrategy {
+public class BuildEverywhereStrategy implements InvestmentStrategy,
+		Serializable {
 
-	protected AbstractNetworkProvider nsp;
-	protected SparseGrid2D networks;
-	protected List<Class<? extends AbstractNetwork>> networkTypes;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	protected Boolean built = false;
 	protected Integer builtThroughX = 0;
 	protected Integer builtThroughY = 0;
+	protected SparseGrid2D networks;
+	protected List<Class<? extends AbstractNetwork>> networkTypes;
+	protected AbstractNetworkProvider nsp;
 
 	public BuildEverywhereStrategy(AbstractNetworkProvider nsp,
 			SparseGrid2D networks) {
@@ -50,49 +56,47 @@ public class BuildEverywhereStrategy implements InvestmentStrategy {
 
 	@Override
 	public void makeNetworkInvestment() {
-		
-		if (built == true)
+
+		if (this.built == true)
 			return;
-		
-		Double amountAvailable = nsp.investor.getAvailableFinancing();
+
+		Double amountAvailable = this.nsp.investor.getAvailableFinancing();
 
 		// Figure out costs, build if we can afford to. All or nothing for each
 		// square.
-		for (int x = builtThroughX; x < Exogenous.landscapeX; x++) {
-			for (int y = builtThroughY; y < Exogenous.landscapeY; y++) {
+		for (int x = this.builtThroughX; x < Exogenous.landscapeX; x++) {
+			for (int y = this.builtThroughY; y < Exogenous.landscapeY; y++) {
 				Double costForThisPixel = 0.0;
 				List<AbstractNetwork> nets = new ArrayList<AbstractNetwork>();
 
 				// figure out the cost to build one of each network at this
 				// location.
-				for (Class<? extends AbstractNetwork> cl : networkTypes) {
+				for (Class<? extends AbstractNetwork> cl : this.networkTypes)
 					try {
 						AbstractNetwork an = cl.newInstance();
-						an.init(nsp, x, y);
+						an.init(this.nsp, x, y);
 						costForThisPixel = an.getBuildCost();
 						nets.add(an);
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
-				}
 
 				// if we have enough funding available to build the networks, do
-				// so.  When we run out of money, stop building.
+				// so. When we run out of money, stop building.
 				if (costForThisPixel < amountAvailable) {
 					for (AbstractNetwork an : nets) {
-						nsp.buildNetwork(an);
+						this.nsp.buildNetwork(an);
 						amountAvailable -= costForThisPixel;
 					}
-					builtThroughY = y + 1;
-				} else {
+					this.builtThroughY = y + 1;
+				} else
 					return;
-				}
 
 			}
-			builtThroughX = x + 1;
-			builtThroughY = 0;
+			this.builtThroughX = x + 1;
+			this.builtThroughY = 0;
 		}
-		
+
 		this.built = true;
 
 	}

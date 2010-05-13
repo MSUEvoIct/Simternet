@@ -1,5 +1,6 @@
 package simternet.nsp;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -8,12 +9,18 @@ import simternet.Exogenous;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.network.AbstractNetwork;
 
-public class RepeatedStackelbergPricingStrategy implements PricingStrategy {
+public class RepeatedStackelbergPricingStrategy implements PricingStrategy,
+		Serializable {
 
-	protected AbstractNetworkProvider nsp = null;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	protected SparseGrid2D networks = null;
+	protected AbstractNetworkProvider nsp = null;
 
-	public RepeatedStackelbergPricingStrategy(AbstractNetworkProvider nsp, SparseGrid2D networks) {
+	public RepeatedStackelbergPricingStrategy(AbstractNetworkProvider nsp,
+			SparseGrid2D networks) {
 		this.nsp = nsp;
 		this.networks = networks;
 	}
@@ -23,11 +30,11 @@ public class RepeatedStackelbergPricingStrategy implements PricingStrategy {
 	public Double getPrice(Class<? extends AbstractNetwork> cl,
 			AbstractConsumerClass cc, int x, int y) {
 
-		if (networks == null)
+		if (this.networks == null)
 			return null;
 
-		Iterator<AbstractNetwork> nets = networks.getObjectsAtLocation(x, y)
-				.iterator();
+		Iterator<AbstractNetwork> nets = this.networks.getObjectsAtLocation(x,
+				y).iterator();
 
 		while (nets.hasNext()) {
 			AbstractNetwork an = nets.next();
@@ -35,15 +42,6 @@ public class RepeatedStackelbergPricingStrategy implements PricingStrategy {
 				return an.getPrice(cc);
 		}
 		return null;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public void setPrices() {
-		Iterator<AbstractNetwork> i = networks.iterator();
-		while (i.hasNext())
-			// set price for all networks
-			this.setPrice(i.next());
 	}
 
 	private void setPrice(AbstractNetwork an) {
@@ -59,6 +57,15 @@ public class RepeatedStackelbergPricingStrategy implements PricingStrategy {
 					/ (2 * totPopAtLoc);
 			an.setPrice(cc, price);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void setPrices() {
+		Iterator<AbstractNetwork> i = this.networks.iterator();
+		while (i.hasNext())
+			// set price for all networks
+			this.setPrice(i.next());
 	}
 
 }

@@ -1,9 +1,16 @@
 package simternet.nsp;
 
+import java.io.Serializable;
+
 import simternet.Simternet;
 
-@SuppressWarnings("serial")
-public class RepeatedStackelburgNSP extends AbstractNetworkProvider {
+public class RepeatedStackelburgNSP extends AbstractNetworkProvider implements
+		Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	public RepeatedStackelburgNSP(Simternet s) {
 		super(s);

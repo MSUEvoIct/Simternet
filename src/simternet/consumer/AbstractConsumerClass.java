@@ -1,5 +1,6 @@
 package simternet.consumer;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,7 +16,7 @@ import simternet.network.AbstractNetwork;
 import simternet.nsp.AbstractNetworkProvider;
 
 @SuppressWarnings("serial")
-public abstract class AbstractConsumerClass implements Steppable {
+public abstract class AbstractConsumerClass implements Steppable, Serializable {
 
 	protected Set<Class<? extends AbstractNetwork>> networkTypesDemanded = new HashSet<Class<? extends AbstractNetwork>>();
 

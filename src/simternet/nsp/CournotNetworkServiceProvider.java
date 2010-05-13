@@ -1,13 +1,16 @@
 package simternet.nsp;
 
+import java.io.Serializable;
+
 import sim.engine.SimState;
 import simternet.CournotSimternet;
 import simternet.Simternet;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.temporal.Temporal;
 
-public class CournotNetworkServiceProvider extends AbstractNetworkProvider {
-	private static final long serialVersionUID = -9165331810723302112L;
+public class CournotNetworkServiceProvider extends AbstractNetworkProvider
+		implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	private Temporal<Double> price = new Temporal<Double>(0.0);
 	private Temporal<Double> totalSubscribers = new Temporal<Double>(0.0);
