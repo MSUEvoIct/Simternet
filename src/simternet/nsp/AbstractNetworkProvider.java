@@ -23,8 +23,7 @@ import simternet.temporal.TemporalSparseGrid2D;
  *         which MASON executed once each time step of the model.
  * 
  */
-public abstract class AbstractNetworkProvider implements Steppable,
-		AsyncUpdate, Serializable {
+public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate {
 
 	/**
 	 * 
@@ -78,13 +77,14 @@ public abstract class AbstractNetworkProvider implements Steppable,
 	}
 
 	/**
+	 * A network object may be instantiated, but it is not considered "built"
+	 * until it hits this method. This method is responsible for financing the
+	 * network and placing it in the list of networks owned by this network
+	 * service provider.
+	 * 
 	 * @param an
 	 *            The network to be built
 	 * 
-	 *            A network object may be instantiated, but it is not considered
-	 *            "built" until it hits this method. This method is responsible
-	 *            for financing the network and placing it in the list of
-	 *            networks owned by this network service provider.
 	 */
 	protected void buildNetwork(AbstractNetwork an) {
 		this.capitalize(an.getBuildCost());

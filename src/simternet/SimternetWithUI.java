@@ -11,6 +11,7 @@ import sim.display.Display2D;
 import sim.display.GUIState;
 import sim.engine.SimState;
 import simternet.ui.ActiveCustomersPortrayal2D;
+import simternet.ui.NetworkProvidersDisplay;
 
 public class SimternetWithUI extends GUIState implements Serializable {
 
@@ -33,11 +34,22 @@ public class SimternetWithUI extends GUIState implements Serializable {
 		c.setVisible(true);
 	}
 
+	/**
+	 * This is a reference to the simulation controller. (This controls the
+	 * window which is used to stop/start the simulation etc. We retain a
+	 * reference outside the scope of the init() function because we will be
+	 * modifying the display programatically based on the simulation. (i.e.,
+	 * adding displays for new network service providers)
+	 */
+	private Controller controller;
+
 	public JFrame displayFrameOverallActiveCustomers;
 
 	public Display2D displayOverallActiveCustomers;
+	protected NetworkProvidersDisplay netProvidersDisplay;
 
 	public ActiveCustomersPortrayal2D overallActiveCustomersPortrayal = null;
+	public Simternet s = null;
 
 	public SimternetWithUI() {
 		this(new Simternet(System.currentTimeMillis()));
@@ -45,13 +57,22 @@ public class SimternetWithUI extends GUIState implements Serializable {
 
 	public SimternetWithUI(SimState state) {
 		super(state);
+		this.s = (Simternet) state;
 		this.overallActiveCustomersPortrayal = new ActiveCustomersPortrayal2D(
 				"All Active Subscribers", (Simternet) this.state);
+	}
+
+	public void addDisplay(Display2D display) {
+		JFrame frame = display.createFrame();
+		frame.setTitle(display.getName());
+		frame.setVisible(false);
+		this.controller.registerFrame(frame);
 	}
 
 	@Override
 	public void init(Controller c) {
 		super.init(c);
+		this.controller = c;
 		this.displayOverallActiveCustomers = new Display2D(400, 400, this, 1);
 		this.displayFrameOverallActiveCustomers = this.displayOverallActiveCustomers
 				.createFrame();
@@ -88,9 +109,15 @@ public class SimternetWithUI extends GUIState implements Serializable {
 
 		// reschedule the displayer
 		this.displayOverallActiveCustomers.reset();
-
 		// redraw the display
 		this.displayOverallActiveCustomers.repaint();
+
+		//Network Providers Display
+		this.netProvidersDisplay = new NetworkProvidersDisplay(400, 400, this,
+				1);
+		this.controller.registerFrame(this.netProvidersDisplay);
+		
+
 	}
 
 	@Override

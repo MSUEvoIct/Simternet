@@ -14,8 +14,8 @@ public class Exogenous implements Serializable {
 
 	public static final PopulationDistribution defaultPopulationDistribution = PopulationDistribution.RANDOM_FLAT;
 	public static final double interestRate = 0.07;
-	public static final int landscapeX = 3;
-	public static final int landscapeY = 3;
+	public static final int landscapeX = 10;
+	public static final int landscapeY = 10;
 	public static final double maxPopulation = 1000;
 	public static final double maxPrice = 200;
 	public static final double netCostSimpleArea = 10000;

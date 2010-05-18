@@ -17,19 +17,12 @@ import simternet.nsp.RepeatedStackelburgNSP;
 import simternet.temporal.Arbiter;
 
 /**
+ * This is the "root" class of the simulation. See the MASON documentation for
+ * more details.
+ * 
  * @author kkoning
- * 
- *         This is the "root" class of the simulation. See the MASON
- *         documentation for more details.
- * 
- * 
  */
 public class Simternet extends SimState implements Serializable {
-
-	/**
-	 * Constant used in Cournot competition
-	 */
-	public final static Double ALPHA = 100.0;
 
 	/**
 	 * Storing a version identifier is appropriate for this class, as we will
@@ -66,16 +59,14 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	/**
+	 * Adds a consumer class to the simulation.
+	 * 
 	 * @param cc
-	 * 
-	 *            Track this consumer class and schedule it to repeat at each
-	 *            step. Ordering steps.
-	 * 
+	 *            The consumer class to add.
 	 */
 	protected void addConsumerClass(AbstractConsumerClass cc) {
 		this.consumerClasses.add(cc);
 		this.schedule.scheduleRepeating(Schedule.EPOCH, 12, cc);
-		// schedule.scheduleRepeating(cc);
 	}
 
 	/**
