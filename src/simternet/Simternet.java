@@ -25,6 +25,31 @@ import simternet.temporal.Arbiter;
 public class Simternet extends SimState implements Serializable {
 
 	/**
+	 * MASON includes a facility for observing and manipulating information
+	 * about the simulation object itself. Sometimes the SimState object can be
+	 * used directly, and Mason will allow inspection and manipulation of
+	 * properties fitting the standard java conventions. (i.e., getX, setX,
+	 * isX...) However, while we do want to make use of the generic user
+	 * interface and charting code, we want more control over which variables
+	 * are presented to the user.
+	 * 
+	 * This object should not store any data itself.
+	 * 
+	 * @author kkoning
+	 */
+	@SuppressWarnings("serial")
+	public class SimternetInspectorObject implements Serializable {
+
+		public boolean isDebug() {
+			return Simternet.this.debug;
+		}
+
+		public void setDebug(boolean debug) {
+			Simternet.this.debug = debug;
+		}
+	}
+
+	/**
 	 * Storing a version identifier is appropriate for this class, as we will
 	 * likely be saving it often and may want to read older versions in a
 	 * predictable, specified way.
@@ -42,20 +67,31 @@ public class Simternet extends SimState implements Serializable {
 	 */
 	protected Set<AbstractConsumerClass> consumerClasses = new HashSet<AbstractConsumerClass>();
 
-	public boolean debug = false;
-
+	public boolean debug;
 	/**
 	 * Stores a list of ALL network service providers present in the simulation.
 	 */
 	protected Set<AbstractNetworkProvider> networkServiceProviders = new HashSet<AbstractNetworkProvider>();
+
+	public Exogenous parameters;
+
+	public final SimternetInspectorObject sio = new SimternetInspectorObject();
 
 	public Simternet(long seed) {
 		this(seed, false);
 	}
 
 	public Simternet(long seed, boolean debug) {
+		this(seed, debug, null);
+	}
+
+	public Simternet(long seed, boolean debug, Exogenous parameters) {
 		super(seed);
 		this.debug = debug;
+		if (parameters != null)
+			this.parameters = parameters;
+		else
+			this.parameters = Exogenous.getDefaults();
 	}
 
 	/**
@@ -126,15 +162,19 @@ public class Simternet extends SimState implements Serializable {
 	 */
 	public DoubleGrid2D getAllActiveSubscribersGrid() {
 		final Double initValue = 0.0;
-		DoubleGrid2D ret = new DoubleGrid2D(Exogenous.landscapeX,
-				Exogenous.landscapeY, initValue);
-		System.out.println("Start new one");
+		DoubleGrid2D ret = new DoubleGrid2D(this.parameters.x(),
+				this.parameters.y(), initValue);
+
+		if (this.debug)
+			System.out.println("Start new one");
 		for (AbstractNetworkProvider nsp : this.networkServiceProviders) {
-			System.out.println("new nsp");
+			if (this.debug)
+				System.out.println("new nsp");
 			for (int i = 0; i < ret.getWidth(); i++)
 				for (int j = 0; j < ret.getHeight(); j++) {
 					ret.set(i, j, ret.get(i, j) + nsp.getCustomers(i, j));
-					System.out.println(ret.get(i, j));
+					if (this.debug)
+						System.out.println(ret.get(i, j));
 				}
 		}
 		return ret;
@@ -146,8 +186,8 @@ public class Simternet extends SimState implements Serializable {
 
 	public DoubleGrid2D getMyActiveSubscribersGrid(AbstractNetworkProvider np) {
 		final Double initValue = 0.0;
-		DoubleGrid2D ret = new DoubleGrid2D(Exogenous.landscapeX,
-				Exogenous.landscapeY, initValue);
+		DoubleGrid2D ret = new DoubleGrid2D(this.parameters.x(),
+				this.parameters.y(), initValue);
 		for (AbstractNetworkProvider nsp : this.networkServiceProviders)
 			if (this.networkServiceProviders == np)
 				for (int i = 0; i < ret.getWidth(); i++)
@@ -200,8 +240,8 @@ public class Simternet extends SimState implements Serializable {
 	 * @return A grid containing the population of each square.
 	 */
 	public DoubleGrid2D getPopulationGrid() {
-		DoubleGrid2D ret = new DoubleGrid2D(Exogenous.landscapeX,
-				Exogenous.landscapeY);
+		DoubleGrid2D ret = new DoubleGrid2D(this.parameters.x(),
+				this.parameters.y());
 		for (int i = 0; i < ret.getWidth(); i++)
 			for (int j = 0; j < ret.getHeight(); j++)
 				ret.set(i, j, this.getPopulation(i, j));

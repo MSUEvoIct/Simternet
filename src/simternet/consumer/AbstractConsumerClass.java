@@ -9,7 +9,6 @@ import java.util.Set;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.grid.DoubleGrid2D;
-import simternet.Exogenous;
 import simternet.PopulationDistribution;
 import simternet.Simternet;
 import simternet.network.AbstractNetwork;
@@ -61,8 +60,8 @@ public abstract class AbstractConsumerClass implements Steppable, Serializable {
 	 */
 	protected AbstractConsumerClass(Simternet s, PopulationDistribution pd) {
 		this.s = s;
-		this.population = new DoubleGrid2D(Exogenous.landscapeX,
-				Exogenous.landscapeY, 0.0);
+		this.population = new DoubleGrid2D(s.parameters.x(), s.parameters.y(),
+				0.0);
 		this.initPopulation(pd);
 		this.totalSubscriptions = new HashMap<Class<? extends AbstractNetwork>, Double>();
 		this.totalLocalSubscriptionsCache = new HashMap<Class<? extends AbstractNetwork>, DoubleGrid2D>();
@@ -71,10 +70,11 @@ public abstract class AbstractConsumerClass implements Steppable, Serializable {
 		for (Class<? extends AbstractNetwork> an : this.networkTypesDemanded) {
 			this.totalSubscriptions.put(an, 0.0);
 			this.totalLocalSubscriptionsCache.put(an, new DoubleGrid2D(
-					Exogenous.landscapeX, Exogenous.landscapeY, 0.0));
-			boolean[][] veryDirtyCache = new boolean[Exogenous.landscapeX][Exogenous.landscapeY];
-			for (int x = 0; x < Exogenous.landscapeX; x++)
-				for (int y = 0; y < Exogenous.landscapeY; y++)
+					s.parameters.x(), s.parameters.y(), 0.0));
+			boolean[][] veryDirtyCache = new boolean[s.parameters.x()][s.parameters
+					.y()];
+			for (int x = 0; x < s.parameters.x(); x++)
+				for (int y = 0; y < s.parameters.y(); y++)
 					veryDirtyCache[x][y] = true;
 			this.totalLocalSubscriptionsCacheDirty.put(an, veryDirtyCache);
 
@@ -122,8 +122,8 @@ public abstract class AbstractConsumerClass implements Steppable, Serializable {
 		if (!this.totalPopulationCacheDirty)
 			return this.totalPopulationCached;
 		Double pop = new Double(0);
-		for (int x = 0; x < Exogenous.landscapeX; x++)
-			for (int y = 0; y < Exogenous.landscapeY; y++)
+		for (int x = 0; x < this.s.parameters.x(); x++)
+			for (int y = 0; y < this.s.parameters.y(); y++)
 				pop += this.getPopulation(x, y);
 		this.totalPopulationCached = pop;
 		this.totalPopulationCacheDirty = false;
@@ -156,15 +156,18 @@ public abstract class AbstractConsumerClass implements Steppable, Serializable {
 	 *            To Do: Consider (static) factory pattern?
 	 */
 	protected void initPopulation(PopulationDistribution pd) {
+		// TODO: Have way of parameterizing population distribution based on
+		// properties.
 		if (pd == null)
-			pd = Exogenous.defaultPopulationDistribution;
+			pd = PopulationDistribution.RANDOM_FLAT;
 
 		switch (pd) {
 		case RANDOM_FLAT: {
-			for (int x = 0; x < Exogenous.landscapeX; x++)
-				for (int y = 0; y < Exogenous.landscapeY; y++)
+			for (int x = 0; x < this.s.parameters.x(); x++)
+				for (int y = 0; y < this.s.parameters.y(); y++)
 					this.population.field[x][y] = this.s.random.nextDouble()
-							* Exogenous.maxPopulation;
+							* Double.parseDouble(this.s.parameters
+									.getProperty("landscape.population.max"));
 		}
 		}
 	}
@@ -172,8 +175,8 @@ public abstract class AbstractConsumerClass implements Steppable, Serializable {
 	protected abstract void makeConsumptionDecisionAt(Integer x, Integer y);
 
 	protected void makeConsumptionDecisions() {
-		for (int x = 0; x < Exogenous.landscapeX; x++)
-			for (int y = 0; y < Exogenous.landscapeY; y++)
+		for (int x = 0; x < this.s.parameters.x(); x++)
+			for (int y = 0; y < this.s.parameters.y(); y++)
 				this.makeConsumptionDecisionAt(x, y);
 	}
 

@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import sim.field.grid.SparseGrid2D;
-import simternet.Exogenous;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.network.AbstractNetwork;
 
@@ -53,7 +52,9 @@ public class RepeatedStackelbergPricingStrategy implements PricingStrategy,
 			Double othersQty = cc.getTotalLocalSubscriptions(an.getClass(), an
 					.getLocationX(), an.getLocationY())
 					- an.getCustomers(cc);
-			Double price = (Exogenous.maxPrice * (-1 * othersQty + totPopAtLoc))
+			Double price = (Double.parseDouble(this.nsp.simternet.parameters
+					.getProperty("comsumers.simple.maxPrice")) * (-1
+					* othersQty + totPopAtLoc))
 					/ (2 * totPopAtLoc);
 			an.setPrice(cc, price);
 		}

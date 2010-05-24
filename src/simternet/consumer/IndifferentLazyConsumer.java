@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import simternet.Exogenous;
 import simternet.Simternet;
 import simternet.network.AbstractNetwork;
 import simternet.network.SimpleNetwork;
@@ -36,7 +35,9 @@ public class IndifferentLazyConsumer extends AbstractConsumerClass implements
 
 	private Double demandSimpleNetwork(Double price, Integer x, Integer y) {
 		Double totPopAt = this.getPopulation(x, y);
-		Double q = (1 - (price / Exogenous.maxPrice)) * totPopAt;
+		Double q = (1 - (price / Double.parseDouble(this.s.parameters
+				.getProperty("comsumers.simple.maxPrice"))))
+				* totPopAt;
 		return q;
 	}
 
@@ -69,16 +70,20 @@ public class IndifferentLazyConsumer extends AbstractConsumerClass implements
 		Set<AbstractNetworkProvider> indifferent = new HashSet<AbstractNetworkProvider>();
 
 		for (Map.Entry<AbstractNetworkProvider, Double> me : prices.entrySet())
-			if (me.getValue() - lowPrice < Exogenous.closeEnoughPrice)
+			if (me.getValue() - lowPrice < Double.parseDouble(this.s.parameters
+					.getProperty("consumers.simple.closeEnoughPrice")))
 				indifferent.add(me.getKey());
 
 		for (AbstractNetworkProvider nsp : indifferent)
 			equilibriumQty.put(nsp, totalQtyDemanded / indifferent.size());
 
 		for (AbstractNetworkProvider nsp : this.s.getNetworkServiceProviders()) {
-			Double actualQty = Exogenous.proportionChange
+			Double actualQty = Double.parseDouble(this.s.parameters
+					.getProperty("proportionChange"))
 					* equilibriumQty.get(nsp)
-					+ (1 - Exogenous.proportionChange) * oldQtys.get(nsp);
+					+ (1 - Double.parseDouble(this.s.parameters
+							.getProperty("proportionChange")))
+					* oldQtys.get(nsp);
 			this.setNumSubscriptions(SimpleNetwork.class, nsp, x, y, actualQty);
 		}
 

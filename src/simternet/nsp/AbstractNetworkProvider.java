@@ -1,13 +1,11 @@
 package simternet.nsp;
 
-import java.io.Serializable;
 import java.util.Iterator;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Bag;
 import sim.util.Int2D;
-import simternet.Exogenous;
 import simternet.Simternet;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.network.AbstractNetwork;
@@ -39,7 +37,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	protected Temporal<Double> periodInvestment = new Temporal<Double>(0.0, 0.0);
 	protected Temporal<Double> periodRevenue = new Temporal<Double>(0.0, 0.0);
 	protected PricingStrategy pricingStrategy;
-	protected Simternet simternet = null;
+	public Simternet simternet = null;
 	protected Temporal<Double> totalCosts = new Temporal<Double>(0.0);
 	protected Temporal<Double> totalInvested = new Temporal<Double>(0.0);
 	protected Temporal<Double> totalRevenue = new Temporal<Double>(0.0);
@@ -50,12 +48,14 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 
 	public AbstractNetworkProvider(Simternet s, Investor i) {
 		this.simternet = s;
-		this.liquidAssets = new Temporal<Double>(Exogenous.nspEndowment);
-		int homeX = s.random.nextInt(Exogenous.landscapeX);
-		int homeY = s.random.nextInt(Exogenous.landscapeY);
+		this.liquidAssets = new Temporal<Double>(Double
+				.parseDouble(this.simternet.parameters
+						.getProperty("nsp.financial.endowment")));
+		int homeX = s.random.nextInt(this.simternet.parameters.x());
+		int homeY = s.random.nextInt(this.simternet.parameters.y());
 		this.homeBase = new Int2D(homeX, homeY);
-		this.networks = new TemporalSparseGrid2D(Exogenous.landscapeX,
-				Exogenous.landscapeY);
+		this.networks = new TemporalSparseGrid2D(this.simternet.parameters.x(),
+				this.simternet.parameters.y());
 		if (i != null)
 			this.investor = i;
 		else
@@ -127,16 +127,16 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	 */
 	public Double getCustomers() {
 		Double numCustomers = 0.0;
-		for (int x = 0; x < Exogenous.landscapeX; x++)
-			for (int y = 0; y < Exogenous.landscapeY; y++)
+		for (int x = 0; x < this.simternet.parameters.x(); x++)
+			for (int y = 0; y < this.simternet.parameters.y(); y++)
 				numCustomers += this.getCustomers(x, y);
 		return numCustomers;
 	}
 
 	public Double getCustomers(AbstractConsumerClass ac) {
 		Double numCustomers = 0.0;
-		for (int x = 0; x < Exogenous.landscapeX; x++)
-			for (int y = 0; y < Exogenous.landscapeY; y++)
+		for (int x = 0; x < this.simternet.parameters.x(); x++)
+			for (int y = 0; y < this.simternet.parameters.y(); y++)
 				numCustomers += this.getCustomers(ac, x, y);
 		return numCustomers;
 	}
@@ -314,7 +314,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 			System.out.print(an.getLocationX() + "x" + an.getLocationY() + "=");
 			System.out.print(an.getTotalCustomers() + "@"
 					+ an.getPrice(null).toString().substring(0, 4));
-			if ((Exogenous.landscapeX * Exogenous.landscapeY) > 15)
+			if ((this.simternet.parameters.x() * this.simternet.parameters.y()) > 15)
 				System.out.print("\n");
 			else if (nets.hasNext() == true)
 				System.out.print(", ");

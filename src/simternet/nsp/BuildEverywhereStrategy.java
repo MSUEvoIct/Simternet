@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sim.field.grid.SparseGrid2D;
-import simternet.Exogenous;
 import simternet.network.AbstractNetwork;
 import simternet.network.SimpleNetwork;
 
@@ -64,8 +63,9 @@ public class BuildEverywhereStrategy implements InvestmentStrategy,
 
 		// Figure out costs, build if we can afford to. All or nothing for each
 		// square.
-		for (int x = this.builtThroughX; x < Exogenous.landscapeX; x++) {
-			for (int y = this.builtThroughY; y < Exogenous.landscapeY; y++) {
+		for (int x = this.builtThroughX; x < this.nsp.simternet.parameters.x(); x++) {
+			for (int y = this.builtThroughY; y < this.nsp.simternet.parameters
+					.y(); y++) {
 				Double costForThisPixel = 0.0;
 				List<AbstractNetwork> nets = new ArrayList<AbstractNetwork>();
 

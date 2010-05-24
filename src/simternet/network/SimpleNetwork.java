@@ -2,7 +2,6 @@ package simternet.network;
 
 import java.io.Serializable;
 
-import simternet.Exogenous;
 import simternet.consumer.AbstractConsumerClass;
 
 public class SimpleNetwork extends AbstractNetwork implements Serializable {
@@ -34,8 +33,11 @@ public class SimpleNetwork extends AbstractNetwork implements Serializable {
 		Double population = this.nsp.getSimternet().getPopulation(
 				this.locationX, this.locationY);
 
-		cost += Exogenous.netCostSimpleArea;
-		cost += population * Exogenous.netCostSimpleUser;
+		cost += Double.parseDouble(this.nsp.simternet.parameters
+				.getProperty("networks.SimpleNetwork.cost.perArea"));
+		cost += population
+				* Double.parseDouble(this.nsp.simternet.parameters
+						.getProperty("networks.SimpleNetwork.cost.perUser"));
 
 		return cost;
 	}

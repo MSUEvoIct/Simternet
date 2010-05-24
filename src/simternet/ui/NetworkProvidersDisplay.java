@@ -3,7 +3,6 @@ package simternet.ui;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Label;
 import java.util.Set;
 
 import javax.swing.JFrame;
@@ -13,6 +12,7 @@ import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
 import sim.display.GUIState;
+import simternet.Simternet;
 import simternet.SimternetWithUI;
 import simternet.nsp.AbstractNetworkProvider;
 
@@ -64,16 +64,14 @@ public class NetworkProvidersDisplay extends JFrame {
 
 	}
 
-	private static final Label placeHolderLabel = new Label("Hello World!");
-	private static final long serialVersionUID = 1L;
-
 	protected Set<AbstractNetworkProvider> networkServiceProviders;
 
 	public NetworkProvidersDisplay(double width, double height,
 			GUIState simulation, long interval) {
 
 		SimternetWithUI gui = (SimternetWithUI) simulation;
-		this.networkServiceProviders = gui.s.getNetworkServiceProviders();
+		this.networkServiceProviders = ((Simternet) (gui.state))
+				.getNetworkServiceProviders();
 
 		this.setTitle("Network Service Providers Console");
 

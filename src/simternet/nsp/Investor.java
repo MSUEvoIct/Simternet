@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import simternet.Exogenous;
 
 public class Investor implements Steppable, Serializable {
 
@@ -29,7 +28,10 @@ public class Investor implements Steppable, Serializable {
 	protected Double totalInterestReceived;
 
 	public Investor(AbstractNetworkProvider nsp) {
-		this(nsp, Exogenous.interestRate, Exogenous.paybackRate);
+		this(nsp, Double.parseDouble(nsp.simternet.parameters
+				.getProperty("financial.interestRate")), Double
+				.parseDouble(nsp.simternet.parameters
+						.getProperty("financial.paybackRate")));
 	}
 
 	public Investor(AbstractNetworkProvider nsp, Double interestRate,

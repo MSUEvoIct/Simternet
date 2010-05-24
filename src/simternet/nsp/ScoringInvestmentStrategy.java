@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 
 import sim.field.grid.SparseGrid2D;
-import simternet.Exogenous;
 import simternet.network.AbstractNetwork;
 import simternet.network.SimpleNetwork;
 
@@ -14,7 +13,7 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 		Serializable {
 
 	@SuppressWarnings("unchecked")
-	private class PotentialNetwork implements Comparable {
+	private class PotentialNetwork implements Serializable, Comparable {
 		private Double cost;
 
 		private Double distanceFromHome;
@@ -119,8 +118,8 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 
 	private void populatePotentialNetworks() {
 		for (Class<? extends AbstractNetwork> networkType : this.networkTypes)
-			for (int x = 0; x < Exogenous.landscapeX; x++)
-				for (int y = 0; y < Exogenous.landscapeY; y++)
+			for (int x = 0; x < this.nsp.simternet.parameters.x(); x++)
+				for (int y = 0; y < this.nsp.simternet.parameters.y(); y++)
 					this.potentialNetworks.add(new PotentialNetwork(x, y,
 							networkType));
 	}
@@ -136,7 +135,9 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 		// know will demand SimpleNetwork.
 		score += Math.pow(this.nsp.simternet.getPopulation(pn.locationX,
 				pn.locationY), 1.5)
-				/ Exogenous.maxPopulation * populationWeight;
+				/ Double.parseDouble(this.nsp.simternet.parameters
+						.getProperty("landscape.population.max"))
+				* populationWeight;
 		score -= pn.cost * costWeight;
 		score -= pn.distanceFromHome * distanceWeight;
 
