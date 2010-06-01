@@ -35,8 +35,24 @@ public class Temporal<T> implements AsyncUpdate, Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Simple testing method.
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		Temporal td = new Temporal<Double>(0.0);
+		System.out.println(td.future);
+		td.set(100.0);
+		System.out.println(td.future);
+		td.decrement(5.0);
+		System.out.println(td.future);
+	}
+
 	private T current = null;
 	private T future = null;
+
 	private T resetValue = null;
 
 	/**
@@ -66,15 +82,56 @@ public class Temporal<T> implements AsyncUpdate, Serializable {
 		return dst;
 	}
 
+	@SuppressWarnings("unchecked")
+	public final void decrement(T amount) {
+		if (!this.isNumeric())
+			throw new RuntimeException("Cannot increment a non-numeric type!");
+
+		if (this.future instanceof Double) {
+			Double futureDouble = (Double) this.future;
+			futureDouble -= (Double) amount;
+			this.future = (T) futureDouble;
+		} else if (this.future instanceof Integer) {
+			Integer futureInteger = (Integer) this.future;
+			futureInteger -= (Integer) amount;
+			this.future = (T) futureInteger;
+		} else
+			throw new RuntimeException("Increment of type unimplemented");
+
+	}
+
 	public T get() {
 		return this.current;
 	}
 
 	/**
-	 * @return
+	 * @return the value at the next Step.
 	 */
 	public T getFuture() {
 		return this.future;
+	}
+
+	@SuppressWarnings("unchecked")
+	public final void increment(Number amount) {
+		if (!this.isNumeric())
+			throw new RuntimeException("Cannot increment a non-numeric type!");
+
+		if (this.future instanceof Double) {
+			Double futureDouble = (Double) this.future;
+			futureDouble += (Double) amount;
+			this.future = (T) futureDouble;
+		} else if (this.future instanceof Integer) {
+			Integer futureInteger = (Integer) this.future;
+			futureInteger += (Integer) amount;
+			this.future = (T) futureInteger;
+		} else
+			throw new RuntimeException("Increment of type unimplemented");
+	}
+
+	public final boolean isNumeric() {
+		if (this.future instanceof Number)
+			return true;
+		return false;
 	}
 
 	/**
