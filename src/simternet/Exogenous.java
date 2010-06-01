@@ -33,22 +33,6 @@ public class Exogenous extends Properties implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	// public final double closeEnoughPrice = 0.1;
-
-	// public final PopulationDistribution defaultPopulationDistribution =
-	// PopulationDistribution.RANDOM_FLAT;
-	// public final double interestRate = 0.07;
-	// public final int landscapeX = 3;
-	// public final int landscapeY = 3;
-	// public final double maxPopulation = 1000;
-	// public final double maxPrice = 200;
-	// public final double netCostSimpleArea = 10000;
-	// public final double netCostSimpleUser = 10;
-
-	// public final double nspEndowment = 11000;
-	// public final double paybackRate = 0.05;
-	// public final double proportionChange = 0.3;
-
 	public static Exogenous getDefaults() {
 
 		Exogenous vars = new Exogenous();
@@ -65,6 +49,83 @@ public class Exogenous extends Properties implements Serializable {
 		}
 
 		return vars;
+	}
+
+	/**
+	 * For testing...
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		Exogenous foo = Exogenous.getDefaults();
+		String bar = foo.getProperty("nsp.misc.names");
+		String names[] = bar.split("\\W");
+		for (String name : names)
+			System.out.println(name);
+	}
+
+	private int aspCounter = 1;
+
+	// public final double closeEnoughPrice = 0.1;
+
+	// public final PopulationDistribution defaultPopulationDistribution =
+	// PopulationDistribution.RANDOM_FLAT;
+	// public final double interestRate = 0.07;
+	// public final int landscapeX = 3;
+	// public final int landscapeY = 3;
+	// public final double maxPopulation = 1000;
+	// public final double maxPrice = 200;
+	// public final double netCostSimpleArea = 10000;
+	// public final double netCostSimpleUser = 10;
+
+	// public final double nspEndowment = 11000;
+	// public final double paybackRate = 0.05;
+	// public final double proportionChange = 0.3;
+
+	private int ccCounter = 1;
+
+	private int nspCounter = 1;
+
+	/**
+	 * It is helpful to have more human-readable names for agents than the
+	 * default toString method, which simply returns the name of the class and
+	 * the address of the object as stored in memory. Additionally, this
+	 * variable name will not be consistent between different simulation runs.
+	 * This function simply appends a serial number to the name listed under the
+	 * "nsp.misc.namePrefix" property.
+	 * 
+	 * @return An arbitrary name for this ApplicationServiceProvider
+	 */
+	public String getASPName() {
+		return this.getProperty("asp.misc.namePrefix") + this.aspCounter++;
+	}
+
+	/**
+	 * It is helpful to have more human-readable names for agents than the
+	 * default toString method, which simply returns the name of the class and
+	 * the address of the object as stored in memory. Additionally, this
+	 * variable name will not be consistent between different simulation runs.
+	 * This function simply appends a serial number to the name listed under the
+	 * "consumers.misc.namePrefix" property.
+	 * 
+	 * @return An arbitrary name for this ConsumerClass
+	 */
+	public String getCCName() {
+		return this.getProperty("consumers.misc.namePrefix") + this.ccCounter++;
+	}
+
+	/**
+	 * It is helpful to have more human-readable names for agents than the
+	 * default toString method, which simply returns the name of the class and
+	 * the address of the object as stored in memory. Additionally, this
+	 * variable name will not be consistent between different simulation runs.
+	 * This function simply appends a serial number to the name listed under the
+	 * "nsp.misc.namePrefix" property.
+	 * 
+	 * @return An arbitrary name for this NetworkServiceProvider
+	 */
+	public String getNSPName() {
+		return this.getProperty("nsp.misc.namePrefix") + this.nspCounter++;
 	}
 
 	/**

@@ -54,6 +54,8 @@ public class NetworkProvidersDisplay extends JFrame {
 		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
 
+			if (columnIndex == 0)
+				return this.getNSP(rowIndex).getName();
 			if (columnIndex == 1)
 				return this.getLiquidAssets(rowIndex);
 			if (columnIndex == 2)

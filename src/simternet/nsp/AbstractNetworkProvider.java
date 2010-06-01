@@ -1,6 +1,7 @@
 package simternet.nsp;
 
 import java.util.Iterator;
+import java.util.UUID;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -32,6 +33,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	protected InvestmentStrategy investmentStrategy;
 	protected Investor investor;
 	protected Temporal<Double> liquidAssets;
+	protected String name = UUID.randomUUID().toString();
 	protected TemporalSparseGrid2D networks;
 	protected Temporal<Double> periodCosts = new Temporal<Double>(0.0, 0.0);
 	protected Temporal<Double> periodInvestment = new Temporal<Double>(0.0, 0.0);
@@ -53,6 +55,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 						.getProperty("nsp.financial.endowment")));
 		int homeX = s.random.nextInt(this.simternet.parameters.x());
 		int homeY = s.random.nextInt(this.simternet.parameters.y());
+		this.name = s.parameters.getNSPName();
 		this.homeBase = new Int2D(homeX, homeY);
 		this.networks = new TemporalSparseGrid2D(this.simternet.parameters.x(),
 				this.simternet.parameters.y());
@@ -231,6 +234,10 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		return this.liquidAssets.get();
 	}
 
+	public String getName() {
+		return this.name;
+	}
+
 	public AbstractNetwork getNetworkAt(Class<? extends AbstractNetwork> net,
 			int x, int y) {
 		Bag nets = this.networks.getObjectsAtLocation(x, y); // All of our nets
@@ -375,6 +382,11 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		if (this.simternet.debug == true)
 			this.printInfo();
 
+	}
+
+	@Override
+	public String toString() {
+		return this.getName();
 	}
 
 	public void update() {
