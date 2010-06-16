@@ -5,6 +5,8 @@ import java.io.Serializable;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import simternet.Simternet;
+import simternet.application.ApplicationServiceProvider;
+import simternet.consumer.AbstractConsumerClass;
 import simternet.nsp.AbstractNetworkProvider;
 
 /**
@@ -34,6 +36,15 @@ public class Arbiter implements Steppable, Serializable {
 		for (AbstractNetworkProvider nsp : ((Simternet) state)
 				.getNetworkServiceProviders())
 			nsp.update();
+
+		for (AbstractConsumerClass acc : ((Simternet) state)
+				.getConsumerClasses())
+			acc.update();
+
+		for (ApplicationServiceProvider asp : ((Simternet) state)
+				.getApplicationServiceProviders())
+			asp.update();
+
 	}
 
 }

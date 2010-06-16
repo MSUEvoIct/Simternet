@@ -2,6 +2,7 @@ package simternet.nsp;
 
 import java.io.Serializable;
 
+import sim.util.Int2D;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.network.AbstractNetwork;
 
@@ -30,7 +31,7 @@ public class ConstantPricingStrategy implements PricingStrategy, Serializable {
 	 */
 	@Override
 	public Double getPrice(Class<? extends AbstractNetwork> cl,
-			AbstractConsumerClass cc, int x, int y) {
+			AbstractConsumerClass cc, Int2D location) {
 		return this.price;
 	}
 

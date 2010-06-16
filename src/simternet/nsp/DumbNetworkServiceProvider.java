@@ -25,12 +25,7 @@ public class DumbNetworkServiceProvider extends AbstractNetworkProvider
 		this.pricingStrategy = new ConstantPricingStrategy(this,
 				DumbNetworkServiceProvider.price);
 		this.investmentStrategy = new BuildEverywhereStrategy(this,
-				this.networks);
-	}
-
-	@Override
-	public void update() {
-		// Do nothing, there are no temporally updated variables in this class
+				this.edgeNetworks);
 	}
 
 }

@@ -10,9 +10,9 @@ public class RepeatedStackelburgNSP extends AbstractNetworkProvider {
 	public RepeatedStackelburgNSP(Simternet s) {
 		super(s);
 		this.pricingStrategy = new RepeatedStackelbergPricingStrategy(this,
-				this.networks);
+				this.edgeNetworks);
 		this.investmentStrategy = new ScoringInvestmentStrategy(this,
-				this.networks, 5.0, null);
+				this.edgeNetworks, 5.0, null);
 		// this.investmentStrategy = new BuildEverywhereStrategy(this,
 		// this.networks);
 

@@ -46,7 +46,7 @@ public class SimternetWithUI extends GUIState {
 	public ActiveCustomersPortrayal2D overallActiveCustomersPortrayal = null;
 
 	public SimternetWithUI() {
-		this(new Simternet(System.currentTimeMillis(), true));
+		this(new Simternet(System.currentTimeMillis()));
 	}
 
 	public SimternetWithUI(SimState state) {

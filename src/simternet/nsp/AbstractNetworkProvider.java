@@ -1,5 +1,8 @@
 package simternet.nsp;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.UUID;
 
@@ -7,11 +10,12 @@ import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Bag;
 import sim.util.Int2D;
+import simternet.Financials;
 import simternet.Simternet;
 import simternet.consumer.AbstractConsumerClass;
+import simternet.network.AbstractEdgeNetwork;
 import simternet.network.AbstractNetwork;
 import simternet.temporal.AsyncUpdate;
-import simternet.temporal.Temporal;
 import simternet.temporal.TemporalSparseGrid2D;
 
 /**
@@ -22,6 +26,10 @@ import simternet.temporal.TemporalSparseGrid2D;
  *         which MASON executed once each time step of the model.
  * 
  */
+/**
+ * @author kkoning
+ * 
+ */
 public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate {
 
 	/**
@@ -29,54 +37,28 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	 */
 	private static final long serialVersionUID = 1L;
 
+	protected TemporalSparseGrid2D edgeNetworks;
+	public Financials financials;
 	protected Int2D homeBase;
 	protected InvestmentStrategy investmentStrategy;
-	protected Investor investor;
-	protected Temporal<Double> liquidAssets;
 	protected String name = UUID.randomUUID().toString();
-	protected TemporalSparseGrid2D networks;
-	protected Temporal<Double> periodCosts = new Temporal<Double>(0.0, 0.0);
-	protected Temporal<Double> periodInvestment = new Temporal<Double>(0.0, 0.0);
-	protected Temporal<Double> periodRevenue = new Temporal<Double>(0.0, 0.0);
 	protected PricingStrategy pricingStrategy;
 	public Simternet simternet = null;
-	protected Temporal<Double> totalCosts = new Temporal<Double>(0.0);
-	protected Temporal<Double> totalInvested = new Temporal<Double>(0.0);
-	protected Temporal<Double> totalRevenue = new Temporal<Double>(0.0);
 
-	public AbstractNetworkProvider(Simternet s) {
-		this(s, null);
-	}
+	public AbstractNetworkProvider(Simternet simternet) {
+		this.simternet = simternet;
+		this.name = simternet.parameters.getNSPName();
 
-	public AbstractNetworkProvider(Simternet s, Investor i) {
-		this.simternet = s;
-		this.liquidAssets = new Temporal<Double>(Double
-				.parseDouble(this.simternet.parameters
-						.getProperty("nsp.financial.endowment")));
-		int homeX = s.random.nextInt(this.simternet.parameters.x());
-		int homeY = s.random.nextInt(this.simternet.parameters.y());
-		this.name = s.parameters.getNSPName();
+		Double endowment = Double.parseDouble(this.simternet.parameters
+				.getProperty("nsp.financial.endowment"));
+		this.financials = new Financials(simternet, endowment);
+
+		int homeX = simternet.random.nextInt(this.simternet.parameters.x());
+		int homeY = simternet.random.nextInt(this.simternet.parameters.y());
 		this.homeBase = new Int2D(homeX, homeY);
-		this.networks = new TemporalSparseGrid2D(this.simternet.parameters.x(),
-				this.simternet.parameters.y());
-		if (i != null)
-			this.investor = i;
-		else
-			this.investor = new Investor(this);
-	}
 
-	/**
-	 * This method loops through all the networks a provider owns and bills the
-	 * customers who are currently subscribed to the network.
-	 */
-	@SuppressWarnings("unchecked")
-	protected void billCustomers() {
-		Iterator<AbstractNetwork> nets = this.networks.iterator();
-		while (nets.hasNext()) {
-			AbstractNetwork an = nets.next();
-			Double revenue = an.billCustomers();
-			this.earn(revenue);
-		}
+		this.edgeNetworks = new TemporalSparseGrid2D(this.simternet.parameters
+				.x(), this.simternet.parameters.y());
 	}
 
 	/**
@@ -90,16 +72,16 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	 * 
 	 */
 	protected void buildNetwork(AbstractNetwork an) {
-		this.capitalize(an.getBuildCost());
-		this.networks.setObjectLocation(an, an.getLocationX(), an
-				.getLocationY());
+		this.financials.capitalize(an.getBuildCost());
+		this.edgeNetworks.setObjectLocation(an, an.getLocation().x, an
+				.getLocation().y);
 	}
 
 	protected void buildNetwork(Class<? extends AbstractNetwork> net,
-			Integer x, Integer y) {
+			Int2D location) {
 		try {
 			AbstractNetwork an = net.newInstance();
-			an.init(this, x, y);
+			an.init(this, location);
 			this.buildNetwork(an);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -107,131 +89,60 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	}
 
 	/**
-	 * @param buildCost
-	 * 
-	 */
-	private void capitalize(Double buildCost) {
-		this.investor.finance(buildCost);
-		this.periodInvestment
-				.set(this.periodInvestment.getFuture() + buildCost);
-		this.totalInvested.set(this.totalInvested.getFuture() + buildCost);
-	}
-
-	protected void earn(Double revenue) {
-		this.liquidAssets.set(this.liquidAssets.getFuture() + revenue);
-		this.totalRevenue.set(this.totalRevenue.getFuture() + revenue);
-		this.periodRevenue.set(this.periodRevenue.getFuture() + revenue);
-	}
-
-	/**
 	 * @return
 	 * 
 	 *         Get the total number of customers the provider currently has.
 	 */
+	@SuppressWarnings("unchecked")
 	public Double getCustomers() {
-		Double numCustomers = 0.0;
-		for (int x = 0; x < this.simternet.parameters.x(); x++)
-			for (int y = 0; y < this.simternet.parameters.y(); y++)
-				numCustomers += this.getCustomers(x, y);
-		return numCustomers;
-	}
-
-	public Double getCustomers(AbstractConsumerClass ac) {
-		Double numCustomers = 0.0;
-		for (int x = 0; x < this.simternet.parameters.x(); x++)
-			for (int y = 0; y < this.simternet.parameters.y(); y++)
-				numCustomers += this.getCustomers(ac, x, y);
-		return numCustomers;
-	}
-
-	/**
-	 * @param ac
-	 * @param x
-	 * @param y
-	 * @return The number of subscriptions from this consumer group at this
-	 *         location. Because each member of the consumer group may subscribe
-	 *         to more than one service
-	 */
-	public Double getCustomers(AbstractConsumerClass ac, Integer x, Integer y) {
-		Double numCustomers = 0.0;
-		for (AbstractNetwork n : (AbstractNetwork[]) this.networks
-				.getObjectsAtLocation(x, y).objs)
-			numCustomers += n.getCustomers(ac);
-		return numCustomers;
-	}
-
-	/**
-	 * @param network
-	 * @param ac
-	 * @param x
-	 * @param y
-	 * @return How many people from the specified consumer group subscribe to
-	 *         the specified network at the specified location.
-	 */
-	@SuppressWarnings("unchecked")
-	public Double getCustomers(Class network, AbstractConsumerClass ac,
-			Integer x, Integer y) {
-		Bag b = this.networks.getObjectsAtLocation(x, y);
-		if (b == null)
-			return 0.0;
-		Object[] objs = b.objs;
-		for (Object obj : objs) {
-			if (obj == null)
-				continue;
-			AbstractNetwork n = (AbstractNetwork) obj;
-			if (network.isInstance(n))
-				return n.getCustomers(ac);
+		double numCustomers = 0.0;
+		Iterator<AbstractEdgeNetwork> allNetworks = this.edgeNetworks
+				.iterator();
+		while (allNetworks.hasNext()) {
+			AbstractEdgeNetwork aen = allNetworks.next();
+			numCustomers += aen.getNumCustomers();
 		}
-		return 0.0;
-	}
-
-	/**
-	 * @param network
-	 * @param x
-	 * @param y
-	 * @return The total number of customers subscribing to the network from all
-	 *         consumer classes at the specified location.
-	 */
-	@SuppressWarnings("unchecked")
-	public Double getCustomers(Class network, Integer x, Integer y) {
-		for (AbstractNetwork n : (AbstractNetwork[]) this.networks
-				.getObjectsAtLocation(x, y).objs)
-			if (network.isInstance(n))
-				return n.getTotalCustomers();
-		return 0.0;
-	}
-
-	/**
-	 * @param x
-	 * @param y
-	 * @return Get the total number of customers at the specified location.
-	 */
-	public Double getCustomers(Integer x, Integer y) {
-		Double numCustomers = 0.0;
-		if (this.networks.getObjectsAtLocation(x, y) == null)
-			return numCustomers;
-		for (int i = 0; i < this.networks.getObjectsAtLocation(x, y).size(); i++)
-			if (this.networks.getObjectsAtLocation(x, y).get(i) != null)
-				numCustomers += ((AbstractNetwork) this.networks
-						.getObjectsAtLocation(x, y).get(i)).getTotalCustomers();
-		// TODO: Why didn't the below code work? Suspicion: Bags suck.
-		// for (AbstractNetwork n : (AbstractNetwork[]) this.networks
-		// .getObjectsAtLocation(x, y).objs)
-		// if (n != null)
-		// numCustomers += n.getTotalCustomers();
 		return numCustomers;
 	}
 
-	public Double getDebt() {
-		return this.investor.balance;
+	/**
+	 * @param location
+	 * @return The total number of customers at the specified location.
+	 */
+	@SuppressWarnings("unchecked")
+	public Double getCustomers(Int2D location) {
+		Double numCustomers = 0.0;
+
+		Bag networks = this.edgeNetworks.getObjectsAtLocation(location);
+		if (networks == null)
+			return 0.0;
+
+		Iterator<AbstractEdgeNetwork> networksIterator = networks.iterator();
+
+		while (networksIterator.hasNext()) {
+			AbstractEdgeNetwork aen = networksIterator.next();
+			numCustomers += aen.getNumCustomers();
+		}
+
+		return numCustomers;
+	}
+
+	public Collection<AbstractNetwork> getEdgeNetworks() {
+		ArrayList<AbstractNetwork> list = new ArrayList<AbstractNetwork>();
+		Bag nets = this.edgeNetworks.allObjects;
+
+		// If there are 0 objects, the Bag will be null rather than empty. :/
+		if (null == nets)
+			return list;
+
+		for (int i = 0; i < nets.numObjs; i++)
+			list.add((AbstractEdgeNetwork) nets.objs[i]);
+
+		return list;
 	}
 
 	public Int2D getHomeBase() {
 		return this.homeBase;
-	}
-
-	public Double getLiquidAssets() {
-		return this.liquidAssets.get();
 	}
 
 	public String getName() {
@@ -239,16 +150,14 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	}
 
 	public AbstractNetwork getNetworkAt(Class<? extends AbstractNetwork> net,
-			int x, int y) {
-		Bag nets = this.networks.getObjectsAtLocation(x, y); // All of our nets
-		// at
-		// this loc
-		if (nets == null) // we have no nets at this loc
+			Int2D location) {
+		Bag allNets = this.edgeNetworks.getObjectsAtLocation(location);
+		if (allNets == null) // we have no nets at this loc
 			return null;
-		if (nets.isEmpty()) // we have no nets at this loc
+		if (allNets.isEmpty()) // we have no nets at this loc
 			return null;
 
-		for (Object obj : nets.objs) {
+		for (Object obj : allNets.objs) {
 			AbstractNetwork n = (AbstractNetwork) obj;
 			if (n.getClass().equals(net))
 				return n;
@@ -256,47 +165,41 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		return null;
 	}
 
-	public Double getOnePeriodCosts() {
-		return this.periodCosts.get();
-	}
+	public Collection<AbstractNetwork> getNetworks(Int2D location) {
+		ArrayList<AbstractNetwork> list = new ArrayList<AbstractNetwork>();
+		Bag localNets = this.edgeNetworks.getObjectsAtLocation(location.x,
+				location.y);
 
-	public Double getOnePeriodRevenue() {
-		return this.periodRevenue.get();
+		// If there are 0 objects, the Bag will be null rather than empty. :/
+		if (null == localNets)
+			return list;
+
+		for (int i = 0; i < localNets.numObjs; i++)
+			list.add((AbstractNetwork) localNets.objs[i]);
+
+		return list;
 	}
 
 	/**
+	 * Determines the price given the following parameters. Many of these
+	 * parameters could be ignored, either by regulatory decree or otherwise.
+	 * 
 	 * @param cl
-	 * @param x
-	 * @param y
-	 * @return The price set by the network service provider for this specific
-	 *         network at this location. This method should be overridden if
-	 *         NSPs to not set prices in individual network objects.
+	 *            The type of network (i.e. Wired/Wireless, DSL/Cable)
+	 * @param acc
+	 *            The class of consumers
+	 * @param location
+	 *            The location on the network
+	 * @return The price the user will pay
 	 */
 	public Double getPrice(Class<? extends AbstractNetwork> cl,
-			AbstractConsumerClass cc, int x, int y) {
-		return this.pricingStrategy.getPrice(cl, cc, x, y);
-	}
-
-	/**
-	 * @return The simulation in which this network service provider is
-	 *         participating.
-	 * 
-	 *         This method exists as a memory-saving convienence, so that other
-	 *         objects (i.e., networks) need not store a reference to both their
-	 *         owning NSP -and- the simternet object. This saves memory at least
-	 *         equal to sizeof(pointer) * #NSPs * Avg. networks per NSP.
-	 */
-	public Simternet getSimternet() {
-		return this.simternet;
-	}
-
-	public Double getTotalRevenueCollected() {
-		return this.totalRevenue.get();
+			AbstractConsumerClass acc, Int2D location) {
+		return this.pricingStrategy.getPrice(cl, null, location);
 	}
 
 	public boolean hasNetworkAt(Class<? extends AbstractNetwork> net,
-			Integer x, Integer y) {
-		AbstractNetwork an = this.getNetworkAt(net, x, y);
+			Int2D location) {
+		AbstractNetwork an = this.getNetworkAt(net, location);
 		if (an == null)
 			return false;
 		else
@@ -308,52 +211,26 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	}
 
 	@SuppressWarnings("unchecked")
-	private void printInfo() {
-		System.out.println("NSP: " + this.getClass().getSimpleName() + "-"
-				+ this.hashCode() + ", totalRev = " + this.totalRevenue.get()
-				+ ", liquidAssets = " + this.liquidAssets.get());
+	private StringBuffer printCustomerGrid() {
 
-		System.out.print("  XxY=#cust@price: ");
+		StringBuffer sb = new StringBuffer();
+		DecimalFormat positionFormat = new DecimalFormat("00");
+		DecimalFormat numCustFormat = new DecimalFormat("0000000");
 
-		Iterator<AbstractNetwork> nets = this.networks.allObjects.iterator();
-		while (nets.hasNext()) {
-			AbstractNetwork an = nets.next();
-			System.out.print(an.getLocationX() + "x" + an.getLocationY() + "=");
-			System.out.print(an.getTotalCustomers() + "@"
-					+ an.getPrice(null).toString().substring(0, 4));
-			if ((this.simternet.parameters.x() * this.simternet.parameters.y()) > 15)
-				System.out.print("\n");
-			else if (nets.hasNext() == true)
-				System.out.print(", ");
+		int curY = 0;
+
+		sb.append(positionFormat.format(0));
+		for (Int2D location : this.simternet.allLocations()) {
+			if (location.y > curY) {
+				sb.append("\n");
+				curY++;
+				sb.append(positionFormat.format(curY));
+			}
+			sb.append(" " + numCustFormat.format(this.getCustomers(location)));
+
 		}
-		System.out.print("\n");
 
-	}
-
-	private void serviceDebt() {
-		Double amountOwed = this.investor.getPayment();
-		Double amountToPay;
-		if (amountOwed > this.liquidAssets.getFuture())
-			amountToPay = this.liquidAssets.getFuture();
-		else
-			amountToPay = amountOwed;
-
-		this.investor.makePayment(amountToPay);
-		this.liquidAssets.set(this.liquidAssets.getFuture() - amountToPay);
-	}
-
-	public void setCustomers(Class<? extends AbstractNetwork> network,
-			AbstractConsumerClass ac, Integer x, Integer y, Double numCustomers) {
-		Bag b = this.networks.getObjectsAtLocation(x, y);
-		if (b == null)
-			throw new RuntimeException(
-					"Setting customers at a location with no networks.");
-
-		for (Object obj : this.networks.getObjectsAtLocation(x, y).objs) {
-			AbstractNetwork n = (AbstractNetwork) obj;
-			if (network.isInstance(n))
-				n.setCustomers(ac, numCustomers);
-		}
+		return sb;
 	}
 
 	protected void setPrices() {
@@ -368,20 +245,15 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	 */
 	@Override
 	public void step(SimState state) {
-		/*
-		 * Investors are stepped here, rather than in the main loop, because of
-		 * the fixed 1:1 correspondence between investors and NSPs.
-		 */
-		this.investor.step(state);
 
-		this.serviceDebt();
 		this.makeNetworkInvestment();
 
-		this.billCustomers(); // Bill customers who are subscribed this period
 		this.setPrices(); // Set prices for the next period.
-		if (this.simternet.debug == true)
-			this.printInfo();
-
+		if (this.simternet.parameters.debugLevel() > 0) {
+			System.out.println("Stepping " + this.getName() + ", has "
+					+ this.financials);
+			System.out.println(this.printCustomerGrid());
+		}
 	}
 
 	@Override
@@ -390,17 +262,8 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	}
 
 	public void update() {
-		this.liquidAssets.update();
-
-		this.totalCosts.update();
-		this.totalInvested.update();
-		this.totalRevenue.update();
-
-		this.periodCosts.update();
-		this.periodInvestment.update();
-		this.periodRevenue.update();
-
-		this.networks.update();
+		this.financials.update();
+		this.edgeNetworks.update();
 	}
 
 }

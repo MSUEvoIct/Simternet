@@ -1,19 +1,23 @@
 package simternet;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.field.grid.DoubleGrid2D;
+import sim.util.Int2D;
+import simternet.application.ApplicationServiceProvider;
 import simternet.consumer.AbstractConsumerClass;
-import simternet.consumer.IndifferentLazyConsumer;
+import simternet.consumer.SimpleConsumer;
 import simternet.network.AbstractNetwork;
 import simternet.nsp.AbstractNetworkProvider;
-import simternet.nsp.RepeatedStackelburgNSP;
+import simternet.nsp.DumbNetworkServiceProvider;
 import simternet.temporal.Arbiter;
 
 /**
@@ -40,12 +44,12 @@ public class Simternet extends SimState implements Serializable {
 	@SuppressWarnings("serial")
 	public class SimternetInspectorObject implements Serializable {
 
-		public boolean isDebug() {
-			return Simternet.this.debug;
+		public Integer getDebugLevel() {
+			return Simternet.this.parameters.debugLevel();
 		}
 
-		public void setDebug(boolean debug) {
-			Simternet.this.debug = debug;
+		public void setDebugLevel(Integer level) {
+			Simternet.this.parameters.setDebugLevel(level);
 		}
 	}
 
@@ -63,35 +67,38 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	/**
-	 * Stores a list of ALL consumer classes present in the simulation.
+	 * All application service providers in the simulation
 	 */
-	protected Set<AbstractConsumerClass> consumerClasses = new HashSet<AbstractConsumerClass>();
+	protected Collection<ApplicationServiceProvider> applicationServiceProviders = new ArrayList<ApplicationServiceProvider>();
 
-	public boolean debug;
 	/**
-	 * Stores a list of ALL network service providers present in the simulation.
+	 * All consumer classes in the simulation.
 	 */
-	protected Set<AbstractNetworkProvider> networkServiceProviders = new HashSet<AbstractNetworkProvider>();
+	protected Collection<AbstractConsumerClass> consumerClasses = new ArrayList<AbstractConsumerClass>();
+
+	/**
+	 * All Network Service Providers in the simulation.
+	 */
+	protected Collection<AbstractNetworkProvider> networkServiceProviders = new ArrayList<AbstractNetworkProvider>();
 
 	public Exogenous parameters;
-
 	public final SimternetInspectorObject sio = new SimternetInspectorObject();
 
 	public Simternet(long seed) {
-		this(seed, false);
+		this(seed, null);
 	}
 
-	public Simternet(long seed, boolean debug) {
-		this(seed, debug, null);
-	}
-
-	public Simternet(long seed, boolean debug, Exogenous parameters) {
+	public Simternet(long seed, Exogenous parameters) {
 		super(seed);
-		this.debug = debug;
 		if (parameters != null)
 			this.parameters = parameters;
 		else
 			this.parameters = Exogenous.getDefaults();
+	}
+
+	protected void addApplicationServiceProvider(ApplicationServiceProvider asp) {
+		this.applicationServiceProviders.add(asp);
+		this.schedule.scheduleRepeating(asp);
 	}
 
 	/**
@@ -132,7 +139,6 @@ public class Simternet extends SimState implements Serializable {
 	protected void addNetworkServiceProvider(AbstractNetworkProvider nsp) {
 		this.networkServiceProviders.add(nsp);
 		this.schedule.scheduleRepeating(Schedule.EPOCH, 1, nsp);
-		// schedule.scheduleRepeating(nsp);
 	}
 
 	/**
@@ -153,6 +159,18 @@ public class Simternet extends SimState implements Serializable {
 		this.schedule.scheduleRepeating(nsp, ordering, interval);
 	}
 
+	public Iterable<Int2D> allLocations() {
+		return new Iterable<Int2D>() {
+
+			@Override
+			public Iterator<Int2D> iterator() {
+				return new LocationIterator(Simternet.this.parameters.x(),
+						Simternet.this.parameters.y());
+			}
+
+		};
+	}
+
 	/**
 	 * This is only used by the user interface, and therefore efficiency is not
 	 * a priority
@@ -165,22 +183,19 @@ public class Simternet extends SimState implements Serializable {
 		DoubleGrid2D ret = new DoubleGrid2D(this.parameters.x(),
 				this.parameters.y(), initValue);
 
-		if (this.debug)
-			System.out.println("Start new one");
-		for (AbstractNetworkProvider nsp : this.networkServiceProviders) {
-			if (this.debug)
-				System.out.println("new nsp");
+		for (AbstractNetworkProvider nsp : this.networkServiceProviders)
 			for (int i = 0; i < ret.getWidth(); i++)
-				for (int j = 0; j < ret.getHeight(); j++) {
-					ret.set(i, j, ret.get(i, j) + nsp.getCustomers(i, j));
-					if (this.debug)
-						System.out.println(ret.get(i, j));
-				}
-		}
+				for (int j = 0; j < ret.getHeight(); j++)
+					ret.set(i, j, ret.get(i, j)
+							+ nsp.getCustomers(new Int2D(i, j)));
 		return ret;
 	}
 
-	public Set<AbstractConsumerClass> getConsumerClasses() {
+	public Collection<ApplicationServiceProvider> getApplicationServiceProviders() {
+		return this.applicationServiceProviders;
+	}
+
+	public Collection<AbstractConsumerClass> getConsumerClasses() {
 		return this.consumerClasses;
 	}
 
@@ -192,23 +207,61 @@ public class Simternet extends SimState implements Serializable {
 			if (this.networkServiceProviders == np)
 				for (int i = 0; i < ret.getWidth(); i++)
 					for (int j = 0; j < ret.getHeight(); j++) {
-						ret.set(i, j, ret.get(i, j) + nsp.getCustomers(i, j));
+						ret.set(i, j, ret.get(i, j)
+								+ nsp.getCustomers(new Int2D(i, j)));
 						System.out.println(ret.get(i, j));
 					}
 		return ret;
 	}
 
-	public Set<AbstractNetworkProvider> getNetworkServiceProviders() {
-		return this.networkServiceProviders;
+	/**
+	 * TODO: This is a relatively expensive function. Watch and investigate
+	 * caching if this becomes a problem.
+	 * 
+	 * @param nsp
+	 *            Only return networks owned by this NSP, unless null.
+	 * @param netType
+	 *            Only return this type of network, unless null.
+	 * @param location
+	 *            Only return networks at this location, unless null/
+	 * @return A collection of all networks matching the specified criteria.
+	 */
+	public Collection<AbstractNetwork> getNetworks(AbstractNetworkProvider nsp,
+			Class<? extends AbstractNetwork> netType, Int2D location) {
+		Collection<AbstractNetwork> networks = new ArrayList<AbstractNetwork>();
+
+		Collection<AbstractNetworkProvider> carriers;
+
+		if (nsp == null)
+			carriers = this.networkServiceProviders;
+		else {
+			carriers = new ArrayList<AbstractNetworkProvider>();
+			carriers.add(nsp);
+		}
+
+		for (AbstractNetworkProvider carrier : carriers) {
+			Collection<AbstractNetwork> carrierNetworks;
+
+			if (location == null)
+				carrierNetworks = carrier.getEdgeNetworks();
+			else
+				carrierNetworks = carrier.getNetworks(location);
+
+			if (netType == null)
+				for (AbstractNetwork net : carrierNetworks)
+					networks.add(net);
+			else
+				for (AbstractNetwork net : carrierNetworks)
+					if (netType.isInstance(net))
+						networks.add(net);
+
+		}
+
+		return networks;
 	}
 
-	public Integer getNumNetworks(Class<? extends AbstractNetwork> net,
-			Integer x, Integer y) {
-		Integer num = 0;
-		for (AbstractNetworkProvider nsp : this.networkServiceProviders)
-			if (nsp.hasNetworkAt(net, x, y))
-				num++;
-		return num;
+	public Collection<AbstractNetworkProvider> getNetworkServiceProviders() {
+		return this.networkServiceProviders;
 	}
 
 	/**
@@ -226,10 +279,10 @@ public class Simternet extends SimState implements Serializable {
 	 * @param y
 	 * @return The total population of ALL consumers at a SPECIFIC location.
 	 */
-	public Double getPopulation(Integer x, Integer y) {
+	public Double getPopulation(Int2D location) {
 		Double pop = new Double(0);
 		for (AbstractConsumerClass cc : this.consumerClasses)
-			pop += cc.getPopulation(x, y);
+			pop += cc.getPopulation(location);
 		return pop;
 	}
 
@@ -244,7 +297,7 @@ public class Simternet extends SimState implements Serializable {
 				this.parameters.y());
 		for (int i = 0; i < ret.getWidth(); i++)
 			for (int j = 0; j < ret.getHeight(); j++)
-				ret.set(i, j, this.getPopulation(i, j));
+				ret.set(i, j, this.getPopulation(new Int2D(i, j)));
 		return ret;
 	}
 
@@ -259,13 +312,19 @@ public class Simternet extends SimState implements Serializable {
 	 */
 	public Map<AbstractNetworkProvider, Double> getPriceList(
 			Class<? extends AbstractNetwork> net, AbstractConsumerClass acc,
-			Integer x, Integer y) {
+			Int2D location) {
 		Map<AbstractNetworkProvider, Double> prices = new HashMap<AbstractNetworkProvider, Double>();
 		for (AbstractNetworkProvider nsp : this.getNetworkServiceProviders())
-			if (nsp.hasNetworkAt(net, x, y))
-				prices.put(nsp, nsp.getPrice(net, acc, x, y));
+			if (nsp.hasNetworkAt(net, location))
+				prices.put(nsp, nsp.getPrice(net, acc, location));
 
 		return prices;
+	}
+
+	private void initApplicationServiceProviders() {
+		for (int i = 0; i < 20; i++)
+			this.addApplicationServiceProvider(new ApplicationServiceProvider(
+					this));
 	}
 
 	private void initArbiter() {
@@ -276,8 +335,14 @@ public class Simternet extends SimState implements Serializable {
 	 * Specify this somehow in parameters, rather than source.
 	 */
 	protected void initConsumerClasses() {
-		// addConsumerClass(new SimpleConsumer(this));
-		this.addConsumerClass(new IndifferentLazyConsumer(this));
+		this.addConsumerClass(new SimpleConsumer(this));
+		this.addConsumerClass(new SimpleConsumer(this));
+		this.addConsumerClass(new SimpleConsumer(this));
+		this.addConsumerClass(new SimpleConsumer(this));
+		this.addConsumerClass(new SimpleConsumer(this));
+		this.addConsumerClass(new SimpleConsumer(this));
+		this.addConsumerClass(new SimpleConsumer(this));
+		this.addConsumerClass(new SimpleConsumer(this));
 	}
 
 	public void initData() {
@@ -289,11 +354,7 @@ public class Simternet extends SimState implements Serializable {
 	 * DO: Specify this somehow in parameters, rather than source.
 	 */
 	private void initNetworkServiceProviders() {
-		// addNetworkServiceProvider(new DumbNetworkServiceProvider(this));
-		// addNetworkServiceProvider(new DumbNetworkServiceProvider(this));
-		this.addNetworkServiceProvider(new RepeatedStackelburgNSP(this));
-		this.addNetworkServiceProvider(new RepeatedStackelburgNSP(this));
-		this.addNetworkServiceProvider(new RepeatedStackelburgNSP(this));
+		this.addNetworkServiceProvider(new DumbNetworkServiceProvider(this));
 	}
 
 	@Override
@@ -302,6 +363,7 @@ public class Simternet extends SimState implements Serializable {
 		this.initData();
 		this.initConsumerClasses();
 		this.initNetworkServiceProviders();
+		this.initApplicationServiceProviders();
 		this.initArbiter();
 	}
 

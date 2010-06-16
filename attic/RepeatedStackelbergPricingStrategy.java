@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import sim.field.grid.SparseGrid2D;
+import sim.util.Int2D;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.network.AbstractNetwork;
 
@@ -27,13 +28,13 @@ public class RepeatedStackelbergPricingStrategy implements PricingStrategy,
 	@SuppressWarnings("unchecked")
 	@Override
 	public Double getPrice(Class<? extends AbstractNetwork> cl,
-			AbstractConsumerClass cc, int x, int y) {
+			AbstractConsumerClass cc, Int2D location) {
 
 		if (this.networks == null)
 			return null;
 
-		Iterator<AbstractNetwork> nets = this.networks.getObjectsAtLocation(x,
-				y).iterator();
+		Iterator<AbstractNetwork> nets = this.networks.getObjectsAtLocation(
+				location.x, location.yy).iterator();
 
 		while (nets.hasNext()) {
 			AbstractNetwork an = nets.next();
@@ -47,10 +48,10 @@ public class RepeatedStackelbergPricingStrategy implements PricingStrategy,
 		Set<AbstractConsumerClass> consumerClasses = this.nsp.simternet
 				.getConsumerClasses();
 		for (AbstractConsumerClass cc : consumerClasses) {
-			Double totPopAtLoc = cc.getPopulation(an.getLocationX(), an
-					.getLocationY());
+			Double totPopAtLoc = cc.getPopulation(an.getLocation().x, an
+					.getLocation().y);
 			Double othersQty = cc.getTotalLocalSubscriptions(an.getClass(), an
-					.getLocationX(), an.getLocationY())
+					.getLocation().x, an.getLocation().y)
 					- an.getCustomers(cc);
 			Double price = (Double.parseDouble(this.nsp.simternet.parameters
 					.getProperty("comsumers.simple.maxPrice")) * (-1

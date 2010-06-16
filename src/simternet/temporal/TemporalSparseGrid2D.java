@@ -38,7 +38,7 @@ import sim.util.Int2D;
  * @see simternet.temporal.Arbiter
  */
 public class TemporalSparseGrid2D extends SparseGrid2D implements AsyncUpdate,
-		Serializable {
+		Serializable, Iterable {
 	private class LocatedObject {
 		Int2D location;
 		Object obj;

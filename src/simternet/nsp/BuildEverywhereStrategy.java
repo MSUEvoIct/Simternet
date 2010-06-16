@@ -5,8 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sim.field.grid.SparseGrid2D;
+import sim.util.Int2D;
 import simternet.network.AbstractNetwork;
-import simternet.network.SimpleNetwork;
+import simternet.network.SimpleEdgeNetwork;
 
 /**
  * @author kkoning
@@ -48,7 +49,7 @@ public class BuildEverywhereStrategy implements InvestmentStrategy,
 		this.networks = networks;
 		if (networkTypes == null) {
 			networkTypes = new ArrayList<Class<? extends AbstractNetwork>>();
-			networkTypes.add(SimpleNetwork.class);
+			networkTypes.add(SimpleEdgeNetwork.class);
 		}
 		this.networkTypes = networkTypes;
 	}
@@ -59,7 +60,7 @@ public class BuildEverywhereStrategy implements InvestmentStrategy,
 		if (this.built == true)
 			return;
 
-		Double amountAvailable = this.nsp.investor.getAvailableFinancing();
+		Double amountAvailable = this.nsp.financials.getAvailableFinancing();
 
 		// Figure out costs, build if we can afford to. All or nothing for each
 		// square.
@@ -74,7 +75,7 @@ public class BuildEverywhereStrategy implements InvestmentStrategy,
 				for (Class<? extends AbstractNetwork> cl : this.networkTypes)
 					try {
 						AbstractNetwork an = cl.newInstance();
-						an.init(this.nsp, x, y);
+						an.init(this.nsp, new Int2D(x, y));
 						costForThisPixel = an.getBuildCost();
 						nets.add(an);
 					} catch (Exception e) {

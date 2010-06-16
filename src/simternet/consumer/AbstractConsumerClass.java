@@ -1,51 +1,49 @@
 package simternet.consumer;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.grid.DoubleGrid2D;
+import sim.util.Bag;
+import sim.util.Int2D;
 import simternet.PopulationDistribution;
 import simternet.Simternet;
+import simternet.application.ApplicationServiceProvider;
+import simternet.network.AbstractEdgeNetwork;
 import simternet.network.AbstractNetwork;
-import simternet.nsp.AbstractNetworkProvider;
+import simternet.network.NetFlow;
+import simternet.temporal.AsyncUpdate;
+import simternet.temporal.TemporalBitMap2D;
+import simternet.temporal.TemporalHashMap;
+import simternet.temporal.TemporalSparseGrid2D;
 
 @SuppressWarnings("serial")
-public abstract class AbstractConsumerClass implements Steppable, Serializable {
+public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
+		Serializable {
 
-	protected Set<Class<? extends AbstractNetwork>> networkTypesDemanded = new HashSet<Class<? extends AbstractNetwork>>();
+	protected TemporalHashMap<ApplicationServiceProvider, TemporalBitMap2D> applicationServiceSubscriptions;
+	protected TemporalSparseGrid2D networkSubscriptions;
 
 	/**
-	 * The # of individuals in this consumer class in each landscape pixel.
+	 * The # of individuals in this consumer class in each landscape pixel. If
+	 * this changes during the simulation it will need to be made Temporal.
 	 */
 	protected DoubleGrid2D population;
 	protected Simternet s;
-	/**
-	 * Total # of consumers of this class who subscribe to the network type at
-	 * each location (all providers)
-	 */
-	private Map<Class<? extends AbstractNetwork>, DoubleGrid2D> totalLocalSubscriptionsCache;
-	private Map<Class<? extends AbstractNetwork>, boolean[][]> totalLocalSubscriptionsCacheDirty;
-
-	// To Do: Add some cache variables here...?
-
-	protected Double totalPopulationCached;
-	protected boolean totalPopulationCacheDirty = true;
-	/**
-	 * Total # of consumers in this class who subscribe to each network
-	 */
-	protected Map<Class<? extends AbstractNetwork>, Double> totalSubscriptions;
 
 	/**
+	 * Create a new consumer class with randomly generated population and
+	 * preferences.
+	 * 
 	 * @param s
-	 * 
-	 *            Create a new consumer class with the default population
-	 *            distribution.
-	 * 
+	 *            Link back to the simulation
 	 */
 	protected AbstractConsumerClass(Simternet s) {
 		this(s, null);
@@ -62,98 +60,75 @@ public abstract class AbstractConsumerClass implements Steppable, Serializable {
 		this.s = s;
 		this.population = new DoubleGrid2D(s.parameters.x(), s.parameters.y(),
 				0.0);
+		this.applicationServiceSubscriptions = new TemporalHashMap<ApplicationServiceProvider, TemporalBitMap2D>();
+		this.networkSubscriptions = new TemporalSparseGrid2D(s.parameters.x(),
+				s.parameters.y());
+
 		this.initPopulation(pd);
-		this.totalSubscriptions = new HashMap<Class<? extends AbstractNetwork>, Double>();
-		this.totalLocalSubscriptionsCache = new HashMap<Class<? extends AbstractNetwork>, DoubleGrid2D>();
-		this.totalLocalSubscriptionsCacheDirty = new HashMap<Class<? extends AbstractNetwork>, boolean[][]>();
 
-		for (Class<? extends AbstractNetwork> an : this.networkTypesDemanded) {
-			this.totalSubscriptions.put(an, 0.0);
-			this.totalLocalSubscriptionsCache.put(an, new DoubleGrid2D(
-					s.parameters.x(), s.parameters.y(), 0.0));
-			boolean[][] veryDirtyCache = new boolean[s.parameters.x()][s.parameters
-					.y()];
-			for (int x = 0; x < s.parameters.x(); x++)
-				for (int y = 0; y < s.parameters.y(); y++)
-					veryDirtyCache[x][y] = true;
-			this.totalLocalSubscriptionsCacheDirty.put(an, veryDirtyCache);
+	}
 
+	protected void consumeApplications() {
+		for (Map.Entry<ApplicationServiceProvider, TemporalBitMap2D> aspMap : this.applicationServiceSubscriptions
+				.entrySet()) {
+			ApplicationServiceProvider asp = aspMap.getKey();
+			TemporalBitMap2D subMap = aspMap.getValue();
+			for (Int2D location : this.s.allLocations())
+				if (subMap.get(location)) {
+					NetFlow nf = new NetFlow();
+					nf.amount = this.population.get(location.x, location.y);
+					asp.processUsage(nf);
+				}
 		}
 	}
 
-	/**
-	 * @param an
-	 * @param price
-	 * @param x
-	 * @param y
-	 * @return The total number of customers at x,y which would subscribe to the
-	 *         specified network at the specified price. This specifies the
-	 *         total market demand, not how that demand is allocated among
-	 *         providers.
-	 */
-	protected abstract Double demand(Class<? extends AbstractNetwork> an,
-			Double price, Integer x, Integer y);
+	@SuppressWarnings("unchecked")
+	protected void consumeNetworks() {
+		Iterator<AbstractEdgeNetwork> i = this.networkSubscriptions.iterator();
+		while (i.hasNext()) {
+			AbstractEdgeNetwork net = i.next();
+			net.receivePayment(this, this.getPopulation(net.getLocation()));
+		}
 
-	protected Double getNumSubscriptions(Class<? extends AbstractNetwork> n,
-			AbstractNetworkProvider nsp, Integer x, Integer y) {
+	}
 
-		AbstractNetwork an = nsp.getNetworkAt(n, x, y);
-		if (an == null) // provider has no network, we can't subscribe to it
-			return 0.0;
+	public Collection<ApplicationServiceProvider> getASPSubscriptions(
+			Int2D location) {
+		Collection<ApplicationServiceProvider> asps = new ArrayList<ApplicationServiceProvider>();
 
-		return an.getCustomers(this);
+		for (Map.Entry<ApplicationServiceProvider, TemporalBitMap2D> aspMap : this.applicationServiceSubscriptions
+				.entrySet())
+			if (aspMap.getValue().get(location))
+				asps.add(aspMap.getKey());
+
+		return asps;
+	}
+
+	public Double getPopulation(Int2D location) {
+		return this.population.field[location.x][location.y];
 	}
 
 	/**
-	 * @param x
-	 * @param y
-	 * @return The population of this specific ConsumerClass at the target
-	 *         location.
-	 */
-	public Double getPopulation(Integer x, Integer y) {
-		return this.population.field[x][y];
-	}
-
-	/**
+	 * If this function will be called often, it should be reduced from O=n^2 to
+	 * O=1 by tracking population changes in a separate variable.
+	 * 
 	 * @return The TOTAL population of this specific Consumer Class at ALL
 	 *         locations.
 	 */
 	public Double getPopultation() {
-		if (!this.totalPopulationCacheDirty)
-			return this.totalPopulationCached;
-		Double pop = new Double(0);
+		double pop = 0.0;
 		for (int x = 0; x < this.s.parameters.x(); x++)
 			for (int y = 0; y < this.s.parameters.y(); y++)
-				pop += this.getPopulation(x, y);
-		this.totalPopulationCached = pop;
-		this.totalPopulationCacheDirty = false;
+				pop += this.population.get(x, y);
 		return pop;
 	}
 
-	public Double getTotalLocalSubscriptions(
-			Class<? extends AbstractNetwork> an, Integer x, Integer y) {
-		Set<AbstractNetworkProvider> nsps = this.s.getNetworkServiceProviders();
-		double runningTotal = 0.0;
-
-		for (AbstractNetworkProvider nsp : nsps) {
-			Double foo = this.getNumSubscriptions(an, nsp, x, y);
-			if (foo != null)
-				runningTotal += foo;
-		}
-
-		return runningTotal;
-	}
-
-	protected abstract void initNetData();
-
 	/**
+	 * Initialize the population distribution using the specified method. If
+	 * none is specified, use Exogenous.defaultPopulationDistribution.
+	 * 
 	 * @param pd
 	 * 
-	 *            Initialize the population distribution using the specified
-	 *            method. If none is specified, use
-	 *            Exogenous.defaultPopulationDistribution.
-	 * 
-	 *            To Do: Consider (static) factory pattern?
 	 */
 	protected void initPopulation(PopulationDistribution pd) {
 		// TODO: Have way of parameterizing population distribution based on
@@ -172,39 +147,55 @@ public abstract class AbstractConsumerClass implements Steppable, Serializable {
 		}
 	}
 
-	protected abstract void makeConsumptionDecisionAt(Integer x, Integer y);
-
-	protected void makeConsumptionDecisions() {
-		for (int x = 0; x < this.s.parameters.x(); x++)
-			for (int y = 0; y < this.s.parameters.y(); y++)
-				this.makeConsumptionDecisionAt(x, y);
+	public boolean isSubscribed(AbstractEdgeNetwork network) {
+		return this.networkSubscriptions.equals(network);
 	}
 
 	/**
-	 * @param n
-	 * @param nsp
-	 * @param x
-	 * @param y
-	 * @param numSubs
-	 * 
-	 *            Sets the actual consumption variables. These are stored in the
-	 * 
+	 * Make decisions about <i>which</i> applications to use. Process their
+	 * actual usage in consumeApplications().
 	 */
-	protected void setNumSubscriptions(Class<? extends AbstractNetwork> n,
-			AbstractNetworkProvider nsp, Integer x, Integer y, Double numSubs) {
-		AbstractNetwork an = nsp.getNetworkAt(n, x, y);
-		if (an != null)
-			an.setCustomers(this, numSubs);
+	protected abstract void manageApplications();
+
+	protected abstract void manageNetworks();
+
+	public Set<AbstractNetwork> networksSubscribed(Int2D location) {
+		HashSet<AbstractNetwork> muffin = new HashSet<AbstractNetwork>();
+		Bag bag = this.networkSubscriptions.getObjectsAtLocation(location.x,
+				location.y);
+		for (int i = 0; i < bag.numObjs; i++)
+			muffin.add((AbstractNetwork) bag.objs[i]);
+		return muffin;
 	}
 
-	protected void setPopulation(int x, int y, Double pop) {
-		this.population.field[x][y] = pop;
-		this.totalPopulationCacheDirty = true;
+	public Double numSubscriptions(AbstractEdgeNetwork network) {
+		Int2D location = this.networkSubscriptions.getObjectLocation(network);
+		if (null == location)
+			return 0.0;
+		return this.getPopulation(location);
+	}
+
+	protected void setPopulation(Int2D location, Double pop) {
+		this.population.field[location.x][location.y] = pop;
 	}
 
 	public void step(SimState state) {
-		this.makeConsumptionDecisions();
-		// System.out.println("Consumer");
+		if (this.s.parameters.debugLevel() > 10)
+			System.out.println("Stepping" + this.toString());
+
+		// Make decisions about consumption
+		this.manageNetworks();
+		this.manageApplications();
+
+		// Act on those decisions
+		this.consumeNetworks();
+		this.consumeApplications();
+	}
+
+	@Override
+	public void update() {
+		this.applicationServiceSubscriptions.update();
+		this.networkSubscriptions.update();
 	}
 
 }

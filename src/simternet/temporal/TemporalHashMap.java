@@ -109,6 +109,8 @@ public class TemporalHashMap<K, V> extends HashMap<K, V> implements
 			for (K key : this.toRemove)
 				super.remove(key);
 
+		// If the elements of this set are themselves implement AsyncUpdate,
+		// cascade the updates.
 		if (this.updateValues)
 			for (K key : this.keySet()) {
 				V val = this.get(key);

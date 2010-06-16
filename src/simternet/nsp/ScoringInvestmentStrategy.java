@@ -6,38 +6,38 @@ import java.util.Collections;
 import java.util.List;
 
 import sim.field.grid.SparseGrid2D;
+import sim.util.Int2D;
 import simternet.network.AbstractNetwork;
-import simternet.network.SimpleNetwork;
+import simternet.network.SimpleEdgeNetwork;
 
 public class ScoringInvestmentStrategy implements InvestmentStrategy,
 		Serializable {
 
 	@SuppressWarnings("unchecked")
 	private class PotentialNetwork implements Serializable, Comparable {
+		private static final long serialVersionUID = 1L;
+
 		private Double cost;
 
 		private Double distanceFromHome;
-		private final Integer locationX;
-		private final Integer locationY;
+		private final Int2D location;
 		private final Class<? extends AbstractNetwork> networkType;
 		private Double score;
 
-		public PotentialNetwork(Integer x, Integer y,
+		public PotentialNetwork(Int2D location,
 				Class<? extends AbstractNetwork> networkType) {
-			this.locationX = x;
-			this.locationY = y;
 			this.networkType = networkType;
+			this.location = location;
 
 			try {
 				AbstractNetwork an = networkType.newInstance();
-				an.init(ScoringInvestmentStrategy.this.nsp, this.locationX,
-						this.locationY);
+				an.init(ScoringInvestmentStrategy.this.nsp, this.location);
 				this.cost = an.getBuildCost();
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 			this.distanceFromHome = ScoringInvestmentStrategy.this.nsp
-					.getHomeBase().distance(this.locationX, this.locationY);
+					.getHomeBase().distance(location);
 
 			this.score = Double.NEGATIVE_INFINITY;
 		}
@@ -86,7 +86,7 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 		this.buildThreshold = buildThreshold;
 		if (networkTypes == null) {
 			networkTypes = new ArrayList<Class<? extends AbstractNetwork>>();
-			networkTypes.add(SimpleNetwork.class);
+			networkTypes.add(SimpleEdgeNetwork.class);
 		}
 		this.networkTypes = networkTypes;
 		this.potentialNetworks = new ArrayList<PotentialNetwork>();
@@ -98,7 +98,7 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 	@SuppressWarnings("unchecked")
 	@Override
 	public void makeNetworkInvestment() {
-		Double availableFinancing = this.nsp.investor.getAvailableFinancing();
+		Double availableFinancing = this.nsp.financials.getAvailableFinancing();
 		List<PotentialNetwork> networksBuilt = new ArrayList<PotentialNetwork>();
 		this.updateScores();
 		Collections.sort(this.potentialNetworks);
@@ -107,7 +107,7 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 			if (pn.cost > availableFinancing)
 				break;
 
-			this.nsp.buildNetwork(pn.networkType, pn.locationX, pn.locationY);
+			this.nsp.buildNetwork(pn.networkType, pn.location);
 			availableFinancing -= pn.cost;
 			networksBuilt.add(pn);
 		}
@@ -120,8 +120,8 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 		for (Class<? extends AbstractNetwork> networkType : this.networkTypes)
 			for (int x = 0; x < this.nsp.simternet.parameters.x(); x++)
 				for (int y = 0; y < this.nsp.simternet.parameters.y(); y++)
-					this.potentialNetworks.add(new PotentialNetwork(x, y,
-							networkType));
+					this.potentialNetworks.add(new PotentialNetwork(new Int2D(
+							x, y), networkType));
 	}
 
 	private void scoreSimpleNetwork(PotentialNetwork pn) {
@@ -133,8 +133,7 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 
 		// population. This is all people, not just those we specifically
 		// know will demand SimpleNetwork.
-		score += Math.pow(this.nsp.simternet.getPopulation(pn.locationX,
-				pn.locationY), 1.5)
+		score += Math.pow(this.nsp.simternet.getPopulation(pn.location), 1.5)
 				/ Double.parseDouble(this.nsp.simternet.parameters
 						.getProperty("landscape.population.max"))
 				* populationWeight;
@@ -143,16 +142,16 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 
 		// divide score by the number of this type of network that would at the
 		// potential location. (including this one)
-		score = score
-				/ (this.nsp.simternet.getNumNetworks(pn.networkType,
-						pn.locationX, pn.locationY) + 1);
+		// score = score
+		// / (this.nsp.simternet.getNumNetworks(pn.networkType,
+		// pn.location) + 1);
 
 		pn.score = score;
 	}
 
 	private void updateScores() {
 		for (PotentialNetwork pn : this.potentialNetworks)
-			if (pn.networkType.equals(SimpleNetwork.class))
+			if (pn.networkType.equals(SimpleEdgeNetwork.class))
 				this.scoreSimpleNetwork(pn);
 			else
 				pn.score = Double.NEGATIVE_INFINITY;

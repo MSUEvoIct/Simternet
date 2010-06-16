@@ -1,10 +1,12 @@
 package simternet.nsp;
 
+import sim.util.Int2D;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.network.AbstractNetwork;
 
 public interface PricingStrategy {
-	public void setPrices();
 	public Double getPrice(Class<? extends AbstractNetwork> cl,
-			AbstractConsumerClass cc, int x, int y);
+			AbstractConsumerClass cc, Int2D location);
+
+	public void setPrices();
 }

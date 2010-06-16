@@ -3,7 +3,7 @@ package simternet.ui;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.util.Set;
+import java.util.Collection;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -33,7 +33,7 @@ public class NetworkProvidersDisplay extends JFrame {
 		}
 
 		protected Double getLiquidAssets(int rowIndex) {
-			return this.getNSP(rowIndex).getLiquidAssets();
+			return this.getNSP(rowIndex).financials.getAssetsLiquid();
 		}
 
 		protected AbstractNetworkProvider getNSP(int rowIndex) {
@@ -66,7 +66,7 @@ public class NetworkProvidersDisplay extends JFrame {
 
 	}
 
-	protected Set<AbstractNetworkProvider> networkServiceProviders;
+	protected Collection<AbstractNetworkProvider> networkServiceProviders;
 
 	public NetworkProvidersDisplay(double width, double height,
 			GUIState simulation, long interval) {

@@ -66,25 +66,16 @@ public class Exogenous extends Properties implements Serializable {
 
 	private int aspCounter = 1;
 
-	// public final double closeEnoughPrice = 0.1;
-
-	// public final PopulationDistribution defaultPopulationDistribution =
-	// PopulationDistribution.RANDOM_FLAT;
-	// public final double interestRate = 0.07;
-	// public final int landscapeX = 3;
-	// public final int landscapeY = 3;
-	// public final double maxPopulation = 1000;
-	// public final double maxPrice = 200;
-	// public final double netCostSimpleArea = 10000;
-	// public final double netCostSimpleUser = 10;
-
-	// public final double nspEndowment = 11000;
-	// public final double paybackRate = 0.05;
-	// public final double proportionChange = 0.3;
-
 	private int ccCounter = 1;
-
+	private Integer debugLevel;
 	private int nspCounter = 1;
+
+	public Integer debugLevel() {
+		if (null == this.debugLevel)
+			this.debugLevel = Integer.parseInt(this
+					.getProperty("general.debugLevel"));
+		return this.debugLevel;
+	}
 
 	/**
 	 * It is helpful to have more human-readable names for agents than the
@@ -126,6 +117,10 @@ public class Exogenous extends Properties implements Serializable {
 	 */
 	public String getNSPName() {
 		return this.getProperty("nsp.misc.namePrefix") + this.nspCounter++;
+	}
+
+	public void setDebugLevel(Integer debugLevel) {
+		this.debugLevel = debugLevel;
 	}
 
 	/**
