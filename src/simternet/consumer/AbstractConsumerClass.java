@@ -1,111 +1,119 @@
 package simternet.consumer;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.field.grid.DoubleGrid2D;
-import sim.util.Bag;
 import sim.util.Int2D;
-import simternet.PopulationDistribution;
 import simternet.Simternet;
 import simternet.application.ApplicationServiceProvider;
 import simternet.network.AbstractEdgeNetwork;
-import simternet.network.AbstractNetwork;
 import simternet.network.NetFlow;
 import simternet.temporal.AsyncUpdate;
-import simternet.temporal.TemporalBitMap2D;
+import simternet.temporal.Temporal;
 import simternet.temporal.TemporalHashMap;
-import simternet.temporal.TemporalSparseGrid2D;
 
 @SuppressWarnings("serial")
 public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 		Serializable {
 
-	protected TemporalHashMap<ApplicationServiceProvider, TemporalBitMap2D> applicationServiceSubscriptions;
-	protected TemporalSparseGrid2D networkSubscriptions;
-
 	/**
-	 * The # of individuals in this consumer class in each landscape pixel. If
-	 * this changes during the simulation it will need to be made Temporal.
+	 * The physical location of this set of consumers.
 	 */
-	protected DoubleGrid2D population;
-	protected Simternet s;
+	protected final Int2D location;
 
 	/**
-	 * Create a new consumer class with randomly generated population and
-	 * preferences.
+	 * This is a significant data structure. It contains details on how each
+	 * network is used, which includes usage of particular applications, since
+	 * it must be possible to vary this based on the network the user is
+	 * connected to. i.e., a user on 56k dialup is not going to watch streaming
+	 * television on Hulu.
+	 */
+	protected final TemporalHashMap<AbstractEdgeNetwork, NetworkUsageDetails> networkUsage;
+
+	/**
+	 * The number of consumers represented by this agent.
+	 */
+	protected final Temporal<Double> population;
+
+	/**
+	 * Details describing the properties of this set of consumers.
+	 */
+	protected final ConsumerProfile profile;
+
+	/**
+	 * A link back to the simulation we are running under. Use of a singleton
+	 * would be inappropriate given that Mason initializes multiple instances of
+	 * a single simulation simultaneously.
+	 */
+	protected final Simternet s;
+
+	/**
+	 * Create a new consumer class in simulation s with location, population,
+	 * and consumer profile as specified.
 	 * 
-	 * @param s
-	 *            Link back to the simulation
 	 */
-	protected AbstractConsumerClass(Simternet s) {
-		this(s, null);
+	protected AbstractConsumerClass(Simternet s, Int2D location,
+			Double population, ConsumerProfile profile) {
+		this.s = s;
+		this.location = location;
+		this.profile = profile;
+		this.population = new Temporal<Double>(population);
+		this.networkUsage = new TemporalHashMap<AbstractEdgeNetwork, NetworkUsageDetails>();
 	}
 
-	/**
-	 * @param s
-	 * @param pd
-	 * 
-	 *            Create a new consumer class with the specified population
-	 *            distribution.
-	 */
-	protected AbstractConsumerClass(Simternet s, PopulationDistribution pd) {
-		this.s = s;
-		this.population = new DoubleGrid2D(s.parameters.x(), s.parameters.y(),
-				0.0);
-		this.applicationServiceSubscriptions = new TemporalHashMap<ApplicationServiceProvider, TemporalBitMap2D>();
-		this.networkSubscriptions = new TemporalSparseGrid2D(s.parameters.x(),
-				s.parameters.y());
+	protected void consumeApplication(ApplicationServiceProvider asp,
+			ApplicationUsage usage) {
+		NetFlow nf = new NetFlow();
 
-		this.initPopulation(pd);
+		// total amount of usage = population * usage
+		nf.amount = this.population.get();
+		nf.amount *= usage.usageAmount.get();
 
+		// usage currently directly processed by asp rather than via network
+		// transversal.
+		asp.processUsage(nf);
 	}
 
 	protected void consumeApplications() {
-		for (Map.Entry<ApplicationServiceProvider, TemporalBitMap2D> aspMap : this.applicationServiceSubscriptions
+
+		// for each network this consumer class subscribes to
+		for (Map.Entry<AbstractEdgeNetwork, NetworkUsageDetails> netMap : this.networkUsage
 				.entrySet()) {
-			ApplicationServiceProvider asp = aspMap.getKey();
-			TemporalBitMap2D subMap = aspMap.getValue();
-			for (Int2D location : this.s.allLocations())
-				if (subMap.get(location)) {
-					NetFlow nf = new NetFlow();
-					nf.amount = this.population.get(location.x, location.y);
-					asp.processUsage(nf);
-				}
+
+			TemporalHashMap<ApplicationServiceProvider, ApplicationUsage> appsUsage = netMap
+					.getValue().getApplicationUsage();
+
+			// for each application used on that network
+			for (Map.Entry<ApplicationServiceProvider, ApplicationUsage> appUsage : appsUsage
+					.entrySet())
+				// Process usage individually.
+				this.consumeApplication(appUsage.getKey(), appUsage.getValue());
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void consumeNetworks() {
-		Iterator<AbstractEdgeNetwork> i = this.networkSubscriptions.iterator();
-		while (i.hasNext()) {
-			AbstractEdgeNetwork net = i.next();
-			net.receivePayment(this, this.getPopulation(net.getLocation()));
+
+		// for each network this consumer class subscribes to
+		for (Map.Entry<AbstractEdgeNetwork, NetworkUsageDetails> netMap : this.networkUsage
+				.entrySet()) {
+			AbstractEdgeNetwork aen = netMap.getKey();
+			NetworkUsageDetails nud = netMap.getValue();
+
+			// Pay for our network connections.
+			aen.receivePayment(this, nud.subscribers.get());
+			// TODO: Is this the proper place to have the price affect utility?
 		}
-
 	}
 
-	public Collection<ApplicationServiceProvider> getASPSubscriptions(
-			Int2D location) {
-		Collection<ApplicationServiceProvider> asps = new ArrayList<ApplicationServiceProvider>();
+	//
+	// public boolean isSubscribed(AbstractEdgeNetwork network) {
+	// return this.networkSubscriptions.equals(network);
+	// }
 
-		for (Map.Entry<ApplicationServiceProvider, TemporalBitMap2D> aspMap : this.applicationServiceSubscriptions
-				.entrySet())
-			if (aspMap.getValue().get(location))
-				asps.add(aspMap.getKey());
-
-		return asps;
-	}
-
-	public Double getPopulation(Int2D location) {
-		return this.population.field[location.x][location.y];
+	public Int2D getLocation() {
+		return this.location;
 	}
 
 	/**
@@ -116,39 +124,15 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 	 *         locations.
 	 */
 	public Double getPopultation() {
-		double pop = 0.0;
-		for (int x = 0; x < this.s.parameters.x(); x++)
-			for (int y = 0; y < this.s.parameters.y(); y++)
-				pop += this.population.get(x, y);
-		return pop;
+		return this.population.get();
 	}
 
-	/**
-	 * Initialize the population distribution using the specified method. If
-	 * none is specified, use Exogenous.defaultPopulationDistribution.
-	 * 
-	 * @param pd
-	 * 
-	 */
-	protected void initPopulation(PopulationDistribution pd) {
-		// TODO: Have way of parameterizing population distribution based on
-		// properties.
-		if (pd == null)
-			pd = PopulationDistribution.RANDOM_FLAT;
-
-		switch (pd) {
-		case RANDOM_FLAT: {
-			for (int x = 0; x < this.s.parameters.x(); x++)
-				for (int y = 0; y < this.s.parameters.y(); y++)
-					this.population.field[x][y] = this.s.random.nextDouble()
-							* Double.parseDouble(this.s.parameters
-									.getProperty("landscape.population.max"));
-		}
-		}
-	}
-
-	public boolean isSubscribed(AbstractEdgeNetwork network) {
-		return this.networkSubscriptions.equals(network);
+	public Double getSubscribers(AbstractEdgeNetwork aen) {
+		NetworkUsageDetails nud = this.networkUsage.get(aen);
+		if (nud == null)
+			return 0.0;
+		else
+			return nud.getSubscribers();
 	}
 
 	/**
@@ -159,25 +143,17 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 
 	protected abstract void manageNetworks();
 
-	public Set<AbstractNetwork> networksSubscribed(Int2D location) {
-		HashSet<AbstractNetwork> muffin = new HashSet<AbstractNetwork>();
-		Bag bag = this.networkSubscriptions.getObjectsAtLocation(location.x,
-				location.y);
-		for (int i = 0; i < bag.numObjs; i++)
-			muffin.add((AbstractNetwork) bag.objs[i]);
-		return muffin;
-	}
-
-	public Double numSubscriptions(AbstractEdgeNetwork network) {
-		Int2D location = this.networkSubscriptions.getObjectLocation(network);
-		if (null == location)
-			return 0.0;
-		return this.getPopulation(location);
-	}
-
-	protected void setPopulation(Int2D location, Double pop) {
-		this.population.field[location.x][location.y] = pop;
-	}
+	// public Set<AbstractNetwork> networksSubscribed(Int2D location) {
+	// HashSet<AbstractNetwork> muffin = new HashSet<AbstractNetwork>();
+	// Bag bag = this.networkSubscriptions.getObjectsAtLocation(location.x,
+	// location.y);
+	// for (int i = 0; i < bag.numObjs; i++)
+	// muffin.add((AbstractNetwork) bag.objs[i]);
+	// return muffin;
+	// } pop) public Double numSubscriptions(AbstractEdgeNetwork network) {
+	// NetworkUsageDetails nud = this.networkUsage.get(network);
+	// return nud.subscribers.get();
+	// }
 
 	public void step(SimState state) {
 		if (this.s.parameters.debugLevel() > 10)
@@ -194,8 +170,8 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 
 	@Override
 	public void update() {
-		this.applicationServiceSubscriptions.update();
-		this.networkSubscriptions.update();
+		this.networkUsage.update();
+		this.population.update();
 	}
 
 }

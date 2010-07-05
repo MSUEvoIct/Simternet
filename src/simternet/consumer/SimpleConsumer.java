@@ -8,11 +8,10 @@ import simternet.Simternet;
 import simternet.application.ApplicationServiceProvider;
 import simternet.network.AbstractEdgeNetwork;
 import simternet.network.AbstractNetwork;
-import simternet.network.NetFlow;
 
 /**
  * SimpleConsumer subscrubes to all networks and all applications, regardless of
- * cost.
+ * cost. Uses each application on each network on which it is subscribed.
  * 
  * TODO: When using network, split traffic equally between all providers.
  * 
@@ -23,29 +22,42 @@ public class SimpleConsumer extends AbstractConsumerClass implements
 		Serializable {
 
 	/**
-	 * 
+	 * Always uses the same application usage variables, regardless of
+	 * application.
 	 */
+	private static final ApplicationUsage au;
 	private static final long serialVersionUID = 1L;
 
-	public SimpleConsumer(Simternet s) {
-		super(s);
-		// TODO Auto-generated constructor stub
+	static {
+		au = new ApplicationUsage();
+		SimpleConsumer.au.usageAmount.set(1.0);
+		SimpleConsumer.au.congestionReceived.set(0.0);
+		SimpleConsumer.au.update();
 	}
 
+	public SimpleConsumer(Simternet s, Int2D location, Double population,
+			ConsumerProfile profile) {
+		super(s, location, population, profile);
+	}
+
+	/*
+	 * Don't track application usage, just consume from everyone
+	 * 
+	 * (non-Javadoc)
+	 * 
+	 * @see simternet.consumer.AbstractConsumerClass#consumeApplications()
+	 */
 	@Override
 	protected void consumeApplications() {
+
 		for (ApplicationServiceProvider asp : this.s
 				.getApplicationServiceProviders())
-			for (Int2D location : this.s.allLocations()) {
-				NetFlow nf = new NetFlow();
-				nf.amount = this.population.get(location.x, location.y);
-				asp.processUsage(nf);
-			}
+			this.consumeApplication(asp, SimpleConsumer.au);
 	}
 
 	/*
 	 * Nothing is done here. Instead, the consumption function has been
-	 * overriden to ignore applicationServiceSubscriptions and always consume.
+	 * overriden to ignore usage tracking variables and always consume.
 	 * 
 	 * (non-Javadoc)
 	 * 
@@ -65,11 +77,25 @@ public class SimpleConsumer extends AbstractConsumerClass implements
 	 */
 	@Override
 	protected void manageNetworks() {
-		Collection<AbstractNetwork> networks = this.s.getNetworks(null,
-				AbstractEdgeNetwork.class, null);
 
-		for (AbstractNetwork net : networks)
-			this.networkSubscriptions.setObjectLocation(net, net.getLocation());
+		// Get all edge networks at this location.
+		Collection<AbstractNetwork> networks = this.s.getNetworks(null,
+				AbstractEdgeNetwork.class, this.location);
+
+		// For each of these networks,
+		for (AbstractNetwork net : networks) {
+			// these are all edge networks...
+			AbstractEdgeNetwork aen = (AbstractEdgeNetwork) net;
+
+			// if we aren't already subscribed to them,
+			if (!this.networkUsage.containsKey(net)) {
+				// do so. Every individual subscribes.
+				NetworkUsageDetails nud = new NetworkUsageDetails();
+				nud.subscribers.set(this.getPopultation());
+				this.networkUsage.put(aen, nud);
+			}
+		}
+
 	}
 
 }

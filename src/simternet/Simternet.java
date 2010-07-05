@@ -11,6 +11,7 @@ import java.util.Map;
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.field.grid.DoubleGrid2D;
+import sim.field.grid.SparseGrid2D;
 import sim.util.Int2D;
 import simternet.application.ApplicationServiceProvider;
 import simternet.consumer.AbstractConsumerClass;
@@ -62,6 +63,7 @@ public class Simternet extends SimState implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static void main(String[] args) {
+		Simternet s = new Simternet(78346);
 		SimState.doLoop(Simternet.class, args);
 		System.exit(0);
 	}
@@ -74,7 +76,7 @@ public class Simternet extends SimState implements Serializable {
 	/**
 	 * All consumer classes in the simulation.
 	 */
-	protected Collection<AbstractConsumerClass> consumerClasses = new ArrayList<AbstractConsumerClass>();
+	protected SparseGrid2D consumerClasses;
 
 	/**
 	 * All Network Service Providers in the simulation.
@@ -94,6 +96,11 @@ public class Simternet extends SimState implements Serializable {
 			this.parameters = parameters;
 		else
 			this.parameters = Exogenous.getDefaults();
+
+		// initialize consumer classes data structure, now that we know the size
+		// of our grid.
+		this.consumerClasses = new SparseGrid2D(this.parameters.x(),
+				this.parameters.y());
 	}
 
 	protected void addApplicationServiceProvider(ApplicationServiceProvider asp) {
@@ -102,39 +109,21 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	/**
-	 * Adds a consumer class to the simulation.
+	 * Track this consumer class and schedule it to repeat at each step.
 	 * 
 	 * @param cc
 	 *            The consumer class to add.
 	 */
-	protected void addConsumerClass(AbstractConsumerClass cc) {
-		this.consumerClasses.add(cc);
-		this.schedule.scheduleRepeating(Schedule.EPOCH, 12, cc);
+	protected void addConsumerClass(AbstractConsumerClass acc) {
+		this.consumerClasses.setObjectLocation(acc, acc.getLocation());
+		this.schedule.scheduleRepeating(Schedule.EPOCH, 12, acc);
 	}
 
 	/**
-	 * Track this consumer class and schedule it to repeat at each step.
+	 * Track this network service provider class and schedule it to repeat at
+	 * each time step.
 	 * 
-	 * @param cc
-	 *            Consumer class to add to the schedule
-	 * @param ordering
-	 *            The order (> 0) in which the item should run
-	 * @param interval
-	 *            The interval (> 0) after which the object should be run
-	 * 
-	 */
-	protected void addConsumerClass(AbstractConsumerClass cc, int ordering,
-			double interval) {
-		this.consumerClasses.add(cc);
-		this.schedule.scheduleRepeating(cc, ordering, interval);
-	}
-
-	/**
 	 * @param nsp
-	 * 
-	 *            Track this network service provider class and schedule it to
-	 *            repeat at each time step.
-	 * 
 	 */
 	protected void addNetworkServiceProvider(AbstractNetworkProvider nsp) {
 		this.networkServiceProviders.add(nsp);
@@ -142,32 +131,17 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	/**
-	 * Track this Network Service Provider class and schedule it to repeat at
-	 * each step.
+	 * A convienence method providing an iterator for all locations.
 	 * 
-	 * @param nsp
-	 *            Network Service Provider class to add to the schedule
-	 * @param ordering
-	 *            The order (> 0) in which the item should run
-	 * @param interval
-	 *            The interval (> 0) after which the object should be run
-	 * 
+	 * @return An iterator of all locations as Int2D objects.
 	 */
-	protected void addNetworkServiceProvider(AbstractNetworkProvider nsp,
-			int ordering, double interval) {
-		this.networkServiceProviders.add(nsp);
-		this.schedule.scheduleRepeating(nsp, ordering, interval);
-	}
-
 	public Iterable<Int2D> allLocations() {
 		return new Iterable<Int2D>() {
-
 			@Override
 			public Iterator<Int2D> iterator() {
 				return new LocationIterator(Simternet.this.parameters.x(),
 						Simternet.this.parameters.y());
 			}
-
 		};
 	}
 
@@ -195,7 +169,7 @@ public class Simternet extends SimState implements Serializable {
 		return this.applicationServiceProviders;
 	}
 
-	public Collection<AbstractConsumerClass> getConsumerClasses() {
+	public SparseGrid2D getConsumerClasses() {
 		return this.consumerClasses;
 	}
 
@@ -267,22 +241,34 @@ public class Simternet extends SimState implements Serializable {
 	/**
 	 * @return The total population of All consumers at ALL locations.
 	 */
+	@SuppressWarnings("unchecked")
 	public Double getPopulation() {
 		Double pop = new Double(0);
-		for (AbstractConsumerClass cc : this.consumerClasses)
-			pop += cc.getPopultation();
+
+		Iterator<AbstractConsumerClass> i = this.consumerClasses.iterator();
+		while (i.hasNext()) {
+			AbstractConsumerClass acc = i.next();
+			pop += acc.getPopultation();
+		}
+
 		return pop;
 	}
 
 	/**
-	 * @param x
-	 * @param y
+	 * @param location
+	 *            The x,y coordinates on the map.
 	 * @return The total population of ALL consumers at a SPECIFIC location.
 	 */
 	public Double getPopulation(Int2D location) {
 		Double pop = new Double(0);
-		for (AbstractConsumerClass cc : this.consumerClasses)
-			pop += cc.getPopulation(location);
+
+		Iterator<AbstractConsumerClass> i = this.consumerClasses
+				.getObjectsAtLocation(location).iterator();
+		while (i.hasNext()) {
+			AbstractConsumerClass acc = i.next();
+			pop += acc.getPopultation();
+		}
+
 		return pop;
 	}
 
@@ -302,12 +288,12 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	/**
+	 * Collects a list
+	 * 
 	 * @param net
 	 * @param x
 	 * @param y
 	 * @return
-	 * 
-	 *         Collects a list
 	 * 
 	 */
 	public Map<AbstractNetworkProvider, Double> getPriceList(
@@ -335,18 +321,30 @@ public class Simternet extends SimState implements Serializable {
 	 * Specify this somehow in parameters, rather than source.
 	 */
 	protected void initConsumerClasses() {
-		this.addConsumerClass(new SimpleConsumer(this));
-		this.addConsumerClass(new SimpleConsumer(this));
-		this.addConsumerClass(new SimpleConsumer(this));
-		this.addConsumerClass(new SimpleConsumer(this));
-		this.addConsumerClass(new SimpleConsumer(this));
-		this.addConsumerClass(new SimpleConsumer(this));
-		this.addConsumerClass(new SimpleConsumer(this));
-		this.addConsumerClass(new SimpleConsumer(this));
+		// TODO: Clean this up.
+		// Populate the landscape with a simpleconsumer class.
+		for (Int2D location : this.allLocations()) {
+			Double pop = this.random.nextDouble()
+					* Double.parseDouble(this.parameters
+							.getProperty("landscape.population.max"));
+			AbstractConsumerClass acc = new SimpleConsumer(this, location, pop,
+					null);
+			this.addConsumerClass(acc);
+		}
+
+		// do it again.
+		for (Int2D location : this.allLocations()) {
+			Double pop = this.random.nextDouble()
+					* Double.parseDouble(this.parameters
+							.getProperty("landscape.population.max"));
+			AbstractConsumerClass acc = new SimpleConsumer(this, location, pop,
+					null);
+			this.addConsumerClass(acc);
+		}
+
 	}
 
 	public void initData() {
-		this.consumerClasses = new HashSet<AbstractConsumerClass>();
 		this.networkServiceProviders = new HashSet<AbstractNetworkProvider>();
 	}
 

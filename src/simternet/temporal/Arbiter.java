@@ -1,6 +1,7 @@
 package simternet.temporal;
 
 import java.io.Serializable;
+import java.util.Iterator;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -31,15 +32,19 @@ import simternet.nsp.AbstractNetworkProvider;
 public class Arbiter implements Steppable, Serializable {
 	private static final long serialVersionUID = 1L;
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void step(SimState state) {
 		for (AbstractNetworkProvider nsp : ((Simternet) state)
 				.getNetworkServiceProviders())
 			nsp.update();
 
-		for (AbstractConsumerClass acc : ((Simternet) state)
-				.getConsumerClasses())
+		Iterator<AbstractConsumerClass> i = ((Simternet) state)
+				.getConsumerClasses().iterator();
+		while (i.hasNext()) {
+			AbstractConsumerClass acc = i.next();
 			acc.update();
+		}
 
 		for (ApplicationServiceProvider asp : ((Simternet) state)
 				.getApplicationServiceProviders())

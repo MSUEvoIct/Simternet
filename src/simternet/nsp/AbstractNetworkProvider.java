@@ -15,6 +15,7 @@ import simternet.Simternet;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.network.AbstractEdgeNetwork;
 import simternet.network.AbstractNetwork;
+import simternet.network.RoutingPoint;
 import simternet.temporal.AsyncUpdate;
 import simternet.temporal.TemporalSparseGrid2D;
 
@@ -37,6 +38,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	 */
 	private static final long serialVersionUID = 1L;
 
+	protected RoutingPoint centralHub;
 	protected TemporalSparseGrid2D edgeNetworks;
 	public Financials financials;
 	protected Int2D homeBase;
@@ -59,6 +61,9 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 
 		this.edgeNetworks = new TemporalSparseGrid2D(this.simternet.parameters
 				.x(), this.simternet.parameters.y());
+
+		this.centralHub = new RoutingPoint(this, this.homeBase);
+
 	}
 
 	/**
@@ -88,6 +93,10 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		}
 	}
 
+	public RoutingPoint getCentralHub() {
+		return this.centralHub;
+	}
+
 	/**
 	 * @return
 	 * 
@@ -100,7 +109,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 				.iterator();
 		while (allNetworks.hasNext()) {
 			AbstractEdgeNetwork aen = allNetworks.next();
-			numCustomers += aen.getNumCustomers();
+			numCustomers += aen.getNumSubscribers();
 		}
 		return numCustomers;
 	}
@@ -121,7 +130,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 
 		while (networksIterator.hasNext()) {
 			AbstractEdgeNetwork aen = networksIterator.next();
-			numCustomers += aen.getNumCustomers();
+			numCustomers += aen.getNumSubscribers();
 		}
 
 		return numCustomers;
