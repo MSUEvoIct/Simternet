@@ -52,7 +52,7 @@ public class SimpleConsumer extends AbstractConsumerClass implements
 
 		for (ApplicationServiceProvider asp : this.s
 				.getApplicationServiceProviders())
-			this.consumeApplication(asp, SimpleConsumer.au);
+			this.consumeApplication(null, asp, SimpleConsumer.au);
 	}
 
 	/*

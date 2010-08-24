@@ -30,6 +30,10 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 		return customers;
 	}
 
+	public void handleUserTraffic(NetFlow nf) {
+
+	}
+
 	@Override
 	public void init(final AbstractNetworkProvider nsp, final Int2D location) {
 		super.init(nsp, location);

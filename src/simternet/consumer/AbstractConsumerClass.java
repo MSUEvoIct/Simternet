@@ -63,8 +63,8 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 		this.networkUsage = new TemporalHashMap<AbstractEdgeNetwork, NetworkUsageDetails>();
 	}
 
-	protected void consumeApplication(ApplicationServiceProvider asp,
-			ApplicationUsage usage) {
+	protected void consumeApplication(AbstractEdgeNetwork aen,
+			ApplicationServiceProvider asp, ApplicationUsage usage) {
 		NetFlow nf = new NetFlow();
 
 		// total amount of usage = population * usage
@@ -82,6 +82,7 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 		for (Map.Entry<AbstractEdgeNetwork, NetworkUsageDetails> netMap : this.networkUsage
 				.entrySet()) {
 
+			AbstractEdgeNetwork aen = netMap.getKey();
 			TemporalHashMap<ApplicationServiceProvider, ApplicationUsage> appsUsage = netMap
 					.getValue().getApplicationUsage();
 
@@ -89,7 +90,8 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 			for (Map.Entry<ApplicationServiceProvider, ApplicationUsage> appUsage : appsUsage
 					.entrySet())
 				// Process usage individually.
-				this.consumeApplication(appUsage.getKey(), appUsage.getValue());
+				this.consumeApplication(aen, appUsage.getKey(), appUsage
+						.getValue());
 		}
 	}
 
