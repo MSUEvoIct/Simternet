@@ -5,37 +5,31 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import sim.field.grid.SparseGrid2D;
 import sim.util.Int2D;
-import simternet.network.AbstractNetwork;
+import simternet.LocationIterator;
+import simternet.network.AbstractEdgeNetwork;
 import simternet.network.SimpleEdgeNetwork;
 
 public class ScoringInvestmentStrategy implements InvestmentStrategy,
 		Serializable {
 
 	@SuppressWarnings("unchecked")
-	private class PotentialNetwork implements Serializable, Comparable {
-		private static final long serialVersionUID = 1L;
+	protected class PotentialNetwork implements Serializable, Comparable {
+		protected static final long serialVersionUID = 1L;
 
-		private Double cost;
+		protected Double cost;
+		protected Double distanceFromHome;
+		protected final Int2D location;
+		protected final Class<? extends AbstractEdgeNetwork> networkType;
+		protected Double score;
 
-		private Double distanceFromHome;
-		private final Int2D location;
-		private final Class<? extends AbstractNetwork> networkType;
-		private Double score;
-
-		public PotentialNetwork(Int2D location,
-				Class<? extends AbstractNetwork> networkType) {
+		public PotentialNetwork(
+				Class<? extends AbstractEdgeNetwork> networkType, Int2D location) {
 			this.networkType = networkType;
 			this.location = location;
 
-			try {
-				AbstractNetwork an = networkType.newInstance();
-				an.init(ScoringInvestmentStrategy.this.nsp, this.location);
-				this.cost = an.getBuildCost();
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
+			this.cost = AbstractEdgeNetwork.getBuildCost(networkType,
+					ScoringInvestmentStrategy.this.nsp, location);
 			this.distanceFromHome = ScoringInvestmentStrategy.this.nsp
 					.getHomeBase().distance(location);
 
@@ -71,28 +65,32 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 	 * a network.
 	 */
 	protected Double buildThreshold;
-	protected SparseGrid2D networks;
-	protected List<Class<? extends AbstractNetwork>> networkTypes;
-
+	protected List<Class<? extends AbstractEdgeNetwork>> networkTypes;
 	protected AbstractNetworkProvider nsp;
-
 	protected List<PotentialNetwork> potentialNetworks;
 
+	/**
+	 * 
+	 * 
+	 * @param nsp
+	 * @param networkTypes
+	 *            If no list of network types is specified, only
+	 *            SimpleEdgeNetwork will be considered.
+	 * @param buildThreshold
+	 *            Only networks with at least this score will be built.
+	 */
 	public ScoringInvestmentStrategy(AbstractNetworkProvider nsp,
-			SparseGrid2D networks, Double buildThreshold,
-			List<Class<? extends AbstractNetwork>> networkTypes) {
+			List<Class<? extends AbstractEdgeNetwork>> networkTypes,
+			Double buildThreshold) {
 		this.nsp = nsp;
-		this.networks = networks;
 		this.buildThreshold = buildThreshold;
 		if (networkTypes == null) {
-			networkTypes = new ArrayList<Class<? extends AbstractNetwork>>();
+			networkTypes = new ArrayList<Class<? extends AbstractEdgeNetwork>>();
 			networkTypes.add(SimpleEdgeNetwork.class);
 		}
 		this.networkTypes = networkTypes;
 		this.potentialNetworks = new ArrayList<PotentialNetwork>();
-
 		this.populatePotentialNetworks();
-
 	}
 
 	@SuppressWarnings("unchecked")
@@ -117,11 +115,10 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 	}
 
 	private void populatePotentialNetworks() {
-		for (Class<? extends AbstractNetwork> networkType : this.networkTypes)
-			for (int x = 0; x < this.nsp.simternet.parameters.x(); x++)
-				for (int y = 0; y < this.nsp.simternet.parameters.y(); y++)
-					this.potentialNetworks.add(new PotentialNetwork(new Int2D(
-							x, y), networkType));
+		for (Class<? extends AbstractEdgeNetwork> networkType : this.networkTypes)
+			for (Int2D location : new LocationIterator(this.nsp.simternet))
+				this.potentialNetworks.add(new PotentialNetwork(networkType,
+						location));
 	}
 
 	private void scoreSimpleNetwork(PotentialNetwork pn) {

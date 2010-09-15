@@ -2,6 +2,7 @@ package simternet.consumer;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 
 import sim.util.Int2D;
 import simternet.Simternet;
@@ -41,7 +42,8 @@ public class SimpleConsumer extends AbstractConsumerClass implements
 	}
 
 	/*
-	 * Don't track application usage, just consume from everyone
+	 * Don't track application usage, just consume from everyone on every
+	 * network.
 	 * 
 	 * (non-Javadoc)
 	 * 
@@ -50,9 +52,15 @@ public class SimpleConsumer extends AbstractConsumerClass implements
 	@Override
 	protected void consumeApplications() {
 
-		for (ApplicationServiceProvider asp : this.s
-				.getApplicationServiceProviders())
-			this.consumeApplication(null, asp, SimpleConsumer.au);
+		for (Map.Entry<AbstractEdgeNetwork, NetworkUsageDetails> netMap : this.networkUsage
+				.entrySet()) {
+
+			AbstractEdgeNetwork aen = netMap.getKey();
+			for (ApplicationServiceProvider asp : this.s
+					.getApplicationServiceProviders())
+				this.consumeApplication(aen, asp, SimpleConsumer.au);
+		}
+
 	}
 
 	/*

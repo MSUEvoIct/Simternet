@@ -67,6 +67,9 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 			ApplicationServiceProvider asp, ApplicationUsage usage) {
 		NetFlow nf = new NetFlow();
 
+		nf.user = this;
+		nf.destination = aen;
+
 		// total amount of usage = population * usage
 		nf.amount = this.population.get();
 		nf.amount *= usage.usageAmount.get();

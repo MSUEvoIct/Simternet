@@ -56,8 +56,8 @@ public class TemporalHashMap<K, V> extends HashMap<K, V> implements
 
 	private static final long serialVersionUID = 1L;
 
-	private List<K> toRemove = null;
-	private Map<K, V> updates = null;
+	protected List<K> toRemove = null;
+	protected Map<K, V> updates = null;
 
 	/**
 	 * We will only attempt to run update() method on value

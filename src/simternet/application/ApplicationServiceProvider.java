@@ -1,13 +1,19 @@
 package simternet.application;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.UUID;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import simternet.Financials;
 import simternet.Simternet;
+import simternet.network.AbstractNetwork;
+import simternet.network.BackboneNetwork;
+import simternet.network.Datacenter;
 import simternet.network.NetFlow;
+import simternet.network.RoutingProtocolConfig;
+import simternet.nsp.AbstractNetworkProvider;
 import simternet.temporal.AsyncUpdate;
 import simternet.temporal.Temporal;
 
@@ -19,17 +25,36 @@ public class ApplicationServiceProvider implements Steppable, Serializable,
 	private static final long serialVersionUID = 1L;
 
 	protected Application applicationOffered;
+	protected HashSet<AbstractNetwork> connectedNetworks = new HashSet<AbstractNetwork>();
+	protected Datacenter datacenter;
 	protected Financials financials;
-	protected String name = UUID.randomUUID().toString();
+	protected String name = "ASP-" + UUID.randomUUID().toString();
 	protected Temporal<Double> priceAdvertising = new Temporal<Double>(3.0);
 	protected Temporal<Double> priceSubscriptions = new Temporal<Double>(3.0);
 	protected Temporal<Double> revenueAdvertising = new Temporal<Double>(0.0);
 	protected Temporal<Double> revenueSubscriptions = new Temporal<Double>(0.0);
+
 	protected Simternet s;
 
 	public ApplicationServiceProvider(Simternet s) {
 		this.s = s;
+
+		// Create datacenter, connect it to all NSPs.
+		this.datacenter = new Datacenter(this);
+
 		this.financials = new Financials(s, 10000.0);
+	}
+
+	private void connectDatacenter() {
+		for (AbstractNetworkProvider anp : this.s.getNetworkServiceProviders()) {
+			BackboneNetwork bn = anp.getBackboneNetwork();
+			if (!this.connectedNetworks.contains(bn)) {
+				this.datacenter.createEgressLinkTo(anp.getBackboneNetwork(),
+						null, RoutingProtocolConfig.TRANSIT);
+				this.connectedNetworks.add(bn);
+			}
+
+		}
 	}
 
 	public Application getApplicationOffered() {
@@ -74,10 +99,15 @@ public class ApplicationServiceProvider implements Steppable, Serializable,
 		this.revenueAdvertising.increment(ads);
 		this.revenueSubscriptions.increment(sub);
 		this.financials.earn(ads + sub);
+
+		usage.source = this.datacenter;
+		this.datacenter.send(usage);
 	}
 
 	@Override
 	public void step(SimState state) {
+		this.connectDatacenter();
+		this.datacenter.step(state);
 		System.out.println("Stepping " + this.getName() + ", has "
 				+ this.financials);
 	}
@@ -89,6 +119,7 @@ public class ApplicationServiceProvider implements Steppable, Serializable,
 		this.revenueSubscriptions.update();
 		this.priceAdvertising.update();
 		this.priceSubscriptions.update();
+		this.datacenter.update();
 	}
 
 }

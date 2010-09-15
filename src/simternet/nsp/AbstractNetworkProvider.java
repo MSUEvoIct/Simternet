@@ -1,5 +1,6 @@
 package simternet.nsp;
 
+import java.lang.reflect.Constructor;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,30 +16,22 @@ import simternet.Simternet;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.network.AbstractEdgeNetwork;
 import simternet.network.AbstractNetwork;
-import simternet.network.RoutingPoint;
+import simternet.network.BackboneNetwork;
 import simternet.temporal.AsyncUpdate;
 import simternet.temporal.TemporalSparseGrid2D;
 
 /**
+ * Each instantiation of this class represents a Network Service Provider as an
+ * agent. Its behavior is defined by the step() function, which MASON executed
+ * once each time step of the model.
+ * 
  * @author kkoning
- * 
- *         Each instantiation of this class represents a Network Service
- *         Provider as an agent. Its behavior is defined by the step() function,
- *         which MASON executed once each time step of the model.
- * 
- */
-/**
- * @author kkoning
- * 
  */
 public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
-	protected RoutingPoint centralHub;
+	protected BackboneNetwork backboneNetwork;
 	protected TemporalSparseGrid2D edgeNetworks;
 	public Financials financials;
 	protected Int2D homeBase;
@@ -62,39 +55,41 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		this.edgeNetworks = new TemporalSparseGrid2D(this.simternet.parameters
 				.x(), this.simternet.parameters.y());
 
-		this.centralHub = new RoutingPoint(this, this.homeBase);
+		this.backboneNetwork = new BackboneNetwork(this);
 
 	}
 
 	/**
-	 * A network object may be instantiated, but it is not considered "built"
-	 * until it hits this method. This method is responsible for financing the
-	 * network and placing it in the list of networks owned by this network
-	 * service provider.
+	 * Builds an edge network of type at location, capitalizes the construction
+	 * costs, and connects the network to its backbone.
 	 * 
-	 * @param an
-	 *            The network to be built
-	 * 
+	 * @param type
+	 *            The class of the network to be built
+	 * @param location
+	 *            The location of the network.
 	 */
-	protected void buildNetwork(AbstractNetwork an) {
-		this.financials.capitalize(an.getBuildCost());
-		this.edgeNetworks.setObjectLocation(an, an.getLocation().x, an
-				.getLocation().y);
-	}
-
-	protected void buildNetwork(Class<? extends AbstractNetwork> net,
+	protected void buildNetwork(Class<? extends AbstractEdgeNetwork> type,
 			Int2D location) {
 		try {
-			AbstractNetwork an = net.newInstance();
-			an.init(this, location);
-			this.buildNetwork(an);
+			Constructor<? extends AbstractEdgeNetwork> constr = type
+					.getConstructor(AbstractNetworkProvider.class, Int2D.class);
+
+			Double buildCost = AbstractEdgeNetwork.getBuildCost(type, this,
+					location);
+			AbstractEdgeNetwork aen = constr.newInstance(this, location);
+			this.financials.capitalize(buildCost);
+			this.edgeNetworks.setObjectLocation(aen, location);
+
+			// for now, create an infinite link to this network.
+			this.getBackboneNetwork().createEgressLinkTo(aen, null);
+
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public RoutingPoint getCentralHub() {
-		return this.centralHub;
+	public BackboneNetwork getBackboneNetwork() {
+		return this.backboneNetwork;
 	}
 
 	/**
@@ -263,6 +258,11 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 					+ this.financials);
 			System.out.println(this.printCustomerGrid());
 		}
+		this.backboneNetwork.step(state);
+		for (Object o : this.edgeNetworks) {
+			AbstractEdgeNetwork aen = (AbstractEdgeNetwork) o;
+			aen.step(state);
+		}
 	}
 
 	@Override
@@ -273,6 +273,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	public void update() {
 		this.financials.update();
 		this.edgeNetworks.update();
+		this.backboneNetwork.update();
 	}
 
 }

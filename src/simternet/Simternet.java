@@ -308,7 +308,7 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	private void initApplicationServiceProviders() {
-		for (int i = 0; i < 20; i++)
+		for (int i = 0; i < 3; i++)
 			this.addApplicationServiceProvider(new ApplicationServiceProvider(
 					this));
 	}

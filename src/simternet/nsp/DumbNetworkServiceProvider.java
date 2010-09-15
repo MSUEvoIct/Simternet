@@ -24,8 +24,7 @@ public class DumbNetworkServiceProvider extends AbstractNetworkProvider
 		super(s);
 		this.pricingStrategy = new ConstantPricingStrategy(this,
 				DumbNetworkServiceProvider.price);
-		this.investmentStrategy = new BuildEverywhereStrategy(this,
-				this.edgeNetworks);
+		this.investmentStrategy = new BuildEverywhereStrategy(this);
 	}
 
 }

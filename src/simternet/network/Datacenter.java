@@ -2,29 +2,43 @@ package simternet.network;
 
 import sim.engine.SimState;
 import simternet.application.ApplicationServiceProvider;
-import simternet.temporal.TemporalHashMap;
+import simternet.temporal.TemporalHashSet;
 
 public class Datacenter extends AbstractNetwork {
 
 	private static final long serialVersionUID = 1L;
-	protected TemporalHashMap<ApplicationServiceProvider, Link> customers = new TemporalHashMap<ApplicationServiceProvider, Link>();
+	protected TemporalHashSet<NetFlow> inputQueue = new TemporalHashSet<NetFlow>();
+	protected final ApplicationServiceProvider owner;
+
+	public Datacenter(ApplicationServiceProvider owner) {
+		this.owner = owner;
+	}
 
 	@Override
-	public Double getBuildCost() {
-		// TODO Auto-generated method stub
-		return null;
+	public void createEgressLinkTo(AbstractNetwork an, BackboneLink l) {
+		super.createEgressLinkTo(an, l);
+	}
+
+	@Override
+	public void route() {
+		for (NetFlow flow : this.inputQueue)
+			this.route(flow);
+	}
+
+	public void send(NetFlow flow) {
+		this.inputQueue.add(flow);
 	}
 
 	@Override
 	public void step(SimState state) {
 		// TODO Auto-generated method stub
-
+		super.step(state);
 	}
 
 	@Override
 	public void update() {
-		// TODO Auto-generated method stub
-
+		super.update();
+		this.inputQueue.update();
 	}
 
 }

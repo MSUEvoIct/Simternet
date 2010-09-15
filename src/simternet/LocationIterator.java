@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 import sim.util.Int2D;
 
-public class LocationIterator implements Iterator<Int2D> {
+public class LocationIterator implements Iterator<Int2D>, Iterable<Int2D> {
 	private int remaining;
 	private int xCur = 0;
 	private final int xMax;
@@ -17,11 +17,21 @@ public class LocationIterator implements Iterator<Int2D> {
 		this.remaining = x * y;
 	}
 
+	public LocationIterator(Simternet s) {
+		this(s.parameters.x(), s.parameters.y());
+	}
+
 	@Override
 	public boolean hasNext() {
 		if (this.remaining > 0)
 			return true;
 		return false;
+	}
+
+	@Override
+	public Iterator<Int2D> iterator() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override

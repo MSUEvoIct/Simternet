@@ -72,7 +72,9 @@ public class Temporal<T> implements AsyncUpdate, Serializable {
 	@SuppressWarnings("unchecked")
 	private T clone(T src) {
 		T dst;
-		if (src instanceof Double)
+		if (src == null)
+			dst = null;
+		else if (src instanceof Double)
 			dst = (T) CloneHelper.cloneDouble((Double) this.current);
 		else if (src instanceof Integer)
 			dst = (T) CloneHelper.cloneInteger((Integer) this.current);
@@ -126,6 +128,7 @@ public class Temporal<T> implements AsyncUpdate, Serializable {
 			this.future = (T) futureInteger;
 		} else
 			throw new RuntimeException("Increment of type unimplemented");
+
 	}
 
 	public final boolean isNumeric() {
@@ -149,8 +152,10 @@ public class Temporal<T> implements AsyncUpdate, Serializable {
 		this.current = this.future;
 		if (this.resetValue != null)
 			this.future = this.clone(this.resetValue);
-		else
+		else if (this.isNumeric())
 			this.future = this.clone(this.current);
+		else
+			this.future = this.current;
 	}
 
 }

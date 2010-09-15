@@ -4,9 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import sim.field.grid.SparseGrid2D;
 import sim.util.Int2D;
-import simternet.network.AbstractNetwork;
+import simternet.network.AbstractEdgeNetwork;
 import simternet.network.SimpleEdgeNetwork;
 
 /**
@@ -26,29 +25,33 @@ public class BuildEverywhereStrategy implements InvestmentStrategy,
 	protected Boolean built = false;
 	protected Integer builtThroughX = 0;
 	protected Integer builtThroughY = 0;
-	protected SparseGrid2D networks;
-	protected List<Class<? extends AbstractNetwork>> networkTypes;
+	protected List<Class<? extends AbstractEdgeNetwork>> networkTypes;
 	protected AbstractNetworkProvider nsp;
 
-	public BuildEverywhereStrategy(AbstractNetworkProvider nsp,
-			SparseGrid2D networks) {
-		this(nsp, networks, null);
+	/**
+	 * Build SimpleNetwork everywhere...
+	 * 
+	 * @param nsp
+	 */
+	public BuildEverywhereStrategy(AbstractNetworkProvider nsp) {
+		this(nsp, null);
 	}
 
 	/**
 	 * @param nsp
+	 *            The NSP implmenting this strategy. We need to know because,
+	 *            e.g., the costs for building a network may vary here.
 	 * @param networks
+	 *            A list of networks to be built. If non
 	 * @param networkTypes
 	 *            if null, just build SimpleNetwork. Otherwise, build all
 	 *            network types in this list at each grid location.
 	 */
 	public BuildEverywhereStrategy(AbstractNetworkProvider nsp,
-			SparseGrid2D networks,
-			List<Class<? extends AbstractNetwork>> networkTypes) {
+			List<Class<? extends AbstractEdgeNetwork>> networkTypes) {
 		this.nsp = nsp;
-		this.networks = networks;
 		if (networkTypes == null) {
-			networkTypes = new ArrayList<Class<? extends AbstractNetwork>>();
+			networkTypes = new ArrayList<Class<? extends AbstractEdgeNetwork>>();
 			networkTypes.add(SimpleEdgeNetwork.class);
 		}
 		this.networkTypes = networkTypes;
@@ -68,27 +71,28 @@ public class BuildEverywhereStrategy implements InvestmentStrategy,
 			for (int y = this.builtThroughY; y < this.nsp.simternet.parameters
 					.y(); y++) {
 				Double costForThisPixel = 0.0;
-				List<AbstractNetwork> nets = new ArrayList<AbstractNetwork>();
 
 				// figure out the cost to build one of each network at this
-				// location.
-				for (Class<? extends AbstractNetwork> cl : this.networkTypes)
-					try {
-						AbstractNetwork an = cl.newInstance();
-						an.init(this.nsp, new Int2D(x, y));
-						costForThisPixel = an.getBuildCost();
-						nets.add(an);
-					} catch (Exception e) {
-						throw new RuntimeException(e);
-					}
+				// location. In order to do this without actually creating a
+				// network
+				// (i.e., instantiating the class), use reflection to call a
+				// static
+				// method instead.
+				for (Class<? extends AbstractEdgeNetwork> cl : this.networkTypes)
+					costForThisPixel = +AbstractEdgeNetwork.getBuildCost(cl,
+							this.nsp, new Int2D(x, y));
 
-				// if we have enough funding available to build the networks, do
-				// so. When we run out of money, stop building.
+				// if we have enough funding available to build the networks,
+				// do so. When we run out of money, stop building.
 				if (costForThisPixel < amountAvailable) {
-					for (AbstractNetwork an : nets) {
-						this.nsp.buildNetwork(an);
-						amountAvailable -= costForThisPixel;
-					}
+
+					for (Class<? extends AbstractEdgeNetwork> cl : this.networkTypes)
+						try {
+							this.nsp.buildNetwork(cl, new Int2D(x, y));
+							amountAvailable -= costForThisPixel;
+						} catch (Exception e) {
+							throw new RuntimeException(e);
+						}
 					this.builtThroughY = y + 1;
 				} else
 					return;

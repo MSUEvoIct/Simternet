@@ -1,14 +1,11 @@
 package simternet.temporal;
 
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public class TemporalHashSet<E> extends HashSet<E> implements AsyncUpdate,
-		Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class TemporalArrayList<E> extends ArrayList<E> implements AsyncUpdate {
 
 	private boolean clear = false;
 	protected Set<E> toAdd = new HashSet<E>();
@@ -49,18 +46,16 @@ public class TemporalHashSet<E> extends HashSet<E> implements AsyncUpdate,
 
 	@Override
 	public void update() {
-		for (E e : this.toAdd)
-			super.add(e);
+		this.addAll(this.toAdd);
 		this.toAdd.clear();
-		for (Object e : this.toRemove)
-			super.remove(e);
+		this.removeAll(this.toRemove);
 		this.toRemove.clear();
 		if (this.clear) {
 			this.clear();
 			this.clear = false;
 		}
 
-		// If the elements of this set are themselves implement AsyncUpdate,
+		// If the elements of this List themselves implement AsyncUpdate,
 		// cascade the updates.
 		if (this.updateValues)
 			for (E entry : this)
