@@ -26,4 +26,9 @@ public class BackboneNetwork extends AbstractNetwork {
 		super.step(state);
 	}
 
+	@Override
+	public String toString() {
+		return "Backbone of " + this.owner.getName();
+	}
+
 }

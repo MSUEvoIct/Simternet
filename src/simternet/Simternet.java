@@ -8,6 +8,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.field.grid.DoubleGrid2D;
@@ -54,6 +57,8 @@ public class Simternet extends SimState implements Serializable {
 		}
 	}
 
+	public static final boolean LOGGING_ENABLED = true;
+
 	/**
 	 * Storing a version identifier is appropriate for this class, as we will
 	 * likely be saving it often and may want to read older versions in a
@@ -62,9 +67,26 @@ public class Simternet extends SimState implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	public static void log(Level l, String m) {
+		Simternet.log(null, l, m);
+	}
+
+	public static void log(String logger, Level l, String m) {
+		if (Simternet.LOGGING_ENABLED) {
+			Logger log;
+			if (logger == null)
+				log = Logger.getRootLogger();
+			else
+				log = Logger.getLogger(logger);
+
+			log.log(l, m);
+		}
+	}
+
 	public static void main(String[] args) {
 		Simternet s = new Simternet(78346);
 		SimState.doLoop(Simternet.class, args);
+		Simternet.log(Level.DEBUG, "bob");
 		System.exit(0);
 	}
 
@@ -308,7 +330,7 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	private void initApplicationServiceProviders() {
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < 2; i++)
 			this.addApplicationServiceProvider(new ApplicationServiceProvider(
 					this));
 	}

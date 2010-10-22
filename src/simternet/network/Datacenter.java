@@ -36,6 +36,11 @@ public class Datacenter extends AbstractNetwork {
 	}
 
 	@Override
+	public String toString() {
+		return "Datacenter of " + this.owner.getName();
+	}
+
+	@Override
 	public void update() {
 		super.update();
 		this.inputQueue.update();

@@ -1,6 +1,6 @@
 package simternet.network;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * NullCongestionAlgorithm simply lets all traffic pass, regardless of actual
@@ -12,9 +12,19 @@ import java.util.Collection;
  */
 public class NullCongestionAlgorithm implements CongestionAlgorithm {
 
+	protected BackboneLink link;
+
+	public NullCongestionAlgorithm(BackboneLink link) {
+		this.link = link;
+	}
+
 	@Override
-	public Collection<NetFlow> limit(Collection<NetFlow> flows,
-			BackboneLink bottleneck) {
+	public BackboneLink getLink() {
+		return this.link;
+	}
+
+	@Override
+	public List<NetFlow> limit(List<NetFlow> flows, BackboneLink bottleneck) {
 		return flows;
 	}
 

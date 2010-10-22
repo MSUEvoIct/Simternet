@@ -2,7 +2,6 @@ package simternet.consumer;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Map;
 
 import sim.util.Int2D;
 import simternet.Simternet;
@@ -26,15 +25,7 @@ public class SimpleConsumer extends AbstractConsumerClass implements
 	 * Always uses the same application usage variables, regardless of
 	 * application.
 	 */
-	private static final ApplicationUsage au;
 	private static final long serialVersionUID = 1L;
-
-	static {
-		au = new ApplicationUsage();
-		SimpleConsumer.au.usageAmount.set(1.0);
-		SimpleConsumer.au.congestionReceived.set(0.0);
-		SimpleConsumer.au.update();
-	}
 
 	public SimpleConsumer(Simternet s, Int2D location, Double population,
 			ConsumerProfile profile) {
@@ -42,68 +33,54 @@ public class SimpleConsumer extends AbstractConsumerClass implements
 	}
 
 	/*
-	 * Don't track application usage, just consume from everyone on every
-	 * network.
-	 * 
-	 * (non-Javadoc)
-	 * 
-	 * @see simternet.consumer.AbstractConsumerClass#consumeApplications()
+	 * Consume all applications, once on each network.
 	 */
 	@Override
 	protected void consumeApplications() {
+		Collection<AbstractNetwork> localEdgeNetworks = this.s.getNetworks(
+				null, AbstractEdgeNetwork.class, this.getLocation());
 
-		for (Map.Entry<AbstractEdgeNetwork, NetworkUsageDetails> netMap : this.networkUsage
-				.entrySet()) {
+		Collection<ApplicationServiceProvider> asps = this.s
+				.getApplicationServiceProviders();
 
-			AbstractEdgeNetwork aen = netMap.getKey();
-			for (ApplicationServiceProvider asp : this.s
-					.getApplicationServiceProviders())
-				this.consumeApplication(aen, asp, SimpleConsumer.au);
-		}
+		for (ApplicationServiceProvider asp : asps)
+			for (AbstractNetwork network : localEdgeNetworks)
+				this.consumeApplication(asp, (AbstractEdgeNetwork) network);
 
 	}
 
 	/*
-	 * Nothing is done here. Instead, the consumption function has been
-	 * overriden to ignore usage tracking variables and always consume.
-	 * 
-	 * (non-Javadoc)
-	 * 
-	 * @see simternet.consumer.AbstractConsumerClass#manageApplications()
+	 * Just get all the edge networks at this location and consume each one.
+	 */
+	@Override
+	protected void consumeNetworks() {
+		Collection<AbstractNetwork> localEdgeNetworks = this.s.getNetworks(
+				null, AbstractEdgeNetwork.class, this.getLocation());
+
+		for (AbstractNetwork edgeNetwork : localEdgeNetworks)
+			this.consumeNetwork((AbstractEdgeNetwork) edgeNetwork);
+	}
+
+	/*
+	 * Do nothing. We're always going to use every application.
 	 */
 	@Override
 	protected void manageApplications() {
-
 	}
 
 	/*
-	 * Simply subscribe to <i>all</i> edge networks.
-	 * 
-	 * (non-Javadoc)
-	 * 
-	 * @see simternet.consumer.AbstractConsumerClass#manageNetworks()
+	 * Do nohing. We're always going to use every network.
 	 */
 	@Override
 	protected void manageNetworks() {
+	}
 
-		// Get all edge networks at this location.
-		Collection<AbstractNetwork> networks = this.s.getNetworks(null,
-				AbstractEdgeNetwork.class, this.location);
-
-		// For each of these networks,
-		for (AbstractNetwork net : networks) {
-			// these are all edge networks...
-			AbstractEdgeNetwork aen = (AbstractEdgeNetwork) net;
-
-			// if we aren't already subscribed to them,
-			if (!this.networkUsage.containsKey(net)) {
-				// do so. Every individual subscribes.
-				NetworkUsageDetails nud = new NetworkUsageDetails();
-				nud.subscribers.set(this.getPopultation());
-				this.networkUsage.put(aen, nud);
-			}
-		}
-
+	/*
+	 * SimpleConsumer always uses every network
+	 */
+	@Override
+	public Boolean usesNetwork(AbstractEdgeNetwork network) {
+		return true;
 	}
 
 }

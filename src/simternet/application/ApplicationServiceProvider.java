@@ -2,15 +2,17 @@ package simternet.application;
 
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.UUID;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import simternet.Financials;
 import simternet.Simternet;
+import simternet.consumer.AbstractConsumerClass;
+import simternet.network.AbstractEdgeNetwork;
 import simternet.network.AbstractNetwork;
 import simternet.network.BackboneNetwork;
 import simternet.network.Datacenter;
+import simternet.network.InteractiveFlow;
 import simternet.network.NetFlow;
 import simternet.network.RoutingProtocolConfig;
 import simternet.nsp.AbstractNetworkProvider;
@@ -28,7 +30,7 @@ public class ApplicationServiceProvider implements Steppable, Serializable,
 	protected HashSet<AbstractNetwork> connectedNetworks = new HashSet<AbstractNetwork>();
 	protected Datacenter datacenter;
 	protected Financials financials;
-	protected String name = "ASP-" + UUID.randomUUID().toString();
+	protected String name;
 	protected Temporal<Double> priceAdvertising = new Temporal<Double>(3.0);
 	protected Temporal<Double> priceSubscriptions = new Temporal<Double>(3.0);
 	protected Temporal<Double> revenueAdvertising = new Temporal<Double>(0.0);
@@ -38,6 +40,8 @@ public class ApplicationServiceProvider implements Steppable, Serializable,
 
 	public ApplicationServiceProvider(Simternet s) {
 		this.s = s;
+
+		this.name = s.parameters.getASPName();
 
 		// Create datacenter, connect it to all NSPs.
 		this.datacenter = new Datacenter(this);
@@ -53,8 +57,14 @@ public class ApplicationServiceProvider implements Steppable, Serializable,
 						null, RoutingProtocolConfig.TRANSIT);
 				this.connectedNetworks.add(bn);
 			}
-
 		}
+	}
+
+	protected NetFlow createNetFlow(AbstractConsumerClass consumer,
+			AbstractEdgeNetwork network) {
+		NetFlow flow = new InteractiveFlow(this.datacenter, network, consumer,
+				100.0, 100.0, null);
+		return flow;
 	}
 
 	public Application getApplicationOffered() {
@@ -83,9 +93,6 @@ public class ApplicationServiceProvider implements Steppable, Serializable,
 	 * information for use in other decision making, such as where to locate
 	 * datacenters
 	 * 
-	 * @param amount
-	 *            How much has the application been used? TODO: Think about
-	 *            units.
 	 * @param acc
 	 *            The consumer class which is using the application
 	 * @param originLocation
@@ -93,15 +100,18 @@ public class ApplicationServiceProvider implements Steppable, Serializable,
 	 * @param datacenterLocation
 	 *            Where the usage was serviced/processed from
 	 */
-	public void processUsage(final NetFlow usage) {
-		double ads = usage.amount * this.priceAdvertising.get();
-		double sub = usage.amount * this.priceSubscriptions.get();
+	public void processUsage(AbstractConsumerClass consumer,
+			AbstractEdgeNetwork network) {
+
+		double ads = this.priceAdvertising.get();
+		double sub = this.priceSubscriptions.get();
 		this.revenueAdvertising.increment(ads);
 		this.revenueSubscriptions.increment(sub);
 		this.financials.earn(ads + sub);
 
-		usage.source = this.datacenter;
-		this.datacenter.send(usage);
+		NetFlow flow = this.createNetFlow(consumer, network);
+
+		this.datacenter.send(flow);
 	}
 
 	@Override

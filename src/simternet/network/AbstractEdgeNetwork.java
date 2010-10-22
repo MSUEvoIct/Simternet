@@ -4,9 +4,12 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Level;
+
 import sim.engine.SimState;
 import sim.util.Bag;
 import sim.util.Int2D;
+import simternet.Simternet;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.nsp.AbstractNetworkProvider;
 
@@ -45,13 +48,30 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 		return buildCost;
 	}
 
+	/**
+	 * The location of this network in the landscape.
+	 */
 	protected final Int2D location;
 
+	/**
+	 * The maximum bandwidth each edge connection can support. Unlike other
+	 * networks, this is an instantaneous measure rather than a total transfer
+	 * capacity per period. I.e., bytes per second, not bytes per month.
+	 */
+	protected Double maxBandwidth;
+
+	/**
+	 * The NSP that owns and operates this network.
+	 */
 	protected final AbstractNetworkProvider owner;
 
 	public AbstractEdgeNetwork(AbstractNetworkProvider owner, Int2D location) {
 		this.owner = owner;
 		this.location = location;
+	}
+
+	public Double getMaxBandwidth() {
+		return this.maxBandwidth;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -83,16 +103,31 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 	public void sendFlowsToCustomers() {
 		// For now, just dump information on the flows...
 		for (BackboneLink link : this.ingressLinks) {
-			// should be only one link...
+			// there should only be one ingress link;
+			// we should only go through this once.
 			List<NetFlow> flows = link.receiveFlows();
-			for (NetFlow flow : flows)
-				System.out.println(flow);
+			for (NetFlow flow : flows) {
+				Simternet.log(Level.TRACE, this + " received " + flow + " for "
+						+ flow.user);
+				if (flow.isCongested())
+					Simternet.log(Level.DEBUG, flow + " congested, "
+							+ flow.describeCongestion());
+			}
 		}
+	}
+
+	public void setMaxBandwidth(Double maxBandwidth) {
+		this.maxBandwidth = maxBandwidth;
 	}
 
 	@Override
 	public void step(SimState state) {
 		this.sendFlowsToCustomers();
+	}
+
+	@Override
+	public String toString() {
+		return "Edge of " + this.owner.getName() + " @" + this.location;
 	}
 
 	@Override

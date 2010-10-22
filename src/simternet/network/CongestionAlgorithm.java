@@ -1,8 +1,9 @@
 package simternet.network;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface CongestionAlgorithm {
-	public Collection<NetFlow> limit(Collection<NetFlow> flows,
-			BackboneLink bottleneck);
+	public BackboneLink getLink();
+
+	public List<NetFlow> limit(List<NetFlow> flows, BackboneLink bottleneck);
 }

@@ -5,7 +5,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.UUID;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -36,12 +35,13 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	public Financials financials;
 	protected Int2D homeBase;
 	protected InvestmentStrategy investmentStrategy;
-	protected String name = UUID.randomUUID().toString();
+	protected String name;
 	protected PricingStrategy pricingStrategy;
 	public Simternet simternet = null;
 
 	public AbstractNetworkProvider(Simternet simternet) {
 		this.simternet = simternet;
+
 		this.name = simternet.parameters.getNSPName();
 
 		Double endowment = Double.parseDouble(this.simternet.parameters

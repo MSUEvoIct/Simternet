@@ -1,7 +1,6 @@
 package simternet.consumer;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -9,10 +8,8 @@ import sim.util.Int2D;
 import simternet.Simternet;
 import simternet.application.ApplicationServiceProvider;
 import simternet.network.AbstractEdgeNetwork;
-import simternet.network.NetFlow;
 import simternet.temporal.AsyncUpdate;
 import simternet.temporal.Temporal;
-import simternet.temporal.TemporalHashMap;
 
 @SuppressWarnings("serial")
 public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
@@ -24,13 +21,9 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 	protected final Int2D location;
 
 	/**
-	 * This is a significant data structure. It contains details on how each
-	 * network is used, which includes usage of particular applications, since
-	 * it must be possible to vary this based on the network the user is
-	 * connected to. i.e., a user on 56k dialup is not going to watch streaming
-	 * television on Hulu.
+	 * 
 	 */
-	protected final TemporalHashMap<AbstractEdgeNetwork, NetworkUsageDetails> networkUsage;
+	protected final String name;
 
 	/**
 	 * The number of consumers represented by this agent.
@@ -60,71 +53,49 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 		this.location = location;
 		this.profile = profile;
 		this.population = new Temporal<Double>(population);
-		this.networkUsage = new TemporalHashMap<AbstractEdgeNetwork, NetworkUsageDetails>();
+		this.name = s.parameters.getCCName();
 	}
 
-	protected void consumeApplication(AbstractEdgeNetwork aen,
-			ApplicationServiceProvider asp, ApplicationUsage usage) {
-		NetFlow nf = new NetFlow();
-
-		nf.user = this;
-		nf.destination = aen;
-
-		// total amount of usage = population * usage
-		nf.amount = this.population.get();
-		nf.amount *= usage.usageAmount.get();
-
-		// usage currently directly processed by asp rather than via network
-		// transversal.
-		asp.processUsage(nf);
+	/**
+	 * @param asp
+	 *            The application to use
+	 * @param aen
+	 *            The network on which to use the application
+	 */
+	protected void consumeApplication(ApplicationServiceProvider application,
+			AbstractEdgeNetwork network) {
+		application.processUsage(this, network);
 	}
 
-	protected void consumeApplications() {
+	/**
+	 * This function should, for each application the consumer uses, call
+	 * consumeApplication() to actualize that consumption.
+	 */
+	protected abstract void consumeApplications();
 
-		// for each network this consumer class subscribes to
-		for (Map.Entry<AbstractEdgeNetwork, NetworkUsageDetails> netMap : this.networkUsage
-				.entrySet()) {
-
-			AbstractEdgeNetwork aen = netMap.getKey();
-			TemporalHashMap<ApplicationServiceProvider, ApplicationUsage> appsUsage = netMap
-					.getValue().getApplicationUsage();
-
-			// for each application used on that network
-			for (Map.Entry<ApplicationServiceProvider, ApplicationUsage> appUsage : appsUsage
-					.entrySet())
-				// Process usage individually.
-				this.consumeApplication(aen, appUsage.getKey(), appUsage
-						.getValue());
-		}
+	/**
+	 * Maintain usage of the specified network. E.g., pay the bill, but could
+	 * include more tasks in the future...
+	 * 
+	 * TODO: Make price paid reflect utility of consumer?
+	 * 
+	 * @param network
+	 */
+	protected void consumeNetwork(AbstractEdgeNetwork network) {
+		network.receivePayment(this, this.getPopultation());
 	}
 
-	protected void consumeNetworks() {
-
-		// for each network this consumer class subscribes to
-		for (Map.Entry<AbstractEdgeNetwork, NetworkUsageDetails> netMap : this.networkUsage
-				.entrySet()) {
-			AbstractEdgeNetwork aen = netMap.getKey();
-			NetworkUsageDetails nud = netMap.getValue();
-
-			// Pay for our network connections.
-			aen.receivePayment(this, nud.subscribers.get());
-			// TODO: Is this the proper place to have the price affect utility?
-		}
-	}
-
-	//
-	// public boolean isSubscribed(AbstractEdgeNetwork network) {
-	// return this.networkSubscriptions.equals(network);
-	// }
+	/**
+	 * For each network this consumer agent is connected to, use
+	 * consumeNetwork(AbstractEdgeNetwork) to handle the details.
+	 */
+	protected abstract void consumeNetworks();
 
 	public Int2D getLocation() {
 		return this.location;
 	}
 
 	/**
-	 * If this function will be called often, it should be reduced from O=n^2 to
-	 * O=1 by tracking population changes in a separate variable.
-	 * 
 	 * @return The TOTAL population of this specific Consumer Class at ALL
 	 *         locations.
 	 */
@@ -133,11 +104,11 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 	}
 
 	public Double getSubscribers(AbstractEdgeNetwork aen) {
-		NetworkUsageDetails nud = this.networkUsage.get(aen);
-		if (nud == null)
-			return 0.0;
+		if (this.usesNetwork(aen))
+			// per agent subscription is all or nothing.
+			return this.getPopultation();
 		else
-			return nud.getSubscribers();
+			return 0.0;
 	}
 
 	/**
@@ -146,19 +117,11 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 	 */
 	protected abstract void manageApplications();
 
+	/**
+	 * Make decisions about <i>which</i> networks to use. Process their actual
+	 * usage in consumeNetworks();
+	 */
 	protected abstract void manageNetworks();
-
-	// public Set<AbstractNetwork> networksSubscribed(Int2D location) {
-	// HashSet<AbstractNetwork> muffin = new HashSet<AbstractNetwork>();
-	// Bag bag = this.networkSubscriptions.getObjectsAtLocation(location.x,
-	// location.y);
-	// for (int i = 0; i < bag.numObjs; i++)
-	// muffin.add((AbstractNetwork) bag.objs[i]);
-	// return muffin;
-	// } pop) public Double numSubscriptions(AbstractEdgeNetwork network) {
-	// NetworkUsageDetails nud = this.networkUsage.get(network);
-	// return nud.subscribers.get();
-	// }
 
 	public void step(SimState state) {
 		if (this.s.parameters.debugLevel() > 10)
@@ -174,9 +137,15 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 	}
 
 	@Override
+	public String toString() {
+		return this.name;
+	}
+
+	@Override
 	public void update() {
-		this.networkUsage.update();
 		this.population.update();
 	}
+
+	public abstract Boolean usesNetwork(AbstractEdgeNetwork network);
 
 }

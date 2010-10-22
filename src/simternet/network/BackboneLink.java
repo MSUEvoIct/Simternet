@@ -41,9 +41,11 @@ public class BackboneLink {
 	 * A provider may choose a congestion algorithm, or QoS policy, on a
 	 * per-link basis.
 	 * 
-	 * TODO: For now, do not process congestion.
+	 * TODO: For now, use the Internet 'best effort' approximating
+	 * WFQCongestionAlgorithm();
 	 */
-	protected CongestionAlgorithm congestionAlgorithm = new NullCongestionAlgorithm();
+	protected CongestionAlgorithm congestionAlgorithm = new WFQCongestionAlgorithm(
+			this);
 
 	/**
 	 * When traffic is sent through this link, it winds up at this network.
@@ -108,7 +110,9 @@ public class BackboneLink {
 
 	public void makeInfinite() {
 		this.latency = 0D;
-		this.bandwidth = Double.MAX_VALUE;
+		// this.bandwidth = Double.MAX_VALUE;
+		this.bandwidth = 5.0E7;
+
 	}
 
 	/**
@@ -149,6 +153,12 @@ public class BackboneLink {
 	public void setRoutingProtocolConfig(
 			RoutingProtocolConfig routingProtocolConfig) {
 		this.routingProtocolConfig = routingProtocolConfig;
+	}
+
+	@Override
+	public String toString() {
+		return "Link " + this.getSource() + "->" + this.getDestination()
+				+ ", BW=" + this.bandwidth;
 	}
 
 	/**
