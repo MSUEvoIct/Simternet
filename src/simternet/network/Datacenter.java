@@ -23,6 +23,7 @@ public class Datacenter extends AbstractNetwork {
 	public void route() {
 		for (NetFlow flow : this.inputQueue)
 			this.route(flow);
+		this.inputQueue = new TemporalHashSet<NetFlow>();
 	}
 
 	public void send(NetFlow flow) {

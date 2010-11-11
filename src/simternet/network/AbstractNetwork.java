@@ -182,9 +182,19 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable,
 		this.defaultRoute.set(defaultRoute);
 	}
 
+	/*
+	 * This function is responsible for top-level operational management of the
+	 * network node.
+	 * 
+	 * (non-Javadoc)
+	 * 
+	 * @see sim.engine.Steppable#step(sim.engine.SimState)
+	 */
 	@Override
 	public void step(SimState state) {
+		// Routing decisions are made first, analagous to a router "backplane"
 		this.route();
+		// Clear output queues on each egress interface.
 		this.transmit();
 	}
 
