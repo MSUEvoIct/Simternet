@@ -51,21 +51,7 @@ public class Exogenous extends Properties implements Serializable {
 		return vars;
 	}
 
-	/**
-	 * For testing...
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		Exogenous foo = Exogenous.getDefaults();
-		String bar = foo.getProperty("nsp.misc.names");
-		String names[] = bar.split("\\W");
-		for (String name : names)
-			System.out.println(name);
-	}
-
 	private int aspCounter = 1;
-
 	private int ccCounter = 1;
 	private Integer debugLevel;
 	private int nspCounter = 1;

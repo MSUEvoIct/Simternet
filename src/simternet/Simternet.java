@@ -4,18 +4,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.field.grid.DoubleGrid2D;
 import sim.field.grid.SparseGrid2D;
 import sim.util.Int2D;
+import simternet.application.ApplicationCategory;
 import simternet.application.ApplicationServiceProvider;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.consumer.SimpleConsumer;
@@ -57,8 +54,6 @@ public class Simternet extends SimState implements Serializable {
 		}
 	}
 
-	public static final boolean LOGGING_ENABLED = true;
-
 	/**
 	 * Storing a version identifier is appropriate for this class, as we will
 	 * likely be saving it often and may want to read older versions in a
@@ -67,28 +62,12 @@ public class Simternet extends SimState implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public static void log(Level l, String m) {
-		Simternet.log(null, l, m);
-	}
-
-	public static void log(String logger, Level l, String m) {
-		if (Simternet.LOGGING_ENABLED) {
-			Logger log;
-			if (logger == null)
-				log = Logger.getRootLogger();
-			else
-				log = Logger.getLogger(logger);
-
-			log.log(l, m);
-		}
-	}
-
 	public static void main(String[] args) {
-		Simternet s = new Simternet(78346);
 		SimState.doLoop(Simternet.class, args);
-		Simternet.log(Level.DEBUG, "bob");
 		System.exit(0);
 	}
+
+	protected Collection<ApplicationCategory> appCategories = new ArrayList<ApplicationCategory>();
 
 	/**
 	 * All application service providers in the simulation
@@ -366,9 +345,9 @@ public class Simternet extends SimState implements Serializable {
 
 	}
 
-	public void initData() {
-		this.networkServiceProviders = new HashSet<AbstractNetworkProvider>();
-	}
+	// public void initData() {
+	// this.networkServiceProviders = new HashSet<AbstractNetworkProvider>();
+	// }
 
 	/**
 	 * DO: Specify this somehow in parameters, rather than source.
@@ -380,7 +359,7 @@ public class Simternet extends SimState implements Serializable {
 	@Override
 	public void start() {
 		super.start();
-		this.initData();
+		// this.initData();
 		this.initConsumerClasses();
 		this.initNetworkServiceProviders();
 		this.initApplicationServiceProviders();
