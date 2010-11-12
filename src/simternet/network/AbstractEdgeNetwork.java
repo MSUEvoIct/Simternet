@@ -5,11 +5,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import sim.engine.SimState;
 import sim.util.Bag;
 import sim.util.Int2D;
-import simternet.Simternet;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.nsp.AbstractNetworkProvider;
 
@@ -107,11 +107,14 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 			// we should only go through this once.
 			List<NetFlow> flows = link.receiveFlows();
 			for (NetFlow flow : flows) {
-				Simternet.log(Level.TRACE, this + " received " + flow + " for "
-						+ flow.user);
-				if (flow.isCongested())
-					Simternet.log(Level.DEBUG, flow + " congested, "
-							+ flow.describeCongestion());
+				Logger.getRootLogger().log(Level.TRACE,
+						this + " received " + flow + " for " + flow.user);
+				if (flow.isCongested()) {
+					Logger.getRootLogger().log(Level.DEBUG,
+							flow + " congested, " + flow.describeCongestion());
+					flow.source.noteCongestion(flow);
+				}
+
 			}
 		}
 	}

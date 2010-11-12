@@ -86,6 +86,10 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable,
 		return this.defaultRoute.get();
 	}
 
+	public void noteCongestion(NetFlow flow) {
+		// do nothing; should be used mostly by Datacenter networks.
+	}
+
 	/**
 	 * This function is the main entry point for agents operating their
 	 * networks. route() receives traffic from each ingress BackboneLink. It
