@@ -19,6 +19,7 @@ import simternet.consumer.SimpleConsumer;
 import simternet.network.AbstractNetwork;
 import simternet.nsp.AbstractNetworkProvider;
 import simternet.nsp.DumbNetworkServiceProvider;
+import simternet.nsp.EvolvingNetworkProvider;
 import simternet.temporal.Arbiter;
 
 /**
@@ -54,6 +55,11 @@ public class Simternet extends SimState implements Serializable {
 		}
 	}
 
+	/*
+	 * Do we use an LCS to evolve the NSP?
+	 */
+	private static boolean evolve = false;
+
 	/**
 	 * Storing a version identifier is appropriate for this class, as we will
 	 * likely be saving it often and may want to read older versions in a
@@ -64,6 +70,9 @@ public class Simternet extends SimState implements Serializable {
 
 	public static void main(String[] args) {
 		SimState.doLoop(Simternet.class, args);
+		for (String s : args)
+			if (s.equals("--evolve"))
+				Simternet.evolve = true;
 		System.exit(0);
 	}
 
@@ -353,7 +362,12 @@ public class Simternet extends SimState implements Serializable {
 	 * DO: Specify this somehow in parameters, rather than source.
 	 */
 	private void initNetworkServiceProviders() {
-		this.addNetworkServiceProvider(new DumbNetworkServiceProvider(this));
+		if (Simternet.evolve)
+			this.addNetworkServiceProvider(new EvolvingNetworkProvider(this));
+		else
+			this
+					.addNetworkServiceProvider(new DumbNetworkServiceProvider(
+							this));
 	}
 
 	@Override
