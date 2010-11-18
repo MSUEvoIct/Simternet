@@ -4,8 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Level;
-
-import simternet.Simternet;
+import org.apache.log4j.Logger;
 
 /**
  * WFQCongestionAlgorithm executes a maximin allocation of bandwidth. It
@@ -53,12 +52,16 @@ public class WFQCongestionAlgorithm implements CongestionAlgorithm {
 		 * Simply allow all flows to pass this link uncongested.
 		 */
 		if (remainingUsage < remainingCapacity) {
-			Simternet.log(Level.DEBUG, this.getLink() + " uncongested, "
-					+ remainingUsage + "/" + remainingCapacity);
+			Logger.getRootLogger().log(
+					Level.DEBUG,
+					this.getLink() + " uncongested, " + remainingUsage + "/"
+							+ remainingCapacity);
 			return flows;
 		} else
-			Simternet.log(Level.DEBUG, this.getLink() + " congested, "
-					+ remainingUsage + "/" + remainingCapacity);
+			Logger.getRootLogger().log(
+					Level.DEBUG,
+					this.getLink() + " congested, " + remainingUsage + "/"
+							+ remainingCapacity);
 
 		/*
 		 * Otherwise, allocate bandwidth to the slowest flows first.

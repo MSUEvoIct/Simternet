@@ -63,7 +63,7 @@ public class ApplicationServiceProvider implements Steppable, Serializable,
 	protected NetFlow createNetFlow(AbstractConsumerClass consumer,
 			AbstractEdgeNetwork network) {
 		NetFlow flow = new InteractiveFlow(this.datacenter, network, consumer,
-				100.0, 100.0, null);
+				100.0, 1000.0, null);
 		return flow;
 	}
 
@@ -111,7 +111,7 @@ public class ApplicationServiceProvider implements Steppable, Serializable,
 
 		NetFlow flow = this.createNetFlow(consumer, network);
 
-		this.datacenter.send(flow);
+		this.datacenter.originate(flow);
 	}
 
 	@Override

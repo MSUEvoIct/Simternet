@@ -1,28 +1,46 @@
 package simternet.consumer;
 
 import java.io.Serializable;
+import java.util.List;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Int2D;
 import simternet.Simternet;
+import simternet.application.ApplicationCategory;
 import simternet.application.ApplicationServiceProvider;
 import simternet.network.AbstractEdgeNetwork;
 import simternet.temporal.AsyncUpdate;
 import simternet.temporal.Temporal;
+import simternet.temporal.TemporalHashMap;
 
 @SuppressWarnings("serial")
 public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 		Serializable {
 
 	/**
+	 * Consumers do not consume all applications. Whether the budget constraint
+	 * is measured in time or dollars, consumers will not spend more than this
+	 * amount on the app class during the next period. To the extent that those
+	 * preferences change over time (i.e., consumers tending to spend more time
+	 * consuming entertainment content), this should be reflected by changing
+	 * these values.
+	 */
+	protected TemporalHashMap<ApplicationCategory, Double> appBudgetConstraints = new TemporalHashMap<ApplicationCategory, Double>();
+
+	/**
+	 * The actual list of application service providers selected for use, sorted
+	 * by category. manageApplications() is responsible for maintaining this
+	 * data structure, based on appBudgetConstraints and the qualities of the
+	 * applications themselves.
+	 */
+	protected TemporalHashMap<ApplicationCategory, List<ApplicationServiceProvider>> appsUsed = new TemporalHashMap<ApplicationCategory, List<ApplicationServiceProvider>>();
+
+	/**
 	 * The physical location of this set of consumers.
 	 */
 	protected final Int2D location;
 
-	/**
-	 * 
-	 */
 	protected final String name;
 
 	/**
@@ -115,7 +133,9 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 	 * Make decisions about <i>which</i> applications to use. Process their
 	 * actual usage in consumeApplications().
 	 */
-	protected abstract void manageApplications();
+	protected void manageApplications() {
+
+	}
 
 	/**
 	 * Make decisions about <i>which</i> networks to use. Process their actual
