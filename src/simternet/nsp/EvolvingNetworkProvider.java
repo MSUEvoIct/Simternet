@@ -51,7 +51,10 @@ public class EvolvingNetworkProvider extends AbstractNetworkProvider implements
 
 	public void runLCSIfNecessary() {
 		if (!this.hasLCSRun) {
-			System.out.println("Running LCS placeholder");
+			System.out.println("Running LCS placeholder and passing "
+					+ this.getDeltaRevenue()
+					+ " as delta revenue at time step "
+					+ this.simternet.schedule.getSteps());
 			this.price = 10.0; // will eventually come from LCS
 			this.hasLCSRun = true;
 		}

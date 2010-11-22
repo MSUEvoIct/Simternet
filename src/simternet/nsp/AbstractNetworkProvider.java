@@ -31,7 +31,9 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	private static final long serialVersionUID = 1L;
 
 	protected BackboneNetwork backboneNetwork;
+	public Double deltaRevenue = 0.0;
 	protected TemporalSparseGrid2D edgeNetworks;
+
 	public Financials financials;
 	protected Int2D homeBase;
 	protected InvestmentStrategy investmentStrategy;
@@ -129,6 +131,16 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		}
 
 		return numCustomers;
+	}
+
+	/**
+	 * Passes back the change in revenue from the previous time step to the
+	 * current time step
+	 * 
+	 * @return
+	 */
+	public Double getDeltaRevenue() {
+		return this.deltaRevenue;
 	}
 
 	public Collection<AbstractNetwork> getEdgeNetworks() {
@@ -271,7 +283,12 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	}
 
 	public void update() {
+		this.deltaRevenue = this.financials.getTotalRevenue();
 		this.financials.update();
+		// Calculate delta revenue as current revenue - past revenue
+		this.deltaRevenue = this.financials.getTotalRevenue()
+				- this.deltaRevenue;
+
 		this.edgeNetworks.update();
 		this.backboneNetwork.update();
 	}
