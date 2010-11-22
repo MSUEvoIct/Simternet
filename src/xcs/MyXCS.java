@@ -39,6 +39,12 @@ public class MyXCS implements Serializable {
 		return;
 	}
 
+	private int currentExplore = 0;
+	private int currentExploreStepCounter = 0;
+	private int currentExploreTrialC = 0;
+	private int[] currentStepsToFood = new int[50];
+	private double[] currentSysError = new double[50];
+
 	/**
 	 * Stores the posed problem.
 	 */
@@ -77,6 +83,31 @@ public class MyXCS implements Serializable {
 		// initialize XCS
 		this.pop = null;
 		MyXCS.cons = new XCSConstants();
+	}
+
+	/**************************** Single Step Experiments ***************************/
+
+	/*
+	 * Ali's addition to execute one step of multi step experiement taking aD
+	 * for agent data
+	 */
+	void doMutliStepSingleIncrementExperiment(AgentData aD, PrintWriter pW) {
+		this.currentExplore = (this.currentExplore + 1) % 2;
+
+		String state = this.env.resetState();
+		if (this.currentExplore == 1)
+			this.currentExploreStepCounter = this.doOneMultiStepProblemExplore(
+					state, this.currentExploreStepCounter);
+		else
+			this.doOneMultiStepProblemExploit(state, this.currentStepsToFood,
+					this.currentSysError, this.currentExploreTrialC,
+					this.currentExploreStepCounter);
+		if ((this.currentExploreTrialC % 50 == 0) && (this.currentExplore == 0)
+				&& (this.currentExploreTrialC > 0))
+			this.writePerformance(pW, this.currentStepsToFood,
+					this.currentSysError, this.currentExploreTrialC);
+		// Sam's hack
+		// System.out.println(((MyEnvironment)env).getAssets());
 	}
 
 	/**
@@ -229,15 +260,15 @@ public class MyXCS implements Serializable {
 				prevActionSet.confirmClassifiersInSet();
 				prevActionSet.updateSet(predictionArray.getBestValue(),
 						prevReward);
-				prevActionSet.runGA(stepCounter + steps, prevState, this.env
-						.getNrActions());
+				prevActionSet.runGA(stepCounter + steps, prevState,
+						this.env.getNrActions());
 			}
 
 			if (this.env.doReset()) {
 				actionSet.confirmClassifiersInSet();
 				actionSet.updateSet(0., reward);
-				actionSet.runGA(stepCounter + steps, state, this.env
-						.getNrActions());
+				actionSet.runGA(stepCounter + steps, state,
+						this.env.getNrActions());
 				break;
 			}
 			prevActionSet = actionSet;
@@ -277,8 +308,6 @@ public class MyXCS implements Serializable {
 			// System.out.println(((MyEnvironment)env).getAssets());
 		}
 	}
-
-	/**************************** Single Step Experiments ***************************/
 
 	/**
 	 * Executes one main performance evaluation loop for a single step problem.
