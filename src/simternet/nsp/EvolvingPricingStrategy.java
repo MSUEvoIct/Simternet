@@ -41,11 +41,11 @@ public class EvolvingPricingStrategy implements PricingStrategy, Serializable {
 	 * @see simternet.nsp.PricingStrategy#setPrices(simternet.Simternet,
 	 * sim.field.grid.SparseGrid2D)
 	 * 
-	 * Does nothing, since we always return a constant price anyway.
+	 * Grabs the global price set by the LCS
 	 */
 	@Override
 	public void setPrices() {
-
+		this.setSinglePrice(this.nsp.getPrice(null, null, null));
 	}
 
 	/*

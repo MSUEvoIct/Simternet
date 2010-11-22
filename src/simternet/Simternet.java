@@ -69,10 +69,10 @@ public class Simternet extends SimState implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static void main(String[] args) {
-		SimState.doLoop(Simternet.class, args);
 		for (String s : args)
 			if (s.equals("--evolve"))
 				Simternet.evolve = true;
+		SimState.doLoop(Simternet.class, args);
 		System.exit(0);
 	}
 

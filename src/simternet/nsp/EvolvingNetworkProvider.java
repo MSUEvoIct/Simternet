@@ -3,7 +3,10 @@ package simternet.nsp;
 import java.io.Serializable;
 import java.util.Date;
 
+import sim.util.Int2D;
 import simternet.Simternet;
+import simternet.consumer.AbstractConsumerClass;
+import simternet.network.AbstractNetwork;
 import xcs.Environment;
 import xcs.MyEnvironment;
 import xcs.MyXCS;
@@ -36,9 +39,23 @@ public class EvolvingNetworkProvider extends AbstractNetworkProvider implements
 		MyXCS xcs = new MyXCS(e, "out.txt");
 		xcs.setNumberOfTrials(10000);
 		xcs.setNumberOfExperiments(2);
+		System.out.println("Evolving!");
 	}
 
-	// Add code to run XCS (if it hasn't been run yet this step)
+	@Override
+	public Double getPrice(Class<? extends AbstractNetwork> cl,
+			AbstractConsumerClass acc, Int2D location) {
+		this.runLCSIfNecessary();
+		return this.price;
+	}
+
+	public void runLCSIfNecessary() {
+		if (!this.hasLCSRun) {
+			System.out.println("Running LCS placeholder");
+			this.price = 10.0; // will eventually come from LCS
+			this.hasLCSRun = true;
+		}
+	}
 
 	@Override
 	public void update() {
