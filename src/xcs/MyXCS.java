@@ -32,7 +32,7 @@ public class MyXCS implements Serializable {
 		XCSConstants.setSeed(1 + (new Date()).getTime() % 10000);
 
 		e = new MyEnvironment();
-		MyXCS xcs = new MyXCS(e, "out.txt");
+		MyXCS xcs = new MyXCS(e);
 		xcs.setNumberOfTrials(10000);
 		xcs.setNumberOfExperiments(2);
 		xcs.runXCS();
@@ -74,11 +74,8 @@ public class MyXCS implements Serializable {
 	/**
 	 * Constructs the XCS system.
 	 */
-	public MyXCS(Environment e, String outFileString) {
+	public MyXCS(Environment e) {
 		this.env = e;
-
-		// specify output file
-		this.outFile = new File(outFileString);
 
 		// initialize XCS
 		this.pop = null;
@@ -91,7 +88,7 @@ public class MyXCS implements Serializable {
 	 * Ali's addition to execute one step of multi step experiement taking aD
 	 * for agent data
 	 */
-	void doMutliStepSingleIncrementExperiment(AgentData aD, PrintWriter pW) {
+	public void doMutliStepSingleIncrementExperiment(AgentData aD) {
 		this.currentExplore = (this.currentExplore + 1) % 2;
 
 		String state = this.env.resetState();
@@ -102,12 +99,11 @@ public class MyXCS implements Serializable {
 			this.doOneMultiStepProblemExploit(state, this.currentStepsToFood,
 					this.currentSysError, this.currentExploreTrialC,
 					this.currentExploreStepCounter);
-		if ((this.currentExploreTrialC % 50 == 0) && (this.currentExplore == 0)
-				&& (this.currentExploreTrialC > 0))
-			this.writePerformance(pW, this.currentStepsToFood,
-					this.currentSysError, this.currentExploreTrialC);
-		// Sam's hack
-		// System.out.println(((MyEnvironment)env).getAssets());
+		// if ((this.currentExploreTrialC % 50 == 0) && (this.currentExplore ==
+		// 0)
+		// && (this.currentExploreTrialC > 0))
+		// this.writePerformance(pW, this.currentStepsToFood,
+		// this.currentSysError, this.currentExploreTrialC);
 	}
 
 	/**
@@ -260,15 +256,15 @@ public class MyXCS implements Serializable {
 				prevActionSet.confirmClassifiersInSet();
 				prevActionSet.updateSet(predictionArray.getBestValue(),
 						prevReward);
-				prevActionSet.runGA(stepCounter + steps, prevState,
-						this.env.getNrActions());
+				prevActionSet.runGA(stepCounter + steps, prevState, this.env
+						.getNrActions());
 			}
 
 			if (this.env.doReset()) {
 				actionSet.confirmClassifiersInSet();
 				actionSet.updateSet(0., reward);
-				actionSet.runGA(stepCounter + steps, state,
-						this.env.getNrActions());
+				actionSet.runGA(stepCounter + steps, state, this.env
+						.getNrActions());
 				break;
 			}
 			prevActionSet = actionSet;

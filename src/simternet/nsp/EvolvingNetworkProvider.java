@@ -7,6 +7,7 @@ import sim.util.Int2D;
 import simternet.Simternet;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.network.AbstractNetwork;
+import xcs.AgentData;
 import xcs.Environment;
 import xcs.MyEnvironment;
 import xcs.MyXCS;
@@ -27,6 +28,8 @@ public class EvolvingNetworkProvider extends AbstractNetworkProvider implements
 	 */
 	private Double price = 15.0;
 
+	private MyXCS xcs;
+
 	public EvolvingNetworkProvider(Simternet s) {
 		super(s);
 		this.pricingStrategy = new EvolvingPricingStrategy(this, this.price);
@@ -36,7 +39,7 @@ public class EvolvingNetworkProvider extends AbstractNetworkProvider implements
 		Environment e = null;
 		XCSConstants.setSeed(1 + (new Date()).getTime() % 10000);
 		e = new MyEnvironment();
-		MyXCS xcs = new MyXCS(e, "out.txt");
+		MyXCS xcs = new MyXCS(e);
 		xcs.setNumberOfTrials(10000);
 		xcs.setNumberOfExperiments(2);
 		System.out.println("Evolving!");
@@ -55,8 +58,11 @@ public class EvolvingNetworkProvider extends AbstractNetworkProvider implements
 					+ this.getDeltaRevenue()
 					+ " as delta revenue at time step "
 					+ this.simternet.schedule.getSteps());
+
 			this.price = 10.0; // will eventually come from LCS
 			this.hasLCSRun = true;
+			AgentData aD = new AgentData(this.getDeltaRevenue());
+			this.xcs.doMutliStepSingleIncrementExperiment(aD);
 		}
 	}
 

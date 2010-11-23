@@ -5,7 +5,11 @@ public class AgentData {
 	private double m_deltaRevenue;
 
 	public AgentData() {
-		this.m_deltaRevenue = 0;
+		this(0.0);
+	}
+
+	public AgentData(Double rev) {
+		this.m_deltaRevenue = rev;
 	}
 
 	public double getM_deltaRevenue() {
