@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -91,12 +92,12 @@ public class MyXCS implements Serializable {
 	public void doMutliStepSingleIncrementExperiment(AgentData aD) {
 		this.currentExplore = (this.currentExplore + 1) % 2;
 
-		String state = this.env.resetState();
+		AgentData state = this.env.resetState();
 		if (this.currentExplore == 1)
 			this.currentExploreStepCounter = this.doOneMultiStepProblemExplore(
 					state, this.currentExploreStepCounter);
 		else
-			this.doOneMultiStepProblemExploit(state, this.currentStepsToFood,
+			this.doOneMultiStepProblemExploit(aD, this.currentStepsToFood,
 					this.currentSysError, this.currentExploreTrialC,
 					this.currentExploreStepCounter);
 		// if ((this.currentExploreTrialC % 50 == 0) && (this.currentExplore ==
@@ -121,7 +122,7 @@ public class MyXCS implements Serializable {
 		for (int exploreTrialC = 0; exploreTrialC < this.maxProblems; exploreTrialC += explore) {
 			explore = (explore + 1) % 2;
 
-			String state = this.env.resetState();
+			AgentData state = this.env.resetState();
 			if (explore == 1)
 				exploreStepCounter = this.doOneMultiStepProblemExplore(state,
 						exploreStepCounter);
@@ -163,8 +164,9 @@ public class MyXCS implements Serializable {
 	 * @param stepCounter
 	 *            The number of exploration steps executed so far.
 	 */
-	private void doOneMultiStepProblemExploit(String state, int[] stepsToGoal,
-			double[] sysError, int trialCounter, int stepCounter) {
+	private void doOneMultiStepProblemExploit(AgentData state,
+			int[] stepsToGoal, double[] sysError, int trialCounter,
+			int stepCounter) {
 		XClassifierSet prevActionSet = null;
 		double prevReward = 0., prevPrediction = 0.;
 		int steps;
@@ -174,22 +176,23 @@ public class MyXCS implements Serializable {
 			XClassifierSet matchSet = new XClassifierSet(state, this.pop,
 					stepCounter, this.env.getNrActions());
 
-			PredictionArray predictionArray = new PredictionArray(matchSet,
-					this.env.getNrActions());
+			PredictionArray predictionArray = new PredictionArray(matchSet);
 
-			int actionWinner = predictionArray.bestActionWinner();
+			ArrayList<XClassifier> actionWinners = predictionArray
+					.bestActionWinner();
 
 			XClassifierSet actionSet = new XClassifierSet(matchSet,
-					actionWinner);
+					actionWinners);
 
-			double reward = this.env.executeAction(actionWinner);
+			double reward = this.env.executeAction(predictionArray
+					.defuzzifyClassifiers(actionWinners));
 
 			if (prevActionSet != null) {
 				prevActionSet.confirmClassifiersInSet();
 				prevActionSet.updateSet(predictionArray.getBestValue(),
 						prevReward);
 				sysError[trialCounter % 50] += Math.abs(XCSConstants.gamma
-						* predictionArray.getValue(actionWinner) + prevReward
+						* predictionArray.getValue(actionWinners) + prevReward
 						- prevPrediction)
 						/ this.env.getMaxPayoff();
 			}
@@ -198,13 +201,13 @@ public class MyXCS implements Serializable {
 				actionSet.confirmClassifiersInSet();
 				actionSet.updateSet(0., reward);
 				sysError[trialCounter % 50] += Math.abs(reward
-						- predictionArray.getValue(actionWinner))
+						- predictionArray.getValue(actionWinners))
 						/ this.env.getMaxPayoff();
 				steps++;
 				break;
 			}
 			prevActionSet = actionSet;
-			prevPrediction = predictionArray.getValue(actionWinner);
+			prevPrediction = predictionArray.getValue(actionWinners);
 			prevReward = reward;
 			state = this.env.getCurrentState();
 		}
@@ -232,25 +235,26 @@ public class MyXCS implements Serializable {
 	 *            The number of exploration steps executed so far.
 	 * @return The updated number of exploration setps.
 	 */
-	private int doOneMultiStepProblemExplore(String state, int stepCounter) {
+	private int doOneMultiStepProblemExplore(AgentData state, int stepCounter) {
 		XClassifierSet prevActionSet = null;
 		double prevReward = 0.;
 		int steps;
-		String prevState = null;
+		AgentData prevState = null;
 
 		for (steps = 0; steps < XCSConstants.teletransportation; steps++) {
 			XClassifierSet matchSet = new XClassifierSet(state, this.pop,
 					stepCounter + steps, this.env.getNrActions());
 
-			PredictionArray predictionArray = new PredictionArray(matchSet,
-					this.env.getNrActions());
+			PredictionArray predictionArray = new PredictionArray(matchSet);
 
-			int actionWinner = predictionArray.randomActionWinner();
+			ArrayList<XClassifier> actionWinners = predictionArray
+					.randomActionWinner();
 
 			XClassifierSet actionSet = new XClassifierSet(matchSet,
-					actionWinner);
+					actionWinners);
 
-			double reward = this.env.executeAction(actionWinner);
+			double reward = this.env.executeAction(predictionArray
+					.defuzzifyClassifiers(actionWinners));
 
 			if (prevActionSet != null) {
 				prevActionSet.confirmClassifiersInSet();
@@ -290,7 +294,7 @@ public class MyXCS implements Serializable {
 		for (int exploreProbC = 0; exploreProbC < this.maxProblems; exploreProbC += explore) {
 			explore = (explore + 1) % 2;
 
-			String state = this.env.resetState();
+			AgentData state = this.env.resetState();
 
 			if (explore == 1)
 				this.doOneSingleStepProblemExplore(state, exploreProbC);
@@ -323,17 +327,18 @@ public class MyXCS implements Serializable {
 	 *            The array stores the last fifty predicted-received reward
 	 *            differences.
 	 */
-	private void doOneSingleStepProblemExploit(String state, int counter,
+	private void doOneSingleStepProblemExploit(AgentData state, int counter,
 			int[] correct, double[] sysError) {
 		XClassifierSet matchSet = new XClassifierSet(state, this.pop, counter,
 				this.env.getNrActions());
 
-		PredictionArray predictionArray = new PredictionArray(matchSet,
-				this.env.getNrActions());
+		PredictionArray predictionArray = new PredictionArray(matchSet);
 
-		int actionWinner = predictionArray.bestActionWinner();
+		ArrayList<XClassifier> actionWinners = predictionArray
+				.bestActionWinner();
 
-		double reward = this.env.executeAction(actionWinner);
+		double reward = this.env.executeAction(predictionArray
+				.defuzzifyClassifiers(actionWinners));
 
 		if (this.env.wasCorrect())
 			correct[counter % 50] = 1;
@@ -359,18 +364,19 @@ public class MyXCS implements Serializable {
 	 * @param counter
 	 *            The number of problems observed so far in exploration.
 	 */
-	private void doOneSingleStepProblemExplore(String state, int counter) {
+	private void doOneSingleStepProblemExplore(AgentData state, int counter) {
 		XClassifierSet matchSet = new XClassifierSet(state, this.pop, counter,
 				this.env.getNrActions());
 
-		PredictionArray predictionArray = new PredictionArray(matchSet,
-				this.env.getNrActions());
+		PredictionArray predictionArray = new PredictionArray(matchSet);
 
-		int actionWinner = predictionArray.randomActionWinner();
+		ArrayList<XClassifier> actionWinners = predictionArray
+				.randomActionWinner();
 
-		XClassifierSet actionSet = new XClassifierSet(matchSet, actionWinner);
+		XClassifierSet actionSet = new XClassifierSet(matchSet, actionWinners);
 
-		double reward = this.env.executeAction(actionWinner);
+		double reward = this.env.executeAction(predictionArray
+				.defuzzifyClassifiers(actionWinners));
 
 		actionSet.updateSet(0., reward);
 
