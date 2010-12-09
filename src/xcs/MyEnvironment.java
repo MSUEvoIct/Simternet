@@ -59,7 +59,7 @@ public class MyEnvironment implements Environment, Serializable {
 	@Override
 	public AgentData resetState() {
 		Random r = new Random(System.currentTimeMillis());
-		this.assets = r.nextInt();
+		this.agentData = new AgentData();
 		return this.getCurrentState();
 	}
 

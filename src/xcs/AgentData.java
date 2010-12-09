@@ -99,7 +99,7 @@ public class AgentData {
 	}
 
 	public void generateRandomData() {
-		this.deltaRevenue.setInputValue(RandomNumber.getDouble());
+		this.setDeltaRevenue(20000 * RandomNumber.getDouble());
 	}
 
 	public String getBinaryString() {

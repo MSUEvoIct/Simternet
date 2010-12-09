@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -27,7 +26,7 @@ public class MyXCS implements Serializable {
 	private static XCSConstants cons;
 
 	public static void main(String args[]) {
-		String envFileString = null;
+		String envFileString = "out.txt";
 		Environment e = null;
 
 		XCSConstants.setSeed(1 + (new Date()).getTime() % 10000);
@@ -77,7 +76,7 @@ public class MyXCS implements Serializable {
 	 */
 	public MyXCS(Environment e) {
 		this.env = e;
-
+		this.outFile = new File("out.txt");
 		// initialize XCS
 		this.pop = null;
 		MyXCS.cons = new XCSConstants();
@@ -178,21 +177,20 @@ public class MyXCS implements Serializable {
 
 			PredictionArray predictionArray = new PredictionArray(matchSet);
 
-			ArrayList<XClassifier> actionWinners = predictionArray
-					.bestActionWinner();
+			CandidateSet actionWinners = predictionArray.bestActionWinner();
 
 			XClassifierSet actionSet = new XClassifierSet(matchSet,
-					actionWinners);
+					actionWinners.set);
 
 			double reward = this.env.executeAction(predictionArray
-					.defuzzifyClassifiers(actionWinners));
+					.defuzzifyClassifiers(actionWinners.set));
 
 			if (prevActionSet != null) {
 				prevActionSet.confirmClassifiersInSet();
 				prevActionSet.updateSet(predictionArray.getBestValue(),
 						prevReward);
 				sysError[trialCounter % 50] += Math.abs(XCSConstants.gamma
-						* predictionArray.getValue(actionWinners) + prevReward
+						* actionWinners.prediction + prevReward
 						- prevPrediction)
 						/ this.env.getMaxPayoff();
 			}
@@ -201,13 +199,13 @@ public class MyXCS implements Serializable {
 				actionSet.confirmClassifiersInSet();
 				actionSet.updateSet(0., reward);
 				sysError[trialCounter % 50] += Math.abs(reward
-						- predictionArray.getValue(actionWinners))
+						- actionWinners.prediction)
 						/ this.env.getMaxPayoff();
 				steps++;
 				break;
 			}
 			prevActionSet = actionSet;
-			prevPrediction = predictionArray.getValue(actionWinners);
+			prevPrediction = actionWinners.prediction;
 			prevReward = reward;
 			state = this.env.getCurrentState();
 		}
@@ -247,14 +245,13 @@ public class MyXCS implements Serializable {
 
 			PredictionArray predictionArray = new PredictionArray(matchSet);
 
-			ArrayList<XClassifier> actionWinners = predictionArray
-					.randomActionWinner();
+			CandidateSet actionWinners = predictionArray.randomActionWinner();
 
 			XClassifierSet actionSet = new XClassifierSet(matchSet,
-					actionWinners);
+					actionWinners.set);
 
 			double reward = this.env.executeAction(predictionArray
-					.defuzzifyClassifiers(actionWinners));
+					.defuzzifyClassifiers(actionWinners.set));
 
 			if (prevActionSet != null) {
 				prevActionSet.confirmClassifiersInSet();
@@ -334,11 +331,10 @@ public class MyXCS implements Serializable {
 
 		PredictionArray predictionArray = new PredictionArray(matchSet);
 
-		ArrayList<XClassifier> actionWinners = predictionArray
-				.bestActionWinner();
+		CandidateSet actionWinners = predictionArray.bestActionWinner();
 
 		double reward = this.env.executeAction(predictionArray
-				.defuzzifyClassifiers(actionWinners));
+				.defuzzifyClassifiers(actionWinners.set));
 
 		if (this.env.wasCorrect())
 			correct[counter % 50] = 1;
@@ -370,13 +366,13 @@ public class MyXCS implements Serializable {
 
 		PredictionArray predictionArray = new PredictionArray(matchSet);
 
-		ArrayList<XClassifier> actionWinners = predictionArray
-				.randomActionWinner();
+		CandidateSet actionWinners = predictionArray.randomActionWinner();
 
-		XClassifierSet actionSet = new XClassifierSet(matchSet, actionWinners);
+		XClassifierSet actionSet = new XClassifierSet(matchSet,
+				actionWinners.set);
 
 		double reward = this.env.executeAction(predictionArray
-				.defuzzifyClassifiers(actionWinners));
+				.defuzzifyClassifiers(actionWinners.set));
 
 		actionSet.updateSet(0., reward);
 

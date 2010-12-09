@@ -222,7 +222,9 @@ public class XClassifier implements Serializable {
 				else
 					tempCondArray[j] = '0';
 			// Now that string is constructed, test it
-			if (cond.isMatching(new String(tempCondArray) + this.action))
+			String newCond = new String(tempCondArray);
+			newCond = newCond + this.action;
+			if (cond.isMatching(newCond))
 				condArray[i] = '1';
 			else
 				condArray[i] = '0';

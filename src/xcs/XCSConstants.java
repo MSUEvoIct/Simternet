@@ -14,6 +14,7 @@ import java.io.Serializable;
  */
 
 public class XCSConstants implements Serializable {
+
 	/**
 	 * Constant for the random number generator (default = 16807).
 	 */
@@ -46,6 +47,8 @@ public class XCSConstants implements Serializable {
 	 * action set size estimate in XCS's classifiers.
 	 */
 	final public static double beta = 0.2;
+
+	final public static boolean debug = true;
 
 	/**
 	 * The fraction of the mean fitness of the population below which the
@@ -107,8 +110,8 @@ public class XCSConstants implements Serializable {
 	 * The probability of using a don't care symbol in an allele when covering.
 	 */
 	final public static double P_dontcare = 0.0;// Removing this for now since
-												// I'm not sure how nicely it
-												// will play with Fuzzy
+	// I'm not sure how nicely it
+	// will play with Fuzzy
 
 	/**
 	 * The probability of mutating one allele and the action in an offspring
