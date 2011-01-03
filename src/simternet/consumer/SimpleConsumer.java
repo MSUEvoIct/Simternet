@@ -41,7 +41,7 @@ public class SimpleConsumer extends AbstractConsumerClass implements
 				null, AbstractEdgeNetwork.class, this.getLocation());
 
 		Collection<ApplicationServiceProvider> asps = this.s
-				.getApplicationServiceProviders();
+				.getASPs();
 
 		for (ApplicationServiceProvider asp : asps)
 			for (AbstractNetwork network : localEdgeNetworks)

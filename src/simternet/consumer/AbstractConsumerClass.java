@@ -7,7 +7,7 @@ import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Int2D;
 import simternet.Simternet;
-import simternet.application.ApplicationCategory;
+import simternet.application.AppCategory;
 import simternet.application.ApplicationServiceProvider;
 import simternet.network.AbstractEdgeNetwork;
 import simternet.temporal.AsyncUpdate;
@@ -26,7 +26,7 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 	 * consuming entertainment content), this should be reflected by changing
 	 * these values.
 	 */
-	protected TemporalHashMap<ApplicationCategory, Double> appBudgetConstraints = new TemporalHashMap<ApplicationCategory, Double>();
+	protected TemporalHashMap<AppCategory, Double> appBudgetConstraints = new TemporalHashMap<AppCategory, Double>();
 
 	/**
 	 * The actual list of application service providers selected for use, sorted
@@ -34,7 +34,7 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 	 * data structure, based on appBudgetConstraints and the qualities of the
 	 * applications themselves.
 	 */
-	protected TemporalHashMap<ApplicationCategory, List<ApplicationServiceProvider>> appsUsed = new TemporalHashMap<ApplicationCategory, List<ApplicationServiceProvider>>();
+	protected TemporalHashMap<AppCategory, List<ApplicationServiceProvider>> appsUsed = new TemporalHashMap<AppCategory, List<ApplicationServiceProvider>>();
 
 	/**
 	 * The physical location of this set of consumers.
@@ -164,6 +164,8 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 	@Override
 	public void update() {
 		this.population.update();
+		this.appBudgetConstraints.update();
+		this.appsUsed.update();
 	}
 
 	public abstract Boolean usesNetwork(AbstractEdgeNetwork network);

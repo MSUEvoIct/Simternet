@@ -12,9 +12,10 @@ import sim.engine.SimState;
 import sim.field.grid.DoubleGrid2D;
 import sim.field.grid.SparseGrid2D;
 import sim.util.Int2D;
-import simternet.application.ApplicationCategory;
+import simternet.application.AppCategory;
 import simternet.application.ApplicationServiceProvider;
 import simternet.consumer.AbstractConsumerClass;
+import simternet.consumer.ApplicationOptimizer;
 import simternet.consumer.SimpleConsumer;
 import simternet.network.AbstractNetwork;
 import simternet.nsp.AbstractNetworkProvider;
@@ -76,12 +77,12 @@ public class Simternet extends SimState implements Serializable {
 		System.exit(0);
 	}
 
-	protected Collection<ApplicationCategory> appCategories = new ArrayList<ApplicationCategory>();
-
 	/**
 	 * All application service providers in the simulation
 	 */
 	protected Collection<ApplicationServiceProvider> applicationServiceProviders = new ArrayList<ApplicationServiceProvider>();
+
+	protected Map<AppCategory, Collection<ApplicationServiceProvider>> ASPsByCategory = new HashMap<AppCategory, Collection<ApplicationServiceProvider>>();
 
 	/**
 	 * All consumer classes in the simulation.
@@ -113,33 +114,6 @@ public class Simternet extends SimState implements Serializable {
 				this.parameters.y());
 	}
 
-	protected void addApplicationServiceProvider(ApplicationServiceProvider asp) {
-		this.applicationServiceProviders.add(asp);
-		this.schedule.scheduleRepeating(asp);
-	}
-
-	/**
-	 * Track this consumer class and schedule it to repeat at each step.
-	 * 
-	 * @param cc
-	 *            The consumer class to add.
-	 */
-	protected void addConsumerClass(AbstractConsumerClass acc) {
-		this.consumerClasses.setObjectLocation(acc, acc.getLocation());
-		this.schedule.scheduleRepeating(Schedule.EPOCH, 12, acc);
-	}
-
-	/**
-	 * Track this network service provider class and schedule it to repeat at
-	 * each time step.
-	 * 
-	 * @param nsp
-	 */
-	protected void addNetworkServiceProvider(AbstractNetworkProvider nsp) {
-		this.networkServiceProviders.add(nsp);
-		this.schedule.scheduleRepeating(Schedule.EPOCH, 1, nsp);
-	}
-
 	/**
 	 * A convienence method providing an iterator for all locations.
 	 * 
@@ -153,6 +127,55 @@ public class Simternet extends SimState implements Serializable {
 						Simternet.this.parameters.y());
 			}
 		};
+	}
+
+	/**
+	 * TODO:
+	 * 
+	 * This function should be called whenever a consumer agent becomes active.
+	 * It should take care of adding it to all the appropriate data structures
+	 * and the MASON schedule.
+	 * 
+	 * @param nsp
+	 */
+	protected void enterMarket(AbstractConsumerClass acc) {
+		this.consumerClasses.setObjectLocation(acc, acc.getLocation());
+		this.schedule.scheduleRepeating(Schedule.EPOCH, 12, acc);
+	}
+
+	/**
+	 * This function should be called whenever a network service provider
+	 * becomes active. It should take care of adding it to all the appropriate
+	 * data structures and the MASON schedule.
+	 * 
+	 * @param nsp
+	 */
+	protected void enterMarket(AbstractNetworkProvider nsp) {
+		this.networkServiceProviders.add(nsp);
+		this.schedule.scheduleRepeating(Schedule.EPOCH, 1, nsp);
+	}
+
+	/**
+	 * TODO:
+	 * 
+	 * This function should be called whenever an application service provider
+	 * becomes active. It should take care of adding it to all the appropriate
+	 * data structures and the MASON schedule.
+	 * 
+	 * @param asp
+	 */
+	protected void enterMarket(ApplicationServiceProvider asp) {
+		this.applicationServiceProviders.add(asp);
+		Collection<ApplicationServiceProvider> appsInCategory = this.ASPsByCategory
+				.get(asp.getAppCategory());
+		if (appsInCategory == null) {
+			appsInCategory = new ArrayList<ApplicationServiceProvider>();
+			this.ASPsByCategory.put(asp.getAppCategory(), appsInCategory);
+		}
+
+		appsInCategory.add(asp);
+
+		this.schedule.scheduleRepeating(asp);
 	}
 
 	/**
@@ -175,8 +198,18 @@ public class Simternet extends SimState implements Serializable {
 		return ret;
 	}
 
-	public Collection<ApplicationServiceProvider> getApplicationServiceProviders() {
+	public Collection<ApplicationServiceProvider> getASPs() {
 		return this.applicationServiceProviders;
+	}
+
+	public Collection<ApplicationServiceProvider> getASPs(AppCategory c) {
+		Collection<ApplicationServiceProvider> asps = this.ASPsByCategory
+				.get(c);
+		if (asps == null) {
+			asps = new ArrayList<ApplicationServiceProvider>();
+			this.ASPsByCategory.put(c, asps);
+		}
+		return asps;
 	}
 
 	public SparseGrid2D getConsumerClasses() {
@@ -318,9 +351,12 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	private void initApplicationServiceProviders() {
-		for (int i = 0; i < 2; i++)
-			this.addApplicationServiceProvider(new ApplicationServiceProvider(
-					this));
+
+		// create three ASPs for each application class
+
+		for (AppCategory ac : AppCategory.values())
+			for (int i = 0; i <= 3; i++)
+				this.enterMarket(new ApplicationServiceProvider(this, ac));
 	}
 
 	private void initArbiter() {
@@ -337,9 +373,9 @@ public class Simternet extends SimState implements Serializable {
 			Double pop = this.random.nextDouble()
 					* Double.parseDouble(this.parameters
 							.getProperty("landscape.population.max"));
-			AbstractConsumerClass acc = new SimpleConsumer(this, location, pop,
-					null);
-			this.addConsumerClass(acc);
+			AbstractConsumerClass acc = new ApplicationOptimizer(this,
+					location, pop, null);
+			this.enterMarket(acc);
 		}
 
 		// do it again.
@@ -349,26 +385,26 @@ public class Simternet extends SimState implements Serializable {
 							.getProperty("landscape.population.max"));
 			AbstractConsumerClass acc = new SimpleConsumer(this, location, pop,
 					null);
-			this.addConsumerClass(acc);
+			this.enterMarket(acc);
 		}
 
 	}
-
-	// public void initData() {
-	// this.networkServiceProviders = new HashSet<AbstractNetworkProvider>();
-	// }
 
 	/**
 	 * DO: Specify this somehow in parameters, rather than source.
 	 */
 	private void initNetworkServiceProviders() {
-		if (Simternet.evolve)
-			this.addNetworkServiceProvider(new EvolvingNetworkProvider(this));
-		else
-			this
-					.addNetworkServiceProvider(new DumbNetworkServiceProvider(
-							this));
+		this.enterMarket(new DumbNetworkServiceProvider(this));
 	}
+	
+//	private void initNetworkServiceProviders() {
+//		if (Simternet.evolve)
+//			this.addNetworkServiceProvider(new EvolvingNetworkProvider(this));
+//		else
+//			this
+//					.addNetworkServiceProvider(new DumbNetworkServiceProvider(
+//							this));
+//	}
 
 	@Override
 	public void start() {

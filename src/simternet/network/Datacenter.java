@@ -1,5 +1,12 @@
 package simternet.network;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import sim.engine.SimState;
 import simternet.application.ApplicationServiceProvider;
 import simternet.temporal.TemporalHashMap;
@@ -19,6 +26,10 @@ public class Datacenter extends AbstractNetwork {
 	@Override
 	public void createEgressLinkTo(AbstractNetwork an, BackboneLink l) {
 		super.createEgressLinkTo(an, l);
+	}
+
+	public Double getCongestion(AbstractNetwork an) {
+		return this.congestion.get(an);
 	}
 
 	@Override
@@ -43,6 +54,26 @@ public class Datacenter extends AbstractNetwork {
 		this.inputQueue.add(flow);
 	}
 
+	public String printCongestion() {
+		StringBuffer sb = new StringBuffer();
+
+		ArrayList<AbstractNetwork> nets = new ArrayList(this.congestion
+				.keySet());
+		Collections.sort(nets, new Comparator<AbstractNetwork>() {
+
+			@Override
+			public int compare(AbstractNetwork o1, AbstractNetwork o2) {
+				return o1.toString().compareTo(o2.toString());
+				// return 0;
+			}
+		});
+
+		for (AbstractNetwork net : nets)
+			sb.append(net.toString() + ": " + this.congestion.get(net) + "\n");
+
+		return sb.toString();
+	}
+
 	@Override
 	public void route() {
 		for (NetFlow flow : this.inputQueue)
@@ -54,6 +85,8 @@ public class Datacenter extends AbstractNetwork {
 	public void step(SimState state) {
 		// TODO Auto-generated method stub
 		super.step(state);
+		Logger.getRootLogger().log(Level.DEBUG,
+				this.toString() + ": Congestion\n" + this.printCongestion());
 	}
 
 	@Override

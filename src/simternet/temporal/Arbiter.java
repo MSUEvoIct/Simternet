@@ -47,7 +47,7 @@ public class Arbiter implements Steppable, Serializable {
 		}
 
 		for (ApplicationServiceProvider asp : ((Simternet) state)
-				.getApplicationServiceProviders())
+				.getASPs())
 			asp.update();
 
 	}

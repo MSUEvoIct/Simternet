@@ -93,7 +93,6 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 	}
 
 	public void receivePayment(AbstractConsumerClass acc, Double numCustomers) {
-
 		double price = this.owner.getPrice(this.getClass(), acc, this.location);
 		double revenue = numCustomers * price;
 
