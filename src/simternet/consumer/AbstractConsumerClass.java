@@ -3,6 +3,9 @@ package simternet.consumer;
 import java.io.Serializable;
 import java.util.List;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Int2D;
@@ -41,6 +44,9 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 	 */
 	protected final Int2D location;
 
+	/**
+	 * A human-readable name to distinguish this consumer agent
+	 */
 	protected final String name;
 
 	/**
@@ -71,7 +77,7 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 		this.location = location;
 		this.profile = profile;
 		this.population = new Temporal<Double>(population);
-		this.name = s.parameters.getCCName();
+		this.name = s.config.getCCName();
 	}
 
 	/**
@@ -121,6 +127,12 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 		return this.population.get();
 	}
 
+	/**
+	 * @param aen
+	 *            Network
+	 * @return If the agent is connected to the specifid network, this function
+	 *         returns its population, and zero otherwise.
+	 */
 	public Double getSubscribers(AbstractEdgeNetwork aen) {
 		if (this.usesNetwork(aen))
 			// per agent subscription is all or nothing.
@@ -143,9 +155,9 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate,
 	 */
 	protected abstract void manageNetworks();
 
+	@Override
 	public void step(SimState state) {
-		if (this.s.parameters.debugLevel() > 10)
-			System.out.println("Stepping" + this.toString());
+		Logger.getRootLogger().log(Level.TRACE, "Stepping" + this.toString());
 
 		// Make decisions about consumption
 		this.manageNetworks();

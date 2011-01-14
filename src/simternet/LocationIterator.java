@@ -18,7 +18,7 @@ public class LocationIterator implements Iterator<Int2D>, Iterable<Int2D> {
 	}
 
 	public LocationIterator(Simternet s) {
-		this(s.parameters.x(), s.parameters.y());
+		this(s.config.x(), s.config.y());
 	}
 
 	@Override

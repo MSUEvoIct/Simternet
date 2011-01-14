@@ -108,6 +108,10 @@ public class BackboneLink {
 		return this.source;
 	}
 
+	/**
+	 * TODO: Obviously, 5.0E7 is not infinite...
+	 * 
+	 */
 	public void makeInfinite() {
 		this.latency = 0D;
 		// this.bandwidth = Double.MAX_VALUE;

@@ -131,7 +131,7 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 		// population. This is all people, not just those we specifically
 		// know will demand SimpleNetwork.
 		score += Math.pow(this.nsp.simternet.getPopulation(pn.location), 1.5)
-				/ Double.parseDouble(this.nsp.simternet.parameters
+				/ Double.parseDouble(this.nsp.simternet.config
 						.getProperty("landscape.population.max"))
 				* populationWeight;
 		score -= pn.cost * costWeight;

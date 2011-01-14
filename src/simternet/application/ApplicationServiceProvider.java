@@ -3,6 +3,9 @@ package simternet.application;
 import java.io.Serializable;
 import java.util.HashSet;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import simternet.Financials;
@@ -19,42 +22,41 @@ import simternet.nsp.AbstractNetworkProvider;
 import simternet.temporal.AsyncUpdate;
 import simternet.temporal.Temporal;
 
-public class ApplicationServiceProvider implements Steppable, Serializable,
-		AsyncUpdate {
+public class ApplicationServiceProvider implements Steppable, Serializable, AsyncUpdate {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long			serialVersionUID		= 1L;
 
 	/**
 	 * Other data structures will rely on this not changing, e.g., one that
 	 * keeps a lists of ASPs within an App Category.
 	 */
-	protected final AppCategory appCategory;
+	protected final AppCategory			appCategory;
 	// TODO: Set this better;
-	protected Temporal<Double> bandwidth = new Temporal<Double>(100.0);
-	protected HashSet<AbstractNetwork> connectedNetworks = new HashSet<AbstractNetwork>();
-	protected Datacenter datacenter;
-	protected Temporal<Double> duration = new Temporal<Double>(100.0);
-	protected Financials financials;
-	protected String name;
-	protected Temporal<Double> priceAdvertising = new Temporal<Double>(3.0);
-	protected Temporal<Double> priceSubscriptions = new Temporal<Double>(3.0);
+	protected Temporal<Double>			bandwidth				= new Temporal<Double>(100.0);
+	protected HashSet<AbstractNetwork>	connectedNetworks		= new HashSet<AbstractNetwork>();
+	protected Datacenter				datacenter;
+	protected Temporal<Double>			duration				= new Temporal<Double>(100.0);
+	protected Financials				financials;
+	protected String					name;
+	protected Temporal<Double>			priceAdvertising		= new Temporal<Double>(3.0);
+	protected Temporal<Double>			priceSubscriptions		= new Temporal<Double>(3.0);
 	/**
 	 * Quick-and-dirty measure of an application's quality. Should reflect
 	 * investment in all qualities other than network transport.
 	 */
-	protected Temporal<Double> quality = new Temporal<Double>(0.0);
-	protected Temporal<Double> revenueAdvertising = new Temporal<Double>(0.0);
-	protected Temporal<Double> revenueSubscriptions = new Temporal<Double>(0.0);
+	protected Temporal<Double>			quality					= new Temporal<Double>(0.0);
+	protected Temporal<Double>			revenueAdvertising		= new Temporal<Double>(0.0);
+	protected Temporal<Double>			revenueSubscriptions	= new Temporal<Double>(0.0);
 
-	protected Simternet s;
+	protected Simternet					s;
 
 	public ApplicationServiceProvider(Simternet s, AppCategory appCategory) {
 		// housekeeping
 		this.s = s;
 		this.appCategory = appCategory;
-		this.name = s.parameters.getASPName();
+		this.name = s.config.getASPName();
 		// TODO: Parameratize ASP endowment.
 		this.financials = new Financials(s, 10000.0);
 
@@ -66,15 +68,13 @@ public class ApplicationServiceProvider implements Steppable, Serializable,
 		for (AbstractNetworkProvider anp : this.s.getNetworkServiceProviders()) {
 			BackboneNetwork bn = anp.getBackboneNetwork();
 			if (!this.connectedNetworks.contains(bn)) {
-				this.datacenter.createEgressLinkTo(anp.getBackboneNetwork(),
-						null, RoutingProtocolConfig.TRANSIT);
+				this.datacenter.createEgressLinkTo(anp.getBackboneNetwork(), null, RoutingProtocolConfig.TRANSIT);
 				this.connectedNetworks.add(bn);
 			}
 		}
 	}
 
-	protected NetFlow createNetFlow(AbstractConsumerClass consumer,
-			AbstractEdgeNetwork network) {
+	protected NetFlow createNetFlow(AbstractConsumerClass consumer, AbstractEdgeNetwork network) {
 		NetFlow flow = new InteractiveFlow( // TODO: Vary interactivity
 				this.datacenter, // Flow comes from us
 				network, // Flow goes to this network
@@ -175,8 +175,7 @@ public class ApplicationServiceProvider implements Steppable, Serializable,
 	 * @param datacenterLocation
 	 *            Where the usage was serviced/processed from
 	 */
-	public void processUsage(AbstractConsumerClass consumer,
-			AbstractEdgeNetwork network) {
+	public void processUsage(AbstractConsumerClass consumer, AbstractEdgeNetwork network) {
 
 		double ads = this.priceAdvertising.get();
 		double sub = this.priceSubscriptions.get();
@@ -194,8 +193,13 @@ public class ApplicationServiceProvider implements Steppable, Serializable,
 		this.connectDatacenter();
 		this.datacenter.step(state);
 		this.investInQuality();
-		System.out.println("Stepping " + this.getName() + ", has "
-				+ this.financials);
+
+		Logger.getRootLogger().log(Level.INFO, this + " Financials: " + this.financials);
+	}
+
+	@Override
+	public String toString() {
+		return this.getName();
 	}
 
 	@Override
@@ -210,5 +214,4 @@ public class ApplicationServiceProvider implements Steppable, Serializable,
 		this.datacenter.update();
 		this.quality.update();
 	}
-
 }

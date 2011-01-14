@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Bag;
@@ -44,18 +47,18 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	public AbstractNetworkProvider(Simternet simternet) {
 		this.simternet = simternet;
 
-		this.name = simternet.parameters.getNSPName();
+		this.name = simternet.config.getNSPName();
 
-		Double endowment = Double.parseDouble(this.simternet.parameters
+		Double endowment = Double.parseDouble(this.simternet.config
 				.getProperty("nsp.financial.endowment"));
 		this.financials = new Financials(simternet, endowment);
 
-		int homeX = simternet.random.nextInt(this.simternet.parameters.x());
-		int homeY = simternet.random.nextInt(this.simternet.parameters.y());
+		int homeX = simternet.random.nextInt(this.simternet.config.x());
+		int homeY = simternet.random.nextInt(this.simternet.config.y());
 		this.homeBase = new Int2D(homeX, homeY);
 
-		this.edgeNetworks = new TemporalSparseGrid2D(this.simternet.parameters
-				.x(), this.simternet.parameters.y());
+		this.edgeNetworks = new TemporalSparseGrid2D(this.simternet.config.x(),
+				this.simternet.config.y());
 
 		this.backboneNetwork = new BackboneNetwork(this);
 
@@ -88,6 +91,18 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public String edgeCongestionReport() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("Edge congestion for " + this + "\n");
+		for (Object o : this.edgeNetworks) {
+			AbstractEdgeNetwork aen = (AbstractEdgeNetwork) o;
+			sb.append(aen + ": ");
+			sb.append(aen.getCongestionReport());
+			sb.append("\n");
+		}
+		return sb.toString();
 	}
 
 	public BackboneNetwork getBackboneNetwork() {
@@ -265,16 +280,33 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		this.makeNetworkInvestment();
 
 		this.setPrices(); // Set prices for the next period.
-		if (this.simternet.parameters.debugLevel() > 0) {
-			System.out.println("Stepping " + this.getName() + ", has "
-					+ this.financials);
-			System.out.println(this.printCustomerGrid());
-		}
+
+		// if (this.simternet.config.debugLevel() > 0) {
+		// System.out.println("Stepping " + this.getName() + ", has "
+		// + this.financials);
+		// System.out.println(this.printCustomerGrid());
+		// }
+
+		// operate our backbone network
 		this.backboneNetwork.step(state);
+
+		// operate our edge networks
 		for (Object o : this.edgeNetworks) {
 			AbstractEdgeNetwork aen = (AbstractEdgeNetwork) o;
 			aen.step(state);
 		}
+
+		// Log financials
+		Logger.getRootLogger().log(Level.INFO,
+				this + " Financials: " + this.financials);
+
+		// Log customer map
+		Logger.getRootLogger().log(Level.INFO,
+				this + " Customer Map: " + this.printCustomerGrid());
+
+		// Log edge congestion
+		Logger.getRootLogger().log(Level.INFO, this.edgeCongestionReport());
+
 	}
 
 	@Override

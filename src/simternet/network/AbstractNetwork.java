@@ -3,28 +3,41 @@ package simternet.network;
 import java.io.Serializable;
 import java.util.Collection;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import simternet.temporal.AsyncUpdate;
 import simternet.temporal.Temporal;
 import simternet.temporal.TemporalHashMap;
-import simternet.temporal.TemporalHashSet;
 
-public abstract class AbstractNetwork implements AsyncUpdate, Steppable,
-		Serializable {
+public abstract class AbstractNetwork implements AsyncUpdate, Steppable, Serializable {
 
-	private static final long serialVersionUID = 1L;
+	private static final long										serialVersionUID	= 1L;
 	/**
 	 * If there is no specific route, send traffic out this link. The link
 	 * should still be in the list of egress links, along with the associated
 	 * queue.
 	 */
-	protected Temporal<BackboneLink> defaultRoute = new Temporal<BackboneLink>(
-			null);
-	protected TemporalHashSet<BackboneLink> egressLinks = new TemporalHashSet<BackboneLink>();
-	protected TemporalHashSet<BackboneLink> ingressLinks = new TemporalHashSet<BackboneLink>();
+	protected Temporal<BackboneLink>								defaultRoute		= new Temporal<BackboneLink>(
+																								null);
+	/**
+	 * Contains the set of other networks we can send traffic to, and the
+	 * associated backbone link.
+	 */
+	protected TemporalHashMap<AbstractNetwork, BackboneLink>		egressLinks			= new TemporalHashMap<AbstractNetwork, BackboneLink>();
+	/**
+	 * Contains the set of other networks we receive traffic from, and the
+	 * associated backbone link.
+	 */
+	protected TemporalHashMap<AbstractNetwork, BackboneLink>		ingressLinks		= new TemporalHashMap<AbstractNetwork, BackboneLink>();
 
-	protected TemporalHashMap<AbstractNetwork, RoutingTableEntry> routingTable = new TemporalHashMap<AbstractNetwork, RoutingTableEntry>();
+	/**
+	 * Contains the full routing table of all networks we can reach, and a
+	 * routing table entry (i.e., the next hop)
+	 */
+	protected TemporalHashMap<AbstractNetwork, RoutingTableEntry>	routingTable		= new TemporalHashMap<AbstractNetwork, RoutingTableEntry>();
 
 	/**
 	 * Accept ingress link requests from other networks. For now, this function
@@ -37,7 +50,7 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable,
 	 * @param l
 	 */
 	public void acceptIngressLinkFrom(BackboneLink l) {
-		this.ingressLinks.add(l);
+		this.ingressLinks.put(l.getSource(), l);
 	}
 
 	public void createEgressLinkTo(AbstractNetwork an, BackboneLink l) {
@@ -51,8 +64,7 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable,
 	 * @param an
 	 * @param l
 	 */
-	public void createEgressLinkTo(AbstractNetwork an, BackboneLink l,
-			RoutingProtocolConfig config) {
+	public void createEgressLinkTo(AbstractNetwork an, BackboneLink l, RoutingProtocolConfig config) {
 
 		if (l == null) {
 			l = new BackboneLink(this, an);
@@ -60,7 +72,7 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable,
 		}
 
 		// track this link
-		this.egressLinks.add(l);
+		this.egressLinks.put(an, l);
 
 		// Now, set up routing...
 		l.setRoutingProtocolConfig(config);
@@ -86,6 +98,15 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable,
 		return this.defaultRoute.get();
 	}
 
+	/**
+	 * @param to
+	 *            The target network
+	 * @return The associated backbone link, or null if not connected.
+	 */
+	public BackboneLink getEgressLink(AbstractNetwork to) {
+		return this.egressLinks.get(to);
+	}
+
 	public void noteCongestion(NetFlow flow) {
 		// do nothing; should be used mostly by Datacenter networks.
 	}
@@ -100,7 +121,7 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable,
 	 */
 	public void route() {
 		// Iterate over all interfaces receiving flows
-		for (BackboneLink link : this.ingressLinks) {
+		for (BackboneLink link : this.ingressLinks.values()) {
 			Collection<NetFlow> flows = link.receiveFlows();
 			// Iterate over all flows received on the interface
 			for (NetFlow flow : flows)
@@ -136,8 +157,7 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable,
 	 */
 	protected void routingProtocolReceive(RoutingTableEntry update) {
 		Boolean accept = false;
-		RoutingTableEntry currentRoute = this.routingTable
-				.get(update.destination);
+		RoutingTableEntry currentRoute = this.routingTable.get(update.destination);
 		if (currentRoute == null)
 			accept = true;
 		else if (currentRoute.distance > update.distance)
@@ -167,15 +187,14 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable,
 		// Send updates to all networks which request them. In other
 		// words, don't waste resources sending updates to stub networks
 		// which would ignore them anyway.
-		for (BackboneLink link : this.ingressLinks)
+		for (BackboneLink link : this.ingressLinks.values())
 			// TODO: Peer Routes
 			if (link.routingProtocolConfig != RoutingProtocolConfig.NONE) {
 
 				// Create a new routing table entry, with this link as the next
 				// hop
 				// and increment the distance by one.
-				RoutingTableEntry toTransmit = new RoutingTableEntry(
-						update.destination, link, update.distance + 1);
+				RoutingTableEntry toTransmit = new RoutingTableEntry(update.destination, link, update.distance + 1);
 
 				// Send the update
 				link.source.routingProtocolReceive(toTransmit);
@@ -184,6 +203,36 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable,
 
 	public void setDefaultRoute(BackboneLink defaultRoute) {
 		this.defaultRoute.set(defaultRoute);
+	}
+
+	/**
+	 * Convience method to change the bandwidth available to an ISP this agent
+	 * is already connected with.
+	 * 
+	 * @param anp
+	 */
+	public void setEgressBandwidth(AbstractNetwork an, Double bandwidth) {
+		BackboneLink bl = this.getEgressLink(an);
+		if (bl != null)
+			bl.setBandwidth(bandwidth);
+		else
+			Logger.getRootLogger().log(Level.ERROR,
+					this + " tried to set egress bandwidth to unconnected destination: " + an.toString());
+	}
+
+	/**
+	 * Convience method to change the latency available to
+	 * 
+	 * @param anp
+	 * @param latency
+	 */
+	public void setEgressLatency(AbstractNetwork an, Double latency) {
+		BackboneLink bl = this.getEgressLink(an);
+		if (bl != null)
+			bl.setLatency(latency);
+		else
+			Logger.getRootLogger().log(Level.ERROR,
+					this + " tried to set egress latency to unconnected destination: " + an.toString());
 	}
 
 	/*
@@ -206,7 +255,7 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable,
 	 * Send out traffic waiting in output queues on all egress links.
 	 */
 	public void transmit() {
-		for (BackboneLink link : this.egressLinks)
+		for (BackboneLink link : this.egressLinks.values())
 			link.transmit();
 	}
 
@@ -217,4 +266,5 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable,
 		this.routingTable.update();
 		this.defaultRoute.update();
 	}
+
 }

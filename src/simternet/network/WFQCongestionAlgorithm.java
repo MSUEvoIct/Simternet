@@ -1,10 +1,8 @@
 package simternet.network;
 
+import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 /**
  * WFQCongestionAlgorithm executes a maximin allocation of bandwidth. It
@@ -15,10 +13,15 @@ import org.apache.log4j.Logger;
  */
 public class WFQCongestionAlgorithm implements CongestionAlgorithm {
 
+	protected String congestionReport;
 	protected BackboneLink link;
 
 	public WFQCongestionAlgorithm(BackboneLink link) {
 		this.link = link;
+	}
+
+	public String getCongestionReport() {
+		return this.congestionReport;
 	}
 
 	@Override
@@ -47,21 +50,20 @@ public class WFQCongestionAlgorithm implements CongestionAlgorithm {
 			congestedDurationRemaining += flow.getCongestionDuration();
 		}
 
+		StringBuffer cr = new StringBuffer();
+		Double usageRatio = remainingUsage / remainingCapacity;
+		String percent = new DecimalFormat("###.").format(usageRatio * 100);
+		cr.append(percent + "%/" + remainingCapacity);
+		this.congestionReport = cr.toString();
+
 		/*
 		 * If the link has enough capacity, there is no need to ration ANY flow.
 		 * Simply allow all flows to pass this link uncongested.
 		 */
-		if (remainingUsage < remainingCapacity) {
-			Logger.getRootLogger().log(
-					Level.DEBUG,
-					this.getLink() + " uncongested, " + remainingUsage + "/"
-							+ remainingCapacity);
+		if (remainingUsage < remainingCapacity)
 			return flows;
-		} else
-			Logger.getRootLogger().log(
-					Level.DEBUG,
-					this.getLink() + " congested, " + remainingUsage + "/"
-							+ remainingCapacity);
+		else {
+		}
 
 		/*
 		 * Otherwise, allocate bandwidth to the slowest flows first.

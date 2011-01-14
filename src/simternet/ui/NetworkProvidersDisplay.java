@@ -20,7 +20,8 @@ public class NetworkProvidersDisplay extends JFrame {
 
 	protected class NSPTableModel extends AbstractTableModel {
 
-		String[] columnNames = { "NSP Id", "Resouces", "Total Customers" };
+		String[] columnNames = { "Network Service Provider", "Resouces",
+				"Total Customers" };
 
 		@Override
 		public int getColumnCount() {

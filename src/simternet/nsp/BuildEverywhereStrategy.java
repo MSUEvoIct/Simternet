@@ -67,8 +67,8 @@ public class BuildEverywhereStrategy implements InvestmentStrategy,
 
 		// Figure out costs, build if we can afford to. All or nothing for each
 		// square.
-		for (int x = this.builtThroughX; x < this.nsp.simternet.parameters.x(); x++) {
-			for (int y = this.builtThroughY; y < this.nsp.simternet.parameters
+		for (int x = this.builtThroughX; x < this.nsp.simternet.config.x(); x++) {
+			for (int y = this.builtThroughY; y < this.nsp.simternet.config
 					.y(); y++) {
 				Double costForThisPixel = 0.0;
 

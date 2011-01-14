@@ -12,6 +12,7 @@ import sim.engine.SimState;
 import sim.portrayal.Inspector;
 import simternet.ui.ActiveCustomersPortrayal2D;
 import simternet.ui.NetworkProvidersDisplay;
+import simternet.ui.ParametersInspectionObject;
 
 public class SimternetWithUI extends GUIState {
 
@@ -82,8 +83,10 @@ public class SimternetWithUI extends GUIState {
 
 	@Override
 	public Object getSimulationInspectedObject() {
-		return ((Simternet) this.state).sio;
-	} // non-volatile
+		// TODO: Return custom parameters object
+		return new ParametersInspectionObject(((Simternet) this.state)
+				.getParameters());
+	}
 
 	@Override
 	public void init(Controller c) {
@@ -121,7 +124,7 @@ public class SimternetWithUI extends GUIState {
 		// portray and how to portray them
 		this.overallActiveCustomersPortrayal
 				.setMap(new sim.util.gui.SimpleColorMap(0.0, Integer
-						.parseInt(((Simternet) this.state).parameters
+						.parseInt(((Simternet) this.state).config
 								.getProperty("landscape.population.max")),
 						Color.black, Color.white));
 

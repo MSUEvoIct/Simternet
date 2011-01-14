@@ -39,10 +39,10 @@ public class Financials implements AsyncUpdate {
 		this.assetsCapital = new Temporal<Double>(0.0);
 		this.debtBalance = new Temporal<Double>(0.0);
 		this.debtInterestRate = new Temporal<Double>(
-				Double.parseDouble(s.parameters
+				Double.parseDouble(s.config
 						.getProperty("financial.interestRate")));
 		this.debtPayoffRate = new Temporal<Double>(Double
-				.parseDouble(s.parameters.getProperty("financial.paybackRate")));
+				.parseDouble(s.config.getProperty("financial.paybackRate")));
 		this.perStepFinancingCost = new Temporal<Double>(0.0, 0.0);
 		this.perStepInvestment = new Temporal<Double>(0.0, 0.0);
 		this.perStepOperationsCost = new Temporal<Double>(0.0, 0.0);
@@ -52,7 +52,7 @@ public class Financials implements AsyncUpdate {
 		this.totalOperationsCost = new Temporal<Double>(0.0);
 		this.totalRevenue = new Temporal<Double>(0.0);
 		this.depreciationRate = new Temporal<Double>(Double
-				.parseDouble(s.parameters
+				.parseDouble(s.config
 						.getProperty("financial.depreciationRate")));
 	}
 

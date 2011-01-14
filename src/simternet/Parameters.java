@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Properties;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 /**
  * This class contains all the exogenous variables used as inputs to the model.
  * Due to MASON's integrated checkpointing functionality, the same code may be
@@ -23,7 +26,7 @@ import java.util.Properties;
  * @author kkoning
  * 
  */
-public class Exogenous extends Properties implements Serializable {
+public class Parameters extends Properties implements Serializable {
 
 	/**
 	 * Version specification is necessary to use persisted states across
@@ -33,34 +36,35 @@ public class Exogenous extends Properties implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public static Exogenous getDefaults() {
+	private int counterASP = 1;
+	private int counterConsumer = 1;
+	private int counterNSP = 1;
 
-		Exogenous vars = new Exogenous();
-
-		try {
-			FileInputStream fis = new FileInputStream(
-					"data/configuration/default.properties");
-			vars.load(fis);
-			fis.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return vars;
+	/**
+	 * Initializes model parameters from data/configuration/default.properties
+	 */
+	public Parameters() {
+		this("data/configuration/default.properties");
 	}
 
-	private int aspCounter = 1;
-	private int ccCounter = 1;
-	private Integer debugLevel;
-	private int nspCounter = 1;
-
-	public Integer debugLevel() {
-		if (null == this.debugLevel)
-			this.debugLevel = Integer.parseInt(this
-					.getProperty("general.debugLevel"));
-		return this.debugLevel;
+	/**
+	 * Initializes model parameters from specified file
+	 * 
+	 * @param file
+	 *            The Java Properties file to load
+	 */
+	public Parameters(String file) {
+		try {
+			FileInputStream fis = new FileInputStream(file);
+			this.load(fis);
+			fis.close();
+		} catch (FileNotFoundException e) {
+			Logger.getRootLogger().log(Level.FATAL,
+					"Cannot load exogenous parameters", e);
+		} catch (IOException e) {
+			Logger.getRootLogger().log(Level.FATAL,
+					"Cannot load exogenous parameters", e);
+		}
 	}
 
 	/**
@@ -74,8 +78,15 @@ public class Exogenous extends Properties implements Serializable {
 	 * @return An arbitrary name for this ApplicationServiceProvider
 	 */
 	public String getASPName() {
-		return this.getProperty("asp.misc.namePrefix") + this.aspCounter++;
+		return this.getProperty("asp.misc.namePrefix") + this.counterASP++;
 	}
+
+	// public Integer debugLevel() {
+	// if (null == this.debugLevel)
+	// this.debugLevel = Integer.parseInt(this
+	// .getProperty("general.debugLevel"));
+	// return this.debugLevel;
+	// }
 
 	/**
 	 * It is helpful to have more human-readable names for agents than the
@@ -88,7 +99,8 @@ public class Exogenous extends Properties implements Serializable {
 	 * @return An arbitrary name for this ConsumerClass
 	 */
 	public String getCCName() {
-		return this.getProperty("consumers.misc.namePrefix") + this.ccCounter++;
+		return this.getProperty("consumers.misc.namePrefix")
+				+ this.counterConsumer++;
 	}
 
 	/**
@@ -102,11 +114,13 @@ public class Exogenous extends Properties implements Serializable {
 	 * @return An arbitrary name for this NetworkServiceProvider
 	 */
 	public String getNSPName() {
-		return this.getProperty("nsp.misc.namePrefix") + this.nspCounter++;
+		return this.getProperty("nsp.misc.namePrefix") + this.counterNSP++;
 	}
 
-	public void setDebugLevel(Integer debugLevel) {
-		this.debugLevel = debugLevel;
+	public void resetNameCounters() {
+		this.counterASP = 1;
+		this.counterNSP = 1;
+		this.counterConsumer = 1;
 	}
 
 	/**

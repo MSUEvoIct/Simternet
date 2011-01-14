@@ -15,7 +15,7 @@ import simternet.nsp.AbstractNetworkProvider;
 
 public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 
-	private static final long serialVersionUID = 1L;
+	private static final long	serialVersionUID	= 1L;
 
 	/**
 	 * Utility function used to determine the cost of building a network. AFAIK,
@@ -32,13 +32,11 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 	 *            network
 	 * @return The cost of building the network in question.
 	 */
-	public static Double getBuildCost(
-			Class<? extends AbstractEdgeNetwork> type,
-			AbstractNetworkProvider builder, Int2D location) {
+	public static Double getBuildCost(Class<? extends AbstractEdgeNetwork> type, AbstractNetworkProvider builder,
+			Int2D location) {
 		Double buildCost;
 		try {
-			Method m = type.getMethod("getBuildCost",
-					AbstractNetworkProvider.class, Int2D.class);
+			Method m = type.getMethod("getBuildCost", AbstractNetworkProvider.class, Int2D.class);
 
 			buildCost = (Double) m.invoke(null, builder, location);
 		} catch (Exception e) {
@@ -51,23 +49,31 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 	/**
 	 * The location of this network in the landscape.
 	 */
-	protected final Int2D location;
+	protected final Int2D					location;
 
 	/**
 	 * The maximum bandwidth each edge connection can support. Unlike other
 	 * networks, this is an instantaneous measure rather than a total transfer
 	 * capacity per period. I.e., bytes per second, not bytes per month.
 	 */
-	protected Double maxBandwidth;
+	protected Double						maxBandwidth;
 
 	/**
 	 * The NSP that owns and operates this network.
 	 */
-	protected final AbstractNetworkProvider owner;
+	protected final AbstractNetworkProvider	owner;
 
 	public AbstractEdgeNetwork(AbstractNetworkProvider owner, Int2D location) {
 		this.owner = owner;
 		this.location = location;
+	}
+
+	public String getCongestionReport() {
+		BackboneLink bl = this.getUpstreamIngress();
+		if (bl == null)
+			return "Not Connected";
+
+		return bl.congestionAlgorithm.getCongestionReport();
 	}
 
 	public Double getMaxBandwidth() {
@@ -78,8 +84,7 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 	public Double getNumSubscribers() {
 		double customers = 0;
 
-		Bag b = this.owner.simternet.getConsumerClasses().getObjectsAtLocation(
-				this.location);
+		Bag b = this.owner.simternet.getConsumerClasses().getObjectsAtLocation(this.location);
 		if (b == null)
 			return 0.0;
 
@@ -92,6 +97,21 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 		return customers;
 	}
 
+	protected BackboneLink getUpstreamIngress() {
+		int i = 0;
+		BackboneLink l = null;
+		for (BackboneLink link : this.ingressLinks.values()) {
+			i++;
+			l = link;
+		}
+		if (i == 1)
+			return l;
+
+		Logger.getRootLogger().log(Level.ERROR, "Num of Ingress links for " + this + " = " + i);
+		return null;
+
+	}
+
 	public void receivePayment(AbstractConsumerClass acc, Double numCustomers) {
 		double price = this.owner.getPrice(this.getClass(), acc, this.location);
 		double revenue = numCustomers * price;
@@ -101,20 +121,17 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 
 	public void sendFlowsToCustomers() {
 		// For now, just dump information on the flows...
-		for (BackboneLink link : this.ingressLinks) {
+		for (BackboneLink link : this.ingressLinks.values()) {
 			// there should only be one ingress link;
 			// we should only go through this once.
 			List<NetFlow> flows = link.receiveFlows();
-			for (NetFlow flow : flows) {
-				Logger.getRootLogger().log(Level.TRACE,
-						this + " received " + flow + " for " + flow.user);
+			for (NetFlow flow : flows)
+				// Logger.getRootLogger().log(Level.TRACE,
+				// this + " received " + flow + " for " + flow.user);
 				if (flow.isCongested()) {
-					Logger.getRootLogger().log(Level.DEBUG,
-							flow + " congested, " + flow.describeCongestion());
+					Logger.getRootLogger().log(Level.TRACE, flow + " congested, " + flow.describeCongestion());
 					flow.source.noteCongestion(flow);
 				}
-
-			}
 		}
 	}
 

@@ -15,6 +15,12 @@ import simternet.temporal.TemporalHashSet;
 public class Datacenter extends AbstractNetwork {
 
 	private static final long serialVersionUID = 1L;
+	/**
+	 * Stores the congestion this application sees on each network. Congestion
+	 * is stored as the amount of bandwidth actually received by the congested
+	 * flow. I.e., you would need to compare this to the application's bandwidth
+	 * use to calculate a percentage of congestion.
+	 */
 	protected TemporalHashMap<AbstractNetwork, Double> congestion = new TemporalHashMap<AbstractNetwork, Double>();
 	protected TemporalHashSet<NetFlow> inputQueue = new TemporalHashSet<NetFlow>();
 	protected final ApplicationServiceProvider owner;
@@ -28,10 +34,24 @@ public class Datacenter extends AbstractNetwork {
 		super.createEgressLinkTo(an, l);
 	}
 
+	/**
+	 * @param an
+	 * @return The actual bandwidth received by congested flows at this edge
+	 *         network.
+	 */
 	public Double getCongestion(AbstractNetwork an) {
 		return this.congestion.get(an);
 	}
 
+	/*
+	 * Once a flow is finally sent to a customer, this method should be called
+	 * so that the application provider can be aware of how its application
+	 * either is or is not congested.
+	 * 
+	 * @see
+	 * simternet.network.AbstractNetwork#noteCongestion(simternet.network.NetFlow
+	 * )
+	 */
 	@Override
 	public void noteCongestion(NetFlow flow) {
 		this.congestion.put(flow.destination, flow.bandwidth);
@@ -61,6 +81,9 @@ public class Datacenter extends AbstractNetwork {
 				.keySet());
 		Collections.sort(nets, new Comparator<AbstractNetwork>() {
 
+			/**
+			 * Just used for sorting display by network.
+			 */
 			@Override
 			public int compare(AbstractNetwork o1, AbstractNetwork o2) {
 				return o1.toString().compareTo(o2.toString());

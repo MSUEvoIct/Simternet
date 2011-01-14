@@ -31,31 +31,6 @@ import simternet.temporal.Arbiter;
  */
 public class Simternet extends SimState implements Serializable {
 
-	/**
-	 * MASON includes a facility for observing and manipulating information
-	 * about the simulation object itself. Sometimes the SimState object can be
-	 * used directly, and Mason will allow inspection and manipulation of
-	 * properties fitting the standard java conventions. (i.e., getX, setX,
-	 * isX...) However, while we do want to make use of the generic user
-	 * interface and charting code, we want more control over which variables
-	 * are presented to the user.
-	 * 
-	 * This object should not store any data itself.
-	 * 
-	 * @author kkoning
-	 */
-	@SuppressWarnings("serial")
-	public class SimternetInspectorObject implements Serializable {
-
-		public Integer getDebugLevel() {
-			return Simternet.this.parameters.debugLevel();
-		}
-
-		public void setDebugLevel(Integer level) {
-			Simternet.this.parameters.setDebugLevel(level);
-		}
-	}
-
 	/*
 	 * Do we use an LCS to evolve the NSP?
 	 */
@@ -80,9 +55,11 @@ public class Simternet extends SimState implements Serializable {
 	/**
 	 * All application service providers in the simulation
 	 */
-	protected Collection<ApplicationServiceProvider> applicationServiceProviders = new ArrayList<ApplicationServiceProvider>();
+	protected Collection<ApplicationServiceProvider> applicationServiceProviders;
 
-	protected Map<AppCategory, Collection<ApplicationServiceProvider>> ASPsByCategory = new HashMap<AppCategory, Collection<ApplicationServiceProvider>>();
+	protected Map<AppCategory, Collection<ApplicationServiceProvider>> ASPsByCategory;
+
+	public Parameters config;
 
 	/**
 	 * All consumer classes in the simulation.
@@ -92,26 +69,18 @@ public class Simternet extends SimState implements Serializable {
 	/**
 	 * All Network Service Providers in the simulation.
 	 */
-	protected Collection<AbstractNetworkProvider> networkServiceProviders = new ArrayList<AbstractNetworkProvider>();
-
-	public Exogenous parameters;
-	public final SimternetInspectorObject sio = new SimternetInspectorObject();
+	protected Collection<AbstractNetworkProvider> networkServiceProviders;
 
 	public Simternet(long seed) {
 		this(seed, null);
 	}
 
-	public Simternet(long seed, Exogenous parameters) {
+	public Simternet(long seed, Parameters config) {
 		super(seed);
-		if (parameters != null)
-			this.parameters = parameters;
+		if (config != null)
+			this.config = config;
 		else
-			this.parameters = Exogenous.getDefaults();
-
-		// initialize consumer classes data structure, now that we know the size
-		// of our grid.
-		this.consumerClasses = new SparseGrid2D(this.parameters.x(),
-				this.parameters.y());
+			this.config = new Parameters();
 	}
 
 	/**
@@ -123,8 +92,8 @@ public class Simternet extends SimState implements Serializable {
 		return new Iterable<Int2D>() {
 			@Override
 			public Iterator<Int2D> iterator() {
-				return new LocationIterator(Simternet.this.parameters.x(),
-						Simternet.this.parameters.y());
+				return new LocationIterator(Simternet.this.config.x(),
+						Simternet.this.config.y());
 			}
 		};
 	}
@@ -187,8 +156,8 @@ public class Simternet extends SimState implements Serializable {
 	 */
 	public DoubleGrid2D getAllActiveSubscribersGrid() {
 		final Double initValue = 0.0;
-		DoubleGrid2D ret = new DoubleGrid2D(this.parameters.x(),
-				this.parameters.y(), initValue);
+		DoubleGrid2D ret = new DoubleGrid2D(this.config.x(), this.config.y(),
+				initValue);
 
 		for (AbstractNetworkProvider nsp : this.networkServiceProviders)
 			for (int i = 0; i < ret.getWidth(); i++)
@@ -218,8 +187,8 @@ public class Simternet extends SimState implements Serializable {
 
 	public DoubleGrid2D getMyActiveSubscribersGrid(AbstractNetworkProvider np) {
 		final Double initValue = 0.0;
-		DoubleGrid2D ret = new DoubleGrid2D(this.parameters.x(),
-				this.parameters.y(), initValue);
+		DoubleGrid2D ret = new DoubleGrid2D(this.config.x(), this.config.y(),
+				initValue);
 		for (AbstractNetworkProvider nsp : this.networkServiceProviders)
 			if (this.networkServiceProviders == np)
 				for (int i = 0; i < ret.getWidth(); i++)
@@ -281,6 +250,10 @@ public class Simternet extends SimState implements Serializable {
 		return this.networkServiceProviders;
 	}
 
+	public Parameters getParameters() {
+		return this.config;
+	}
+
 	/**
 	 * @return The total population of All consumers at ALL locations.
 	 */
@@ -322,8 +295,7 @@ public class Simternet extends SimState implements Serializable {
 	 * @return A grid containing the population of each square.
 	 */
 	public DoubleGrid2D getPopulationGrid() {
-		DoubleGrid2D ret = new DoubleGrid2D(this.parameters.x(),
-				this.parameters.y());
+		DoubleGrid2D ret = new DoubleGrid2D(this.config.x(), this.config.y());
 		for (int i = 0; i < ret.getWidth(); i++)
 			for (int j = 0; j < ret.getHeight(); j++)
 				ret.set(i, j, this.getPopulation(new Int2D(i, j)));
@@ -371,7 +343,7 @@ public class Simternet extends SimState implements Serializable {
 		// Populate the landscape with a simpleconsumer class.
 		for (Int2D location : this.allLocations()) {
 			Double pop = this.random.nextDouble()
-					* Double.parseDouble(this.parameters
+					* Double.parseDouble(this.config
 							.getProperty("landscape.population.max"));
 			AbstractConsumerClass acc = new ApplicationOptimizer(this,
 					location, pop, null);
@@ -381,7 +353,7 @@ public class Simternet extends SimState implements Serializable {
 		// do it again.
 		for (Int2D location : this.allLocations()) {
 			Double pop = this.random.nextDouble()
-					* Double.parseDouble(this.parameters
+					* Double.parseDouble(this.config
 							.getProperty("landscape.population.max"));
 			AbstractConsumerClass acc = new SimpleConsumer(this, location, pop,
 					null);
@@ -394,25 +366,33 @@ public class Simternet extends SimState implements Serializable {
 	 * DO: Specify this somehow in parameters, rather than source.
 	 */
 	private void initNetworkServiceProviders() {
-		this.enterMarket(new DumbNetworkServiceProvider(this));
+		if (Simternet.evolve)
+			this.enterMarket(new EvolvingNetworkProvider(this));
+		else
+			this.enterMarket(new DumbNetworkServiceProvider(this));
 	}
-	
-//	private void initNetworkServiceProviders() {
-//		if (Simternet.evolve)
-//			this.addNetworkServiceProvider(new EvolvingNetworkProvider(this));
-//		else
-//			this
-//					.addNetworkServiceProvider(new DumbNetworkServiceProvider(
-//							this));
-//	}
 
 	@Override
 	public void start() {
 		super.start();
-		// this.initData();
+
+		// Reset name counters, for consistency between runs in the GUI.
+		this.config.resetNameCounters();
+
+		// Initialize Consumer Agents
+		this.consumerClasses = new SparseGrid2D(this.config.x(), this.config
+				.y());
 		this.initConsumerClasses();
+
+		// Initialize Network Service Providers
+		this.networkServiceProviders = new ArrayList<AbstractNetworkProvider>();
 		this.initNetworkServiceProviders();
+
+		// Initialize Application Service Providers
+		this.applicationServiceProviders = new ArrayList<ApplicationServiceProvider>();
+		this.ASPsByCategory = new HashMap<AppCategory, Collection<ApplicationServiceProvider>>();
 		this.initApplicationServiceProviders();
+
 		this.initArbiter();
 	}
 
