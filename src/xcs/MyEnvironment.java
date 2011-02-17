@@ -1,5 +1,4 @@
 package xcs;
-
 import java.io.Serializable;
 import java.util.Random;
 
@@ -7,48 +6,91 @@ import java.util.Random;
  * Extremely simple environment where the agents can spend money, and the more money they spend
  * the more money they're rewarded with
  */
-public class MyEnvironment implements Environment, Serializable {
+public class MyEnvironment implements Environment, Serializable{
 
-	private AgentData agentData;
 	private int assets = 1;
-	private boolean correct = false;
+	//private int targetAssets = 1000;
 	private boolean reset = false;
-
+	private boolean correct = false;
+	
 	@Override
 	public boolean doReset() {
-		return this.reset;
+		return reset;
 	}
 
 	@Override
-	public double executeAction(double action) {
-		return action;
-	}
-
-	public int getAssets() {
-		return this.assets;
+	public double executeAction(int action) {
+		int sign = 1;
+		switch(action){
+		case 0:
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+		case 8:
+		case 9:
+			int lastDigit = assets % 10;
+//			if(lastDigit == action){
+//				sign = 1;
+//				correct = true;
+//			}else{
+//				sign = -1;
+//				correct = false;
+//			}
+			//if(assets > (2147483647/2)){
+			if(assets % 2 == 0){	
+				if(action > 4){
+					sign = 1;
+					correct = true;
+				}else{
+					sign = -1;
+					correct = false;
+				}
+			}else{
+				if(action <= 4){
+					sign = 1;
+					correct = true;
+				}else{
+					sign = -1;
+					correct = false;
+				}
+			}
+			assets = assets + sign;
+			//assets = assets + Math.round(assets * sign * ((float)action / 50));
+			break;
+		default:
+			System.out.println("Fatal error, incorrect executeAction parameter " + action);
+			System.exit(-1);
+			break;
+		}
+		Integer i = new Integer(sign);
+		return i.doubleValue();
 	}
 
 	@Override
 	public int getConditionLength() {
-		// return 10; //Because length of max int is 10
-		return AgentData.ANTECEDENT_LENGTH;
+		//return 10; //Because length of max int is 10
+		return 1;
 	}
 
-	public AgentData getCurrentState() {
-		// return String.format("%010d", assets);
-		// return String.valueOf(this.agentData.getDeltaRevenue());
-		return this.agentData;
+	@Override
+	public String getCurrentState() {
+		//return String.format("%010d", assets);
+		return String.valueOf(assets);
 	}
 
 	@Override
 	public int getMaxPayoff() {
-		// return assets = assets + Math.round(assets * 1 * ((float)10 / 50));
+		//return assets = assets + Math.round(assets * 1 * ((float)10 / 50));
 		return 1;
 	}
 
 	@Override
 	public int getNrActions() {
-		return 2;
+		return 10;
 	}
 
 	@Override
@@ -57,19 +99,19 @@ public class MyEnvironment implements Environment, Serializable {
 	}
 
 	@Override
-	public AgentData resetState() {
+	public String resetState() {
 		Random r = new Random(System.currentTimeMillis());
-		this.agentData = new AgentData();
-		return this.getCurrentState();
-	}
-
-	public void setAgentData(AgentData aD) {
-		this.agentData = aD;
+		assets = r.nextInt();
+		return getCurrentState();
 	}
 
 	@Override
 	public boolean wasCorrect() {
 		return false;
+	}
+	
+	public int getAssets() {
+		return assets;
 	}
 
 }
