@@ -7,28 +7,26 @@ import sim.util.Int2D;
 import simternet.Simternet;
 import simternet.consumer.AbstractConsumerClass;
 import simternet.network.AbstractNetwork;
-import xcs.AgentData;
 import xcs.Environment;
 import xcs.MyEnvironment;
 import xcs.MyXCS;
 import xcs.XCSConstants;
 
-public class EvolvingNetworkProvider extends AbstractNetworkProvider implements
-		Serializable {
+public class EvolvingNetworkProvider extends AbstractNetworkProvider implements Serializable {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long	serialVersionUID	= 1L;
 
-	private boolean hasLCSRun = false;
+	private boolean				hasLCSRun			= false;
 
 	/**
 	 * Price of service for all tiles
 	 */
-	private Double price = 15.0;
+	private Double				price				= 15.0;
 
-	private MyXCS xcs;
+	private MyXCS				xcs;
 
 	public EvolvingNetworkProvider(Simternet s) {
 		super(s);
@@ -46,22 +44,20 @@ public class EvolvingNetworkProvider extends AbstractNetworkProvider implements
 	}
 
 	@Override
-	public Double getPrice(Class<? extends AbstractNetwork> cl,
-			AbstractConsumerClass acc, Int2D location) {
+	public Double getPrice(Class<? extends AbstractNetwork> cl, AbstractConsumerClass acc, Int2D location) {
 		this.runLCSIfNecessary();
 		return this.price;
 	}
 
 	public void runLCSIfNecessary() {
 		if (!this.hasLCSRun) {
-			System.out.println("Running LCS placeholder and passing "
-					+ this.getDeltaRevenue()
-					+ " as delta revenue at time step "
-					+ this.simternet.schedule.getSteps());
+			System.out.println("Running LCS placeholder and passing " + this.getDeltaRevenue()
+					+ " as delta revenue at time step " + this.simternet.schedule.getSteps());
 
 			this.price = 10.0; // will eventually come from LCS
 			this.hasLCSRun = true;
-			AgentData aD = new AgentData(this.getDeltaRevenue());
+			String aD = new String(Long.toBinaryString(Math.round(this.getDeltaRevenue())));
+			// AgentData aD = new AgentData(this.getDeltaRevenue());
 			this.xcs.doMutliStepSingleIncrementExperiment(aD);
 		}
 	}
