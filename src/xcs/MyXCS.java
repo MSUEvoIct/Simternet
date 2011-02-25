@@ -39,10 +39,14 @@ public class MyXCS implements Serializable {
 		return;
 	}
 
+	XClassifierSet			actionSet;
+	int[]					correct						= new int[50];
 	private int				currentExplore				= 0;
 	private int				currentExploreStepCounter	= 0;
 	private int				currentExploreTrialC		= 0;
+
 	private int[]			currentStepsToFood			= new int[50];
+
 	private double[]		currentSysError				= new double[50];
 
 	/**
@@ -50,11 +54,37 @@ public class MyXCS implements Serializable {
 	 */
 	private Environment		env;
 
+	private boolean			exploit						= false;
+
+	private int				explore						= 0;
+
+	private boolean			firstTime					= true;
+
+	/**
+	 * Executes one main learning loop for a single step problem.
+	 * 
+	 * @see XClassifierSet#XClassifierSet(String,XClassifierSet,int,int)
+	 * @see PredictionArray#PredictionArray
+	 * @see PredictionArray#randomActionWinner
+	 * @see XClassifierSet#XClassifierSet(XClassifierSet,int)
+	 * @see Environment#executeAction
+	 * @see XClassifierSet#updateSet
+	 * @see XClassifierSet#runGA
+	 * @param state
+	 *            The actual problem instance.
+	 * @param counter
+	 *            The number of problems observed so far in exploration.
+	 */
+
+	private PredictionArray	globalPredictionArray;
+
 	/**
 	 * Specifies the number of exploration problems/trials to solve in one
 	 * experiment.
 	 */
 	private int				maxProblems					= 20000;
+
+	private double			newPrice					= 0.0;
 
 	/**
 	 * Specifies the number of investigated experiments.
@@ -71,6 +101,14 @@ public class MyXCS implements Serializable {
 	 */
 	private XClassifierSet	pop;
 
+	private String			previousEnv;
+
+	private double			reward						= 0.0;
+
+	private int				step						= 0;
+
+	double[]				sysError					= new double[50];
+
 	/**
 	 * Constructs the XCS system.
 	 */
@@ -80,6 +118,22 @@ public class MyXCS implements Serializable {
 		// initialize XCS
 		this.pop = null;
 		MyXCS.cons = new XCSConstants();
+	}
+
+	public double doExternalLCS(String env, double reward) {
+		this.reward = reward;
+		if (!this.firstTime)
+			this.updateWithReward();
+		else
+			this.firstTime = false;
+		this.previousEnv = env;
+		this.explore = (this.explore + 1) % 2;
+		if (this.explore == 1)
+			this.doOneSingleStepProblemExplore(env, this.step++);
+		else
+			this.doOneSingleStepProblemExploit(env, this.step++, this.correct, this.sysError);
+
+		return this.newPrice;
 	}
 
 	/**************************** Single Step Experiments ***************************/
@@ -97,11 +151,7 @@ public class MyXCS implements Serializable {
 		else
 			this.doOneMultiStepProblemExploit(state, this.currentStepsToFood, this.currentSysError,
 					this.currentExploreTrialC, this.currentExploreStepCounter);
-		// if ((this.currentExploreTrialC % 50 == 0) && (this.currentExplore ==
-		// 0)
-		// && (this.currentExploreTrialC > 0))
-		// this.writePerformance(pW, this.currentStepsToFood,
-		// this.currentSysError, this.currentExploreTrialC);
+
 	}
 
 	/**
@@ -305,51 +355,32 @@ public class MyXCS implements Serializable {
 	 *            differences.
 	 */
 	private void doOneSingleStepProblemExploit(String state, int counter, int[] correct, double[] sysError) {
+		this.exploit = true;
 		XClassifierSet matchSet = new XClassifierSet(state, this.pop, counter, this.env.getNrActions());
 
 		PredictionArray predictionArray = new PredictionArray(matchSet, this.env.getNrActions());
 
 		int actionWinner = predictionArray.bestActionWinner();
 
-		double reward = this.env.executeAction(actionWinner);
-
-		if (this.env.wasCorrect())
-			correct[counter % 50] = 1;
-		else
-			correct[counter % 50] = 0;
-
-		sysError[counter % 50] = Math.abs(reward - predictionArray.getBestValue());
+		this.newPrice = this.env.executeAction(actionWinner);
 	}
 
-	/**
-	 * Executes one main learning loop for a single step problem.
-	 * 
-	 * @see XClassifierSet#XClassifierSet(String,XClassifierSet,int,int)
-	 * @see PredictionArray#PredictionArray
-	 * @see PredictionArray#randomActionWinner
-	 * @see XClassifierSet#XClassifierSet(XClassifierSet,int)
-	 * @see Environment#executeAction
-	 * @see XClassifierSet#updateSet
-	 * @see XClassifierSet#runGA
-	 * @param state
-	 *            The actual problem instance.
-	 * @param counter
-	 *            The number of problems observed so far in exploration.
-	 */
 	private void doOneSingleStepProblemExplore(String state, int counter) {
+		this.exploit = false;
 		XClassifierSet matchSet = new XClassifierSet(state, this.pop, counter, this.env.getNrActions());
 
-		PredictionArray predictionArray = new PredictionArray(matchSet, this.env.getNrActions());
+		this.globalPredictionArray = new PredictionArray(matchSet, this.env.getNrActions());
 
-		int actionWinner = predictionArray.randomActionWinner();
+		int actionWinner = this.globalPredictionArray.randomActionWinner();
 
-		XClassifierSet actionSet = new XClassifierSet(matchSet, actionWinner);
+		this.actionSet = new XClassifierSet(matchSet, actionWinner);
 
-		double reward = this.env.executeAction(actionWinner);
+		this.newPrice = this.env.executeAction(actionWinner);
 
-		actionSet.updateSet(0., reward);
+	}
 
-		actionSet.runGA(counter, state, this.env.getNrActions());
+	public void init() {
+		this.pop = new XClassifierSet(this.env.getNrActions());
 	}
 
 	/**
@@ -399,6 +430,10 @@ public class MyXCS implements Serializable {
 		this.maxProblems = trials;
 	}
 
+	public void setReward(double reward) {
+		this.reward = reward;
+	}
+
 	/**
 	 * This function runs the number of experiments specified. After the
 	 * initialization of the empty population, either one single- or one
@@ -426,6 +461,20 @@ public class MyXCS implements Serializable {
 			else
 				this.doOneMultiStepExperiment(pW);
 			this.pop = null;
+		}
+	}
+
+	private void updateWithReward() {
+		if (this.exploit) {
+			if (this.env.wasCorrect())
+				this.correct[this.step % 50] = 1;
+			else
+				this.correct[this.step % 50] = 0;
+
+			this.sysError[this.step % 50] = Math.abs(this.reward - this.globalPredictionArray.getBestValue());
+		} else {
+			this.actionSet.updateSet(0., this.reward);
+			this.actionSet.runGA(this.step, this.previousEnv, this.env.getNrActions());
 		}
 	}
 

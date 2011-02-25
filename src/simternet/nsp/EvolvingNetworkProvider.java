@@ -19,8 +19,8 @@ public class EvolvingNetworkProvider extends AbstractNetworkProvider implements 
 	 */
 	private static final long	serialVersionUID	= 1L;
 
+	private boolean				firstRun			= true;
 	private boolean				hasLCSRun			= false;
-
 	/**
 	 * Price of service for all tiles
 	 */
@@ -37,9 +37,10 @@ public class EvolvingNetworkProvider extends AbstractNetworkProvider implements 
 		Environment e = null;
 		XCSConstants.setSeed(1 + (new Date()).getTime() % 10000);
 		e = new MyEnvironment();
-		MyXCS xcs = new MyXCS(e);
-		xcs.setNumberOfTrials(10000);
-		xcs.setNumberOfExperiments(2);
+		this.xcs = new MyXCS(e);
+		this.xcs.setNumberOfTrials(10000);
+		this.xcs.setNumberOfExperiments(2);
+		this.xcs.init();
 		System.out.println("Evolving!");
 	}
 
@@ -54,11 +55,15 @@ public class EvolvingNetworkProvider extends AbstractNetworkProvider implements 
 			System.out.println("Running LCS placeholder and passing " + this.getDeltaRevenue()
 					+ " as delta revenue at time step " + this.simternet.schedule.getSteps());
 
-			this.price = 10.0; // will eventually come from LCS
 			this.hasLCSRun = true;
-			String aD = new String(Long.toBinaryString(Math.round(this.getDeltaRevenue())));
-			// AgentData aD = new AgentData(this.getDeltaRevenue());
-			this.xcs.doMutliStepSingleIncrementExperiment(aD);
+
+			// Take a look at rules that LCS generates!
+			String env = new String(Long.toBinaryString(Math.round(this.financials.getTotalRevenue())));
+			// String env = new
+			// String(Long.toBinaryString(Math.round(this.price)));
+			env = String.format("%020d", Long.parseLong(env));
+			this.price += this.xcs.doExternalLCS(env, this.getDeltaRevenue());
+			System.out.println("The price is:" + this.price);
 		}
 	}
 
