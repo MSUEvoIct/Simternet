@@ -127,6 +127,17 @@ public class ApplicationServiceProvider implements Steppable, Serializable, Asyn
 		return congested / maxBW;
 	}
 
+	public double getCustomers() {
+		// TODO Get this info; will need to look at all customer objects, so
+		// value should be cached.
+		// for now, always return 100
+		return 100.0;
+	}
+
+	public AbstractNetwork getDataCenter() {
+		return this.datacenter;
+	}
+
 	public Financials getFinancials() {
 		return this.financials;
 	}

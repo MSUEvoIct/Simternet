@@ -21,8 +21,7 @@ public abstract class NetFlow {
 	 * @author kkoning
 	 * 
 	 */
-	public static class CongestionBandwidthComparator implements
-			Comparator<NetFlow> {
+	public static class CongestionBandwidthComparator implements Comparator<NetFlow> {
 		@Override
 		public int compare(NetFlow o1, NetFlow o2) {
 			if (o1.getCongestionBandwidth() > o2.getCongestionBandwidth())
@@ -36,35 +35,35 @@ public abstract class NetFlow {
 	/**
 	 * The actual bandwidth of this flow.
 	 */
-	protected Double bandwidth;
+	protected Double						bandwidth;
 
 	/**
 	 * Has this flow ever been congested?
 	 */
-	protected Boolean congested = false;
+	protected Boolean						congested	= false;
 
 	/**
 	 * The network this NetFlow object will be delivered to.
 	 */
-	protected final AbstractNetwork destination;
+	protected final AbstractNetwork			destination;
 
 	/**
 	 * The actual duration of this flow. For interactive flows, this should
 	 * always be equal to maxTime. For non-interactive flows, this may be less
 	 * because the flows will transfer as quickly as possible.
 	 */
-	protected Double duration;
+	protected Double						duration;
 
 	/**
 	 * The accumulated latency of this flow
 	 */
-	protected Double latency = 0D;
+	protected Double						latency		= 0D;
 
 	/**
 	 * The source network, should be a RoutingPoint operated by an application
 	 * provider.
 	 */
-	protected final AbstractNetwork source;
+	protected final AbstractNetwork			source;
 
 	/**
 	 * Exactly analogous to TTL in real networks. We should never have a network
@@ -72,16 +71,15 @@ public abstract class NetFlow {
 	 * because it's more of a debug/sanity check than anything else. We should
 	 * probably quit with an error if this ever reaches zero.
 	 */
-	protected Integer TTL = 20;
+	protected Integer						TTL			= 20;
 
 	/**
 	 * The user this traffic is intended for, once we reach the destination
 	 * network. This is analagous to the host portion of a CIDR IPv4 address.
 	 */
-	protected final AbstractConsumerClass user;
+	protected final AbstractConsumerClass	user;
 
-	protected NetFlow(AbstractNetwork source, AbstractNetwork destination,
-			AbstractConsumerClass user) {
+	protected NetFlow(AbstractNetwork source, AbstractNetwork destination, AbstractConsumerClass user) {
 		this.source = source;
 		this.destination = destination;
 		this.user = user;
@@ -133,8 +131,8 @@ public abstract class NetFlow {
 
 	@Override
 	public String toString() {
-		return "Flow from " + this.source + " to " + this.user + ", BW="
-				+ this.bandwidth + ", DUR=" + this.duration;
+		return "Flow: " + this.source + " -> " + this.user + "@" + this.destination + ", " + this.duration + "s@"
+				+ this.bandwidth + "b/s";
 	}
 
 }

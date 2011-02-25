@@ -1,0 +1,158 @@
+
+Generation: 0
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: 2.30866551E12
+Tree 0:
+ (- (+ (- (- (* 7 edge.numSubscribers()) (+
+     5 7)) (+ (- 7 edge.numSubscribers()) (- 7
+     edge.numSubscribers()))) (+ (+ (* 7 7) (-
+     7 edge.numSubscribers())) (- (- 7 7) (- 5
+     7)))) (* (+ (+ (* 7 7) (* edge.numSubscribers()
+     5)) (* (* edge.numSubscribers() edge.numSubscribers())
+     (- 5 5))) (* (+ (- 7 edge.numSubscribers())
+     (+ 5 7)) (+ (- 5 7) (- edge.numSubscribers()
+     7)))))
+
+Generation: 1
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: 4.6166273E16
+Tree 0:
+ (* (+ (- 5 7) (* 7 5)) (* (* (+ (- 5 7) (*
+     7 5)) (* (+ edge.numSubscribers() 7) (* 7
+     edge.numSubscribers()))) (* 7 edge.numSubscribers())))
+
+Generation: 2
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: 1.09352785E23
+Tree 0:
+ (* (* (* (+ (- 5 7) (* 7 5)) (* (+ edge.numSubscribers()
+     7) (* 7 edge.numSubscribers()))) (* 7 edge.numSubscribers()))
+     (* (* edge.numSubscribers() edge.numSubscribers())
+         (+ edge.numSubscribers() 5)))
+
+Generation: 3
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: 1.610893E33
+Tree 0:
+ (* (* (* (+ (+ (* 7 7) (- 7 edge.numSubscribers()))
+     (* (+ (- 5 7) (* 7 5)) (* (* (+ (- 5 7) (*
+         7 5)) (* (+ edge.numSubscribers() 7) (* 7
+         edge.numSubscribers()))) (* 7 edge.numSubscribers()))))
+     (* (+ edge.numSubscribers() 7) (* 7 edge.numSubscribers())))
+     (* 7 edge.numSubscribers())) (* (* edge.numSubscribers()
+     edge.numSubscribers()) (+ edge.numSubscribers()
+     5)))
+
+Generation: 4
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: 4.3690988E36
+Tree 0:
+ (* (* (* (+ (+ (* 7 7) (- 7 edge.numSubscribers()))
+     (* (+ (- 5 7) (* 7 5)) (* (* (+ (- 5 7) (*
+         7 5)) (* (+ (+ 7 5) (- (* edge.numSubscribers()
+         5) (- edge.numSubscribers() edge.numSubscribers())))
+         (* (* edge.numSubscribers() edge.numSubscribers())
+             (+ edge.numSubscribers() 5)))) (* 7 edge.numSubscribers()))))
+     (* (+ edge.numSubscribers() 7) (* 7 edge.numSubscribers())))
+     (* 7 edge.numSubscribers())) (* (* edge.numSubscribers()
+     edge.numSubscribers()) (+ edge.numSubscribers()
+     5)))
+
+Generation: 5
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: 1.1052639E37
+Tree 0:
+ (* (* (* (+ (+ (* 7 7) (- 7 edge.numSubscribers()))
+     (* (+ (- 5 7) (* 7 5)) (* (* (+ (- 5 7) (*
+         7 5)) (* (+ (+ 7 5) (- (* edge.numSubscribers()
+         5) (- edge.numSubscribers() edge.numSubscribers())))
+         (* (* edge.numSubscribers() edge.numSubscribers())
+             (+ edge.numSubscribers() 5)))) (* 7 edge.numSubscribers()))))
+     (* (+ edge.numSubscribers() 7) (* 7 edge.numSubscribers())))
+     (* 7 edge.numSubscribers())) (* (* edge.numSubscribers()
+     edge.numSubscribers()) (+ edge.numSubscribers()
+     5)))
+
+Generation: 6
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: 2.2917466E38
+Tree 0:
+ (* (* (* (+ edge.numSubscribers() 5) (* (+
+     edge.numSubscribers() 7) (* (* (* (* edge.numSubscribers()
+     edge.numSubscribers()) (+ edge.numSubscribers()
+     5)) (* 7 edge.numSubscribers())) edge.numSubscribers())))
+     (* 7 edge.numSubscribers())) (* (+ edge.numSubscribers()
+     7) (* (* (+ edge.numSubscribers() 7) (* 7
+     edge.numSubscribers())) edge.numSubscribers())))
+
+Generation: 7
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: 8.6680034E36
+Tree 0:
+ (* (* (* (+ (- 5 7) (* 7 5)) (* (+ edge.numSubscribers()
+     7) (* (* (+ edge.numSubscribers() 7) (* (*
+     edge.numSubscribers() edge.numSubscribers())
+     (+ edge.numSubscribers() 5))) edge.numSubscribers())))
+     (* 7 edge.numSubscribers())) (* (+ edge.numSubscribers()
+     7) (* (* (* edge.numSubscribers() 5) (* 7
+     edge.numSubscribers())) edge.numSubscribers())))
+
+Generation: 8
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: 1.7876428E37
+Tree 0:
+ (* (* (* (+ (+ (* 7 7) (- 7 edge.numSubscribers()))
+     (* (+ (- 5 7) (* 7 5)) (* (* (+ (- 5 7) (*
+         7 5)) (* (+ (+ 7 5) (- (* edge.numSubscribers()
+         5) edge.numSubscribers())) (* (* edge.numSubscribers()
+         edge.numSubscribers()) (+ edge.numSubscribers()
+         5)))) (* 7 edge.numSubscribers())))) (+ 7
+     5)) (* (+ edge.numSubscribers() 7) (* 7 edge.numSubscribers())))
+     (* (* edge.numSubscribers() edge.numSubscribers())
+         (+ edge.numSubscribers() 5)))
+
+Generation: 9
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: 2.1049667E38
+Tree 0:
+ (* (* (* (+ (- 5 7) (* (* edge.numSubscribers()
+     edge.numSubscribers()) (- (* edge.numSubscribers()
+     5) (- edge.numSubscribers() edge.numSubscribers()))))
+     (* (+ edge.numSubscribers() 7) (* (* (+ edge.numSubscribers()
+         7) (* 7 edge.numSubscribers())) edge.numSubscribers())))
+     (* edge.numSubscribers() edge.numSubscribers()))
+     (* (* (+ edge.numSubscribers() 5) (* 7 edge.numSubscribers()))
+         (+ edge.numSubscribers() 5)))
+
+Best Individual of Run:
+Subpopulation 0:
+Evaluated: true
+Fitness: 2.2917466E38
+Tree 0:
+ (* (* (* (+ edge.numSubscribers() 5) (* (+
+     edge.numSubscribers() 7) (* (* (* (* edge.numSubscribers()
+     edge.numSubscribers()) (+ edge.numSubscribers()
+     5)) (* 7 edge.numSubscribers())) edge.numSubscribers())))
+     (* 7 edge.numSubscribers())) (* (+ edge.numSubscribers()
+     7) (* (* (+ edge.numSubscribers() 7) (* 7
+     edge.numSubscribers())) edge.numSubscribers())))

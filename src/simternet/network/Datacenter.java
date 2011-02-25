@@ -14,16 +14,16 @@ import simternet.temporal.TemporalHashSet;
 
 public class Datacenter extends AbstractNetwork {
 
-	private static final long serialVersionUID = 1L;
+	private static final long							serialVersionUID	= 1L;
 	/**
 	 * Stores the congestion this application sees on each network. Congestion
 	 * is stored as the amount of bandwidth actually received by the congested
 	 * flow. I.e., you would need to compare this to the application's bandwidth
 	 * use to calculate a percentage of congestion.
 	 */
-	protected TemporalHashMap<AbstractNetwork, Double> congestion = new TemporalHashMap<AbstractNetwork, Double>();
-	protected TemporalHashSet<NetFlow> inputQueue = new TemporalHashSet<NetFlow>();
-	protected final ApplicationServiceProvider owner;
+	protected TemporalHashMap<AbstractNetwork, Double>	congestion			= new TemporalHashMap<AbstractNetwork, Double>();
+	protected TemporalHashSet<NetFlow>					inputQueue			= new TemporalHashSet<NetFlow>();
+	protected final ApplicationServiceProvider			owner;
 
 	public Datacenter(ApplicationServiceProvider owner) {
 		this.owner = owner;
@@ -41,6 +41,10 @@ public class Datacenter extends AbstractNetwork {
 	 */
 	public Double getCongestion(AbstractNetwork an) {
 		return this.congestion.get(an);
+	}
+
+	public ApplicationServiceProvider getOwner() {
+		return this.owner;
 	}
 
 	/*
@@ -77,8 +81,7 @@ public class Datacenter extends AbstractNetwork {
 	public String printCongestion() {
 		StringBuffer sb = new StringBuffer();
 
-		ArrayList<AbstractNetwork> nets = new ArrayList(this.congestion
-				.keySet());
+		ArrayList<AbstractNetwork> nets = new ArrayList(this.congestion.keySet());
 		Collections.sort(nets, new Comparator<AbstractNetwork>() {
 
 			/**
@@ -108,8 +111,7 @@ public class Datacenter extends AbstractNetwork {
 	public void step(SimState state) {
 		// TODO Auto-generated method stub
 		super.step(state);
-		Logger.getRootLogger().log(Level.DEBUG,
-				this.toString() + ": Congestion\n" + this.printCongestion());
+		Logger.getRootLogger().log(Level.DEBUG, this.toString() + ": Congestion\n" + this.printCongestion());
 	}
 
 	@Override

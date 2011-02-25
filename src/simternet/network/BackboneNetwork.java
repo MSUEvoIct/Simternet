@@ -13,11 +13,15 @@ import simternet.nsp.AbstractNetworkProvider;
  */
 public class BackboneNetwork extends AbstractNetwork {
 
-	private static final long serialVersionUID = 1L;
-	protected final AbstractNetworkProvider owner;
+	private static final long				serialVersionUID	= 1L;
+	protected final AbstractNetworkProvider	owner;
 
 	public BackboneNetwork(final AbstractNetworkProvider nsp) {
 		this.owner = nsp;
+	}
+
+	public AbstractNetworkProvider getOwner() {
+		return this.owner;
 	}
 
 	@Override

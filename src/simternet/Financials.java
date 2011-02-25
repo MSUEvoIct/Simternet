@@ -1,5 +1,7 @@
 package simternet;
 
+import java.io.Serializable;
+
 import simternet.temporal.AsyncUpdate;
 import simternet.temporal.Temporal;
 
@@ -12,25 +14,25 @@ import simternet.temporal.Temporal;
  * @author kkoning
  * 
  */
-public class Financials implements AsyncUpdate {
+public class Financials implements Serializable, AsyncUpdate {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
-	private Temporal<Double> assetsCapital;
-	private Temporal<Double> assetsLiquid;
-	private Temporal<Double> debtBalance;
-	private Temporal<Double> debtInterestRate;
-	private Temporal<Double> debtPayoffRate;
-	private Temporal<Double> depreciationRate;
-	private Temporal<Double> perStepFinancingCost;
-	private Temporal<Double> perStepInvestment;
-	private Temporal<Double> perStepOperationsCost;
-	private Temporal<Double> perStepRevenue;
-	private Temporal<Double> totalFinancingCost;
-	private Temporal<Double> totalInvestment;
-	private Temporal<Double> totalOperationsCost;
-	private Temporal<Double> totalRevenue;
+	private static final long	serialVersionUID	= 1L;
+	private Temporal<Double>	assetsCapital;
+	private Temporal<Double>	assetsLiquid;
+	private Temporal<Double>	debtBalance;
+	private Temporal<Double>	debtInterestRate;
+	private Temporal<Double>	debtPayoffRate;
+	private Temporal<Double>	depreciationRate;
+	private Temporal<Double>	perStepFinancingCost;
+	private Temporal<Double>	perStepInvestment;
+	private Temporal<Double>	perStepOperationsCost;
+	private Temporal<Double>	perStepRevenue;
+	private Temporal<Double>	totalFinancingCost;
+	private Temporal<Double>	totalInvestment;
+	private Temporal<Double>	totalOperationsCost;
+	private Temporal<Double>	totalRevenue;
 
 	public Financials(Simternet s, Double endowment) {
 		this.assetsLiquid = new Temporal<Double>(endowment);
@@ -38,11 +40,8 @@ public class Financials implements AsyncUpdate {
 		// Initialize tracking variables with zero values.
 		this.assetsCapital = new Temporal<Double>(0.0);
 		this.debtBalance = new Temporal<Double>(0.0);
-		this.debtInterestRate = new Temporal<Double>(
-				Double.parseDouble(s.config
-						.getProperty("financial.interestRate")));
-		this.debtPayoffRate = new Temporal<Double>(Double
-				.parseDouble(s.config.getProperty("financial.paybackRate")));
+		this.debtInterestRate = new Temporal<Double>(Double.parseDouble(s.config.getProperty("financial.interestRate")));
+		this.debtPayoffRate = new Temporal<Double>(Double.parseDouble(s.config.getProperty("financial.paybackRate")));
 		this.perStepFinancingCost = new Temporal<Double>(0.0, 0.0);
 		this.perStepInvestment = new Temporal<Double>(0.0, 0.0);
 		this.perStepOperationsCost = new Temporal<Double>(0.0, 0.0);
@@ -51,9 +50,8 @@ public class Financials implements AsyncUpdate {
 		this.totalInvestment = new Temporal<Double>(0.0);
 		this.totalOperationsCost = new Temporal<Double>(0.0);
 		this.totalRevenue = new Temporal<Double>(0.0);
-		this.depreciationRate = new Temporal<Double>(Double
-				.parseDouble(s.config
-						.getProperty("financial.depreciationRate")));
+		this.depreciationRate = new Temporal<Double>(Double.parseDouble(s.config
+				.getProperty("financial.depreciationRate")));
 	}
 
 	/**
@@ -82,8 +80,7 @@ public class Financials implements AsyncUpdate {
 	}
 
 	private void depreciateCapital() {
-		double depreciation = this.assetsCapital.get()
-				* this.depreciationRate.get();
+		double depreciation = this.assetsCapital.get() * this.depreciationRate.get();
 		this.assetsCapital.decrement(depreciation);
 	}
 
@@ -110,8 +107,7 @@ public class Financials implements AsyncUpdate {
 	public Double getAvailableFinancing() {
 		Double liquidAssets = this.assetsLiquid.get();
 		Double revenue = this.perStepRevenue.get();
-		return (2 * liquidAssets) + (2 * revenue)
-				- this.debtBalance.getFuture();
+		return (2 * liquidAssets) + (2 * revenue) - this.debtBalance.getFuture();
 	}
 
 	public Double getDebtBalance() {
@@ -183,8 +179,7 @@ public class Financials implements AsyncUpdate {
 
 	@Override
 	public String toString() {
-		return "Cash: " + this.assetsLiquid.get() + ", Assets: "
-				+ this.assetsCapital.get() + ", Debt/Avail: "
+		return "Cash: " + this.assetsLiquid.get() + ", Assets: " + this.assetsCapital.get() + ", Debt/Avail: "
 				+ this.debtBalance.get() + "/" + this.getAvailableFinancing();
 	}
 

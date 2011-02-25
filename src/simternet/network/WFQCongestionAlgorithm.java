@@ -13,8 +13,8 @@ import java.util.List;
  */
 public class WFQCongestionAlgorithm implements CongestionAlgorithm {
 
-	protected String congestionReport;
-	protected BackboneLink link;
+	protected String		congestionReport;
+	protected BackboneLink	link;
 
 	public WFQCongestionAlgorithm(BackboneLink link) {
 		this.link = link;
@@ -52,7 +52,7 @@ public class WFQCongestionAlgorithm implements CongestionAlgorithm {
 
 		StringBuffer cr = new StringBuffer();
 		Double usageRatio = remainingUsage / remainingCapacity;
-		String percent = new DecimalFormat("###.").format(usageRatio * 100);
+		String percent = new DecimalFormat("000.#").format(usageRatio * 100);
 		cr.append(percent + "%/" + remainingCapacity);
 		this.congestionReport = cr.toString();
 

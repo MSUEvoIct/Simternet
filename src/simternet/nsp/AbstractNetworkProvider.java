@@ -31,34 +31,32 @@ import simternet.temporal.TemporalSparseGrid2D;
  */
 public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate {
 
-	private static final long serialVersionUID = 1L;
+	private static final long		serialVersionUID	= 1L;
 
-	protected BackboneNetwork backboneNetwork;
-	public Double deltaRevenue = 0.0;
-	protected TemporalSparseGrid2D edgeNetworks;
+	protected BackboneNetwork		backboneNetwork;
+	public Double					deltaRevenue		= 0.0;
+	protected TemporalSparseGrid2D	edgeNetworks;
 
-	public Financials financials;
-	protected Int2D homeBase;
-	protected InvestmentStrategy investmentStrategy;
-	protected String name;
-	protected PricingStrategy pricingStrategy;
-	public Simternet simternet = null;
+	public Financials				financials;
+	protected Int2D					homeBase;
+	protected InvestmentStrategy	investmentStrategy;
+	protected String				name;
+	protected PricingStrategy		pricingStrategy;
+	public Simternet				simternet			= null;
 
 	public AbstractNetworkProvider(Simternet simternet) {
 		this.simternet = simternet;
 
 		this.name = simternet.config.getNSPName();
 
-		Double endowment = Double.parseDouble(this.simternet.config
-				.getProperty("nsp.financial.endowment"));
+		Double endowment = Double.parseDouble(this.simternet.config.getProperty("nsp.financial.endowment"));
 		this.financials = new Financials(simternet, endowment);
 
 		int homeX = simternet.random.nextInt(this.simternet.config.x());
 		int homeY = simternet.random.nextInt(this.simternet.config.y());
 		this.homeBase = new Int2D(homeX, homeY);
 
-		this.edgeNetworks = new TemporalSparseGrid2D(this.simternet.config.x(),
-				this.simternet.config.y());
+		this.edgeNetworks = new TemporalSparseGrid2D(this.simternet.config.x(), this.simternet.config.y());
 
 		this.backboneNetwork = new BackboneNetwork(this);
 
@@ -73,14 +71,12 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	 * @param location
 	 *            The location of the network.
 	 */
-	protected void buildNetwork(Class<? extends AbstractEdgeNetwork> type,
-			Int2D location) {
+	protected void buildNetwork(Class<? extends AbstractEdgeNetwork> type, Int2D location) {
 		try {
-			Constructor<? extends AbstractEdgeNetwork> constr = type
-					.getConstructor(AbstractNetworkProvider.class, Int2D.class);
+			Constructor<? extends AbstractEdgeNetwork> constr = type.getConstructor(AbstractNetworkProvider.class,
+					Int2D.class);
 
-			Double buildCost = AbstractEdgeNetwork.getBuildCost(type, this,
-					location);
+			Double buildCost = AbstractEdgeNetwork.getBuildCost(type, this, location);
 			AbstractEdgeNetwork aen = constr.newInstance(this, location);
 			this.financials.capitalize(buildCost);
 			this.edgeNetworks.setObjectLocation(aen, location);
@@ -117,8 +113,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	@SuppressWarnings("unchecked")
 	public Double getCustomers() {
 		double numCustomers = 0.0;
-		Iterator<AbstractEdgeNetwork> allNetworks = this.edgeNetworks
-				.iterator();
+		Iterator<AbstractEdgeNetwork> allNetworks = this.edgeNetworks.iterator();
 		while (allNetworks.hasNext()) {
 			AbstractEdgeNetwork aen = allNetworks.next();
 			numCustomers += aen.getNumSubscribers();
@@ -180,8 +175,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		return this.name;
 	}
 
-	public AbstractNetwork getNetworkAt(Class<? extends AbstractNetwork> net,
-			Int2D location) {
+	public AbstractNetwork getNetworkAt(Class<? extends AbstractNetwork> net, Int2D location) {
 		Bag allNets = this.edgeNetworks.getObjectsAtLocation(location);
 		if (allNets == null) // we have no nets at this loc
 			return null;
@@ -198,8 +192,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 
 	public Collection<AbstractNetwork> getNetworks(Int2D location) {
 		ArrayList<AbstractNetwork> list = new ArrayList<AbstractNetwork>();
-		Bag localNets = this.edgeNetworks.getObjectsAtLocation(location.x,
-				location.y);
+		Bag localNets = this.edgeNetworks.getObjectsAtLocation(location.x, location.y);
 
 		// If there are 0 objects, the Bag will be null rather than empty. :/
 		if (null == localNets)
@@ -223,13 +216,11 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	 *            The location on the network
 	 * @return The price the user will pay
 	 */
-	public Double getPrice(Class<? extends AbstractNetwork> cl,
-			AbstractConsumerClass acc, Int2D location) {
+	public Double getPrice(Class<? extends AbstractNetwork> cl, AbstractConsumerClass acc, Int2D location) {
 		return this.pricingStrategy.getPrice(cl, null, location);
 	}
 
-	public boolean hasNetworkAt(Class<? extends AbstractNetwork> net,
-			Int2D location) {
+	public boolean hasNetworkAt(Class<? extends AbstractNetwork> net, Int2D location) {
 		AbstractNetwork an = this.getNetworkAt(net, location);
 		if (an == null)
 			return false;
@@ -297,15 +288,16 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		}
 
 		// Log financials
-		Logger.getRootLogger().log(Level.INFO,
-				this + " Financials: " + this.financials);
+		Logger.getRootLogger().log(Level.INFO, this + " Financials: " + this.financials);
 
 		// Log customer map
-		Logger.getRootLogger().log(Level.INFO,
-				this + " Customer Map: " + this.printCustomerGrid());
+		Logger.getRootLogger().log(Level.INFO, this + " Customer Map:\n" + this.printCustomerGrid());
 
 		// Log edge congestion
 		Logger.getRootLogger().log(Level.INFO, this.edgeCongestionReport());
+
+		int foo = 1;
+		foo = foo + 1;
 
 	}
 
@@ -318,8 +310,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		this.deltaRevenue = this.financials.getTotalRevenue();
 		this.financials.update();
 		// Calculate delta revenue as current revenue - past revenue
-		this.deltaRevenue = this.financials.getTotalRevenue()
-				- this.deltaRevenue;
+		this.deltaRevenue = this.financials.getTotalRevenue() - this.deltaRevenue;
 
 		this.edgeNetworks.update();
 		this.backboneNetwork.update();

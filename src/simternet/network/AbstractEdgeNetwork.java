@@ -97,6 +97,10 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 		return customers;
 	}
 
+	public Double getPrice(AbstractConsumerClass acc, Int2D location) {
+		return this.owner.getPrice(this.getClass(), acc, location);
+	}
+
 	protected BackboneLink getUpstreamIngress() {
 		int i = 0;
 		BackboneLink l = null;

@@ -35,7 +35,7 @@ public class BackboneLink {
 	/**
 	 * The number of data units this link may transfer each model time step.
 	 */
-	protected Double bandwidth;
+	protected Double				bandwidth;
 
 	/**
 	 * A provider may choose a congestion algorithm, or QoS policy, on a
@@ -44,52 +44,54 @@ public class BackboneLink {
 	 * TODO: For now, use the Internet 'best effort' approximating
 	 * WFQCongestionAlgorithm();
 	 */
-	protected CongestionAlgorithm congestionAlgorithm = new WFQCongestionAlgorithm(
-			this);
+	protected CongestionAlgorithm	congestionAlgorithm		= new WFQCongestionAlgorithm(this);
 
 	/**
 	 * When traffic is sent through this link, it winds up at this network.
 	 */
-	protected final AbstractNetwork destination;
+	protected final AbstractNetwork	destination;
 
 	/**
 	 * This is the set of network flows which the source/transmittion network
 	 * would like to send using this link. They are not transmitted (placed in
 	 * the outputQueue) until processing by this link's congestion algorithm.
 	 */
-	protected List<NetFlow> inputQueue = new ArrayList<NetFlow>();
+	protected List<NetFlow>			inputQueue				= new ArrayList<NetFlow>();
 
 	/**
 	 * The link adds this amount of latency, or delay, to each flow which it
 	 * transmits.
 	 */
-	protected Double latency;
+	protected Double				latency;
 
 	/**
 	 * This is the set of network flows which are ready to be received by the
 	 * destination network.
 	 */
-	protected List<NetFlow> outputQueue = new ArrayList<NetFlow>();
+	protected List<NetFlow>			outputQueue				= new ArrayList<NetFlow>();
 
 	/**
 	 * Controls what routing protocol information is sent to the network which
 	 * uses this link as egress. By default, no information is sent.
 	 */
-	protected RoutingProtocolConfig routingProtocolConfig = RoutingProtocolConfig.NONE;
+	protected RoutingProtocolConfig	routingProtocolConfig	= RoutingProtocolConfig.NONE;
 
 	/**
 	 * The transmitting network.
 	 */
-	protected final AbstractNetwork source;
+	protected final AbstractNetwork	source;
 
-	public BackboneLink(final AbstractNetwork source,
-			final AbstractNetwork destination) {
+	public BackboneLink(final AbstractNetwork source, final AbstractNetwork destination) {
 		this.source = source;
 		this.destination = destination;
 	}
 
 	public Double getBandwidth() {
 		return this.bandwidth;
+	}
+
+	public CongestionAlgorithm getCongestionAlgorithm() {
+		return this.congestionAlgorithm;
 	}
 
 	public AbstractNetwork getDestination() {
@@ -150,19 +152,21 @@ public class BackboneLink {
 		this.bandwidth = bandwidth;
 	}
 
+	public void setCongestionAlgorithm(CongestionAlgorithm congestionAlgorithm) {
+		this.congestionAlgorithm = congestionAlgorithm;
+	}
+
 	public void setLatency(Double latency) {
 		this.latency = latency;
 	}
 
-	public void setRoutingProtocolConfig(
-			RoutingProtocolConfig routingProtocolConfig) {
+	public void setRoutingProtocolConfig(RoutingProtocolConfig routingProtocolConfig) {
 		this.routingProtocolConfig = routingProtocolConfig;
 	}
 
 	@Override
 	public String toString() {
-		return "Link " + this.getSource() + "->" + this.getDestination()
-				+ ", BW=" + this.bandwidth;
+		return "Link " + this.getSource() + "->" + this.getDestination() + ", BW=" + this.bandwidth;
 	}
 
 	/**
@@ -174,8 +178,7 @@ public class BackboneLink {
 		for (NetFlow f : this.inputQueue)
 			f.latency += this.latency;
 
-		this.outputQueue.addAll(this.congestionAlgorithm.limit(this.inputQueue,
-				this));
+		this.outputQueue.addAll(this.congestionAlgorithm.limit(this.inputQueue, this));
 
 		this.inputQueue.clear();
 

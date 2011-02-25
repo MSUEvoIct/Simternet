@@ -2,6 +2,7 @@ package simternet.network;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -9,35 +10,32 @@ import org.apache.log4j.Logger;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import simternet.temporal.AsyncUpdate;
-import simternet.temporal.Temporal;
-import simternet.temporal.TemporalHashMap;
 
 public abstract class AbstractNetwork implements AsyncUpdate, Steppable, Serializable {
 
-	private static final long										serialVersionUID	= 1L;
+	private static final long								serialVersionUID	= 1L;
 	/**
 	 * If there is no specific route, send traffic out this link. The link
 	 * should still be in the list of egress links, along with the associated
 	 * queue.
 	 */
-	protected Temporal<BackboneLink>								defaultRoute		= new Temporal<BackboneLink>(
-																								null);
+	protected BackboneLink									defaultRoute		= null;
 	/**
 	 * Contains the set of other networks we can send traffic to, and the
 	 * associated backbone link.
 	 */
-	protected TemporalHashMap<AbstractNetwork, BackboneLink>		egressLinks			= new TemporalHashMap<AbstractNetwork, BackboneLink>();
+	protected HashMap<AbstractNetwork, BackboneLink>		egressLinks			= new HashMap<AbstractNetwork, BackboneLink>();
 	/**
 	 * Contains the set of other networks we receive traffic from, and the
 	 * associated backbone link.
 	 */
-	protected TemporalHashMap<AbstractNetwork, BackboneLink>		ingressLinks		= new TemporalHashMap<AbstractNetwork, BackboneLink>();
+	protected HashMap<AbstractNetwork, BackboneLink>		ingressLinks		= new HashMap<AbstractNetwork, BackboneLink>();
 
 	/**
 	 * Contains the full routing table of all networks we can reach, and a
 	 * routing table entry (i.e., the next hop)
 	 */
-	protected TemporalHashMap<AbstractNetwork, RoutingTableEntry>	routingTable		= new TemporalHashMap<AbstractNetwork, RoutingTableEntry>();
+	protected HashMap<AbstractNetwork, RoutingTableEntry>	routingTable		= new HashMap<AbstractNetwork, RoutingTableEntry>();
 
 	/**
 	 * Accept ingress link requests from other networks. For now, this function
@@ -51,6 +49,10 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable, Seriali
 	 */
 	public void acceptIngressLinkFrom(BackboneLink l) {
 		this.ingressLinks.put(l.getSource(), l);
+		// Send our initial routing table
+		if (l.routingProtocolConfig != RoutingProtocolConfig.TRANSIT)
+			for (RoutingTableEntry rte : this.routingTable.values())
+				l.source.routingProtocolReceive(rte);
 	}
 
 	public void createEgressLinkTo(AbstractNetwork an, BackboneLink l) {
@@ -86,17 +88,17 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable, Seriali
 		// If we don't have a default route yet, use this link. The effect of
 		// this procedure is that the default route is the first link added
 		// unless it is changed later.
-		if (this.defaultRoute.get() == null)
-			this.defaultRoute.set(l);
+		if (this.defaultRoute == null)
+			this.defaultRoute = l;
 
 		an.acceptIngressLinkFrom(l);
 	}
 
-	// public abstract Double getBuildCost();
-
 	public BackboneLink getDefaultRoute() {
-		return this.defaultRoute.get();
+		return this.defaultRoute;
 	}
+
+	// public abstract Double getBuildCost();
 
 	/**
 	 * @param to
@@ -105,6 +107,22 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable, Seriali
 	 */
 	public BackboneLink getEgressLink(AbstractNetwork to) {
 		return this.egressLinks.get(to);
+	}
+
+	public String getRoutingTableReport() {
+		StringBuffer sb = new StringBuffer();
+		for (AbstractNetwork dest : this.routingTable.keySet())
+			sb.append(dest + " -> " + this.routingTable.get(dest) + "\n");
+		return sb.toString();
+	}
+
+	public boolean isConnectedTo(AbstractNetwork target) {
+		boolean isConnected = false;
+		if (this.egressLinks.containsKey(target))
+			isConnected = true;
+		if (this.ingressLinks.containsKey(target))
+			isConnected = true;
+		return isConnected;
 	}
 
 	public void noteCongestion(NetFlow flow) {
@@ -135,7 +153,7 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable, Seriali
 		RoutingTableEntry rte = this.routingTable.get(flow.destination);
 		BackboneLink outgoing;
 		if (rte == null)
-			outgoing = this.defaultRoute.get();
+			outgoing = this.defaultRoute;
 		else
 			outgoing = rte.nextHop;
 
@@ -202,7 +220,7 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable, Seriali
 	}
 
 	public void setDefaultRoute(BackboneLink defaultRoute) {
-		this.defaultRoute.set(defaultRoute);
+		this.defaultRoute = defaultRoute;
 	}
 
 	/**
@@ -245,6 +263,10 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable, Seriali
 	 */
 	@Override
 	public void step(SimState state) {
+
+		Logger.getRootLogger().log(Level.DEBUG, this + " Default Route: " + this.getDefaultRoute());
+		Logger.getRootLogger().log(Level.DEBUG, this + " Routing Table:\n" + this.getRoutingTableReport());
+
 		// Routing decisions are made first, analagous to a router "backplane"
 		this.route();
 		// Clear output queues on each egress interface.
@@ -261,10 +283,10 @@ public abstract class AbstractNetwork implements AsyncUpdate, Steppable, Seriali
 
 	@Override
 	public void update() {
-		this.egressLinks.update();
-		this.ingressLinks.update();
-		this.routingTable.update();
-		this.defaultRoute.update();
+		// this.egressLinks.update();
+		// this.ingressLinks.update();
+		// this.routingTable.update();
+		// this.defaultRoute.update();
 	}
 
 }
