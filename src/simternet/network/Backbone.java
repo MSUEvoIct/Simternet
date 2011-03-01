@@ -1,7 +1,7 @@
 package simternet.network;
 
 import sim.engine.SimState;
-import simternet.nsp.AbstractNetworkProvider;
+import simternet.nsp.NetworkProvider;
 
 /**
  * BackboneNetworks are those operated by Network Service Providers. They
@@ -11,16 +11,16 @@ import simternet.nsp.AbstractNetworkProvider;
  * @author kkoning
  * 
  */
-public class BackboneNetwork extends AbstractNetwork {
+public class Backbone extends Network {
 
 	private static final long				serialVersionUID	= 1L;
-	protected final AbstractNetworkProvider	owner;
+	protected final NetworkProvider	owner;
 
-	public BackboneNetwork(final AbstractNetworkProvider nsp) {
+	public Backbone(final NetworkProvider nsp) {
 		this.owner = nsp;
 	}
 
-	public AbstractNetworkProvider getOwner() {
+	public NetworkProvider getOwner() {
 		return this.owner;
 	}
 

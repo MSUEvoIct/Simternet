@@ -26,7 +26,7 @@ public class InteractiveFlow extends NetFlow {
 	 *            bandwidthRequested only so that the user can compare actual
 	 *            and requested once they receive the flow.
 	 */
-	public InteractiveFlow(AbstractNetwork source, AbstractNetwork destination,
+	public InteractiveFlow(Network source, Network destination,
 			AbstractConsumerClass user, Double durationActual,
 			Double bandwidthRequested, Double bandwidthActual) {
 

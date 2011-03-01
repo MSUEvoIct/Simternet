@@ -12,26 +12,21 @@ import simternet.application.ApplicationServiceProvider;
 import simternet.temporal.TemporalHashMap;
 import simternet.temporal.TemporalHashSet;
 
-public class Datacenter extends AbstractNetwork {
+public class Datacenter extends Network {
 
-	private static final long							serialVersionUID	= 1L;
+	private static final long					serialVersionUID	= 1L;
 	/**
 	 * Stores the congestion this application sees on each network. Congestion
 	 * is stored as the amount of bandwidth actually received by the congested
 	 * flow. I.e., you would need to compare this to the application's bandwidth
 	 * use to calculate a percentage of congestion.
 	 */
-	protected TemporalHashMap<AbstractNetwork, Double>	congestion			= new TemporalHashMap<AbstractNetwork, Double>();
-	protected TemporalHashSet<NetFlow>					inputQueue			= new TemporalHashSet<NetFlow>();
-	protected final ApplicationServiceProvider			owner;
+	protected TemporalHashMap<Network, Double>	congestion			= new TemporalHashMap<Network, Double>();
+	protected TemporalHashSet<NetFlow>			inputQueue			= new TemporalHashSet<NetFlow>();
+	protected final ApplicationServiceProvider	owner;
 
 	public Datacenter(ApplicationServiceProvider owner) {
 		this.owner = owner;
-	}
-
-	@Override
-	public void createEgressLinkTo(AbstractNetwork an, BackboneLink l) {
-		super.createEgressLinkTo(an, l);
 	}
 
 	/**
@@ -39,7 +34,7 @@ public class Datacenter extends AbstractNetwork {
 	 * @return The actual bandwidth received by congested flows at this edge
 	 *         network.
 	 */
-	public Double getCongestion(AbstractNetwork an) {
+	public Double getCongestion(Network an) {
 		return this.congestion.get(an);
 	}
 
@@ -58,6 +53,8 @@ public class Datacenter extends AbstractNetwork {
 	 */
 	@Override
 	public void noteCongestion(NetFlow flow) {
+		if (flow.destination == null)
+			throw new RuntimeException("A packet going nowhere is congested?!");
 		this.congestion.put(flow.destination, flow.bandwidth);
 	}
 
@@ -81,21 +78,24 @@ public class Datacenter extends AbstractNetwork {
 	public String printCongestion() {
 		StringBuffer sb = new StringBuffer();
 
-		ArrayList<AbstractNetwork> nets = new ArrayList(this.congestion.keySet());
-		Collections.sort(nets, new Comparator<AbstractNetwork>() {
+		ArrayList<Network> nets = new ArrayList(this.congestion.keySet());
+		Collections.sort(nets, new Comparator<Network>() {
 
 			/**
 			 * Just used for sorting display by network.
 			 */
 			@Override
-			public int compare(AbstractNetwork o1, AbstractNetwork o2) {
+			public int compare(Network o1, Network o2) {
 				return o1.toString().compareTo(o2.toString());
 				// return 0;
 			}
 		});
 
-		for (AbstractNetwork net : nets)
+		for (Network net : nets) {
+			if (net == null)
+				throw new RuntimeException("wtf?");
 			sb.append(net.toString() + ": " + this.congestion.get(net) + "\n");
+		}
 
 		return sb.toString();
 	}

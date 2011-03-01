@@ -12,18 +12,16 @@ import simternet.Simternet;
  * 
  */
 @SuppressWarnings("serial")
-public class DumbNetworkServiceProvider extends AbstractNetworkProvider
-		implements Serializable {
+public class DumbNetworkServiceProvider extends NetworkProvider implements Serializable {
 
 	/**
 	 * DumbNetworkServiceProviders always offer service for exactly 15.0
 	 */
-	private static Double price = 15.0;
+	private static Double	price	= 15.0;
 
 	public DumbNetworkServiceProvider(Simternet s) {
 		super(s);
-		this.pricingStrategy = new ConstantPricingStrategy(this,
-				DumbNetworkServiceProvider.price);
+		this.pricingStrategy = new ConstantPricingStrategy(this, DumbNetworkServiceProvider.price);
 		this.investmentStrategy = new BuildEverywhereStrategy(this);
 	}
 

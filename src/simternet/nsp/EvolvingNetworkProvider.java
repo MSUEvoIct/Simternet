@@ -3,16 +3,13 @@ package simternet.nsp;
 import java.io.Serializable;
 import java.util.Date;
 
-import sim.util.Int2D;
 import simternet.Simternet;
-import simternet.consumer.AbstractConsumerClass;
-import simternet.network.AbstractNetwork;
 import xcs.Environment;
 import xcs.MyEnvironment;
 import xcs.MyXCS;
 import xcs.XCSConstants;
 
-public class EvolvingNetworkProvider extends AbstractNetworkProvider implements Serializable {
+public class EvolvingNetworkProvider extends NetworkProvider implements Serializable {
 
 	/**
 	 * 
@@ -44,11 +41,12 @@ public class EvolvingNetworkProvider extends AbstractNetworkProvider implements 
 		System.out.println("Evolving!");
 	}
 
-	@Override
-	public Double getPrice(Class<? extends AbstractNetwork> cl, AbstractConsumerClass acc, Int2D location) {
-		this.runLCSIfNecessary();
-		return this.price;
-	}
+	// @Override
+	// public Double getPrice(Class<? extends Network> cl, AbstractConsumerClass
+	// acc, Int2D location) {
+	// this.runLCSIfNecessary();
+	// return this.price;
+	// }
 
 	public void runLCSIfNecessary() {
 		if (!this.hasLCSRun) {

@@ -10,10 +10,12 @@ import org.apache.log4j.Logger;
 import sim.engine.SimState;
 import sim.util.Bag;
 import sim.util.Int2D;
+import simternet.AssetFinance;
 import simternet.consumer.AbstractConsumerClass;
-import simternet.nsp.AbstractNetworkProvider;
+import simternet.nsp.NetworkProvider;
+import simternet.temporal.Temporal;
 
-public abstract class AbstractEdgeNetwork extends AbstractNetwork {
+public abstract class EdgeNetwork extends Network {
 
 	private static final long	serialVersionUID	= 1L;
 
@@ -32,12 +34,10 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 	 *            network
 	 * @return The cost of building the network in question.
 	 */
-	public static Double getBuildCost(Class<? extends AbstractEdgeNetwork> type, AbstractNetworkProvider builder,
-			Int2D location) {
+	public static Double getBuildCost(Class<? extends EdgeNetwork> type, NetworkProvider builder, Int2D location) {
 		Double buildCost;
 		try {
-			Method m = type.getMethod("getBuildCost", AbstractNetworkProvider.class, Int2D.class);
-
+			Method m = type.getMethod("getBuildCost", NetworkProvider.class, Int2D.class);
 			buildCost = (Double) m.invoke(null, builder, location);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -46,26 +46,37 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 		return buildCost;
 	}
 
+	final AssetFinance				assetFinance;
+
 	/**
 	 * The location of this network in the landscape.
 	 */
-	protected final Int2D					location;
+	final Int2D						location;
 
 	/**
 	 * The maximum bandwidth each edge connection can support. Unlike other
 	 * networks, this is an instantaneous measure rather than a total transfer
 	 * capacity per period. I.e., bytes per second, not bytes per month.
 	 */
-	protected Double						maxBandwidth;
+	Temporal<Double>				maxBandwidth	= new Temporal<Double>(0.0);
 
 	/**
 	 * The NSP that owns and operates this network.
 	 */
-	protected final AbstractNetworkProvider	owner;
+	final NetworkProvider	owner;
 
-	public AbstractEdgeNetwork(AbstractNetworkProvider owner, Int2D location) {
+	/**
+	 * The price of this network
+	 */
+	Temporal<Double>				price			= new Temporal<Double>(0.0);
+
+	public EdgeNetwork(NetworkProvider owner, Int2D location) {
 		this.owner = owner;
 		this.location = location;
+		this.assetFinance = new AssetFinance(this, this.owner.financials);
+
+		Double firstPrice = this.owner.pricingStrategy.getEdgePrice(this);
+		this.price = new Temporal<Double>(firstPrice);
 	}
 
 	public String getCongestionReport() {
@@ -77,7 +88,7 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 	}
 
 	public Double getMaxBandwidth() {
-		return this.maxBandwidth;
+		return this.maxBandwidth.get();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -97,8 +108,8 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 		return customers;
 	}
 
-	public Double getPrice(AbstractConsumerClass acc, Int2D location) {
-		return this.owner.getPrice(this.getClass(), acc, location);
+	public Double getPrice() {
+		return this.price.get();
 	}
 
 	protected BackboneLink getUpstreamIngress() {
@@ -116,10 +127,13 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 
 	}
 
-	public void receivePayment(AbstractConsumerClass acc, Double numCustomers) {
-		double price = this.owner.getPrice(this.getClass(), acc, this.location);
-		double revenue = numCustomers * price;
+	public void processUsage(AbstractConsumerClass users) {
+		this.receivePayment(users);
+	}
 
+	public void receivePayment(AbstractConsumerClass acc) {
+		double price = this.owner.pricingStrategy.getEdgePrice(this);
+		double revenue = acc.getPopultation() * price;
 		this.owner.financials.earn(revenue);
 	}
 
@@ -140,7 +154,11 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 	}
 
 	public void setMaxBandwidth(Double maxBandwidth) {
-		this.maxBandwidth = maxBandwidth;
+		this.maxBandwidth.set(maxBandwidth);
+	}
+
+	public void setPrice(Double price) {
+		this.price.set(price);
 	}
 
 	@Override
@@ -156,7 +174,7 @@ public abstract class AbstractEdgeNetwork extends AbstractNetwork {
 	@Override
 	public void update() {
 		super.update();
-
+		this.maxBandwidth.update();
+		this.price.update();
 	}
-
 }

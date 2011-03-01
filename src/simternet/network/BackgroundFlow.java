@@ -40,7 +40,7 @@ public class BackgroundFlow extends NetFlow {
 	 * @param maxDuration
 	 *            The maximum time to wait for this data transfer.
 	 */
-	public BackgroundFlow(AbstractNetwork source, AbstractNetwork destination,
+	public BackgroundFlow(Network source, Network destination,
 			AbstractConsumerClass user, Double usage, Double maxDuration) {
 
 		super(source, destination, user);

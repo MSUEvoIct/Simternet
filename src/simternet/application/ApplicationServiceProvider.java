@@ -11,14 +11,14 @@ import sim.engine.Steppable;
 import simternet.Financials;
 import simternet.Simternet;
 import simternet.consumer.AbstractConsumerClass;
-import simternet.network.AbstractEdgeNetwork;
-import simternet.network.AbstractNetwork;
-import simternet.network.BackboneNetwork;
+import simternet.network.Backbone;
 import simternet.network.Datacenter;
+import simternet.network.EdgeNetwork;
 import simternet.network.InteractiveFlow;
 import simternet.network.NetFlow;
+import simternet.network.Network;
 import simternet.network.RoutingProtocolConfig;
-import simternet.nsp.AbstractNetworkProvider;
+import simternet.nsp.NetworkProvider;
 import simternet.temporal.AsyncUpdate;
 import simternet.temporal.Temporal;
 
@@ -26,31 +26,31 @@ public class ApplicationServiceProvider implements Steppable, Serializable, Asyn
 	/**
 	 * 
 	 */
-	private static final long			serialVersionUID		= 1L;
+	private static final long	serialVersionUID		= 1L;
 
 	/**
 	 * Other data structures will rely on this not changing, e.g., one that
 	 * keeps a lists of ASPs within an App Category.
 	 */
-	protected final AppCategory			appCategory;
+	protected final AppCategory	appCategory;
 	// TODO: Set this better;
-	protected Temporal<Double>			bandwidth				= new Temporal<Double>(100.0);
-	protected HashSet<AbstractNetwork>	connectedNetworks		= new HashSet<AbstractNetwork>();
-	protected Datacenter				datacenter;
-	protected Temporal<Double>			duration				= new Temporal<Double>(100.0);
-	protected Financials				financials;
-	protected String					name;
-	protected Temporal<Double>			priceAdvertising		= new Temporal<Double>(3.0);
-	protected Temporal<Double>			priceSubscriptions		= new Temporal<Double>(3.0);
+	protected Temporal<Double>	bandwidth				= new Temporal<Double>(100.0);
+	protected HashSet<Network>	connectedNetworks		= new HashSet<Network>();
+	protected Datacenter		datacenter;
+	protected Temporal<Double>	duration				= new Temporal<Double>(100.0);
+	protected Financials		financials;
+	protected String			name;
+	protected Temporal<Double>	priceAdvertising		= new Temporal<Double>(3.0);
+	protected Temporal<Double>	priceSubscriptions		= new Temporal<Double>(3.0);
 	/**
 	 * Quick-and-dirty measure of an application's quality. Should reflect
 	 * investment in all qualities other than network transport.
 	 */
-	protected Temporal<Double>			quality					= new Temporal<Double>(0.0);
-	protected Temporal<Double>			revenueAdvertising		= new Temporal<Double>(0.0);
-	protected Temporal<Double>			revenueSubscriptions	= new Temporal<Double>(0.0);
+	protected Temporal<Double>	quality					= new Temporal<Double>(0.0);
+	protected Temporal<Double>	revenueAdvertising		= new Temporal<Double>(0.0);
+	protected Temporal<Double>	revenueSubscriptions	= new Temporal<Double>(0.0);
 
-	protected Simternet					s;
+	protected Simternet			s;
 
 	public ApplicationServiceProvider(Simternet s, AppCategory appCategory) {
 		// housekeeping
@@ -65,16 +65,17 @@ public class ApplicationServiceProvider implements Steppable, Serializable, Asyn
 	}
 
 	private void connectDatacenter() {
-		for (AbstractNetworkProvider anp : this.s.getNetworkServiceProviders()) {
-			BackboneNetwork bn = anp.getBackboneNetwork();
+		for (NetworkProvider anp : this.s.getNetworkServiceProviders()) {
+			Backbone bn = anp.getBackboneNetwork();
 			if (!this.connectedNetworks.contains(bn)) {
-				this.datacenter.createEgressLinkTo(anp.getBackboneNetwork(), null, RoutingProtocolConfig.TRANSIT);
+				// XXX: hard coded bandwidth!
+				this.datacenter.createEgressLinkTo(anp.getBackboneNetwork(), 5.0E7, RoutingProtocolConfig.TRANSIT);
 				this.connectedNetworks.add(bn);
 			}
 		}
 	}
 
-	protected NetFlow createNetFlow(AbstractConsumerClass consumer, AbstractEdgeNetwork network) {
+	protected NetFlow createNetFlow(AbstractConsumerClass consumer, EdgeNetwork network) {
 		NetFlow flow = new InteractiveFlow( // TODO: Vary interactivity
 				this.datacenter, // Flow comes from us
 				network, // Flow goes to this network
@@ -108,7 +109,7 @@ public class ApplicationServiceProvider implements Steppable, Serializable, Asyn
 		return this.appCategory;
 	}
 
-	protected Double getCongestedBandwidth(AbstractNetwork an) {
+	protected Double getCongestedBandwidth(Network an) {
 		Double congestedMaxSeen = this.datacenter.getCongestion(an);
 		if (congestedMaxSeen == null)
 			return this.bandwidth.get();
@@ -121,7 +122,7 @@ public class ApplicationServiceProvider implements Steppable, Serializable, Asyn
 	 * @param an
 	 * @return
 	 */
-	public Double getCongestionRatio(AbstractNetwork an) {
+	public Double getCongestionRatio(Network an) {
 		Double congested = this.getCongestedBandwidth(an);
 		Double maxBW = this.bandwidth.get();
 		return congested / maxBW;
@@ -134,7 +135,7 @@ public class ApplicationServiceProvider implements Steppable, Serializable, Asyn
 		return 100.0;
 	}
 
-	public AbstractNetwork getDataCenter() {
+	public Network getDataCenter() {
 		return this.datacenter;
 	}
 
@@ -170,7 +171,7 @@ public class ApplicationServiceProvider implements Steppable, Serializable, Asyn
 	 */
 	protected void investInQuality() {
 		Double toInvest = this.s.random.nextDouble() * 10;
-		this.quality.increment(toInvest);
+		this.quality.increase(toInvest);
 	}
 
 	/**
@@ -186,12 +187,12 @@ public class ApplicationServiceProvider implements Steppable, Serializable, Asyn
 	 * @param datacenterLocation
 	 *            Where the usage was serviced/processed from
 	 */
-	public void processUsage(AbstractConsumerClass consumer, AbstractEdgeNetwork network) {
+	public void processUsage(AbstractConsumerClass consumer, EdgeNetwork network) {
 
 		double ads = this.priceAdvertising.get();
 		double sub = this.priceSubscriptions.get();
-		this.revenueAdvertising.increment(ads);
-		this.revenueSubscriptions.increment(sub);
+		this.revenueAdvertising.increase(ads);
+		this.revenueSubscriptions.increase(sub);
 		this.financials.earn(ads + sub);
 
 		NetFlow flow = this.createNetFlow(consumer, network);

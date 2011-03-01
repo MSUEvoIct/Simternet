@@ -7,7 +7,7 @@ import java.util.List;
 
 import sim.util.Int2D;
 import simternet.LocationIterator;
-import simternet.network.AbstractEdgeNetwork;
+import simternet.network.EdgeNetwork;
 import simternet.network.SimpleEdgeNetwork;
 
 public class ScoringInvestmentStrategy implements InvestmentStrategy,
@@ -20,15 +20,15 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 		protected Double cost;
 		protected Double distanceFromHome;
 		protected final Int2D location;
-		protected final Class<? extends AbstractEdgeNetwork> networkType;
+		protected final Class<? extends EdgeNetwork> networkType;
 		protected Double score;
 
 		public PotentialNetwork(
-				Class<? extends AbstractEdgeNetwork> networkType, Int2D location) {
+				Class<? extends EdgeNetwork> networkType, Int2D location) {
 			this.networkType = networkType;
 			this.location = location;
 
-			this.cost = AbstractEdgeNetwork.getBuildCost(networkType,
+			this.cost = EdgeNetwork.getBuildCost(networkType,
 					ScoringInvestmentStrategy.this.nsp, location);
 			this.distanceFromHome = ScoringInvestmentStrategy.this.nsp
 					.getHomeBase().distance(location);
@@ -65,8 +65,8 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 	 * a network.
 	 */
 	protected Double buildThreshold;
-	protected List<Class<? extends AbstractEdgeNetwork>> networkTypes;
-	protected AbstractNetworkProvider nsp;
+	protected List<Class<? extends EdgeNetwork>> networkTypes;
+	protected NetworkProvider nsp;
 	protected List<PotentialNetwork> potentialNetworks;
 
 	/**
@@ -79,13 +79,13 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 	 * @param buildThreshold
 	 *            Only networks with at least this score will be built.
 	 */
-	public ScoringInvestmentStrategy(AbstractNetworkProvider nsp,
-			List<Class<? extends AbstractEdgeNetwork>> networkTypes,
+	public ScoringInvestmentStrategy(NetworkProvider nsp,
+			List<Class<? extends EdgeNetwork>> networkTypes,
 			Double buildThreshold) {
 		this.nsp = nsp;
 		this.buildThreshold = buildThreshold;
 		if (networkTypes == null) {
-			networkTypes = new ArrayList<Class<? extends AbstractEdgeNetwork>>();
+			networkTypes = new ArrayList<Class<? extends EdgeNetwork>>();
 			networkTypes.add(SimpleEdgeNetwork.class);
 		}
 		this.networkTypes = networkTypes;
@@ -115,7 +115,7 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy,
 	}
 
 	private void populatePotentialNetworks() {
-		for (Class<? extends AbstractEdgeNetwork> networkType : this.networkTypes)
+		for (Class<? extends EdgeNetwork> networkType : this.networkTypes)
 			for (Int2D location : new LocationIterator(this.nsp.simternet))
 				this.potentialNetworks.add(new PotentialNetwork(networkType,
 						location));

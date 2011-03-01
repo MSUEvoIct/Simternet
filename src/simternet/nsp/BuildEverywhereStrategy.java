@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sim.util.Int2D;
-import simternet.network.AbstractEdgeNetwork;
+import simternet.network.EdgeNetwork;
 import simternet.network.SimpleEdgeNetwork;
 
 /**
@@ -25,15 +25,15 @@ public class BuildEverywhereStrategy implements InvestmentStrategy,
 	protected Boolean built = false;
 	protected Integer builtThroughX = 0;
 	protected Integer builtThroughY = 0;
-	protected List<Class<? extends AbstractEdgeNetwork>> networkTypes;
-	protected AbstractNetworkProvider nsp;
+	protected List<Class<? extends EdgeNetwork>> networkTypes;
+	protected NetworkProvider nsp;
 
 	/**
 	 * Build SimpleNetwork everywhere...
 	 * 
 	 * @param nsp
 	 */
-	public BuildEverywhereStrategy(AbstractNetworkProvider nsp) {
+	public BuildEverywhereStrategy(NetworkProvider nsp) {
 		this(nsp, null);
 	}
 
@@ -47,11 +47,11 @@ public class BuildEverywhereStrategy implements InvestmentStrategy,
 	 *            if null, just build SimpleNetwork. Otherwise, build all
 	 *            network types in this list at each grid location.
 	 */
-	public BuildEverywhereStrategy(AbstractNetworkProvider nsp,
-			List<Class<? extends AbstractEdgeNetwork>> networkTypes) {
+	public BuildEverywhereStrategy(NetworkProvider nsp,
+			List<Class<? extends EdgeNetwork>> networkTypes) {
 		this.nsp = nsp;
 		if (networkTypes == null) {
-			networkTypes = new ArrayList<Class<? extends AbstractEdgeNetwork>>();
+			networkTypes = new ArrayList<Class<? extends EdgeNetwork>>();
 			networkTypes.add(SimpleEdgeNetwork.class);
 		}
 		this.networkTypes = networkTypes;
@@ -78,15 +78,15 @@ public class BuildEverywhereStrategy implements InvestmentStrategy,
 				// (i.e., instantiating the class), use reflection to call a
 				// static
 				// method instead.
-				for (Class<? extends AbstractEdgeNetwork> cl : this.networkTypes)
-					costForThisPixel = +AbstractEdgeNetwork.getBuildCost(cl,
+				for (Class<? extends EdgeNetwork> cl : this.networkTypes)
+					costForThisPixel = +EdgeNetwork.getBuildCost(cl,
 							this.nsp, new Int2D(x, y));
 
 				// if we have enough funding available to build the networks,
 				// do so. When we run out of money, stop building.
 				if (costForThisPixel < amountAvailable) {
 
-					for (Class<? extends AbstractEdgeNetwork> cl : this.networkTypes)
+					for (Class<? extends EdgeNetwork> cl : this.networkTypes)
 						try {
 							this.nsp.buildNetwork(cl, new Int2D(x, y));
 							amountAvailable -= costForThisPixel;

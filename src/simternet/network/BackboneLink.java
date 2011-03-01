@@ -1,7 +1,10 @@
 package simternet.network;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A BackboneLink is a simplex connection between two Networks. BackboneLinks
@@ -23,10 +26,12 @@ import java.util.List;
  * @author kkoning
  * 
  */
-public class BackboneLink {
+public class BackboneLink implements Serializable {
+
+	private static final long	serialVersionUID	= 1L;
 
 	public static BackboneLink createSymmetricLink(BackboneLink a) {
-		BackboneLink b = new BackboneLink(a.source, a.destination);
+		BackboneLink b = new BackboneLink(a.source, a.destination, a.bandwidth);
 		b.setBandwidth(a.getBandwidth());
 		b.setLatency(a.getLatency());
 		return b;
@@ -35,7 +40,7 @@ public class BackboneLink {
 	/**
 	 * The number of data units this link may transfer each model time step.
 	 */
-	protected Double				bandwidth;
+	protected Double				bandwidth				= Double.MAX_VALUE;
 
 	/**
 	 * A provider may choose a congestion algorithm, or QoS policy, on a
@@ -49,7 +54,13 @@ public class BackboneLink {
 	/**
 	 * When traffic is sent through this link, it winds up at this network.
 	 */
-	protected final AbstractNetwork	destination;
+	protected final Network			destination;
+
+	/**
+	 * The link adds this amount of latency, or delay, to each flow which it
+	 * transmits, in addition to whatever latency may be added due to queueing.
+	 */
+	private Double					inherentLatency			= 0.0;
 
 	/**
 	 * This is the set of network flows which the source/transmittion network
@@ -57,12 +68,6 @@ public class BackboneLink {
 	 * the outputQueue) until processing by this link's congestion algorithm.
 	 */
 	protected List<NetFlow>			inputQueue				= new ArrayList<NetFlow>();
-
-	/**
-	 * The link adds this amount of latency, or delay, to each flow which it
-	 * transmits.
-	 */
-	protected Double				latency;
 
 	/**
 	 * This is the set of network flows which are ready to be received by the
@@ -76,14 +81,36 @@ public class BackboneLink {
 	 */
 	protected RoutingProtocolConfig	routingProtocolConfig	= RoutingProtocolConfig.NONE;
 
+	Map<Network, Route>				routingTable;
+
 	/**
 	 * The transmitting network.
 	 */
-	protected final AbstractNetwork	source;
+	protected final Network			source;
 
-	public BackboneLink(final AbstractNetwork source, final AbstractNetwork destination) {
+	/**
+	 * Create a backbone link, automatically add it to the source and
+	 * destination networks as egress and ingress links respectively.
+	 * 
+	 * @param source
+	 * @param destination
+	 */
+	public BackboneLink(final Network source, final Network destination, Double bandwidth) {
 		this.source = source;
 		this.destination = destination;
+		if (bandwidth != null)
+			this.bandwidth = bandwidth;
+
+		this.source.egressLinks.put(destination, this);
+		this.destination.ingressLinks.put(source, this);
+
+		this.initRoutingTable();
+	}
+
+	public void disconnect() {
+		this.stopRoutingProtocol();
+		this.destination.ingressLinks.remove(this.source);
+		this.source.egressLinks.remove(this.destination);
 	}
 
 	public Double getBandwidth() {
@@ -94,20 +121,27 @@ public class BackboneLink {
 		return this.congestionAlgorithm;
 	}
 
-	public AbstractNetwork getDestination() {
+	public Network getDestination() {
 		return this.destination;
 	}
 
 	public Double getLatency() {
-		return this.latency;
+		return this.inherentLatency;
 	}
 
 	public RoutingProtocolConfig getRoutingProtocolConfig() {
 		return this.routingProtocolConfig;
 	}
 
-	public AbstractNetwork getSource() {
+	public Network getSource() {
 		return this.source;
+	}
+
+	private void initRoutingTable() {
+		this.routingTable = new HashMap<Network, Route>();
+		Route directlyConnected = new Route(this.destination, this, 0);
+		this.routingTable.put(this.destination, directlyConnected);
+		this.source.receiveRoute(directlyConnected);
 	}
 
 	/**
@@ -115,7 +149,7 @@ public class BackboneLink {
 	 * 
 	 */
 	public void makeInfinite() {
-		this.latency = 0D;
+		this.inherentLatency = 0D;
 		// this.bandwidth = Double.MAX_VALUE;
 		this.bandwidth = 5.0E7;
 
@@ -157,16 +191,50 @@ public class BackboneLink {
 	}
 
 	public void setLatency(Double latency) {
-		this.latency = latency;
+		this.inherentLatency = latency;
 	}
 
 	public void setRoutingProtocolConfig(RoutingProtocolConfig routingProtocolConfig) {
+		if (this.routingProtocolConfig.equals(routingProtocolConfig))
+			return; // no change, do nothing
+
+		if (routingProtocolConfig.equals(RoutingProtocolConfig.NONE)) {
+			this.stopRoutingProtocol(); // was something, now nothing
+			this.routingProtocolConfig = RoutingProtocolConfig.NONE;
+			return;
+		}
+
+		// Otherwise, we're changing from none to some, or between them. so
+		// reset
+		this.stopRoutingProtocol();
+		this.startRoutingProtocol();
 		this.routingProtocolConfig = routingProtocolConfig;
+	}
+
+	private void startRoutingProtocol() {
+		// start with a fresh new routing table
+		this.initRoutingTable();
+
+		// the destination network tells the sending network which
+		// other networks it can reach through this link.
+		this.destination.initRoutes(this);
+	}
+
+	private void stopRoutingProtocol() {
+		// withdraw all routes
+		for (Route route : this.routingTable.values()) {
+			route.distance = Integer.MAX_VALUE;
+			this.source.receiveRoute(route);
+		}
+
+		// wipe routing table
+		this.initRoutingTable();
 	}
 
 	@Override
 	public String toString() {
-		return "Link " + this.getSource() + "->" + this.getDestination() + ", BW=" + this.bandwidth;
+		return "Link " + this.getSource() + "->" + this.getDestination() + ", BW=" + this.bandwidth + ", ROUTE="
+				+ this.routingProtocolConfig.toString();
 	}
 
 	/**
@@ -174,14 +242,65 @@ public class BackboneLink {
 	 * queue. These flows are then processed by the congestion algorithm and
 	 * placed in the output queue to be retrieved by the target network.
 	 */
-	public void transmit() {
+	public void transmitFlows() {
 		for (NetFlow f : this.inputQueue)
-			f.latency += this.latency;
+			f.latency += this.inherentLatency;
 
 		this.outputQueue.addAll(this.congestionAlgorithm.limit(this.inputQueue, this));
 
 		this.inputQueue.clear();
+	}
 
+	/**
+	 * Called by the destination network when telling its peer (the source) that
+	 * a particular network may be reached via this link. The default
+	 * implementation keeps track of the route in a hash specifically for this
+	 * link, and immediately passes it on to the destination network
+	 * 
+	 * This function is intended to recieve routes <i>directly</i> from the
+	 * destination network's routing table. It takes care of cloning the routes,
+	 * incrementing the distance, etc...
+	 * 
+	 * @param route
+	 */
+	public void updateRoute(Route route) {
+
+		boolean beingWithdrawn = false;
+
+		// if we're being told the route is being withdrawn
+		if (route.distance == Integer.MAX_VALUE)
+			beingWithdrawn = true;
+
+		// We need a new copy of the route, as we're going to have our own
+		// distance, path, etc...
+		Route newRoute;
+		try {
+			newRoute = route.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
+
+		// This link is obviously the next hop now
+		newRoute.setNextHop(this);
+
+		// Track the network path (i.e., AS-PATH) for loop detection
+		newRoute.path.add(this.destination);
+
+		if (!beingWithdrawn) {
+			// By default, increase the distance by 1
+			newRoute.setDistance(route.getDistance() + 1);
+
+			// If we're going to reach the destination network via this link,
+			// we're going to do so using this route
+			this.routingTable.put(route.destination, newRoute);
+		} else {
+			newRoute.setDistance(Integer.MAX_VALUE);
+			this.routingTable.remove(route.destination);
+		}
+
+		// The network using this link to send (the source) needs to process the
+		// update
+		this.source.receiveRoute(newRoute);
 	}
 
 }

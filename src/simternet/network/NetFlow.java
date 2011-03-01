@@ -45,7 +45,7 @@ public abstract class NetFlow {
 	/**
 	 * The network this NetFlow object will be delivered to.
 	 */
-	protected final AbstractNetwork			destination;
+	protected final Network			destination;
 
 	/**
 	 * The actual duration of this flow. For interactive flows, this should
@@ -63,7 +63,7 @@ public abstract class NetFlow {
 	 * The source network, should be a RoutingPoint operated by an application
 	 * provider.
 	 */
-	protected final AbstractNetwork			source;
+	protected final Network			source;
 
 	/**
 	 * Exactly analogous to TTL in real networks. We should never have a network
@@ -79,7 +79,9 @@ public abstract class NetFlow {
 	 */
 	protected final AbstractConsumerClass	user;
 
-	protected NetFlow(AbstractNetwork source, AbstractNetwork destination, AbstractConsumerClass user) {
+	protected NetFlow(Network source, Network destination, AbstractConsumerClass user) {
+		if (destination == null)
+			throw new RuntimeException("Can't send a packet nowhere");
 		this.source = source;
 		this.destination = destination;
 		this.user = user;

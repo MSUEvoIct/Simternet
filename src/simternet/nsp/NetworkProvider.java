@@ -15,10 +15,10 @@ import sim.util.Bag;
 import sim.util.Int2D;
 import simternet.Financials;
 import simternet.Simternet;
-import simternet.consumer.AbstractConsumerClass;
-import simternet.network.AbstractEdgeNetwork;
-import simternet.network.AbstractNetwork;
-import simternet.network.BackboneNetwork;
+import simternet.network.Backbone;
+import simternet.network.EdgeNetwork;
+import simternet.network.Network;
+import simternet.network.RoutingProtocolConfig;
 import simternet.temporal.AsyncUpdate;
 import simternet.temporal.TemporalSparseGrid2D;
 
@@ -29,22 +29,22 @@ import simternet.temporal.TemporalSparseGrid2D;
  * 
  * @author kkoning
  */
-public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate {
+public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 
 	private static final long		serialVersionUID	= 1L;
 
-	protected BackboneNetwork		backboneNetwork;
+	protected Backbone				backboneNetwork;
+	public boolean					bankrupt			= false;
 	public Double					deltaRevenue		= 0.0;
 	protected TemporalSparseGrid2D	edgeNetworks;
-
 	public Financials				financials;
 	protected Int2D					homeBase;
 	protected InvestmentStrategy	investmentStrategy;
 	protected String				name;
-	protected PricingStrategy		pricingStrategy;
+	public PricingStrategy			pricingStrategy;
 	public Simternet				simternet			= null;
 
-	public AbstractNetworkProvider(Simternet simternet) {
+	public NetworkProvider(Simternet simternet) {
 		this.simternet = simternet;
 
 		this.name = simternet.config.getNSPName();
@@ -58,7 +58,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 
 		this.edgeNetworks = new TemporalSparseGrid2D(this.simternet.config.x(), this.simternet.config.y());
 
-		this.backboneNetwork = new BackboneNetwork(this);
+		this.backboneNetwork = new Backbone(this);
 
 	}
 
@@ -71,18 +71,17 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	 * @param location
 	 *            The location of the network.
 	 */
-	protected void buildNetwork(Class<? extends AbstractEdgeNetwork> type, Int2D location) {
+	protected void buildNetwork(Class<? extends EdgeNetwork> type, Int2D location) {
 		try {
-			Constructor<? extends AbstractEdgeNetwork> constr = type.getConstructor(AbstractNetworkProvider.class,
-					Int2D.class);
+			Constructor<? extends EdgeNetwork> constr = type.getConstructor(NetworkProvider.class, Int2D.class);
 
-			Double buildCost = AbstractEdgeNetwork.getBuildCost(type, this, location);
-			AbstractEdgeNetwork aen = constr.newInstance(this, location);
+			Double buildCost = EdgeNetwork.getBuildCost(type, this, location);
+			EdgeNetwork aen = constr.newInstance(this, location);
 			this.financials.capitalize(buildCost);
 			this.edgeNetworks.setObjectLocation(aen, location);
 
 			// for now, create an infinite link to this network.
-			this.getBackboneNetwork().createEgressLinkTo(aen, null);
+			this.getBackboneNetwork().createEgressLinkTo(aen, 1.0E5, RoutingProtocolConfig.NONE);
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -93,7 +92,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		StringBuffer sb = new StringBuffer();
 		sb.append("Edge congestion for " + this + "\n");
 		for (Object o : this.edgeNetworks) {
-			AbstractEdgeNetwork aen = (AbstractEdgeNetwork) o;
+			EdgeNetwork aen = (EdgeNetwork) o;
 			sb.append(aen + ": ");
 			sb.append(aen.getCongestionReport());
 			sb.append("\n");
@@ -101,7 +100,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		return sb.toString();
 	}
 
-	public BackboneNetwork getBackboneNetwork() {
+	public Backbone getBackboneNetwork() {
 		return this.backboneNetwork;
 	}
 
@@ -113,9 +112,9 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	@SuppressWarnings("unchecked")
 	public Double getCustomers() {
 		double numCustomers = 0.0;
-		Iterator<AbstractEdgeNetwork> allNetworks = this.edgeNetworks.iterator();
+		Iterator<EdgeNetwork> allNetworks = this.edgeNetworks.iterator();
 		while (allNetworks.hasNext()) {
-			AbstractEdgeNetwork aen = allNetworks.next();
+			EdgeNetwork aen = allNetworks.next();
 			numCustomers += aen.getNumSubscribers();
 		}
 		return numCustomers;
@@ -133,10 +132,10 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		if (networks == null)
 			return 0.0;
 
-		Iterator<AbstractEdgeNetwork> networksIterator = networks.iterator();
+		Iterator<EdgeNetwork> networksIterator = networks.iterator();
 
 		while (networksIterator.hasNext()) {
-			AbstractEdgeNetwork aen = networksIterator.next();
+			EdgeNetwork aen = networksIterator.next();
 			numCustomers += aen.getNumSubscribers();
 		}
 
@@ -153,8 +152,8 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		return this.deltaRevenue;
 	}
 
-	public Collection<AbstractNetwork> getEdgeNetworks() {
-		ArrayList<AbstractNetwork> list = new ArrayList<AbstractNetwork>();
+	public Collection<EdgeNetwork> getEdgeNetworks() {
+		ArrayList<EdgeNetwork> list = new ArrayList<EdgeNetwork>();
 		Bag nets = this.edgeNetworks.allObjects;
 
 		// If there are 0 objects, the Bag will be null rather than empty. :/
@@ -162,7 +161,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 			return list;
 
 		for (int i = 0; i < nets.numObjs; i++)
-			list.add((AbstractEdgeNetwork) nets.objs[i]);
+			list.add((EdgeNetwork) nets.objs[i]);
 
 		return list;
 	}
@@ -175,7 +174,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		return this.name;
 	}
 
-	public AbstractNetwork getNetworkAt(Class<? extends AbstractNetwork> net, Int2D location) {
+	public Network getNetworkAt(Class<? extends Network> net, Int2D location) {
 		Bag allNets = this.edgeNetworks.getObjectsAtLocation(location);
 		if (allNets == null) // we have no nets at this loc
 			return null;
@@ -183,45 +182,53 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 			return null;
 
 		for (Object obj : allNets.objs) {
-			AbstractNetwork n = (AbstractNetwork) obj;
+			Network n = (Network) obj;
 			if (n.getClass().equals(net))
 				return n;
 		}
 		return null;
 	}
 
-	public Collection<AbstractNetwork> getNetworks(Int2D location) {
-		ArrayList<AbstractNetwork> list = new ArrayList<AbstractNetwork>();
-		Bag localNets = this.edgeNetworks.getObjectsAtLocation(location.x, location.y);
+	/**
+	 * @return All this NSP's networks
+	 */
+	public Collection<Network> getNetworks() {
+		return this.getNetworks(null);
+	}
+
+	public Collection<Network> getNetworks(Int2D location) {
+		ArrayList<Network> list = new ArrayList<Network>();
+		Bag edgeNets;
+		if (location != null)
+			edgeNets = this.edgeNetworks.getObjectsAtLocation(location.x, location.y);
+		else
+			edgeNets = this.edgeNetworks.allObjects;
 
 		// If there are 0 objects, the Bag will be null rather than empty. :/
-		if (null == localNets)
-			return list;
+		if (edgeNets != null)
+			for (int i = 0; i < edgeNets.numObjs; i++)
+				list.add((Network) edgeNets.objs[i]);
 
-		for (int i = 0; i < localNets.numObjs; i++)
-			list.add((AbstractNetwork) localNets.objs[i]);
+		if (location == null)
+			list.add(this.getBackboneNetwork());
 
 		return list;
 	}
 
 	/**
-	 * Determines the price given the following parameters. Many of these
-	 * parameters could be ignored, either by regulatory decree or otherwise.
-	 * 
-	 * @param cl
-	 *            The type of network (i.e. Wired/Wireless, DSL/Cable)
-	 * @param acc
-	 *            The class of consumers
-	 * @param location
-	 *            The location on the network
-	 * @return The price the user will pay
+	 * Dispose of all assets, exit market
 	 */
-	public Double getPrice(Class<? extends AbstractNetwork> cl, AbstractConsumerClass acc, Int2D location) {
-		return this.pricingStrategy.getPrice(cl, null, location);
+	private void goBankrupt() {
+		Logger.getRootLogger().log(Level.WARN, this + " going bankrupt: " + this.financials);
+		for (EdgeNetwork edge : (Iterable<EdgeNetwork>) this.edgeNetworks)
+			edge.disconnect();
+		this.edgeNetworks.clear();
+		this.backboneNetwork.disconnect();
+		this.bankrupt = true;
 	}
 
-	public boolean hasNetworkAt(Class<? extends AbstractNetwork> net, Int2D location) {
-		AbstractNetwork an = this.getNetworkAt(net, location);
+	public boolean hasNetworkAt(Class<? extends Network> net, Int2D location) {
+		Network an = this.getNetworkAt(net, location);
 		if (an == null)
 			return false;
 		else
@@ -232,9 +239,7 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		this.investmentStrategy.makeNetworkInvestment();
 	}
 
-	@SuppressWarnings("unchecked")
 	private StringBuffer printCustomerGrid() {
-
 		StringBuffer sb = new StringBuffer();
 		DecimalFormat positionFormat = new DecimalFormat("00");
 		DecimalFormat numCustFormat = new DecimalFormat("0000000");
@@ -249,14 +254,9 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 				sb.append(positionFormat.format(curY));
 			}
 			sb.append(" " + numCustFormat.format(this.getCustomers(location)));
-
 		}
 
 		return sb;
-	}
-
-	protected void setPrices() {
-		this.pricingStrategy.setPrices();
 	}
 
 	/**
@@ -268,22 +268,19 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 	@Override
 	public void step(SimState state) {
 
+		if (this.bankrupt)
+			return;
+
 		this.makeNetworkInvestment();
 
-		this.setPrices(); // Set prices for the next period.
-
-		// if (this.simternet.config.debugLevel() > 0) {
-		// System.out.println("Stepping " + this.getName() + ", has "
-		// + this.financials);
-		// System.out.println(this.printCustomerGrid());
-		// }
+		this.pricingStrategy.priceEdges(); // Set prices for the next period.
 
 		// operate our backbone network
 		this.backboneNetwork.step(state);
 
 		// operate our edge networks
 		for (Object o : this.edgeNetworks) {
-			AbstractEdgeNetwork aen = (AbstractEdgeNetwork) o;
+			EdgeNetwork aen = (EdgeNetwork) o;
 			aen.step(state);
 		}
 
@@ -296,9 +293,8 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 		// Log edge congestion
 		Logger.getRootLogger().log(Level.INFO, this.edgeCongestionReport());
 
-		int foo = 1;
-		foo = foo + 1;
-
+		if (this.financials.getNetWorth() < -1.0E6)
+			this.goBankrupt();
 	}
 
 	@Override
@@ -314,6 +310,12 @@ public abstract class AbstractNetworkProvider implements Steppable, AsyncUpdate 
 
 		this.edgeNetworks.update();
 		this.backboneNetwork.update();
+
+		for (Object o : this.edgeNetworks) {
+			EdgeNetwork aen = (EdgeNetwork) o;
+			aen.update();
+		}
+
 	}
 
 }
