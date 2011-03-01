@@ -8,7 +8,7 @@ import sim.engine.Steppable;
 import simternet.Simternet;
 import simternet.application.ApplicationServiceProvider;
 import simternet.consumer.AbstractConsumerClass;
-import simternet.nsp.AbstractNetworkProvider;
+import simternet.nsp.NetworkProvider;
 
 /**
  * 
@@ -35,7 +35,7 @@ public class Arbiter implements Steppable, Serializable {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void step(SimState state) {
-		for (AbstractNetworkProvider nsp : ((Simternet) state)
+		for (NetworkProvider nsp : ((Simternet) state)
 				.getNetworkServiceProviders())
 			nsp.update();
 

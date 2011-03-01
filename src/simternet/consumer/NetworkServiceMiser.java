@@ -6,8 +6,8 @@ import java.util.Collection;
 import sim.util.Int2D;
 import simternet.Simternet;
 import simternet.application.ApplicationServiceProvider;
-import simternet.network.AbstractEdgeNetwork;
-import simternet.network.AbstractNetwork;
+import simternet.network.EdgeNetwork;
+import simternet.network.Network;
 
 /**
  * Uses only the cheapest network connection at his location. Uses all
@@ -20,7 +20,7 @@ public class NetworkServiceMiser extends AbstractConsumerClass implements Serial
 
 	private static final long	serialVersionUID	= 1L;
 
-	public AbstractEdgeNetwork	myNetwork;
+	public EdgeNetwork	myNetwork;
 
 	public NetworkServiceMiser(Simternet s, Int2D location, Double population, ConsumerProfile profile) {
 		super(s, location, population, profile);
@@ -48,12 +48,12 @@ public class NetworkServiceMiser extends AbstractConsumerClass implements Serial
 
 	@Override
 	protected void manageNetworks() {
-		Collection<AbstractNetwork> c = this.s.getNetworks(null, AbstractEdgeNetwork.class, this.location);
+		Collection<Network> c = this.s.getNetworks(null, EdgeNetwork.class, this.location);
 		double lowestPrice = Double.MAX_VALUE;
-		AbstractEdgeNetwork lowestPricedNetwork = null;
-		for (AbstractNetwork an : c) {
-			AbstractEdgeNetwork aen = (AbstractEdgeNetwork) an;
-			double price = aen.getPrice(this, this.location);
+		EdgeNetwork lowestPricedNetwork = null;
+		for (Network an : c) {
+			EdgeNetwork aen = (EdgeNetwork) an;
+			double price = aen.getPrice();
 			if (price < lowestPrice) {
 				lowestPrice = price;
 				lowestPricedNetwork = aen;
@@ -63,7 +63,7 @@ public class NetworkServiceMiser extends AbstractConsumerClass implements Serial
 	}
 
 	@Override
-	public Boolean usesNetwork(AbstractEdgeNetwork network) {
+	public Boolean usesNetwork(EdgeNetwork network) {
 		return network.equals(this.myNetwork);
 	}
 

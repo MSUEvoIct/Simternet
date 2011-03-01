@@ -29,12 +29,15 @@ public class Financials implements Serializable, AsyncUpdate {
 	private Temporal<Double>	perStepInvestment;
 	private Temporal<Double>	perStepOperationsCost;
 	private Temporal<Double>	perStepRevenue;
+	private final Simternet		s;
 	private Temporal<Double>	totalFinancingCost;
 	private Temporal<Double>	totalInvestment;
 	private Temporal<Double>	totalOperationsCost;
+
 	private Temporal<Double>	totalRevenue;
 
 	public Financials(Simternet s, Double endowment) {
+		this.s = s;
 		this.assetsLiquid = new Temporal<Double>(endowment);
 
 		// Initialize tracking variables with zero values.
@@ -63,10 +66,10 @@ public class Financials implements Serializable, AsyncUpdate {
 		if (capitalInvestment > this.getAvailableFinancing())
 			return false;
 
-		this.debtBalance.increment(capitalInvestment);
-		this.assetsCapital.increment(capitalInvestment);
-		this.perStepInvestment.increment(capitalInvestment);
-		this.totalInvestment.increment(capitalInvestment);
+		this.debtBalance.increase(capitalInvestment);
+		this.assetsCapital.increase(capitalInvestment);
+		this.perStepInvestment.increase(capitalInvestment);
+		this.totalInvestment.increase(capitalInvestment);
 		return true;
 	}
 
@@ -74,20 +77,25 @@ public class Financials implements Serializable, AsyncUpdate {
 		Double interestRate = this.debtInterestRate.get();
 		Double balance = this.debtBalance.get();
 		Double amount = interestRate * balance;
-		this.debtBalance.increment(amount);
-		this.perStepFinancingCost.increment(amount);
-		this.totalFinancingCost.increment(amount);
+		this.debtBalance.increase(amount);
+		this.perStepFinancingCost.increase(amount);
+		this.totalFinancingCost.increase(amount);
 	}
 
 	private void depreciateCapital() {
 		double depreciation = this.assetsCapital.get() * this.depreciationRate.get();
-		this.assetsCapital.decrement(depreciation);
+		this.assetsCapital.reduce(depreciation);
+	}
+
+	public void earn(AssetFinance assetFinance, Double amount) {
+		// TODO Auto-generated method stub
+		this.earn(amount);
 	}
 
 	public void earn(Double revenue) {
-		this.assetsLiquid.increment(revenue);
-		this.totalRevenue.increment(revenue);
-		this.perStepRevenue.increment(revenue);
+		this.assetsLiquid.increase(revenue);
+		this.totalRevenue.increase(revenue);
+		this.perStepRevenue.increase(revenue);
 	}
 
 	public Double getAssetsCapital() {
@@ -129,6 +137,10 @@ public class Financials implements Serializable, AsyncUpdate {
 		return this.debtPayoffRate.get();
 	}
 
+	public Double getNetWorth() {
+		return this.assetsCapital.get() + this.assetsLiquid.get() - this.debtBalance.get();
+	}
+
 	public Double getPerStepFinancingCost() {
 		return this.perStepFinancingCost.get();
 	}
@@ -143,6 +155,23 @@ public class Financials implements Serializable, AsyncUpdate {
 
 	public Double getPerStepRevenue() {
 		return this.perStepRevenue.get();
+	}
+
+	/**
+	 * Get current value of assets and present value of future revenue stream
+	 * 
+	 * TODO: do this much much better
+	 * 
+	 * @return net present value of enterprise
+	 */
+	public Double getPresentValue() {
+		Double presentValue = this.getNetWorth();
+		Double totalRevenues = this.totalRevenue.get();
+		Double totalExpenses = this.totalFinancingCost.get() + this.totalOperationsCost.get()
+				+ this.totalInvestment.get();
+		Double averageProfits = (totalRevenues - totalExpenses) / this.s.schedule.getSteps();
+		presentValue += averageProfits * (1 / this.getDebtInterestRate());
+		return presentValue;
 	}
 
 	public Double getTotalFinancingCost() {
@@ -162,8 +191,18 @@ public class Financials implements Serializable, AsyncUpdate {
 	}
 
 	public void makeDebtPayment(Double amount) {
-		this.assetsLiquid.decrement(amount);
-		this.debtBalance.decrement(amount);
+		this.assetsLiquid.reduce(amount);
+		this.debtBalance.reduce(amount);
+	}
+
+	public void payMaintenance(AssetFinance assetFinance) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void registerAsset(AssetFinance assetFinance) {
+		// TODO Auto-generated method stub
+
 	}
 
 	private void serviceDebt() {
@@ -180,7 +219,7 @@ public class Financials implements Serializable, AsyncUpdate {
 	@Override
 	public String toString() {
 		return "Cash: " + this.assetsLiquid.get() + ", Assets: " + this.assetsCapital.get() + ", Debt/Avail: "
-				+ this.debtBalance.get() + "/" + this.getAvailableFinancing();
+				+ this.debtBalance.get() + "/" + this.getAvailableFinancing() + ", NetWorth: " + this.getNetWorth();
 	}
 
 	/*

@@ -14,7 +14,7 @@ import javax.swing.table.AbstractTableModel;
 import sim.display.GUIState;
 import simternet.Simternet;
 import simternet.SimternetWithUI;
-import simternet.nsp.AbstractNetworkProvider;
+import simternet.nsp.NetworkProvider;
 
 public class NetworkProvidersDisplay extends JFrame {
 
@@ -37,10 +37,10 @@ public class NetworkProvidersDisplay extends JFrame {
 			return this.getNSP(rowIndex).financials.getAssetsLiquid();
 		}
 
-		protected AbstractNetworkProvider getNSP(int rowIndex) {
+		protected NetworkProvider getNSP(int rowIndex) {
 			Object[] anp = NetworkProvidersDisplay.this.networkServiceProviders
 					.toArray();
-			return (AbstractNetworkProvider) anp[rowIndex];
+			return (NetworkProvider) anp[rowIndex];
 		}
 
 		@Override
@@ -67,7 +67,7 @@ public class NetworkProvidersDisplay extends JFrame {
 
 	}
 
-	protected Collection<AbstractNetworkProvider> networkServiceProviders;
+	protected Collection<NetworkProvider> networkServiceProviders;
 
 	public NetworkProvidersDisplay(double width, double height,
 			GUIState simulation, long interval) {

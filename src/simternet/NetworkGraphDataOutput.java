@@ -9,31 +9,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 import simternet.application.ApplicationServiceProvider;
-import simternet.network.AbstractEdgeNetwork;
-import simternet.network.AbstractNetwork;
-import simternet.network.BackboneNetwork;
+import simternet.network.EdgeNetwork;
+import simternet.network.Network;
+import simternet.network.Backbone;
 import simternet.network.Datacenter;
-import simternet.nsp.AbstractNetworkProvider;
+import simternet.nsp.NetworkProvider;
 
 public class NetworkGraphDataOutput {
 
 	private final String			connectionMatrixOutputFile	= "networkGraphConnectionMatrix.csv";
-	private List<AbstractNetwork>	networks;
+	private List<Network>	networks;
 	private final Simternet			s;
 	private final String			vertexDataOutputFile		= "networkGraphVertexData.tab";
 
-	public NetworkGraphDataOutput(Simternet s, List<AbstractNetwork> networks) {
+	public NetworkGraphDataOutput(Simternet s, List<Network> networks) {
 		this.s = s;
-		this.networks = new ArrayList<AbstractNetwork>(networks);
+		this.networks = new ArrayList<Network>(networks);
 	}
 
 	private String getConnectionMatrix() {
 
 		StringBuffer sb = new StringBuffer();
 
-		for (AbstractNetwork n1 : this.networks) {
+		for (Network n1 : this.networks) {
 			boolean first = true;
-			for (AbstractNetwork n2 : this.networks) {
+			for (Network n2 : this.networks) {
 				if (!first)
 					sb.append(",");
 				if (n1.isConnectedTo(n2))
@@ -59,7 +59,7 @@ public class NetworkGraphDataOutput {
 		sb.append("Size");
 		sb.append("\n");
 
-		for (AbstractNetwork an : this.networks) {
+		for (Network an : this.networks) {
 			// Label
 			sb.append(an.toString() + "\t");
 
@@ -68,7 +68,7 @@ public class NetworkGraphDataOutput {
 			int sides = 3;
 			String color = "black";
 
-			if (an instanceof BackboneNetwork) {
+			if (an instanceof Backbone) {
 				// Sides
 				sides = 5; // Backbones are pentagons
 
@@ -76,11 +76,11 @@ public class NetworkGraphDataOutput {
 				color = "blue";
 
 				// Size
-				BackboneNetwork bb = (BackboneNetwork) an;
-				AbstractNetworkProvider nsp = bb.getOwner();
+				Backbone bb = (Backbone) an;
+				NetworkProvider nsp = bb.getOwner();
 				double customers = nsp.getCustomers();
 				size = Math.log(customers);
-			} else if (an instanceof AbstractEdgeNetwork) {
+			} else if (an instanceof EdgeNetwork) {
 				// Sides
 				sides = 3; // Edges others triangles
 
@@ -88,7 +88,7 @@ public class NetworkGraphDataOutput {
 				color = "red";
 
 				// Size
-				AbstractEdgeNetwork aen = (AbstractEdgeNetwork) an;
+				EdgeNetwork aen = (EdgeNetwork) an;
 				size = Math.log(aen.getNumSubscribers());
 			} else if (an instanceof Datacenter) {
 				// Sides

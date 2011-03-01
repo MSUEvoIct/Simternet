@@ -6,8 +6,8 @@ import java.util.Collection;
 import sim.util.Int2D;
 import simternet.Simternet;
 import simternet.application.ApplicationServiceProvider;
-import simternet.network.AbstractEdgeNetwork;
-import simternet.network.AbstractNetwork;
+import simternet.network.EdgeNetwork;
+import simternet.network.Network;
 
 /**
  * SimpleConsumer subscrubes to all networks and all applications, regardless of
@@ -37,15 +37,15 @@ public class SimpleConsumer extends AbstractConsumerClass implements
 	 */
 	@Override
 	protected void consumeApplications() {
-		Collection<AbstractNetwork> localEdgeNetworks = this.s.getNetworks(
-				null, AbstractEdgeNetwork.class, this.getLocation());
+		Collection<Network> localEdgeNetworks = this.s.getNetworks(
+				null, EdgeNetwork.class, this.getLocation());
 
 		Collection<ApplicationServiceProvider> asps = this.s
 				.getASPs();
 
 		for (ApplicationServiceProvider asp : asps)
-			for (AbstractNetwork network : localEdgeNetworks)
-				this.consumeApplication(asp, (AbstractEdgeNetwork) network);
+			for (Network network : localEdgeNetworks)
+				this.consumeApplication(asp, (EdgeNetwork) network);
 
 	}
 
@@ -54,11 +54,11 @@ public class SimpleConsumer extends AbstractConsumerClass implements
 	 */
 	@Override
 	protected void consumeNetworks() {
-		Collection<AbstractNetwork> localEdgeNetworks = this.s.getNetworks(
-				null, AbstractEdgeNetwork.class, this.getLocation());
+		Collection<Network> localEdgeNetworks = this.s.getNetworks(
+				null, EdgeNetwork.class, this.getLocation());
 
-		for (AbstractNetwork edgeNetwork : localEdgeNetworks)
-			this.consumeNetwork((AbstractEdgeNetwork) edgeNetwork);
+		for (Network edgeNetwork : localEdgeNetworks)
+			this.consumeNetwork((EdgeNetwork) edgeNetwork);
 	}
 
 	/*
@@ -79,7 +79,7 @@ public class SimpleConsumer extends AbstractConsumerClass implements
 	 * SimpleConsumer always uses every network
 	 */
 	@Override
-	public Boolean usesNetwork(AbstractEdgeNetwork network) {
+	public Boolean usesNetwork(EdgeNetwork network) {
 		return true;
 	}
 

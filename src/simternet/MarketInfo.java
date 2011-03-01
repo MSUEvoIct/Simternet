@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import simternet.consumer.AbstractConsumerClass;
-import simternet.nsp.AbstractNetworkProvider;
+import simternet.nsp.NetworkProvider;
 
 /**
  * Returns various information about the simternet ICT market that is useful to
@@ -26,12 +26,12 @@ public class MarketInfo {
 	 *         share, only including those customers who are subscribed to one
 	 *         or more providers.
 	 */
-	Map<AbstractNetworkProvider, Double> nspsByMarketShare() {
-		Map<AbstractNetworkProvider, Double> marketShareMap = this.nspsBySize();
+	Map<NetworkProvider, Double> nspsByMarketShare() {
+		Map<NetworkProvider, Double> marketShareMap = this.nspsBySize();
 		double totalCustomers = 0.0;
 		for (Double customers : marketShareMap.values())
 			totalCustomers += customers;
-		for (AbstractNetworkProvider anp : marketShareMap.keySet())
+		for (NetworkProvider anp : marketShareMap.keySet())
 			marketShareMap.put(anp, marketShareMap.get(anp) / totalCustomers);
 		return marketShareMap;
 	}
@@ -40,10 +40,10 @@ public class MarketInfo {
 	 * @return a map of network service providers and the proportion of market
 	 *         share, only including all individual consumers within the system.
 	 */
-	Map<AbstractNetworkProvider, Double> nspsByPopulationFractionServed() {
-		Map<AbstractNetworkProvider, Double> marketShareMap = this.nspsBySize();
+	Map<NetworkProvider, Double> nspsByPopulationFractionServed() {
+		Map<NetworkProvider, Double> marketShareMap = this.nspsBySize();
 		double totalConsumers = this.numberOfConsumers();
-		for (AbstractNetworkProvider anp : marketShareMap.keySet())
+		for (NetworkProvider anp : marketShareMap.keySet())
 			marketShareMap.put(anp, marketShareMap.get(anp) / totalConsumers);
 		return marketShareMap;
 	}
@@ -51,9 +51,9 @@ public class MarketInfo {
 	/**
 	 * @return a map of network service providers and their number of customers.
 	 */
-	Map<AbstractNetworkProvider, Double> nspsBySize() {
-		Map<AbstractNetworkProvider, Double> customerMap = new HashMap<AbstractNetworkProvider, Double>();
-		for (AbstractNetworkProvider anp : this.s.networkServiceProviders)
+	Map<NetworkProvider, Double> nspsBySize() {
+		Map<NetworkProvider, Double> customerMap = new HashMap<NetworkProvider, Double>();
+		for (NetworkProvider anp : this.s.networkServiceProviders)
 			customerMap.put(anp, anp.getCustomers());
 
 		return customerMap;

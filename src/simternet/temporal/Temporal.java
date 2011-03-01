@@ -31,29 +31,28 @@ import java.io.Serializable;
  */
 public class Temporal<T> implements AsyncUpdate, Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+	private static final long	serialVersionUID	= 1L;
 
 	/**
 	 * Simple testing method.
 	 * 
 	 * @param args
 	 */
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		Temporal td = new Temporal<Double>(0.0);
 		System.out.println(td.future);
 		td.set(100.0);
 		System.out.println(td.future);
-		td.decrement(5.0);
+		td.reduce(5.0);
 		System.out.println(td.future);
 	}
 
-	private T current = null;
-	private T future = null;
+	private T	current		= null;
 
-	private T resetValue = null;
+	private T	future		= null;
+	private T	past		= null;
+	private T	resetValue	= null;
 
 	/**
 	 * @param current
@@ -79,13 +78,12 @@ public class Temporal<T> implements AsyncUpdate, Serializable {
 		else if (src instanceof Integer)
 			dst = (T) CloneHelper.cloneInteger((Integer) this.current);
 		else
-			throw new RuntimeException("Unable to clone "
-					+ this.current.getClass().getCanonicalName());
+			throw new RuntimeException("Unable to clone " + this.current.getClass().getCanonicalName());
 		return dst;
 	}
 
 	@SuppressWarnings("unchecked")
-	public final void decrement(T amount) {
+	public final void reduce(T amount) {
 		if (!this.isNumeric())
 			throw new RuntimeException("Cannot increment a non-numeric type!");
 
@@ -113,8 +111,34 @@ public class Temporal<T> implements AsyncUpdate, Serializable {
 		return this.future;
 	}
 
+	public T getPast() {
+		return this.past;
+	}
+
+	public T getPastDelta() {
+		T toReturn;
+
+		if (!this.isNumeric())
+			throw new RuntimeException("Cannot calculate a change for a non-numeric type!");
+
+		if (this.past instanceof Double) {
+			Double past = (Double) this.past;
+			Double current = (Double) this.current;
+			Double change = current - past;
+			toReturn = (T) change;
+		} else if (this.past instanceof Integer) {
+			Integer past = (Integer) this.past;
+			Integer current = (Integer) this.current;
+			Integer change = current - past;
+			toReturn = (T) change;
+		} else
+			throw new RuntimeException("Delta of " + this.current.getClass() + " unimplemented");
+
+		return toReturn;
+	}
+
 	@SuppressWarnings("unchecked")
-	public final void increment(Number amount) {
+	public final void increase(Number amount) {
 		if (!this.isNumeric())
 			throw new RuntimeException("Cannot increment a non-numeric type!");
 
@@ -148,7 +172,13 @@ public class Temporal<T> implements AsyncUpdate, Serializable {
 		this.future = future;
 	}
 
+	@Override
+	public String toString() {
+		return this.past + "->" + this.current + "->" + this.future + "(" + this.resetValue + ")";
+	}
+
 	public void update() {
+		this.past = this.current;
 		this.current = this.future;
 		if (this.resetValue != null)
 			this.future = this.clone(this.resetValue);
