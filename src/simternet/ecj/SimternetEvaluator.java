@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import simternet.Simternet;
 import simternet.application.ApplicationServiceProvider;
-import simternet.nsp.AbstractNetworkProvider;
+import simternet.nsp.NetworkProvider;
 import ec.Evaluator;
 import ec.EvolutionState;
 import ec.Individual;
@@ -26,6 +26,7 @@ import ec.util.Parameter;
 public class SimternetEvaluator extends Evaluator {
 
 	private static final long	serialVersionUID	= 1L;
+	boolean						inStep				= false;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -47,16 +48,25 @@ public class SimternetEvaluator extends Evaluator {
 		 * therefore can be run in parallel.
 		 */
 
+		if (this.inStep)
+			throw new RuntimeException("evaluatePopulaiton() is not reentrant, yet is being called recursively.");
+
+		this.inStep = true;
+
 		Parameter base = new Parameter("simternet");
 		int numThreads = state.parameters.getIntWithDefault(base.push("threads"), null, 1);
 		int numChunks = state.parameters.getInt(base.push("chunks"), null);
 		int numSteps = state.parameters.getInt(base.push("steps"), null);
 		boolean simternetCheckpoint = state.parameters.getBoolean(base.push("checkpoint"), null, false);
+		int checkpointModulo = state.parameters.getInt(new Parameter("checkpoint-modulo"), null);
 
 		// Create and initialize our simulations
 		Simternet[] simternet = new Simternet[numChunks];
 		for (int i = 0; i < simternet.length; i++) {
-			simternet[i] = new Simternet(state.random[0].nextInt());
+			int seed = state.random[0].nextInt();
+			// System.out.println("Seed for g" + state.generation + "s" + i +
+			// " = " + seed);
+			simternet[i] = new Simternet(seed);
 			simternet[i].start();
 		}
 
@@ -96,8 +106,8 @@ public class SimternetEvaluator extends Evaluator {
 					throw new RuntimeException("Couldn't instantiate agent", e);
 				}
 
-				if (agent instanceof AbstractNetworkProvider) {
-					AbstractNetworkProvider nsp = (AbstractNetworkProvider) agent;
+				if (agent instanceof NetworkProvider) {
+					NetworkProvider nsp = (NetworkProvider) agent;
 					simternet[whichSimternet].enterMarket(nsp);
 				} else if (agent instanceof ApplicationServiceProvider) {
 					ApplicationServiceProvider asp = (ApplicationServiceProvider) agent;
@@ -107,33 +117,48 @@ public class SimternetEvaluator extends Evaluator {
 
 		}
 
-		// Simulations are populated. Run them!
-		LinkedBlockingQueue<Runnable> tasks = new LinkedBlockingQueue<Runnable>();
-		ThreadPoolExecutor threadPool = new ThreadPoolExecutor(numThreads, numThreads, 10, TimeUnit.SECONDS, tasks);
-		// for (Simternet s : simternet) {
-		for (int i = 0; i < simternet.length; i++) {
-			Simternet s = simternet[i];
-			// TODO: Save initial checkpoints
-			if (simternetCheckpoint)
-				this.generateCheckpoint(state, s, i);
+		numThreads = 0;
 
-			SimternetRunner sr = new SimternetRunner(s, numSteps);
-			threadPool.execute(sr);
-		}
+		if (numThreads > 1) {
+			// Simulations are populated. Run them!
+			LinkedBlockingQueue<Runnable> tasks = new LinkedBlockingQueue<Runnable>();
+			ThreadPoolExecutor threadPool = new ThreadPoolExecutor(numThreads, numThreads, 10, TimeUnit.SECONDS, tasks);
+			// for (Simternet s : simternet) {
+			for (int i = 0; i < simternet.length; i++) {
+				Simternet s = simternet[i];
+				// TODO: Save initial checkpoints
+				if (simternetCheckpoint)
+					if ((state.generation % checkpointModulo) == 0)
+						this.generateCheckpoint(state, s, i);
 
-		threadPool.shutdown();
-		try {
-			threadPool.awaitTermination(60, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+				SimternetRunner sr = new SimternetRunner(s, numSteps);
+				threadPool.execute(sr);
+			}
+
+			threadPool.shutdown();
+			try {
+				threadPool.awaitTermination(60, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else
+			for (int i = 0; i < simternet.length; i++) {
+				Simternet s = simternet[i];
+				SimternetRunner sr = new SimternetRunner(s, numSteps);
+				if (simternetCheckpoint)
+					if ((state.generation % checkpointModulo) == 0)
+						this.generateCheckpoint(state, s, i);
+				sr.run();
+			}
 
 		// Look at each agent and assign fitness
 		SimpleProblemForm spf = (SimpleProblemForm) this.p_problem.clone();
 		for (Subpopulation sp : state.population.subpops)
 			for (Individual individual : sp.individuals)
 				spf.evaluate(state, individual, 0, 0);
+
+		this.inStep = false;
 
 	}
 

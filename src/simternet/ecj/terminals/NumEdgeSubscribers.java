@@ -1,28 +1,36 @@
 package simternet.ecj.terminals;
 
+import simternet.ecj.DoubleGP;
 import simternet.ecj.problems.HasEdgeNetwork;
-import simternet.network.AbstractEdgeNetwork;
+import simternet.network.EdgeNetwork;
 import ec.EvolutionState;
 import ec.Problem;
-import ec.app.tutorial4.DoubleData;
 import ec.gp.ADFStack;
 import ec.gp.GPData;
 import ec.gp.GPIndividual;
 import ec.gp.GPNode;
 
+/**
+ * This GP terminal requires that problem implements the HasEdgeNetwork
+ * interface, which it uses to determine the number of current individual
+ * subscribers.
+ * 
+ * @author kkoning
+ * 
+ */
 public class NumEdgeSubscribers extends GPNode {
+
+	private static final long	serialVersionUID	= 1L;
 
 	@Override
 	public void eval(EvolutionState state, int thread, GPData input, ADFStack stack, GPIndividual individual,
 			Problem problem) {
 
 		HasEdgeNetwork hen = (HasEdgeNetwork) problem;
-		AbstractEdgeNetwork aen = hen.getEdgeNetwork();
+		EdgeNetwork aen = hen.getEdgeNetwork();
 
-		Double numCustomers = aen.getNumSubscribers();
-
-		DoubleData dd = (DoubleData) input;
-		dd.x = numCustomers;
+		DoubleGP dd = (DoubleGP) input;
+		dd.value = aen.getNumSubscribers();
 
 	}
 

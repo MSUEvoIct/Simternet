@@ -1,7 +1,7 @@
 package simternet.ecj.problems;
 
-import simternet.network.AbstractEdgeNetwork;
+import simternet.network.EdgeNetwork;
 
 public interface HasEdgeNetwork {
-	public AbstractEdgeNetwork getEdgeNetwork();
+	public EdgeNetwork getEdgeNetwork();
 }

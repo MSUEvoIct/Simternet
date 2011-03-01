@@ -1,7 +1,7 @@
 package simternet.ecj.problems;
 
-import simternet.consumer.AbstractConsumerClass;
-import simternet.network.AbstractEdgeNetwork;
+import simternet.network.EdgeNetwork;
+import simternet.nsp.NetworkProvider;
 import ec.Problem;
 
 /**
@@ -14,24 +14,24 @@ import ec.Problem;
  * @author kkoning
  * 
  */
-public class PriceEdgeNetworkProblem extends Problem implements HasConsumerClass, HasEdgeNetwork {
+public class PriceEdgeNetworkProblem extends Problem implements HasEdgeNetwork {
 
-	private AbstractConsumerClass	acc;
-	private AbstractEdgeNetwork		aen;
+	private static final long		serialVersionUID	= 1L;
+	private EdgeNetwork		aen;
+	private NetworkProvider	nsp;
 
-	public PriceEdgeNetworkProblem(AbstractEdgeNetwork aen, AbstractConsumerClass acc) {
+	public PriceEdgeNetworkProblem(NetworkProvider nsp, EdgeNetwork aen) {
+		this.nsp = nsp;
 		this.aen = aen;
-		this.acc = acc;
 	}
 
 	@Override
-	public AbstractConsumerClass getConsumerClass() {
-		return this.acc;
-	}
-
-	@Override
-	public AbstractEdgeNetwork getEdgeNetwork() {
+	public EdgeNetwork getEdgeNetwork() {
 		return this.aen;
+	}
+
+	public NetworkProvider getNsp() {
+		return this.nsp;
 	}
 
 }

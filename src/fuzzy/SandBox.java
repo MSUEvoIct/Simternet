@@ -4,11 +4,11 @@ import xcs.AgentData;
 
 public class SandBox {
 
-	public static void main(String args[]) throws RulesParsingException,
-			EvaluationException, NoRulesFiredException {
+	public static void main(String args[]) throws RulesParsingException, EvaluationException, NoRulesFiredException {
 		AgentData ad = new AgentData(5000.0);
 
-		System.out.println(ad.isMatching("0111"));
+		// Commented out, didn't compile - KK
+		// System.out.println(ad.isMatching("0111"));
 
 		LinguisticVariable assets = new LinguisticVariable("assets");
 		assets.add("poor", 0, 0, 3000, 5000);
