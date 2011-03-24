@@ -11,7 +11,7 @@
 <listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="simternet.Simternet"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-for 10 --evolve"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-for 10000 --evolve"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Simternet"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-XX:+HeapDumpOnOutOfMemoryError&#10;-Xmx1024m"/>
 </launchConfiguration>

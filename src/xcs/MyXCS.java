@@ -121,6 +121,11 @@ public class MyXCS implements Serializable {
 	}
 
 	public double doExternalLCS(String env, double reward) {
+		if (this.step == 9999) {
+			System.out.println("here");
+			for (int x = 0; x < this.pop.getSize(); x++)
+				System.out.println(this.pop.elementAt(x).getCondtion());
+		}
 		this.reward = reward;
 		if (!this.firstTime)
 			this.updateWithReward();

@@ -23,11 +23,11 @@ public class MyEnvironment implements Environment, Serializable {
 	public double executeAction(int action) {
 		switch (action) {
 		case 0:
-			return -1.0;
+			return 1.1;
 		case 1:
-			return 0.0;
-		case 2:
 			return 1.0;
+		case 2:
+			return 0.9;
 		}
 		return 0.0;
 	}
