@@ -15,6 +15,7 @@ import sim.util.Bag;
 import sim.util.Int2D;
 import simternet.Financials;
 import simternet.Simternet;
+import simternet.Utils;
 import simternet.network.Backbone;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
@@ -42,6 +43,7 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	protected InvestmentStrategy	investmentStrategy;
 	protected String				name;
 	public PricingStrategy			pricingStrategy;
+
 	public Simternet				simternet			= null;
 
 	public NetworkProvider(Simternet simternet) {
@@ -239,6 +241,26 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 		this.investmentStrategy.makeNetworkInvestment();
 	}
 
+	private StringBuffer printAllNetworkGrid() {
+		StringBuffer sb = new StringBuffer();
+		DecimalFormat positionFormat = new DecimalFormat("00");
+		DecimalFormat numCustFormat = new DecimalFormat("0000000");
+
+		int curY = 0;
+
+		sb.append(positionFormat.format(0));
+		for (Int2D location : this.simternet.allLocations()) {
+			if (location.y > curY) {
+				sb.append("\n");
+				curY++;
+				sb.append(positionFormat.format(curY));
+			}
+			sb.append(Utils.padLeft(String.valueOf(this.simternet.getNetworks(null, null, location).size()), 4));
+		}
+
+		return sb;
+	}
+
 	private StringBuffer printCustomerGrid() {
 		StringBuffer sb = new StringBuffer();
 		DecimalFormat positionFormat = new DecimalFormat("00");
@@ -253,7 +275,28 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 				curY++;
 				sb.append(positionFormat.format(curY));
 			}
-			sb.append(" " + numCustFormat.format(this.getCustomers(location)));
+
+			sb.append(Utils.padLeft(String.valueOf(Math.round(this.getCustomers(location))), 7));
+		}
+
+		return sb;
+	}
+
+	private StringBuffer printNetworkGrid() {
+		StringBuffer sb = new StringBuffer();
+		DecimalFormat positionFormat = new DecimalFormat("00");
+		DecimalFormat numCustFormat = new DecimalFormat("0000000");
+
+		int curY = 0;
+
+		sb.append(positionFormat.format(0));
+		for (Int2D location : this.simternet.allLocations()) {
+			if (location.y > curY) {
+				sb.append("\n");
+				curY++;
+				sb.append(positionFormat.format(curY));
+			}
+			sb.append(Utils.padLeft(String.valueOf(this.getNetworks(location).size()), 4));
 		}
 
 		return sb;
@@ -289,6 +332,12 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 
 		// Log customer map
 		Logger.getRootLogger().log(Level.INFO, this + " Customer Map:\n" + this.printCustomerGrid());
+
+		// Log this NSP's Network
+		Logger.getRootLogger().log(Level.INFO, this + " Network Map:\n" + this.printNetworkGrid());
+
+		// Log ALL NSP's networks
+		Logger.getRootLogger().log(Level.INFO, "Unified Network Map:\n" + this.printAllNetworkGrid());
 
 		// Log edge congestion
 		Logger.getRootLogger().log(Level.INFO, this.edgeCongestionReport());

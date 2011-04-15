@@ -56,11 +56,16 @@ public class EvolvingNetworkProvider extends NetworkProvider implements Serializ
 			this.hasLCSRun = true;
 
 			// Take a look at rules that LCS generates!
-			String env = new String(Long.toBinaryString(Math.round(this.financials.getTotalRevenue())));
 			// String env = new
+			// String(Long.toBinaryString(Math.round(this.financials.getTotalRevenue())));
+			String env = new String(Long.toBinaryString(Math.round(this.getDeltaRevenue())));
 			// String(Long.toBinaryString(Math.round(this.price)));
-			env = String.format("%020d", Long.parseLong(env));
-			this.price += this.xcs.doExternalLCS(env, this.getDeltaRevenue());
+			String pad = "";
+			for (int x = 0; x < (20 - env.length()); x++)
+				pad += "0";
+			// env = String.format("%020d", Long.parseLong(env));
+			env = pad + env;
+			this.price *= this.xcs.doExternalLCS(env, this.getDeltaRevenue());
 			System.out.println("The price is:" + this.price);
 		}
 	}
