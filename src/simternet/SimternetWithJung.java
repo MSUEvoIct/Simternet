@@ -16,7 +16,9 @@ import javax.swing.JFrame;
 
 import simternet.application.AppCategory;
 import simternet.application.ApplicationServiceProvider;
+import simternet.jung.BackboneLayoutTransformer;
 import simternet.jung.CompositeLayoutTransformer;
+import simternet.jung.DatacenterLayoutTransformer;
 import simternet.jung.EdgeLayoutTransformer;
 import simternet.jung.RandomLayoutTransformer;
 import simternet.network.Backbone;
@@ -65,14 +67,11 @@ public class SimternetWithJung extends JFrame {
 
 		// Set up transformers to move the vertices to the right pixels
 		CompositeLayoutTransformer transformer = new CompositeLayoutTransformer();
-		transformer.addTransformer(new EdgeLayoutTransformer(new Dimension(100, 100)), 1, new Dimension(100,
-				100));
-		transformer.addTransformer(new BackboneNetworkToPixelTransformer(new Dimension(100, 500)), 1, new Dimension(
-				400, 100));
-		transformer.addTransformer(new DataCenterNetworkToPixelTransformer(new Dimension(100, 500)), 1, new Dimension(
-				500, 100));
-		transformer.addTransformer(new RandomLayoutTransformer(new Dimension(400, 400)), 10, new Dimension(200,
-				200));
+		transformer.addTransformer(new EdgeLayoutTransformer(new Dimension(100, 100)), 1, new Dimension(100, 100));
+		transformer.addTransformer(new BackboneLayoutTransformer(new Dimension(100, 500)), 1, new Dimension(400, 100));
+		transformer
+				.addTransformer(new DatacenterLayoutTransformer(new Dimension(100, 500)), 1, new Dimension(500, 100));
+		transformer.addTransformer(new RandomLayoutTransformer(new Dimension(400, 400)), 10, new Dimension(200, 200));
 
 		this.layout = new StaticLayout<Network, BackboneLink>(this.graph, transformer);
 
@@ -102,12 +101,11 @@ public class SimternetWithJung extends JFrame {
 
 	private void start() {
 		// start simulation
-		// TODO: have simulation call update() if possible.
 		this.sim.start();
-		// for (int i = 0; i < 50; i++)
-		// this.sim.schedule.step(this.sim);
-		// System.out.println("Simulation Done!");
-		// this.update();
+		for (int i = 0; i < 50; i++)
+			this.sim.schedule.step(this.sim);
+		System.out.println("Simulation Done!");
+		this.update();
 	}
 
 	public void update() {
