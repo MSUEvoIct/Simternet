@@ -95,7 +95,7 @@ public abstract class EdgeNetwork extends Network {
 	public Double getNumSubscribers() {
 		double customers = 0;
 
-		Bag b = this.owner.simternet.getConsumerClasses().getObjectsAtLocation(this.location);
+		Bag b = this.owner.simternet.getConsumerClasses().getObjectsAtLocation(this.getLocation());
 		if (b == null)
 			return 0.0;
 
@@ -168,7 +168,7 @@ public abstract class EdgeNetwork extends Network {
 
 	@Override
 	public String toString() {
-		return "Edge of " + this.owner.getName() + " @" + this.location;
+		return "Edge of " + this.owner.getName() + " @" + this.getLocation();
 	}
 
 	@Override
@@ -176,5 +176,9 @@ public abstract class EdgeNetwork extends Network {
 		super.update();
 		this.maxBandwidth.update();
 		this.price.update();
+	}
+
+	public Int2D getLocation() {
+		return location;
 	}
 }
