@@ -128,6 +128,11 @@ public class ApplicationServiceProvider implements Steppable, Serializable, Asyn
 		return congested / maxBW;
 	}
 
+	@SuppressWarnings("unchecked")
+	public HashSet<Network> getConnectedNetworks() {
+		return (HashSet<Network>) this.connectedNetworks.clone();
+	}
+
 	public double getCustomers() {
 		// TODO Get this info; will need to look at all customer objects, so
 		// value should be cached.
