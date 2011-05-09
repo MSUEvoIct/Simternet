@@ -10,16 +10,20 @@ import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Int2D;
 import simternet.Simternet;
+import simternet.TraceConfig;
 import simternet.application.AppCategory;
-import simternet.application.ApplicationServiceProvider;
+import simternet.application.ApplicationProvider;
 import simternet.network.EdgeNetwork;
+import simternet.network.NetFlow;
 import simternet.temporal.AsyncUpdate;
 import simternet.temporal.Temporal;
 import simternet.temporal.TemporalHashMap;
 
 @SuppressWarnings("serial")
-public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate, Serializable {
+public class Consumer implements Steppable, AsyncUpdate, Serializable {
 
+	protected AppBenefitCalculator												appBenefitCalculator	= AppBenefitCalculator
+																												.getSingleton();
 	/**
 	 * Consumers do not consume all applications. Whether the budget constraint
 	 * is measured in time or dollars, consumers will not spend more than this
@@ -31,12 +35,24 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate, S
 	protected TemporalHashMap<AppCategory, Double>								appBudgetConstraints	= new TemporalHashMap<AppCategory, Double>();
 
 	/**
+	 * Controls the consumer's application consumption behavior; it controlls
+	 * which applications the consumer uses. This behavior is specified in a
+	 * separate object rather than code within an individual class so that
+	 * distinct behaviors can be mixed and matched without refactoring code.
+	 */
+	protected AppManager														appManager				= AppManager
+																												.getSingleton();
+
+	/**
 	 * The actual list of application service providers selected for use, sorted
 	 * by category. manageApplications() is responsible for maintaining this
 	 * data structure, based on appBudgetConstraints and the qualities of the
 	 * applications themselves.
 	 */
-	protected TemporalHashMap<AppCategory, List<ApplicationServiceProvider>>	appsUsed				= new TemporalHashMap<AppCategory, List<ApplicationServiceProvider>>();
+	protected TemporalHashMap<AppCategory, List<ApplicationProvider>>	appsUsed				= new TemporalHashMap<AppCategory, List<ApplicationProvider>>();
+
+	protected Temporal<EdgeNetwork>												edgeNetwork				= new Temporal<EdgeNetwork>(
+																												null);
 
 	/**
 	 * The physical location of this set of consumers.
@@ -49,6 +65,15 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate, S
 	protected final String														name;
 
 	/**
+	 * Controls the consumer's network consumption behavior; it controlls which
+	 * edge networks the consumer uses. This behavior is specified in a separate
+	 * object rather than code within an individual class so that distinct
+	 * behaviors can be mixed and matched without refactoring code.
+	 */
+	protected NetManager														netManager				= NetManager
+																												.getSingleton();
+
+	/**
 	 * The number of consumers represented by this agent.
 	 */
 	protected final Temporal<Double>											population;
@@ -56,7 +81,8 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate, S
 	/**
 	 * Details describing the properties of this set of consumers.
 	 */
-	protected final ConsumerProfile												profile;
+	protected ConsumerProfile													profile					= ConsumerProfile
+																												.getSingleton();
 
 	/**
 	 * A link back to the simulation we are running under. Use of a singleton
@@ -65,20 +91,34 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate, S
 	 */
 	protected final Simternet													s;
 
-	protected Temporal<EdgeNetwork>										subscribedTo			= new Temporal<EdgeNetwork>(
-																												null);
-
 	/**
 	 * Create a new consumer class in simulation s with location, population,
 	 * and consumer profile as specified.
 	 * 
 	 */
-	protected AbstractConsumerClass(Simternet s, Int2D location, Double population, ConsumerProfile profile) {
+	public Consumer(Simternet s, Int2D location, Double population, ConsumerProfile profile, NetManager netManager,
+			AppManager appManager, AppBenefitCalculator abc) {
 		this.s = s;
-		this.location = location;
-		this.profile = profile;
-		this.population = new Temporal<Double>(population);
 		this.name = s.config.getCCName();
+
+		if (location != null)
+			this.location = location;
+		else
+			throw new RuntimeException("Consumer must have a location");
+
+		if (population != null)
+			this.population = new Temporal<Double>(population);
+		else
+			throw new RuntimeException("Consumer must have a population");
+
+		if (profile != null)
+			this.profile = profile;
+		if (netManager != null)
+			this.netManager = netManager;
+		if (appManager != null)
+			this.appManager = appManager;
+		if (abc != null)
+			this.appBenefitCalculator = abc;
 	}
 
 	/**
@@ -87,7 +127,7 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate, S
 	 * @param aen
 	 *            The network on which to use the application
 	 */
-	protected void consumeApplication(ApplicationServiceProvider application, EdgeNetwork network) {
+	protected void consumeApplication(ApplicationProvider application, EdgeNetwork network) {
 		application.processUsage(this, network);
 	}
 
@@ -96,16 +136,20 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate, S
 	 * consumeApplication() to actualize that consumption.
 	 */
 	protected void consumeApplications() {
-		if (this.subscribedTo.get() == null)
+
+		// if we are not subscribed to a network, we cannot consume any network
+		// applications
+		if (this.edgeNetwork.get() == null)
 			return;
 
 		// For Each Category
-		for (List<ApplicationServiceProvider> asps : this.appsUsed.values())
+		for (List<ApplicationProvider> asps : this.appsUsed.values())
 			// Each ASP with that category
-			for (ApplicationServiceProvider asp : asps) {
+			for (ApplicationProvider asp : asps) {
 				// Use that app on the network we're subscribed to
-				this.consumeApplication(asp, this.subscribedTo.get());
-				Logger.getRootLogger().log(Level.TRACE, this + " consumed " + asp);
+				this.consumeApplication(asp, this.edgeNetwork.get());
+				if (TraceConfig.consumerUsedApp && Logger.getRootLogger().isTraceEnabled())
+					Logger.getRootLogger().trace(this + " consumed " + asp);
 			}
 	}
 
@@ -126,8 +170,12 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate, S
 	 * consumeNetwork(AbstractEdgeNetwork) to handle the details.
 	 */
 	protected void consumeNetworks() {
-		if (this.subscribedTo.get() != null)
-			this.consumeNetwork(this.subscribedTo.get());
+		if (this.edgeNetwork.get() != null)
+			this.consumeNetwork(this.edgeNetwork.get());
+	}
+
+	public AppBenefitCalculator getAppBenefitCalculator() {
+		return this.appBenefitCalculator;
 	}
 
 	public Int2D getLocation() {
@@ -138,7 +186,7 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate, S
 	 * @return The TOTAL population of this specific Consumer Class at ALL
 	 *         locations.
 	 */
-	public Double getPopultation() {
+	public Double getPopulation() {
 		return this.population.get();
 	}
 
@@ -151,32 +199,29 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate, S
 	public Double getSubscribers(EdgeNetwork aen) {
 		if (this.usesNetwork(aen))
 			// per agent subscription is all or nothing.
-			return this.getPopultation();
+			return this.getPopulation();
 		else
 			return 0.0;
 	}
 
-	/**
-	 * Make decisions about <i>which</i> applications to use. Process their
-	 * actual usage in consumeApplications().
-	 */
-	protected void manageApplications() {
+	public void receiveFlow(NetFlow flow) {
+
+		if (TraceConfig.consumerFlowReceived && Logger.getRootLogger().isTraceEnabled())
+			Logger.getRootLogger().log(Level.TRACE,
+					this + " received " + flow + ", congestion = " + flow.describeCongestion());
 
 	}
 
-	/**
-	 * Make decisions about <i>which</i> networks to use. Process their actual
-	 * usage in consumeNetworks();
-	 */
-	protected abstract void manageNetworks();
-
 	@Override
 	public void step(SimState state) {
-		Logger.getRootLogger().log(Level.TRACE, "Stepping" + this.toString());
+		if (TraceConfig.steppingConsumer && Logger.getRootLogger().isTraceEnabled())
+			Logger.getRootLogger().trace("Stepping" + this.toString());
 
 		// Make decisions about consumption
-		this.manageNetworks();
-		this.manageApplications();
+		if (this.appManager != null)
+			this.appManager.manageApplications(this);
+		if (this.netManager != null)
+			this.netManager.manageNetworks(this);
 
 		// Act on those decisions
 		this.consumeNetworks();
@@ -185,18 +230,19 @@ public abstract class AbstractConsumerClass implements Steppable, AsyncUpdate, S
 
 	@Override
 	public String toString() {
-		return this.name;
+		return this.name + "*" + this.population.get() + "@" + this.location;
 	}
 
 	@Override
 	public void update() {
-		this.population.update();
 		this.appBudgetConstraints.update();
 		this.appsUsed.update();
+		this.population.update();
+		this.edgeNetwork.update();
 	}
 
 	public Boolean usesNetwork(EdgeNetwork network) {
-		return network.equals(this.subscribedTo.get());
+		return network.equals(this.edgeNetwork.get());
 	}
 
 }

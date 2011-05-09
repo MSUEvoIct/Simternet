@@ -15,18 +15,25 @@ import simternet.network.SimpleEdgeNetwork;
  *         sequentially, starting at 0.0.
  * 
  */
-public class BuildEverywhereStrategy implements InvestmentStrategy,
-		Serializable {
+public class BuildEverywhereStrategy implements InvestmentStrategy, Serializable {
 
+	private static Integer							reserve				= 10000;	// don't
+																					// build
+																					// with
+																					// the
+																					// last
+																					// X
+																					// of
+																					// $
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
-	protected Boolean built = false;
-	protected Integer builtThroughX = 0;
-	protected Integer builtThroughY = 0;
-	protected List<Class<? extends EdgeNetwork>> networkTypes;
-	protected NetworkProvider nsp;
+	private static final long						serialVersionUID	= 1L;
+	protected Boolean								built				= false;
+	protected Integer								builtThroughX		= 0;
+	protected Integer								builtThroughY		= 0;
+	protected List<Class<? extends EdgeNetwork>>	networkTypes;
+	protected NetworkProvider						nsp;
 
 	/**
 	 * Build SimpleNetwork everywhere...
@@ -47,8 +54,7 @@ public class BuildEverywhereStrategy implements InvestmentStrategy,
 	 *            if null, just build SimpleNetwork. Otherwise, build all
 	 *            network types in this list at each grid location.
 	 */
-	public BuildEverywhereStrategy(NetworkProvider nsp,
-			List<Class<? extends EdgeNetwork>> networkTypes) {
+	public BuildEverywhereStrategy(NetworkProvider nsp, List<Class<? extends EdgeNetwork>> networkTypes) {
 		this.nsp = nsp;
 		if (networkTypes == null) {
 			networkTypes = new ArrayList<Class<? extends EdgeNetwork>>();
@@ -68,8 +74,7 @@ public class BuildEverywhereStrategy implements InvestmentStrategy,
 		// Figure out costs, build if we can afford to. All or nothing for each
 		// square.
 		for (int x = this.builtThroughX; x < this.nsp.simternet.config.x(); x++) {
-			for (int y = this.builtThroughY; y < this.nsp.simternet.config
-					.y(); y++) {
+			for (int y = this.builtThroughY; y < this.nsp.simternet.config.y(); y++) {
 				Double costForThisPixel = 0.0;
 
 				// figure out the cost to build one of each network at this
@@ -79,12 +84,11 @@ public class BuildEverywhereStrategy implements InvestmentStrategy,
 				// static
 				// method instead.
 				for (Class<? extends EdgeNetwork> cl : this.networkTypes)
-					costForThisPixel = +EdgeNetwork.getBuildCost(cl,
-							this.nsp, new Int2D(x, y));
+					costForThisPixel = +EdgeNetwork.getBuildCost(cl, this.nsp, new Int2D(x, y));
 
 				// if we have enough funding available to build the networks,
 				// do so. When we run out of money, stop building.
-				if (costForThisPixel < amountAvailable) {
+				if (costForThisPixel < amountAvailable - BuildEverywhereStrategy.reserve) {
 
 					for (Class<? extends EdgeNetwork> cl : this.networkTypes)
 						try {

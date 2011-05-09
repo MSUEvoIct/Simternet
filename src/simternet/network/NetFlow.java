@@ -2,7 +2,7 @@ package simternet.network;
 
 import java.util.Comparator;
 
-import simternet.consumer.AbstractConsumerClass;
+import simternet.consumer.Consumer;
 
 /**
  * TODO: Modify to require user, source, destination, at time of object
@@ -77,9 +77,9 @@ public abstract class NetFlow {
 	 * The user this traffic is intended for, once we reach the destination
 	 * network. This is analagous to the host portion of a CIDR IPv4 address.
 	 */
-	protected final AbstractConsumerClass	user;
+	protected final Consumer	user;
 
-	protected NetFlow(Network source, Network destination, AbstractConsumerClass user) {
+	protected NetFlow(Network source, Network destination, Consumer user) {
 		if (destination == null)
 			throw new RuntimeException("Can't send a packet nowhere");
 		this.source = source;
@@ -124,7 +124,7 @@ public abstract class NetFlow {
 	public abstract Double getCongestionDuration();
 
 	public Double getUsage() {
-		return this.bandwidth * this.duration * this.user.getPopultation();
+		return this.bandwidth * this.duration * this.user.getPopulation();
 	}
 
 	public Boolean isCongested() {

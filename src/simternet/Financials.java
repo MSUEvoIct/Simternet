@@ -137,6 +137,14 @@ public class Financials implements Serializable, AsyncUpdate {
 		return this.debtPayoffRate.get();
 	}
 
+	public double getDeltaRevenue() {
+		return this.perStepRevenue.getPastDelta();
+	}
+
+	public Double getDepreciationRate() {
+		return this.depreciationRate.get();
+	}
+
 	public Double getNetWorth() {
 		return this.assetsCapital.get() + this.assetsLiquid.get() - this.debtBalance.get();
 	}

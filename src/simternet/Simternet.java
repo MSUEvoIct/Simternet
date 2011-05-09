@@ -8,6 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -15,11 +18,12 @@ import sim.field.grid.DoubleGrid2D;
 import sim.field.grid.SparseGrid2D;
 import sim.util.Int2D;
 import simternet.application.AppCategory;
-import simternet.application.ApplicationServiceProvider;
-import simternet.consumer.AbstractConsumerClass;
+import simternet.application.ApplicationProvider;
+import simternet.consumer.Consumer;
 import simternet.consumer.DefaultConsumerProfile;
-import simternet.consumer.DefinedBehaviorConsumer;
-import simternet.consumer.NetworkServiceMiser;
+import simternet.consumer.GreedyAppManager;
+import simternet.consumer.NetworkMiser;
+import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 import simternet.nsp.DumbNetworkServiceProvider;
 import simternet.nsp.EvolvingNetworkProvider;
@@ -58,9 +62,9 @@ public class Simternet extends SimState implements Serializable {
 	/**
 	 * All application service providers in the simulation
 	 */
-	protected Collection<ApplicationServiceProvider>					applicationServiceProviders;
+	protected Collection<ApplicationProvider>					applicationServiceProviders;
 
-	protected Map<AppCategory, Collection<ApplicationServiceProvider>>	ASPsByCategory;
+	protected Map<AppCategory, Collection<ApplicationProvider>>	ASPsByCategory;
 
 	public Parameters													config;
 
@@ -103,51 +107,41 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	/**
-	 * TODO:
+	 * This function should be called whenever an agent becomes active. It
+	 * should take care of adding it to all the appropriate tracking data
+	 * structures and the MASON schedule.
 	 * 
-	 * This function should be called whenever a consumer agent becomes active.
-	 * It should take care of adding it to all the appropriate data structures
-	 * and the MASON schedule.
-	 * 
-	 * @param nsp
+	 * @param agent
 	 */
-	public void enterMarket(AbstractConsumerClass acc) {
-		this.consumerClasses.setObjectLocation(acc, acc.getLocation());
-		this.schedule.scheduleRepeating(Schedule.EPOCH, 12, acc);
-	}
+	public void enterMarket(Steppable agent) {
 
-	/**
-	 * TODO:
-	 * 
-	 * This function should be called whenever an application service provider
-	 * becomes active. It should take care of adding it to all the appropriate
-	 * data structures and the MASON schedule.
-	 * 
-	 * @param asp
-	 */
-	public void enterMarket(ApplicationServiceProvider asp) {
-		this.applicationServiceProviders.add(asp);
-		Collection<ApplicationServiceProvider> appsInCategory = this.ASPsByCategory.get(asp.getAppCategory());
-		if (appsInCategory == null) {
-			appsInCategory = new ArrayList<ApplicationServiceProvider>();
-			this.ASPsByCategory.put(asp.getAppCategory(), appsInCategory);
-		}
+		int ordering = 0; // determines execution priority of agents, lowest #s
+		// first.
 
-		appsInCategory.add(asp);
+		if (agent instanceof Consumer) {
+			Consumer acc = (Consumer) agent;
+			this.consumerClasses.setObjectLocation(acc, acc.getLocation());
+			ordering = 3;
+		} else if (agent instanceof ApplicationProvider) {
+			ApplicationProvider asp = (ApplicationProvider) agent;
+			this.applicationServiceProviders.add(asp);
+			Collection<ApplicationProvider> appsInCategory = this.ASPsByCategory.get(asp.getAppCategory());
+			if (appsInCategory == null) {
+				appsInCategory = new ArrayList<ApplicationProvider>();
+				this.ASPsByCategory.put(asp.getAppCategory(), appsInCategory);
+			}
+			appsInCategory.add(asp);
+			ordering = 2;
+		} else if (agent instanceof NetworkProvider) {
+			ordering = 1;
+			NetworkProvider nsp = (NetworkProvider) agent;
+			this.networkServiceProviders.add(nsp);
+		} else
+			throw new RuntimeException("Adding unknown agent");
 
-		this.schedule.scheduleRepeating(asp);
-	}
-
-	/**
-	 * This function should be called whenever a network service provider
-	 * becomes active. It should take care of adding it to all the appropriate
-	 * data structures and the MASON schedule.
-	 * 
-	 * @param nsp
-	 */
-	public void enterMarket(NetworkProvider nsp) {
-		this.networkServiceProviders.add(nsp);
-		this.schedule.scheduleRepeating(Schedule.EPOCH, 1, nsp);
+		this.schedule.scheduleRepeating(Schedule.EPOCH, ordering, agent);
+		if (TraceConfig.marketEntry && Logger.getRootLogger().isTraceEnabled())
+			Logger.getRootLogger().log(Level.INFO, "Market Entry: " + agent);
 	}
 
 	@Override
@@ -156,7 +150,7 @@ public class Simternet extends SimState implements Serializable {
 
 		List<Network> nets = new ArrayList<Network>();
 
-		for (ApplicationServiceProvider asp : this.applicationServiceProviders)
+		for (ApplicationProvider asp : this.applicationServiceProviders)
 			nets.add(asp.getDataCenter());
 
 		for (NetworkProvider nsp : this.networkServiceProviders) {
@@ -189,14 +183,14 @@ public class Simternet extends SimState implements Serializable {
 		return ret;
 	}
 
-	public Collection<ApplicationServiceProvider> getASPs() {
+	public Collection<ApplicationProvider> getASPs() {
 		return this.applicationServiceProviders;
 	}
 
-	public Collection<ApplicationServiceProvider> getASPs(AppCategory c) {
-		Collection<ApplicationServiceProvider> asps = this.ASPsByCategory.get(c);
+	public Collection<ApplicationProvider> getASPs(AppCategory c) {
+		Collection<ApplicationProvider> asps = this.ASPsByCategory.get(c);
 		if (asps == null) {
-			asps = new ArrayList<ApplicationServiceProvider>();
+			asps = new ArrayList<ApplicationProvider>();
 			this.ASPsByCategory.put(c, asps);
 		}
 		return asps;
@@ -268,6 +262,14 @@ public class Simternet extends SimState implements Serializable {
 		return this.networkServiceProviders;
 	}
 
+	public Double getNumNetworkProviders(Int2D location) {
+		Double providersWithNetworks = 0.0;
+		for (NetworkProvider nsp : this.networkServiceProviders)
+			if (nsp.hasNetworkAt(EdgeNetwork.class, location))
+				providersWithNetworks++;
+		return providersWithNetworks;
+	}
+
 	public Parameters getParameters() {
 		return this.config;
 	}
@@ -279,10 +281,10 @@ public class Simternet extends SimState implements Serializable {
 	public Double getPopulation() {
 		Double pop = new Double(0);
 
-		Iterator<AbstractConsumerClass> i = this.consumerClasses.iterator();
+		Iterator<Consumer> i = this.consumerClasses.iterator();
 		while (i.hasNext()) {
-			AbstractConsumerClass acc = i.next();
-			pop += acc.getPopultation();
+			Consumer acc = i.next();
+			pop += acc.getPopulation();
 		}
 
 		return pop;
@@ -296,10 +298,10 @@ public class Simternet extends SimState implements Serializable {
 	public Double getPopulation(Int2D location) {
 		Double pop = new Double(0);
 
-		Iterator<AbstractConsumerClass> i = this.consumerClasses.getObjectsAtLocation(location).iterator();
+		Iterator<Consumer> i = this.consumerClasses.getObjectsAtLocation(location).iterator();
 		while (i.hasNext()) {
-			AbstractConsumerClass acc = i.next();
-			pop += acc.getPopultation();
+			Consumer acc = i.next();
+			pop += acc.getPopulation();
 		}
 
 		return pop;
@@ -346,7 +348,7 @@ public class Simternet extends SimState implements Serializable {
 
 		for (AppCategory ac : AppCategory.values())
 			for (int i = 0; i <= 1; i++)
-				this.enterMarket(new ApplicationServiceProvider(this, ac));
+				this.enterMarket(new ApplicationProvider(this, ac));
 	}
 
 	private void initArbiter() {
@@ -359,23 +361,26 @@ public class Simternet extends SimState implements Serializable {
 	protected void initConsumerClasses() {
 
 		DefaultConsumerProfile defaultProfile = new DefaultConsumerProfile();
-
-		// TODO: Clean this up.
-		// Populate the landscape with a simpleconsumer class.
-		for (Int2D location : this.allLocations()) {
-			Double pop = this.random.nextDouble()
-					* Double.parseDouble(this.config.getProperty("landscape.population.max"));
-			AbstractConsumerClass acc = new DefinedBehaviorConsumer(this, location, pop, defaultProfile);
-			this.enterMarket(acc);
-		}
+		for (int i = 0; i < 40; i++)
+			// TODO: Clean this up.
+			// Populate the landscape with a simpleconsumer class.
+			for (Int2D location : this.allLocations()) {
+				Double pop = this.random.nextDouble()
+						* Double.parseDouble(this.config.getProperty("landscape.population.max"));
+				Consumer acc = new Consumer(this, location, pop, defaultProfile, NetworkMiser.getSingleton(),
+						GreedyAppManager.getSingleton(), null);
+				this.enterMarket(acc);
+			}
 
 		// do it again.
-		for (Int2D location : this.allLocations()) {
-			Double pop = this.random.nextDouble()
-					* Double.parseDouble(this.config.getProperty("landscape.population.max"));
-			AbstractConsumerClass acc = new NetworkServiceMiser(this, location, pop, defaultProfile);
-			this.enterMarket(acc);
-		}
+		// for (Int2D location : this.allLocations()) {
+		// Double pop = this.random.nextDouble()
+		// *
+		// Double.parseDouble(this.config.getProperty("landscape.population.max"));
+		// AbstractConsumerClass acc = new DefinedBehaviorConsumer(this,
+		// location, pop, defaultProfile);
+		// this.enterMarket(acc);
+		// }
 
 	}
 
@@ -405,8 +410,8 @@ public class Simternet extends SimState implements Serializable {
 		this.initNetworkServiceProviders();
 
 		// Initialize Application Service Providers
-		this.applicationServiceProviders = new ArrayList<ApplicationServiceProvider>();
-		this.ASPsByCategory = new HashMap<AppCategory, Collection<ApplicationServiceProvider>>();
+		this.applicationServiceProviders = new ArrayList<ApplicationProvider>();
+		this.ASPsByCategory = new HashMap<AppCategory, Collection<ApplicationProvider>>();
 		this.initApplicationServiceProviders();
 
 		this.initArbiter();

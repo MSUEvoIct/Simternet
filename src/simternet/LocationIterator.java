@@ -5,11 +5,11 @@ import java.util.Iterator;
 import sim.util.Int2D;
 
 public class LocationIterator implements Iterator<Int2D>, Iterable<Int2D> {
-	private int remaining;
-	private int xCur = 0;
-	private final int xMax;
-	private int yCur = 0;
-	private final int yMax;
+	private int			remaining;
+	private int			xCur	= 0;
+	private final int	xMax;
+	private int			yCur	= 0;
+	private final int	yMax;
 
 	public LocationIterator(int x, int y) {
 		this.xMax = x - 1;
@@ -31,7 +31,7 @@ public class LocationIterator implements Iterator<Int2D>, Iterable<Int2D> {
 	@Override
 	public Iterator<Int2D> iterator() {
 		// TODO Auto-generated method stub
-		return null;
+		return this;
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 package simternet.network;
 
-import simternet.consumer.AbstractConsumerClass;
+import simternet.consumer.Consumer;
 
 public class BackgroundFlow extends NetFlow {
 
@@ -41,7 +41,7 @@ public class BackgroundFlow extends NetFlow {
 	 *            The maximum time to wait for this data transfer.
 	 */
 	public BackgroundFlow(Network source, Network destination,
-			AbstractConsumerClass user, Double usage, Double maxDuration) {
+			Consumer user, Double usage, Double maxDuration) {
 
 		super(source, destination, user);
 
@@ -84,7 +84,7 @@ public class BackgroundFlow extends NetFlow {
 
 	@Override
 	public Double getCongestionDuration() {
-		return this.maxDuration * this.user.getPopultation();
+		return this.maxDuration * this.user.getPopulation();
 	}
 
 }

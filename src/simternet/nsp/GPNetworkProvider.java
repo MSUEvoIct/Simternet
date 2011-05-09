@@ -1,8 +1,13 @@
 package simternet.nsp;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import simternet.Simternet;
 import simternet.ecj.EvolvableAgent;
 import simternet.ecj.SimternetGPIndividual;
+import simternet.network.EdgeNetwork;
+import simternet.network.SimpleEdgeNetwork;
 import ec.Individual;
 
 public class GPNetworkProvider extends NetworkProvider implements EvolvableAgent {
@@ -12,13 +17,15 @@ public class GPNetworkProvider extends NetworkProvider implements EvolvableAgent
 
 	public GPNetworkProvider(Simternet simternet) {
 		super(simternet);
-		this.investmentStrategy = new BuildEverywhereStrategy(this);
+		List<Class<? extends EdgeNetwork>> edgeTypes = new ArrayList<Class<? extends EdgeNetwork>>();
+		edgeTypes.add(SimpleEdgeNetwork.class);
+		this.investmentStrategy = new ScoringInvestmentStrategy(this, edgeTypes, 0.0);
 	}
 
 	@Override
 	public Double getFitness() {
-		// TODO: Actually think about the proper fitness measure.
-		return this.financials.getPresentValue();
+		// TODO: Think about the proper fitness measure.
+		return this.financials.getNetWorth();
 	}
 
 	@Override
@@ -31,6 +38,10 @@ public class GPNetworkProvider extends NetworkProvider implements EvolvableAgent
 		this.ind = (SimternetGPIndividual) i;
 		this.ind.setAgent(this);
 		this.pricingStrategy = new GPPricingStrategy(this, this.ind, this.ind.trees[0]);
+		List<Class<? extends EdgeNetwork>> edgeTypes = new ArrayList<Class<? extends EdgeNetwork>>();
+		edgeTypes.add(SimpleEdgeNetwork.class);
+		this.investmentStrategy = new GPScoringInvestmentStrategy(this, edgeTypes, this.ind, this.ind.trees[1]);
+
 	}
 
 }

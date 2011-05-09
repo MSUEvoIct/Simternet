@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import simternet.application.AppCategory;
-import simternet.application.ApplicationServiceProvider;
 
 /**
  * ConsumerProfile objects store the attributes associated with each consumer
@@ -18,14 +17,22 @@ import simternet.application.ApplicationServiceProvider;
  */
 public class ConsumerProfile implements Serializable {
 
-	private static final long			serialVersionUID	= 1L;
+	private static final long		serialVersionUID	= 1L;
+
+	private static ConsumerProfile	singleton;
+
+	public static ConsumerProfile getSingleton() {
+		if (ConsumerProfile.singleton == null)
+			ConsumerProfile.singleton = new ConsumerProfile();
+		return ConsumerProfile.singleton;
+	}
 
 	private Map<AppCategory, Double>	applicationBudgets	= new HashMap<AppCategory, Double>();
 
 	/**
 	 * True if this consumer class is an "early adopter."
 	 */
-	private boolean						earlyAdopter;
+	protected boolean					earlyAdopter;
 
 	private Double						maxNetworkPrice		= 70.0;
 
@@ -33,7 +40,7 @@ public class ConsumerProfile implements Serializable {
 	 * The proportion of this period's consumption which is determined by the
 	 * last period's consumption. (i.e., momentum or transaction costs)
 	 */
-	private Double						switchSpeed;
+	protected Double					switchSpeed;
 
 	/**
 	 * Create a default consumer profile for testing purposes
@@ -47,18 +54,6 @@ public class ConsumerProfile implements Serializable {
 		if (amount == null)
 			return 0.0;
 		return amount;
-	}
-
-	/**
-	 * benefit = quality ^ alpha * expected congestion
-	 * 
-	 * @param asp
-	 * @return
-	 */
-	public Double getApplicationBenefit(ApplicationServiceProvider asp) {
-		// TODO: Parameterize alpha
-		Double preCongestionBenefit = Math.pow(asp.getQuality(), 0.7);
-		return preCongestionBenefit;
 	}
 
 	public Double getMaxNetworkPrice() {

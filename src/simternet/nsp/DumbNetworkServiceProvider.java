@@ -23,6 +23,12 @@ public class DumbNetworkServiceProvider extends NetworkProvider implements Seria
 		super(s);
 		this.pricingStrategy = new ConstantPricingStrategy(this, DumbNetworkServiceProvider.price);
 		this.investmentStrategy = new BuildEverywhereStrategy(this);
+		// List<Class<? extends EdgeNetwork>> networks = new ArrayList<Class<?
+		// extends EdgeNetwork>>();
+		// networks.add(SimpleEdgeNetwork.class);
+		//
+		// this.investmentStrategy = new ScoringInvestmentStrategy(this,
+		// networks, 0.0);
 	}
 
 }

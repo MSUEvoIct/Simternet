@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
+import simternet.TraceConfig;
 import simternet.temporal.AsyncUpdate;
 
 /**
@@ -413,8 +414,10 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 	@Override
 	public void step(SimState state) {
 
-		Logger.getRootLogger().log(Level.DEBUG, this + " Default Route: " + this.getDefaultRoute());
-		Logger.getRootLogger().log(Level.DEBUG, this + " Routing Table:\n" + this.routingTableReport());
+		if (TraceConfig.routingTables && Logger.getRootLogger().isTraceEnabled()) {
+			Logger.getRootLogger().trace(this + " Default Route: " + this.getDefaultRoute());
+			Logger.getRootLogger().trace(this + " Routing Table:\n" + this.routingTableReport());
+		}
 
 		// Routing decisions are made first, analagous to a router "backplane"
 		this.route();

@@ -8,10 +8,11 @@ import ec.gp.GPTree;
 
 public class GPPricingStrategy extends PricingStrategy {
 
+	public static final Double	MAX_PRICE			= 1.0E25;
 	/**
-	 * Rediculous minimul price just prevents infinite negative prices etc...
+	 * Rediculous minimal price just prevents infinite negative prices etc...
 	 */
-	public static final Double	MIN_PRICE			= -1.0E7;
+	public static final Double	MIN_PRICE			= -1.0E25;
 
 	private static final long	serialVersionUID	= 1L;
 	GPIndividual				individual			= null;
@@ -32,10 +33,12 @@ public class GPPricingStrategy extends PricingStrategy {
 		PriceEdgeNetworkProblem penp = new PriceEdgeNetworkProblem(this.nsp, edge);
 		this.pricingTree.child.eval(null, 0, d, null, this.individual, penp);
 
-		if (d.value > GPPricingStrategy.MIN_PRICE)
-			return d.value;
-		else
+		if (d.value < GPPricingStrategy.MIN_PRICE)
 			return GPPricingStrategy.MIN_PRICE;
+		else if (d.value > GPPricingStrategy.MAX_PRICE)
+			return GPPricingStrategy.MAX_PRICE;
+		else
+			return d.value;
 	}
 
 }

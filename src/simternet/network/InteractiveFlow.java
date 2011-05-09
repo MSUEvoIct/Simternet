@@ -1,6 +1,6 @@
 package simternet.network;
 
-import simternet.consumer.AbstractConsumerClass;
+import simternet.consumer.Consumer;
 
 public class InteractiveFlow extends NetFlow {
 
@@ -27,7 +27,7 @@ public class InteractiveFlow extends NetFlow {
 	 *            and requested once they receive the flow.
 	 */
 	public InteractiveFlow(Network source, Network destination,
-			AbstractConsumerClass user, Double durationActual,
+			Consumer user, Double durationActual,
 			Double bandwidthRequested, Double bandwidthActual) {
 
 		super(source, destination, user);
@@ -65,7 +65,7 @@ public class InteractiveFlow extends NetFlow {
 
 	@Override
 	public Double getCongestionDuration() {
-		return this.duration * this.user.getPopultation();
+		return this.duration * this.user.getPopulation();
 	}
 
 }

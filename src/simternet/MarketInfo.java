@@ -3,7 +3,7 @@ package simternet;
 import java.util.HashMap;
 import java.util.Map;
 
-import simternet.consumer.AbstractConsumerClass;
+import simternet.consumer.Consumer;
 import simternet.nsp.NetworkProvider;
 
 /**
@@ -90,8 +90,8 @@ public class MarketInfo {
 	Double numberOfConsumers() {
 		double numCustomers = 0.0;
 		for (Object o : this.s.consumerClasses.allObjects) {
-			AbstractConsumerClass acc = (AbstractConsumerClass) o;
-			numCustomers += acc.getPopultation();
+			Consumer acc = (Consumer) o;
+			numCustomers += acc.getPopulation();
 		}
 		return numCustomers;
 	}

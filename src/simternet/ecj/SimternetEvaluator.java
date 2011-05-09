@@ -6,8 +6,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
+
 import simternet.Simternet;
-import simternet.application.ApplicationServiceProvider;
+import simternet.application.ApplicationProvider;
 import simternet.nsp.NetworkProvider;
 import ec.Evaluator;
 import ec.EvolutionState;
@@ -80,8 +82,8 @@ public class SimternetEvaluator extends Evaluator {
 			Class agentClass = null;
 			Constructor<EvolvableAgent> agentConstructor = null;
 			try {
-				Parameter p = new Parameter("pop").push("subpop").push(Integer.toString(i)).push("species").push(
-						"agent");
+				Parameter p = new Parameter("pop").push("subpop").push(Integer.toString(i)).push("species")
+						.push("agent");
 				agentClassName = state.parameters.getString(p, null);
 				agentClass = Class.forName(agentClassName);
 				agentConstructor = agentClass.getConstructor(Simternet.class);
@@ -109,15 +111,15 @@ public class SimternetEvaluator extends Evaluator {
 				if (agent instanceof NetworkProvider) {
 					NetworkProvider nsp = (NetworkProvider) agent;
 					simternet[whichSimternet].enterMarket(nsp);
-				} else if (agent instanceof ApplicationServiceProvider) {
-					ApplicationServiceProvider asp = (ApplicationServiceProvider) agent;
+				} else if (agent instanceof ApplicationProvider) {
+					ApplicationProvider asp = (ApplicationProvider) agent;
 					simternet[whichSimternet].enterMarket(asp);
 				}
 			}
 
 		}
 
-		numThreads = 0;
+		// numThreads = 0;
 
 		if (numThreads > 1) {
 			// Simulations are populated. Run them!
@@ -137,7 +139,22 @@ public class SimternetEvaluator extends Evaluator {
 
 			threadPool.shutdown();
 			try {
-				threadPool.awaitTermination(60, TimeUnit.SECONDS);
+				int seconds = 0; // how long we've waited
+				int waiting = 60; // update every 60 seconds
+				int timeout = 1200; // 20 minutes
+				while (seconds < timeout) {
+					if (threadPool.isTerminated()) {
+						Logger.getRootLogger().info("Comleted evaluation of population");
+						break;
+					} else
+						Logger.getRootLogger().info("Evaluating population, " + seconds + "/" + timeout + "s");
+					threadPool.awaitTermination(waiting, TimeUnit.SECONDS);
+					seconds += waiting;
+				}
+				if (!threadPool.isTerminated()) {
+					Logger.getRootLogger().fatal("Could not evaluate population in under " + timeout + " seconds");
+					System.exit(-1);
+				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -196,8 +213,8 @@ public class SimternetEvaluator extends Evaluator {
 	public void setup(EvolutionState state, Parameter base) {
 		super.setup(state, base);
 		if (!(this.p_problem instanceof SimpleProblemForm))
-			state.output.fatal("" + this.getClass() + " used, but the Problem is not of SimpleProblemForm", base
-					.push(Evaluator.P_PROBLEM));
+			state.output.fatal("" + this.getClass() + " used, but the Problem is not of SimpleProblemForm",
+					base.push(Evaluator.P_PROBLEM));
 
 	}
 

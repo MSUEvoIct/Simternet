@@ -6,14 +6,14 @@ package simternet.consumer;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import simternet.application.ApplicationServiceProvider;
+import simternet.application.ApplicationProvider;
 import simternet.network.EdgeNetwork;
 
 class AppBenefit {
-	ApplicationServiceProvider	app;
+	ApplicationProvider	app;
 	Double						benefit;
 	Double						cost;
-	EdgeNetwork			onNetwork;
+	EdgeNetwork					onNetwork;
 
 	/**
 	 * Reduces the benefit received if there is congestion

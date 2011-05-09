@@ -8,24 +8,25 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import sim.engine.SimState;
-import simternet.application.ApplicationServiceProvider;
+import simternet.TraceConfig;
+import simternet.application.ApplicationProvider;
 import simternet.temporal.TemporalHashMap;
 import simternet.temporal.TemporalHashSet;
 
 public class Datacenter extends Network {
 
 	private static final long					serialVersionUID	= 1L;
+	protected TemporalHashSet<NetFlow>			inputQueue			= new TemporalHashSet<NetFlow>();
 	/**
 	 * Stores the congestion this application sees on each network. Congestion
 	 * is stored as the amount of bandwidth actually received by the congested
 	 * flow. I.e., you would need to compare this to the application's bandwidth
 	 * use to calculate a percentage of congestion.
 	 */
-	protected TemporalHashMap<Network, Double>	congestion			= new TemporalHashMap<Network, Double>();
-	protected TemporalHashSet<NetFlow>			inputQueue			= new TemporalHashSet<NetFlow>();
-	protected final ApplicationServiceProvider	owner;
+	protected TemporalHashMap<Network, Double>	observedBandwidth	= new TemporalHashMap<Network, Double>();
+	protected final ApplicationProvider	owner;
 
-	public Datacenter(ApplicationServiceProvider owner) {
+	public Datacenter(ApplicationProvider owner) {
 		this.owner = owner;
 	}
 
@@ -34,11 +35,11 @@ public class Datacenter extends Network {
 	 * @return The actual bandwidth received by congested flows at this edge
 	 *         network.
 	 */
-	public Double getCongestion(Network an) {
-		return this.congestion.get(an);
+	public Double getObservedBandwidth(Network an) {
+		return this.observedBandwidth.get(an);
 	}
 
-	public ApplicationServiceProvider getOwner() {
+	public ApplicationProvider getOwner() {
 		return this.owner;
 	}
 
@@ -55,7 +56,7 @@ public class Datacenter extends Network {
 	public void noteCongestion(NetFlow flow) {
 		if (flow.destination == null)
 			throw new RuntimeException("A packet going nowhere is congested?!");
-		this.congestion.put(flow.destination, flow.bandwidth);
+		this.observedBandwidth.put(flow.destination, flow.bandwidth);
 	}
 
 	/**
@@ -68,7 +69,7 @@ public class Datacenter extends Network {
 	public void originate(NetFlow flow) {
 		// Check to see if this flow was congested in previous periods. If so,
 		// pre-congest it to just faster than last period.
-		Double congestedBandwidth = this.congestion.get(flow.destination);
+		Double congestedBandwidth = this.observedBandwidth.get(flow.destination);
 		if (congestedBandwidth != null)
 			flow.congest(congestedBandwidth * 1.1);
 
@@ -78,7 +79,13 @@ public class Datacenter extends Network {
 	public String printCongestion() {
 		StringBuffer sb = new StringBuffer();
 
-		ArrayList<Network> nets = new ArrayList(this.congestion.keySet());
+		sb.append("Congestion status of Egress Links\n");
+		for (BackboneLink bb : this.egressLinks.values())
+			sb.append(bb + " has congestion " + bb.congestionAlgorithm.getCongestionReport() + "\n");
+
+		sb.append("Congestion status of Edge Networks\n");
+
+		ArrayList<Network> nets = new ArrayList(this.observedBandwidth.keySet());
 		Collections.sort(nets, new Comparator<Network>() {
 
 			/**
@@ -94,7 +101,9 @@ public class Datacenter extends Network {
 		for (Network net : nets) {
 			if (net == null)
 				throw new RuntimeException("wtf?");
-			sb.append(net.toString() + ": " + this.congestion.get(net) + "\n");
+			sb.append(net.toString() + ": ObservedBW=" + this.observedBandwidth.get(net));
+			sb.append(" (" + this.owner.getCongestionRatio(net) + ")");
+			sb.append("\n");
 		}
 
 		return sb.toString();
@@ -111,7 +120,9 @@ public class Datacenter extends Network {
 	public void step(SimState state) {
 		// TODO Auto-generated method stub
 		super.step(state);
-		Logger.getRootLogger().log(Level.DEBUG, this.toString() + ": Congestion\n" + this.printCongestion());
+
+		if (TraceConfig.congestionASPSummary && Logger.getRootLogger().isTraceEnabled())
+			Logger.getRootLogger().log(Level.TRACE, this.toString() + ": Congestion\n" + this.printCongestion());
 	}
 
 	@Override
@@ -123,7 +134,7 @@ public class Datacenter extends Network {
 	public void update() {
 		super.update();
 		this.inputQueue.update();
-		this.congestion.update();
+		this.observedBandwidth.update();
 	}
 
 }

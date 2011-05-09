@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import sim.util.Int2D;
 import simternet.Simternet;
-import simternet.application.ApplicationServiceProvider;
+import simternet.application.ApplicationProvider;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 
@@ -18,18 +18,16 @@ import simternet.network.Network;
  * @author kkoning
  * 
  */
-public class SimpleConsumer extends AbstractConsumerClass implements
-		Serializable {
+public class GluttonousConsumer extends Consumer implements Serializable {
 
 	/**
 	 * Always uses the same application usage variables, regardless of
 	 * application.
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long	serialVersionUID	= 1L;
 
-	public SimpleConsumer(Simternet s, Int2D location, Double population,
-			ConsumerProfile profile) {
-		super(s, location, population, profile);
+	public GluttonousConsumer(Simternet s, Int2D location, Double population) {
+		super(s, location, population, null, null, null, null);
 	}
 
 	/*
@@ -37,13 +35,11 @@ public class SimpleConsumer extends AbstractConsumerClass implements
 	 */
 	@Override
 	protected void consumeApplications() {
-		Collection<Network> localEdgeNetworks = this.s.getNetworks(
-				null, EdgeNetwork.class, this.getLocation());
+		Collection<Network> localEdgeNetworks = this.s.getNetworks(null, EdgeNetwork.class, this.getLocation());
 
-		Collection<ApplicationServiceProvider> asps = this.s
-				.getASPs();
+		Collection<ApplicationProvider> asps = this.s.getASPs();
 
-		for (ApplicationServiceProvider asp : asps)
+		for (ApplicationProvider asp : asps)
 			for (Network network : localEdgeNetworks)
 				this.consumeApplication(asp, (EdgeNetwork) network);
 
@@ -54,25 +50,10 @@ public class SimpleConsumer extends AbstractConsumerClass implements
 	 */
 	@Override
 	protected void consumeNetworks() {
-		Collection<Network> localEdgeNetworks = this.s.getNetworks(
-				null, EdgeNetwork.class, this.getLocation());
+		Collection<Network> localEdgeNetworks = this.s.getNetworks(null, EdgeNetwork.class, this.getLocation());
 
 		for (Network edgeNetwork : localEdgeNetworks)
 			this.consumeNetwork((EdgeNetwork) edgeNetwork);
-	}
-
-	/*
-	 * Do nothing. We're always going to use every application.
-	 */
-	@Override
-	protected void manageApplications() {
-	}
-
-	/*
-	 * Do nohing. We're always going to use every network.
-	 */
-	@Override
-	protected void manageNetworks() {
 	}
 
 	/*

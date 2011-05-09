@@ -42,7 +42,11 @@ public class WFQCongestionAlgorithm implements CongestionAlgorithm {
 	public List<NetFlow> limit(List<NetFlow> flows, BackboneLink bottleneck) {
 
 		Double remainingCapacity = bottleneck.getBandwidth();
+
+		// will contain the total bytes requested by all flows
 		Double remainingUsage = 0D;
+		// will contain the total # of flow seconds (non-interactive flows will
+		// extend time if congested)
 		Double congestedDurationRemaining = 0D;
 
 		for (NetFlow flow : flows) {
@@ -51,9 +55,9 @@ public class WFQCongestionAlgorithm implements CongestionAlgorithm {
 		}
 
 		StringBuffer cr = new StringBuffer();
-		Double usageRatio = remainingUsage / remainingCapacity;
+		Double usageRatio = remainingUsage / bottleneck.getBandwidth();
 		String percent = new DecimalFormat("000.#").format(usageRatio * 100);
-		cr.append(percent + "%/" + remainingCapacity);
+		cr.append(percent + "%/" + bottleneck.getBandwidth());
 		this.congestionReport = cr.toString();
 
 		/*

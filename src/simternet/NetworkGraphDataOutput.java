@@ -8,19 +8,25 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import simternet.application.ApplicationServiceProvider;
-import simternet.network.EdgeNetwork;
-import simternet.network.Network;
+import simternet.application.ApplicationProvider;
 import simternet.network.Backbone;
 import simternet.network.Datacenter;
+import simternet.network.EdgeNetwork;
+import simternet.network.Network;
 import simternet.nsp.NetworkProvider;
 
+/**
+ * Exports data on connections between networks suitable for importation into R.
+ * 
+ * @author kkoning
+ * 
+ */
 public class NetworkGraphDataOutput {
 
-	private final String			connectionMatrixOutputFile	= "networkGraphConnectionMatrix.csv";
+	private final String	connectionMatrixOutputFile	= "networkGraphConnectionMatrix.csv";
 	private List<Network>	networks;
-	private final Simternet			s;
-	private final String			vertexDataOutputFile		= "networkGraphVertexData.tab";
+	private final Simternet	s;
+	private final String	vertexDataOutputFile		= "networkGraphVertexData.tab";
 
 	public NetworkGraphDataOutput(Simternet s, List<Network> networks) {
 		this.s = s;
@@ -99,7 +105,7 @@ public class NetworkGraphDataOutput {
 
 				// Size
 				Datacenter d = (Datacenter) an;
-				ApplicationServiceProvider asp = d.getOwner();
+				ApplicationProvider asp = d.getOwner();
 				double customers = asp.getCustomers();
 				size = Math.log(customers);
 			}

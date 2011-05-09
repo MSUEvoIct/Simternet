@@ -6,8 +6,8 @@ import java.util.Iterator;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import simternet.Simternet;
-import simternet.application.ApplicationServiceProvider;
-import simternet.consumer.AbstractConsumerClass;
+import simternet.application.ApplicationProvider;
+import simternet.consumer.Consumer;
 import simternet.nsp.NetworkProvider;
 
 /**
@@ -39,14 +39,14 @@ public class Arbiter implements Steppable, Serializable {
 				.getNetworkServiceProviders())
 			nsp.update();
 
-		Iterator<AbstractConsumerClass> i = ((Simternet) state)
+		Iterator<Consumer> i = ((Simternet) state)
 				.getConsumerClasses().iterator();
 		while (i.hasNext()) {
-			AbstractConsumerClass acc = i.next();
+			Consumer acc = i.next();
 			acc.update();
 		}
 
-		for (ApplicationServiceProvider asp : ((Simternet) state)
+		for (ApplicationProvider asp : ((Simternet) state)
 				.getASPs())
 			asp.update();
 

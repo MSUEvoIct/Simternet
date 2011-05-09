@@ -82,24 +82,6 @@ public class Temporal<T> implements AsyncUpdate, Serializable {
 		return dst;
 	}
 
-	@SuppressWarnings("unchecked")
-	public final void reduce(T amount) {
-		if (!this.isNumeric())
-			throw new RuntimeException("Cannot increment a non-numeric type!");
-
-		if (this.future instanceof Double) {
-			Double futureDouble = (Double) this.future;
-			futureDouble -= (Double) amount;
-			this.future = (T) futureDouble;
-		} else if (this.future instanceof Integer) {
-			Integer futureInteger = (Integer) this.future;
-			futureInteger -= (Integer) amount;
-			this.future = (T) futureInteger;
-		} else
-			throw new RuntimeException("Increment of type unimplemented");
-
-	}
-
 	public T get() {
 		return this.current;
 	}
@@ -121,13 +103,17 @@ public class Temporal<T> implements AsyncUpdate, Serializable {
 		if (!this.isNumeric())
 			throw new RuntimeException("Cannot calculate a change for a non-numeric type!");
 
-		if (this.past instanceof Double) {
+		if (this.current instanceof Double) {
 			Double past = (Double) this.past;
+			if (past == null)
+				past = 0.0;
 			Double current = (Double) this.current;
 			Double change = current - past;
 			toReturn = (T) change;
-		} else if (this.past instanceof Integer) {
+		} else if (this.current instanceof Integer) {
 			Integer past = (Integer) this.past;
+			if (past == null)
+				past = 0;
 			Integer current = (Integer) this.current;
 			Integer change = current - past;
 			toReturn = (T) change;
@@ -159,6 +145,24 @@ public class Temporal<T> implements AsyncUpdate, Serializable {
 		if (this.future instanceof Number)
 			return true;
 		return false;
+	}
+
+	@SuppressWarnings("unchecked")
+	public final void reduce(T amount) {
+		if (!this.isNumeric())
+			throw new RuntimeException("Cannot increment a non-numeric type!");
+
+		if (this.future instanceof Double) {
+			Double futureDouble = (Double) this.future;
+			futureDouble -= (Double) amount;
+			this.future = (T) futureDouble;
+		} else if (this.future instanceof Integer) {
+			Integer futureInteger = (Integer) this.future;
+			futureInteger -= (Integer) amount;
+			this.future = (T) futureInteger;
+		} else
+			throw new RuntimeException("Increment of type unimplemented");
+
 	}
 
 	/**

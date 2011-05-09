@@ -1,7 +1,7 @@
 package simternet.ecj.problems;
 
-import simternet.consumer.AbstractConsumerClass;
+import simternet.consumer.Consumer;
 
 public interface HasConsumerClass {
-	public AbstractConsumerClass getConsumerClass();
+	public Consumer getConsumerClass();
 }

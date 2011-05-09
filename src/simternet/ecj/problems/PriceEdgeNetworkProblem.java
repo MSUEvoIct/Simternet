@@ -1,5 +1,6 @@
 package simternet.ecj.problems;
 
+import simternet.Financials;
 import simternet.network.EdgeNetwork;
 import simternet.nsp.NetworkProvider;
 import ec.Problem;
@@ -14,11 +15,11 @@ import ec.Problem;
  * @author kkoning
  * 
  */
-public class PriceEdgeNetworkProblem extends Problem implements HasEdgeNetwork {
+public class PriceEdgeNetworkProblem extends Problem implements HasEdgeNetwork, HasFinancials {
 
-	private static final long		serialVersionUID	= 1L;
-	private EdgeNetwork		aen;
-	private NetworkProvider	nsp;
+	private static final long	serialVersionUID	= 1L;
+	private EdgeNetwork			aen;
+	private NetworkProvider		nsp;
 
 	public PriceEdgeNetworkProblem(NetworkProvider nsp, EdgeNetwork aen) {
 		this.nsp = nsp;
@@ -28,6 +29,11 @@ public class PriceEdgeNetworkProblem extends Problem implements HasEdgeNetwork {
 	@Override
 	public EdgeNetwork getEdgeNetwork() {
 		return this.aen;
+	}
+
+	@Override
+	public Financials getFinancials() {
+		return this.nsp.financials;
 	}
 
 	public NetworkProvider getNsp() {
