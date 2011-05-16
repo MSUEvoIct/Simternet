@@ -12,10 +12,22 @@ import java.util.List;
  */
 public class NullCongestionAlgorithm implements CongestionAlgorithm {
 
-	protected BackboneLink link;
+	protected BackboneLink	link;
 
 	public NullCongestionAlgorithm(BackboneLink link) {
 		this.link = link;
+	}
+
+	/*
+	 * Always report that we have zero congestion
+	 * 
+	 * (non-Javadoc)
+	 * 
+	 * @see simternet.network.CongestionAlgorithm#getCongestionRatio()
+	 */
+	@Override
+	public Double getCongestionRatio() {
+		return 0.0;
 	}
 
 	@Override

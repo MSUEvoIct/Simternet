@@ -13,11 +13,17 @@ import java.util.List;
  */
 public class WFQCongestionAlgorithm implements CongestionAlgorithm {
 
+	protected Double		congestionRatio	= 0D;
 	protected String		congestionReport;
 	protected BackboneLink	link;
 
 	public WFQCongestionAlgorithm(BackboneLink link) {
 		this.link = link;
+	}
+
+	@Override
+	public Double getCongestionRatio() {
+		return this.congestionRatio;
 	}
 
 	public String getCongestionReport() {
@@ -59,6 +65,9 @@ public class WFQCongestionAlgorithm implements CongestionAlgorithm {
 		String percent = new DecimalFormat("000.#").format(usageRatio * 100);
 		cr.append(percent + "%/" + bottleneck.getBandwidth());
 		this.congestionReport = cr.toString();
+
+		// Calculate the congestion ratio, store to be queried later.
+		this.congestionRatio = remainingUsage / remainingCapacity;
 
 		/*
 		 * If the link has enough capacity, there is no need to ration ANY flow.
