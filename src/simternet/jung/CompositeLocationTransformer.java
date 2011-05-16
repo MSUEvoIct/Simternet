@@ -8,16 +8,16 @@ import java.util.PriorityQueue;
 
 import simternet.network.Network;
 
-public class CompositeLayoutTransformer extends LayoutTransformer {
-	private HashMap<LayoutTransformer, Dimension>	offsetMap;
-	private PriorityQueue<LayoutTransformer>		transformerQueue;
+public class CompositeLocationTransformer extends LocationTransformer {
+	private HashMap<LocationTransformer, Dimension>	offsetMap;
+	private PriorityQueue<LocationTransformer>		transformerQueue;
 
-	public CompositeLayoutTransformer() {
-		this.transformerQueue = new PriorityQueue<LayoutTransformer>();
-		this.offsetMap = new HashMap<LayoutTransformer, Dimension>();
+	public CompositeLocationTransformer() {
+		this.transformerQueue = new PriorityQueue<LocationTransformer>();
+		this.offsetMap = new HashMap<LocationTransformer, Dimension>();
 	}
 
-	public void addTransformer(LayoutTransformer transformer, int priority, Dimension offset) {
+	public void addTransformer(LocationTransformer transformer, int priority, Dimension offset) {
 		transformer.setPriority(priority);
 		this.transformerQueue.add(transformer);
 		this.offsetMap.put(transformer, offset);
@@ -30,7 +30,7 @@ public class CompositeLayoutTransformer extends LayoutTransformer {
 	 */
 	@Override
 	public boolean handles(Network net) {
-		for (LayoutTransformer ntpTransformer : this.transformerQueue)
+		for (LocationTransformer ntpTransformer : this.transformerQueue)
 			if (ntpTransformer.handles(net))
 				return true;
 		return false;
@@ -45,7 +45,7 @@ public class CompositeLayoutTransformer extends LayoutTransformer {
 
 		Point result = null;
 
-		for (LayoutTransformer ntpTransformer : this.transformerQueue)
+		for (LocationTransformer ntpTransformer : this.transformerQueue)
 			if (ntpTransformer.handles(net)) {
 				result = (Point) ntpTransformer.transform(net);
 				Dimension offset = this.offsetMap.get(ntpTransformer);

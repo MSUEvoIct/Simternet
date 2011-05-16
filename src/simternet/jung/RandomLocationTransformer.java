@@ -7,11 +7,11 @@ import java.util.Random;
 
 import simternet.network.Network;
 
-public class RandomLayoutTransformer extends LayoutTransformer {
+public class RandomLocationTransformer extends LocationTransformer {
 
 	private Dimension	dimension;
 
-	public RandomLayoutTransformer(Dimension d) {
+	public RandomLocationTransformer(Dimension d) {
 		this.dimension = d;
 	}
 

@@ -5,23 +5,22 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.Random;
 
-import simternet.network.Backbone;
+import simternet.network.Datacenter;
 import simternet.network.Network;
 
-public class BackboneLayoutTransformer extends LayoutTransformer {
+public class DatacenterLocationTransformer extends LocationTransformer {
 
 	private Dimension	dimension;
 	private Random		random;
 
-	public BackboneLayoutTransformer(Dimension d) {
-		// TODO Auto-generated constructor stub
+	public DatacenterLocationTransformer(Dimension d) {
 		this.dimension = d;
 		this.random = new Random();
 	}
 
 	@Override
 	public boolean handles(Network net) {
-		return (net instanceof Backbone);
+		return (net instanceof Datacenter);
 	}
 
 	@Override
@@ -32,4 +31,5 @@ public class BackboneLayoutTransformer extends LayoutTransformer {
 		return new Point(this.dimension.width / 2, (int) (this.random.nextFloat() * this.dimension.height));
 
 	}
+
 }

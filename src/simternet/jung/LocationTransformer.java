@@ -13,12 +13,12 @@ import org.apache.commons.collections15.Transformer;
 
 import simternet.network.Network;
 
-public abstract class LayoutTransformer implements Transformer<Network, Point2D>,
-		Comparable<LayoutTransformer> {
+public abstract class LocationTransformer implements Transformer<Network, Point2D>,
+		Comparable<LocationTransformer> {
 
 	private int	priority;
 
-	public int compareTo(LayoutTransformer transformer) {
+	public int compareTo(LocationTransformer transformer) {
 		return transformer.getPriority() - this.getPriority();
 	}
 

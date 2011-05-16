@@ -8,13 +8,13 @@ import sim.util.Int2D;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 
-public class EdgeLayoutTransformer extends LayoutTransformer {
+public class EdgeLocationTransformer extends LocationTransformer {
 
 	Dimension	cellSize;
 
 	// Dimension maximum;
 
-	public EdgeLayoutTransformer(Dimension cSize) {
+	public EdgeLocationTransformer(Dimension cSize) {
 		// this.dimension = d;
 		this.cellSize = cSize;
 		// this.maximum = new Dimension(0, 0);
