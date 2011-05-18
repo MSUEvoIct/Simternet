@@ -8,6 +8,15 @@ import java.util.Random;
 import simternet.network.Datacenter;
 import simternet.network.Network;
 
+/**
+ * DatacenterLocationTransformer
+ * 
+ * A transformer to move DataCenters to their correct location onscreen.
+ * 
+ * See comments for <LocationTransformer.java>
+ * 
+ * @author graysonwright
+ */
 public class DatacenterLocationTransformer extends LocationTransformer {
 
 	private Dimension	dimension;

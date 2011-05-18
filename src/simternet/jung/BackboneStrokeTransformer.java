@@ -7,6 +7,16 @@ import org.apache.commons.collections15.Transformer;
 
 import simternet.network.BackboneLink;
 
+/**
+ * BackboneStrokeTransformer
+ * 
+ * Works with JUNG's RenderContext to define the graphical representation of
+ * Backbone Links. For now, all links are represented by a solid line, and the
+ * width depends on the bandwidth of the link. Color is defined in a separate
+ * class, BackbonePaintTransformer
+ * 
+ * @author graysonwright
+ */
 public class BackboneStrokeTransformer implements Transformer<BackboneLink, Stroke> {
 
 	@Override

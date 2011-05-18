@@ -1,8 +1,10 @@
 package simternet.jung;
 
 /** 
- * Uses a chain-of-command with subclasses to determine whether or not it can place a network in the graph.
- * If a sublcass can place it, return that sublcasses result.
+ * LocationTransformer
+ * 
+ * An abstract class that defines transformers that are used to place Network objects in their correct onscreen positions.
+ * Subclasses will override methods <handles> and <transform> to deal with specific types of Networks.
  * 
  * @author graysonwright
  */
@@ -13,10 +15,9 @@ import org.apache.commons.collections15.Transformer;
 
 import simternet.network.Network;
 
-public abstract class LocationTransformer implements Transformer<Network, Point2D>,
-		Comparable<LocationTransformer> {
+public abstract class LocationTransformer implements Transformer<Network, Point2D>, Comparable<LocationTransformer> {
 
-	private int	priority;
+	protected int	priority;
 
 	public int compareTo(LocationTransformer transformer) {
 		return transformer.getPriority() - this.getPriority();

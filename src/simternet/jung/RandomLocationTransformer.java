@@ -7,6 +7,15 @@ import java.util.Random;
 
 import simternet.network.Network;
 
+/**
+ * RandomLocationTransformer
+ * 
+ * A transformer to move any Network to a random location onscreen.
+ * 
+ * See comments for <LocationTransformer.java>
+ * 
+ * @author graysonwright
+ */
 public class RandomLocationTransformer extends LocationTransformer {
 
 	private Dimension	dimension;

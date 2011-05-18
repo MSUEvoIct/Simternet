@@ -8,6 +8,15 @@ import java.util.Random;
 import simternet.network.Backbone;
 import simternet.network.Network;
 
+/**
+ * BackboneLocationTransformer
+ * 
+ * A transformer to move Backbones to their correct location onscreen.
+ * 
+ * See comments for <LocationTransformer.java>
+ * 
+ * @author graysonwright
+ */
 public class BackboneLocationTransformer extends LocationTransformer {
 
 	private Dimension	dimension;

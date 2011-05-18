@@ -8,6 +8,16 @@ import java.util.PriorityQueue;
 
 import simternet.network.Network;
 
+/**
+ * CompositeLocationTransformer
+ * 
+ * A composite transformer class. Holds a list of LocationTransformers that each
+ * handle different types of Network. When asked to place a Network, this class
+ * has one of the transformers in its queue handle the placement instead.
+ * Priorities are used to decide which of these transformers to ask first.
+ * 
+ * @author graysonwright
+ */
 public class CompositeLocationTransformer extends LocationTransformer {
 	private HashMap<LocationTransformer, Dimension>	offsetMap;
 	private PriorityQueue<LocationTransformer>		transformerQueue;
@@ -24,9 +34,13 @@ public class CompositeLocationTransformer extends LocationTransformer {
 	}
 
 	/*
-	 * Search subclasses in the queue (should be sorted from lowest # priority
-	 * to highest) if any transformer in the queue can handle the network, this
-	 * class can handle it.
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * simternet.jung.LocationTransformer#handles(simternet.network.Network)
+	 * 
+	 * If any transformer in the queue can handle the Network, then this class
+	 * can as well.
 	 */
 	@Override
 	public boolean handles(Network net) {
@@ -36,6 +50,15 @@ public class CompositeLocationTransformer extends LocationTransformer {
 		return false;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * simternet.jung.LocationTransformer#transform(simternet.network.Network)
+	 * 
+	 * Ask the lowest-priority transformer that handles this type of Network to
+	 * place it.
+	 */
 	@Override
 	public Point2D transform(Network net) {
 		// TODO Auto-generated method stub
