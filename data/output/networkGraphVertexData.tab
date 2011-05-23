@@ -5,8 +5,53 @@ Datacenter of ASP-3	4	green	1.5350567286626973
 Datacenter of ASP-4	4	green	1.5350567286626973
 Datacenter of ASP-5	4	green	1.5350567286626973
 Datacenter of ASP-6	4	green	1.5350567286626973
-Backbone of NSP-1	5	blue	2.3620737171073807
-Edge of NSP-1 @Int2D[0,0]	3	red	1.9874523740699912
-Edge of NSP-1 @Int2D[0,1]	3	red	2.0066086151717264
-Edge of NSP-1 @Int2D[1,0]	3	red	1.714610069069544
-Edge of NSP-1 @Int2D[1,1]	3	red	1.8038513879637765
+Backbone of simternet.nsp.DumbNetworkServiceProvider-NSP-1	5	blue	4.60462599609753
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[0,0]	3	red	3.2773243919524195
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[0,1]	3	red	3.2708693081420126
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[0,2]	3	red	3.293459661770788
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[0,3]	3	red	3.259358237294468
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[0,4]	3	red	3.276025344634944
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[0,5]	3	red	3.3332174780585127
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[0,6]	3	red	3.2206987059425267
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[1,0]	3	red	3.293232744756423
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[1,1]	3	red	3.336287090524665
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[1,2]	3	red	3.2625778211803245
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[1,3]	3	red	3.332965262767806
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[1,4]	3	red	3.306639088942078
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[1,5]	3	red	3.3143112486119306
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[1,6]	3	red	3.3369420720377523
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[2,0]	3	red	3.357382874091923
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[2,1]	3	red	3.318873711899204
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[2,2]	3	red	3.320989277843367
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[2,3]	3	red	3.316465338308742
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[2,4]	3	red	3.3293294316003905
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[2,5]	3	red	3.3022838907950143
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[2,6]	3	red	3.2514023396898746
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[3,0]	3	red	3.2862797595420976
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[3,1]	3	red	3.291753848636428
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[3,2]	3	red	3.3571603742573157
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[3,3]	3	red	3.315086045737267
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[3,4]	3	red	3.3271740792264217
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[3,5]	3	red	3.301208354868463
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[3,6]	3	red	3.3188136117879057
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[4,0]	3	red	3.28268707274267
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[4,1]	3	red	3.2662284351446202
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[4,2]	3	red	3.3029361344577866
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[4,3]	3	red	3.3354157033117278
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[4,4]	3	red	3.2993796938001867
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[4,5]	3	red	3.2638861358360582
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[4,6]	3	red	3.2830055716263247
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[5,0]	3	red	3.3135812137353207
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[5,1]	3	red	3.306115151401807
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[5,2]	3	red	3.3003689609620825
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[5,3]	3	red	3.312553530678238
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[5,4]	3	red	3.3259362156698304
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[5,5]	3	red	3.3381085134756106
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[5,6]	3	red	3.323788373471515
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[6,0]	3	red	3.3154529721435906
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[6,1]	3	red	3.319485890682769
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[6,2]	3	red	3.285130847219376
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[6,3]	3	red	3.306626554545147
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[6,4]	3	red	3.3671338806797126
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[6,5]	3	red	3.316414481810465
+Edge of simternet.nsp.DumbNetworkServiceProvider-NSP-1 @Int2D[6,6]	3	red	3.3274379106139804
