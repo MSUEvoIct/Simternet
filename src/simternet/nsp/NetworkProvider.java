@@ -15,6 +15,7 @@ import sim.util.Bag;
 import sim.util.Int2D;
 import simternet.Financials;
 import simternet.Simternet;
+import simternet.TraceConfig;
 import simternet.Utils;
 import simternet.network.Backbone;
 import simternet.network.EdgeNetwork;
@@ -32,6 +33,9 @@ import simternet.temporal.TemporalSparseGrid2D;
  */
 public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 
+	protected static DecimalFormat	numCustFormat		= new DecimalFormat("0000000");
+	protected static DecimalFormat	positionFormat		= new DecimalFormat("00");
+	protected static DecimalFormat	priceFormat			= new DecimalFormat("000.00");
 	private static final long		serialVersionUID	= 1L;
 
 	protected Backbone				backboneNetwork;
@@ -82,8 +86,11 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 			this.financials.capitalize(buildCost);
 			this.edgeNetworks.setObjectLocation(aen, location);
 
-			// for now, create an infinite link to this network.
+			// for now, create a fixed bandwidth link to this network.
 			this.getBackboneNetwork().createEgressLinkTo(aen, 1.0E5, RoutingProtocolConfig.NONE);
+
+			if (TraceConfig.NSPBuiltNetwork && Logger.getRootLogger().isTraceEnabled())
+				Logger.getRootLogger().trace(this + " building " + type + " @ " + location);
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -148,7 +155,7 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	 * Passes back the change in revenue from the previous time step to the
 	 * current time step
 	 * 
-	 * @return
+	 * @return change in revenue in units of currency
 	 */
 	public Double getDeltaRevenue() {
 		return this.deltaRevenue;
@@ -173,7 +180,7 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	}
 
 	public String getName() {
-		return this.name;
+		return this.getClass().getCanonicalName() + "-" + this.name;
 	}
 
 	public Network getNetworkAt(Class<? extends Network> net, Int2D location) {
@@ -183,9 +190,9 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 		if (allNets.isEmpty()) // we have no nets at this loc
 			return null;
 
-		for (Object obj : allNets.objs) {
+		for (Object obj : allNets) {
 			Network n = (Network) obj;
-			if (n.getClass().equals(net))
+			if (net.isAssignableFrom(n.getClass()))
 				return n;
 		}
 		return null;
@@ -221,7 +228,8 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	 * Dispose of all assets, exit market
 	 */
 	private void goBankrupt() {
-		Logger.getRootLogger().log(Level.WARN, this + " going bankrupt: " + this.financials);
+		if (TraceConfig.bankruptcyNSP && Logger.getRootLogger().isTraceEnabled())
+			Logger.getRootLogger().trace(this + " going bankrupt: " + this.financials);
 		for (EdgeNetwork edge : (Iterable<EdgeNetwork>) this.edgeNetworks)
 			edge.disconnect();
 		this.edgeNetworks.clear();
@@ -263,19 +271,16 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 
 	private StringBuffer printCustomerGrid() {
 		StringBuffer sb = new StringBuffer();
-		DecimalFormat positionFormat = new DecimalFormat("00");
-		DecimalFormat numCustFormat = new DecimalFormat("0000000");
 
 		int curY = 0;
 
-		sb.append(positionFormat.format(0));
+		sb.append(NetworkProvider.positionFormat.format(0));
 		for (Int2D location : this.simternet.allLocations()) {
 			if (location.y > curY) {
 				sb.append("\n");
 				curY++;
-				sb.append(positionFormat.format(curY));
+				sb.append(NetworkProvider.positionFormat.format(curY));
 			}
-
 			sb.append(Utils.padLeft(String.valueOf(Math.round(this.getCustomers(location))), 7));
 		}
 
@@ -297,6 +302,29 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 				sb.append(positionFormat.format(curY));
 			}
 			sb.append(Utils.padLeft(String.valueOf(this.getNetworks(location).size()), 4));
+		}
+
+		return sb;
+	}
+
+	private StringBuffer printPriceGrid() {
+		StringBuffer sb = new StringBuffer();
+		int curY = 0;
+
+		sb.append(NetworkProvider.positionFormat.format(0));
+		for (Int2D location : this.simternet.allLocations()) {
+			if (location.y > curY) {
+				sb.append("\n");
+				curY++;
+				sb.append(NetworkProvider.positionFormat.format(curY));
+			}
+			EdgeNetwork net = (EdgeNetwork) this.getNetworkAt(EdgeNetwork.class, location);
+			String price;
+			if (net == null)
+				price = "   N/A";
+			else
+				price = NetworkProvider.priceFormat.format(net.getPrice());
+			sb.append(" " + price);
 		}
 
 		return sb;
@@ -327,22 +355,34 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 			aen.step(state);
 		}
 
-		// Log financials
-		Logger.getRootLogger().log(Level.INFO, this + " Financials: " + this.financials);
+		if (Logger.getRootLogger().isTraceEnabled()) {
+			// Log financials
+			if (TraceConfig.financialStatusNSP)
+				Logger.getRootLogger().trace(this + " Financials: " + this.financials);
 
-		// Log customer map
-		Logger.getRootLogger().log(Level.INFO, this + " Customer Map:\n" + this.printCustomerGrid());
+			// Log price map
+			if (TraceConfig.NSPPriceTables)
+				Logger.getRootLogger().trace(this + " Price Map:\n" + this.printPriceGrid());
 
-		// Log this NSP's Network
-		Logger.getRootLogger().log(Level.INFO, this + " Network Map:\n" + this.printNetworkGrid());
+			// Log customer map
+			if (TraceConfig.NSPCustomerTables)
+				Logger.getRootLogger().trace(this + " Customer Map:\n" + this.printCustomerGrid());
+			// Log this NSP's Network
+			Logger.getRootLogger().log(Level.INFO, this + " Network Map:\n" + this.printNetworkGrid());
 
-		// Log ALL NSP's networks
-		Logger.getRootLogger().log(Level.INFO, "Unified Network Map:\n" + this.printAllNetworkGrid());
+			// Log ALL NSP's networks
+			Logger.getRootLogger().log(Level.INFO, "Unified Network Map:\n" + this.printAllNetworkGrid());
 
-		// Log edge congestion
-		Logger.getRootLogger().log(Level.INFO, this.edgeCongestionReport());
+			// Log edge congestion
+			Logger.getRootLogger().log(Level.INFO, this.edgeCongestionReport());
 
-		if (this.financials.getNetWorth() < -1.0E6)
+			// Log edge congestion
+			if (TraceConfig.congestionNSPSummary)
+				Logger.getRootLogger().trace(this.edgeCongestionReport());
+
+		}
+
+		if (this.financials.getNetWorth() < -10000.0)
 			this.goBankrupt();
 	}
 
@@ -352,6 +392,10 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	}
 
 	public void update() {
+
+		if (this.bankrupt)
+			return;
+
 		this.deltaRevenue = this.financials.getTotalRevenue();
 		this.financials.update();
 		// Calculate delta revenue as current revenue - past revenue
