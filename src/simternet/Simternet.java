@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
@@ -21,9 +20,10 @@ import simternet.application.AppCategory;
 import simternet.application.ApplicationProvider;
 import simternet.consumer.Consumer;
 import simternet.consumer.DefaultConsumerProfile;
+import simternet.consumer.DefinedBehaviorConsumer;
+import simternet.network.EdgeNetwork;
 import simternet.consumer.GreedyAppManager;
 import simternet.consumer.NetworkMiser;
-import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 import simternet.nsp.DumbNetworkServiceProvider;
 import simternet.nsp.EvolvingNetworkProvider;
@@ -62,23 +62,23 @@ public class Simternet extends SimState implements Serializable {
 	/**
 	 * All application service providers in the simulation
 	 */
-	protected Collection<ApplicationProvider>					applicationServiceProviders;
+	protected Collection<ApplicationProvider>					applicationProviders;
 
 	protected Map<AppCategory, Collection<ApplicationProvider>>	ASPsByCategory;
 
-	public Parameters													config;
+	public Parameters											config;
 
 	/**
 	 * All consumer classes in the simulation.
 	 */
-	protected SparseGrid2D												consumerClasses;
+	protected SparseGrid2D										consumerClasses;
 
-	Collection<Steppable>												deadAgents	= new ArrayList<Steppable>();
+	Collection<Steppable>										deadAgents	= new ArrayList<Steppable>();
 
 	/**
 	 * All Network Service Providers in the simulation.
 	 */
-	protected Collection<NetworkProvider>								networkServiceProviders;
+	protected Collection<NetworkProvider>						networkServiceProviders;
 
 	public Simternet(long seed) {
 		this(seed, null);
@@ -124,7 +124,7 @@ public class Simternet extends SimState implements Serializable {
 			ordering = 3;
 		} else if (agent instanceof ApplicationProvider) {
 			ApplicationProvider asp = (ApplicationProvider) agent;
-			this.applicationServiceProviders.add(asp);
+			this.applicationProviders.add(asp);
 			Collection<ApplicationProvider> appsInCategory = this.ASPsByCategory.get(asp.getAppCategory());
 			if (appsInCategory == null) {
 				appsInCategory = new ArrayList<ApplicationProvider>();
@@ -150,8 +150,8 @@ public class Simternet extends SimState implements Serializable {
 
 		List<Network> nets = new ArrayList<Network>();
 
-		for (ApplicationProvider asp : this.applicationServiceProviders)
-			nets.add(asp.getDataCenter());
+		for (ApplicationProvider asp : this.applicationProviders)
+			nets.add(asp.getDatacenter());
 
 		for (NetworkProvider nsp : this.networkServiceProviders) {
 			nets.add(nsp.getBackboneNetwork());
@@ -184,7 +184,7 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	public Collection<ApplicationProvider> getASPs() {
-		return this.applicationServiceProviders;
+		return this.applicationProviders;
 	}
 
 	public Collection<ApplicationProvider> getASPs(AppCategory c) {
@@ -372,15 +372,13 @@ public class Simternet extends SimState implements Serializable {
 				this.enterMarket(acc);
 			}
 
-		// do it again.
-		// for (Int2D location : this.allLocations()) {
-		// Double pop = this.random.nextDouble()
-		// *
-		// Double.parseDouble(this.config.getProperty("landscape.population.max"));
-		// AbstractConsumerClass acc = new DefinedBehaviorConsumer(this,
-		// location, pop, defaultProfile);
-		// this.enterMarket(acc);
-		// }
+		// Add some consumers with defined behavior
+		for (Int2D location : this.allLocations()) {
+			Double pop = this.random.nextDouble()
+					* Double.parseDouble(this.config.getProperty("landscape.population.max"));
+			Consumer acc = new DefinedBehaviorConsumer(this, location, pop, defaultProfile);
+			this.enterMarket(acc);
+		}
 
 	}
 
@@ -410,11 +408,10 @@ public class Simternet extends SimState implements Serializable {
 		this.initNetworkServiceProviders();
 
 		// Initialize Application Service Providers
-		this.applicationServiceProviders = new ArrayList<ApplicationProvider>();
+		this.applicationProviders = new ArrayList<ApplicationProvider>();
 		this.ASPsByCategory = new HashMap<AppCategory, Collection<ApplicationProvider>>();
 		this.initApplicationServiceProviders();
 
 		this.initArbiter();
 	}
-
 }

@@ -3,219 +3,63 @@ Generation: 0
 Best Individual:
 Subpopulation 0:
 Evaluated: true
-Fitness: 70981.33
+Fitness: 6.3813645E8
 Tree 0:
  7
+Tree 1:
+ (/ Financials.PresentValue Financials.PerStepFinancingCost)
+Subpopulation 1:
+Evaluated: true
+Fitness: 1142320.0
+Tree 0:
+ (* (if (xor true true) (- Financials.DebtBalance
+     5) (- Financials.TotalRevenue Financials.PresentValue))
+     (- (/ Financials.TotalFinancingCost Financials.DebitInterestRate)
+         (if false Financials.PerStepOperationsCost
+             Financials.PerStepInvestment)))
 
 Generation: 1
 Best Individual:
 Subpopulation 0:
 Evaluated: true
-Fitness: -47852.746
+Fitness: 1.92474864E8
 Tree 0:
- (+ (- (- 5 5) (- ERC[0.33337512834327365]
-     edge.numSubscribers())) (if (or false false)
-     (- edge.numSubscribers() 5) (/ ERC[0.2974855693125652]
-     ERC[0.8792381347992968])))
+ (+ (if true Financials.DeltaRevenue Financials.DebtBalance)
+     7)
+Tree 1:
+ (- (/ (/ (+ (+ Financial.AssetsCapital PotentialNetwork.distanceFromHome)
+     (* Financials.DebtBalance Financials.NetWorth))
+     (/ (- Financials.PerStepFinancingCost Financials.TotalFinancingCost)
+         (if Financials.IncreasingRevenue PotentialNetwork.population
+             Financials.PerStepFinancingCost))) (- (*
+     (if false PotentialNetwork.numCompetitors
+         Financials.PerStepFinancingCost) (- ERC[0.15139407042446174]
+     5)) (+ (* Financial.AssetsCapital 7) (if
+     Financials.IncreasingRevenue Financials.TotalFinancingCost
+     Financials.PerStepFinancingCost)))) Financials.NetWorth)
+Subpopulation 1:
+Evaluated: true
+Fitness: 1141849.2
+Tree 0:
+ (+ 5 Financials.DebtPayoffRate)
 
 Generation: 2
 Best Individual:
 Subpopulation 0:
 Evaluated: true
-Fitness: -82606.28
+Fitness: 4.74228544E8
 Tree 0:
- ERC[0.33337512834327365]
-
-Generation: 3
-Best Individual:
-Subpopulation 0:
+ 5
+Tree 1:
+ (if (< Financial.AssetsCapital 7) (* Financials.DebtBalance
+     Financials.PerStepFinancingCost) (if (or
+     true Financials.IncreasingRevenue) (+ Financials.DebtBalance
+     PotentialNetwork.population) (/ Financials.DebtBalance
+     Financials.TotalFinancingCost)))
+Subpopulation 1:
 Evaluated: true
-Fitness: -81849.45
+Fitness: 1141453.6
 Tree 0:
- (/ ERC[0.2974855693125652] ERC[0.8792381347992968])
-
-Generation: 4
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -113204.914
-Tree 0:
- (/ ERC[0.33337512834327365] (+ 7 (+ ERC[0.27026379674676027]
-     ERC[0.21392324622993653])))
-
-Generation: 5
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -112502.37
-Tree 0:
- (/ ERC[0.33337512834327365] (+ 7 (+ ERC[0.27026379674676027]
-     ERC[0.21392324622993653])))
-
-Generation: 6
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -114833.23
-Tree 0:
- (if (xor true true) edge.numSubscribers()
-     (/ ERC[0.011874960149681923] 7))
-
-Generation: 7
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -114822.484
-Tree 0:
- (if (xor true true) edge.numSubscribers()
-     (if (xor true true) edge.numSubscribers()
-         (/ ERC[0.011874960149681923] 7)))
-
-Generation: 8
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -114808.414
-Tree 0:
- (if (xor true true) (/ ERC[0.011874960149681923]
-     7) (if (xor true true) edge.numSubscribers()
-     (/ ERC[0.011874960149681923] 7)))
-
-Generation: 9
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -114793.15
-Tree 0:
- (if (xor true true) (/ ERC[0.011874960149681923]
-     7) (if (xor true true) edge.numSubscribers()
-     (/ ERC[0.011874960149681923] 7)))
-
-Generation: 10
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -114802.16
-Tree 0:
- (if (xor true true) (/ ERC[0.011874960149681923]
-     7) (/ ERC[0.011874960149681923] 7))
-
-Generation: 11
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -114854.68
-Tree 0:
- (if (xor true true) (/ ERC[0.011874960149681923]
-     7) (/ ERC[0.011874960149681923] 7))
-
-Generation: 12
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -114950.28
-Tree 0:
- (if (xor true true) (- edge.numSubscribers()
-     (+ 5 5)) (if (xor true true) (if (xor true
-     true) (/ ERC[0.011874960149681923] (/ ERC[0.011874960149681923]
-     7)) (/ ERC[0.011874960149681923] 7)) (/ (/
-     ERC[0.011874960149681923] 7) 7)))
-
-Generation: 13
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -114929.07
-Tree 0:
- (if (xor true true) (/ ERC[0.011874960149681923]
-     7) (/ ERC[0.011874960149681923] 7))
-
-Generation: 14
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -114955.83
-Tree 0:
- (if (xor true true) (- edge.numSubscribers()
-     (+ 5 5)) (if (xor true true) (if (xor true
-     true) (/ ERC[0.011874960149681923] (/ ERC[0.011874960149681923]
-     7)) (/ ERC[0.011874960149681923] 7)) (/ (/
-     ERC[0.011874960149681923] 7) 7)))
-
-Generation: 15
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -114955.81
-Tree 0:
- (if (xor true true) (- edge.numSubscribers()
-     (+ (if (xor true true) (- edge.numSubscribers()
-         (if (xor true true) edge.numSubscribers()
-             (if (xor true true) edge.numSubscribers()
-                 (/ ERC[0.011874960149681923] 7)))) (/ (if
-         (xor true true) edge.numSubscribers() (/
-         ERC[0.011874960149681923] 7)) 7)) 5)) (if
-     (xor true true) (if (xor true true) (if (xor
-     true true) (/ ERC[0.011874960149681923] (/
-     ERC[0.011874960149681923] 7)) (/ ERC[0.011874960149681923]
-     7)) (/ (/ ERC[0.011874960149681923] 7) 7))
-     (/ (/ ERC[0.011874960149681923] 7) 7)))
-
-Generation: 16
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -114974.414
-Tree 0:
- (if (xor true true) (- edge.numSubscribers()
-     (+ 5 5)) (if (xor true true) (if (xor true
-     true) (/ ERC[0.011874960149681923] (/ ERC[0.011874960149681923]
-     7)) (/ ERC[0.011874960149681923] 7)) (/ (/
-     (/ ERC[0.011874960149681923] 7) 7) 7)))
-
-Generation: 17
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -114973.805
-Tree 0:
- (if (xor true true) (/ ERC[0.011874960149681923]
-     7) (if (xor true true) (if (xor true true)
-     ERC[0.011874960149681923] (/ ERC[0.011874960149681923]
-     7)) (/ (/ (/ ERC[0.011874960149681923] 7)
-     7) 7)))
-
-Generation: 18
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -114974.25
-Tree 0:
- (if (xor true true) (- edge.numSubscribers()
-     (+ 5 5)) (if (xor true true) (/ (/ ERC[0.011874960149681923]
-     7) 7) (/ (/ (/ ERC[0.011874960149681923]
-     7) 7) 7)))
-
-Generation: 19
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: -114975.01
-Tree 0:
- (if (xor true true) (- edge.numSubscribers()
-     (if (xor true true) (- edge.numSubscribers()
-         (+ 5 5)) (if (xor true true) (if (xor true
-         true) (/ ERC[0.011874960149681923] (/ ERC[0.011874960149681923]
-         7)) 7) (/ (/ (/ ERC[0.011874960149681923]
-         7) 7) 7)))) (if (xor true true) (if (xor
-     true true) (/ ERC[0.011874960149681923] (/
-     ERC[0.011874960149681923] 7)) (/ ERC[0.011874960149681923]
-     7)) (/ (/ (/ ERC[0.011874960149681923] 7)
-     7) 7)))
-
-Best Individual of Run:
-Subpopulation 0:
-Evaluated: true
-Fitness: 70981.33
-Tree 0:
- 7
+ (if (xor true true) (- Financials.TotalRevenue
+     Financials.PresentValue) (/ Financials.PerStepOperationsCost
+     Financials.DebitInterestRate))

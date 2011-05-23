@@ -145,7 +145,7 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 		return 100.0;
 	}
 
-	public Network getDataCenter() {
+	public Datacenter getDatacenter() {
 		return this.datacenter;
 	}
 

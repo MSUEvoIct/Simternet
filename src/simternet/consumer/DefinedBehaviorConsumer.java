@@ -1,51 +1,26 @@
 package simternet.consumer;
 
+import java.io.Serializable;
+
 import sim.util.Int2D;
 import simternet.Simternet;
+import simternet.network.EdgeNetwork;
 
 /**
- * In this class we're specifically defining the behavior of consumers, rather
- * than having it be determined by the ouput of an evolutionary algorithm.
+ * Uses only the cheapest network connection at his location. Uses all
+ * applications on that connection.
  * 
  * @author kkoning
  * 
  */
-@Deprecated
-public class DefinedBehaviorConsumer extends Consumer {
+public class DefinedBehaviorConsumer extends Consumer implements Serializable {
 
 	private static final long	serialVersionUID	= 1L;
 
-	protected DefinedBehaviorConsumer(Simternet s, Int2D location, Double population, ConsumerProfile profile,
-			NetManager netManager, AppManager appManager, AppBenefitCalculator abc) {
-		super(s, location, population, profile, netManager, appManager, abc);
-	}
+	public EdgeNetwork			myNetwork;
 
-	// @Override
-	// protected void manageNetworks() {
-	//
-	// EdgeNetwork currentNetwork = this.subscribedTo.get();
-	//
-	// Collection<Network> c = this.s.getNetworks(null, EdgeNetwork.class,
-	// this.location);
-	// double lowestPrice = Double.MAX_VALUE;
-	// EdgeNetwork lowestPricedNetwork = null;
-	// for (Network an : c) {
-	// EdgeNetwork aen = (EdgeNetwork) an;
-	// double price = aen.getPriceFuture();
-	// if (price < lowestPrice) {
-	// lowestPrice = price;
-	// lowestPricedNetwork = aen;
-	// }
-	// }
-	//
-	// if (lowestPrice < this.profile.getMaxNetworkPrice()) {
-	// if (this.subscribedTo.get() == null)
-	// this.subscribedTo.set(lowestPricedNetwork);
-	// else if (this.s.random.nextBoolean(0.1))
-	// this.subscribedTo.set(lowestPricedNetwork);
-	// } else
-	// this.subscribedTo.set(null);
-	//
-	// }
+	public DefinedBehaviorConsumer(Simternet s, Int2D location, Double population, ConsumerProfile profile) {
+		super(s, location, population, profile, new NetworkMiser(), new GreedyAppManager(), new AppBenefitCalculator());
+	}
 
 }

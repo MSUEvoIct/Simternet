@@ -64,7 +64,7 @@ public class MarketInfo {
 	 *         system.
 	 */
 	Integer numberOfAgents() {
-		return this.s.applicationServiceProviders.size() + this.s.networkServiceProviders.size()
+		return this.s.applicationProviders.size() + this.s.networkServiceProviders.size()
 				+ this.s.consumerClasses.size();
 	}
 
@@ -73,7 +73,7 @@ public class MarketInfo {
 	 *         Simternet system.
 	 */
 	Integer numberOfApplicationProviders() {
-		return this.s.applicationServiceProviders.size();
+		return this.s.applicationProviders.size();
 	}
 
 	/**

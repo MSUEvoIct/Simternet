@@ -142,7 +142,7 @@ public abstract class EdgeNetwork extends Network {
 
 	public void receivePayment(Consumer acc) {
 		double price = this.owner.pricingStrategy.getEdgePrice(this);
-		double revenue = acc.getPopultation() * price;
+		double revenue = acc.getPopulation() * price;
 		this.owner.financials.earn(revenue);
 
 		if (TraceConfig.consumerPaidNSP && Logger.getRootLogger().isTraceEnabled())

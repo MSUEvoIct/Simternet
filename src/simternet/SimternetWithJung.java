@@ -18,7 +18,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 
 import simternet.application.AppCategory;
-import simternet.application.ApplicationServiceProvider;
+import simternet.application.ApplicationProvider;
 import simternet.jung.BackboneLocationTransformer;
 import simternet.jung.BackbonePaintTransformer;
 import simternet.jung.BackboneStrokeTransformer;
@@ -28,6 +28,7 @@ import simternet.jung.EdgeLocationTransformer;
 import simternet.jung.RandomLocationTransformer;
 import simternet.network.Backbone;
 import simternet.network.BackboneLink;
+import simternet.network.Datacenter;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 import simternet.nsp.NetworkProvider;
@@ -42,16 +43,19 @@ import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
 public class SimternetWithJung extends JFrame {
 
-	private JFrame										frame;
-	private Graph<Network, BackboneLink>				graph;
-	private AbstractLayout<Network, BackboneLink>		layout;
-	private Simternet									sim;
-	private VisualizationViewer<Network, BackboneLink>	viewer;
+	private static final long	serialVersionUID	= 1L;
 
 	public static void main(String[] args) {
 		SimternetWithJung simWithJung = new SimternetWithJung();
 		simWithJung.start();
 	}
+
+	private JFrame										frame;
+	private Graph<Network, BackboneLink>				graph;
+	private AbstractLayout<Network, BackboneLink>		layout;
+	private Simternet									sim;
+
+	private VisualizationViewer<Network, BackboneLink>	viewer;
 
 	SimternetWithJung() {
 		this.init();
@@ -136,11 +140,13 @@ public class SimternetWithJung extends JFrame {
 
 		this.sim.schedule.step(this.sim);
 
-		for (ApplicationServiceProvider asp : this.sim.getASPs(AppCategory.COMMUNICATION)) {
-			this.graph.addVertex(asp.getDataCenter());
-			for (Network net : asp.getConnectedNetworks()) {
+		for (ApplicationProvider asp : this.sim.getASPs(AppCategory.COMMUNICATION)) {
+			this.graph.addVertex(asp.getDatacenter());
+			Datacenter dc = asp.getDatacenter();
+
+			for (Network net : dc.getPeers()) {
 				this.graph.addVertex(net);
-				this.graph.addEdge(asp.getDataCenter().getEgressLink(net), asp.getDataCenter(), net);
+				this.graph.addEdge(asp.getDatacenter().getEgressLink(net), asp.getDatacenter(), net);
 			}
 		}
 

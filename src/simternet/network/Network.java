@@ -1,6 +1,7 @@
 package simternet.network;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Vector;
@@ -159,6 +160,29 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 		return this.egressLinks.get(to);
 	}
 
+	public Collection<Network> getEgressPeers() {
+		Collection<Network> peers = new ArrayList<Network>();
+		for (Network n : this.egressLinks.keySet())
+			if (this.egressLinks.get(n) != null)
+				peers.add(n);
+		return peers;
+	}
+
+	public Collection<Network> getIngressPeers() {
+		Collection<Network> peers = new ArrayList<Network>();
+		for (Network n : this.ingressLinks.keySet())
+			if (this.ingressLinks.get(n) != null)
+				peers.add(n);
+		return peers;
+	}
+
+	public Collection<Network> getPeers() {
+		Collection<Network> peers = new ArrayList<Network>();
+		peers.addAll(this.getEgressPeers());
+		peers.addAll(this.getIngressPeers());
+		return peers;
+	}
+
 	/**
 	 * Initialize the routing protocol information on this link. The default
 	 * implementation sends all active entries in our routing table to the
@@ -265,47 +289,6 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 		}
 	}
 
-	public void route(NetFlow flow) {
-		// Send these flows out the correct egress links
-		// Routing table lookup
-		Route rte = this.routingTable.get(flow.destination);
-		BackboneLink outgoing;
-		if (rte == null)
-			outgoing = this.defaultRoute;
-		else
-			outgoing = rte.nextHop;
-
-		if (outgoing != null)
-			// place in appropriate output queue
-			outgoing.sendFlow(flow);
-		else
-			System.out.println("No route for " + flow);
-	}
-
-	protected boolean routePolicy(RoutingProtocolConfig config, Route route) {
-		boolean shouldBeSent = false;
-
-		if (config == RoutingProtocolConfig.TRANSIT)
-			shouldBeSent = true;
-
-		if (config == RoutingProtocolConfig.PEER)
-			if (route.distance <= 1)
-				shouldBeSent = true;
-
-		if (route.distance == 0)
-			shouldBeSent = true;
-
-		return shouldBeSent;
-	}
-
-	public String routingTableReport() {
-		StringBuffer sb = new StringBuffer();
-		for (Network dest : this.routingTable.keySet())
-			sb.append(dest + " -> " + this.routingTable.get(dest) + "\n");
-		sb.append("Default -> " + this.defaultRoute + "\n");
-		return sb.toString();
-	}
-
 	// /**
 	// * This function should (only) be called by another network which is
 	// sending
@@ -362,6 +345,47 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 	// link.source.routingProtocolReceive(toTransmit);
 	// }
 	// }
+
+	public void route(NetFlow flow) {
+		// Send these flows out the correct egress links
+		// Routing table lookup
+		Route rte = this.routingTable.get(flow.destination);
+		BackboneLink outgoing;
+		if (rte == null)
+			outgoing = this.defaultRoute;
+		else
+			outgoing = rte.nextHop;
+
+		if (outgoing != null)
+			// place in appropriate output queue
+			outgoing.sendFlow(flow);
+		else
+			System.out.println("No route for " + flow);
+	}
+
+	protected boolean routePolicy(RoutingProtocolConfig config, Route route) {
+		boolean shouldBeSent = false;
+
+		if (config == RoutingProtocolConfig.TRANSIT)
+			shouldBeSent = true;
+
+		if (config == RoutingProtocolConfig.PEER)
+			if (route.distance <= 1)
+				shouldBeSent = true;
+
+		if (route.distance == 0)
+			shouldBeSent = true;
+
+		return shouldBeSent;
+	}
+
+	public String routingTableReport() {
+		StringBuffer sb = new StringBuffer();
+		for (Network dest : this.routingTable.keySet())
+			sb.append(dest + " -> " + this.routingTable.get(dest) + "\n");
+		sb.append("Default -> " + this.defaultRoute + "\n");
+		return sb.toString();
+	}
 
 	protected void sendRouteToNeighbors(Route route) {
 		for (BackboneLink link : this.ingressLinks.values())
