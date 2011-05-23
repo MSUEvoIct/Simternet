@@ -11,7 +11,8 @@ import sim.engine.SimState;
 import sim.util.Bag;
 import sim.util.Int2D;
 import simternet.AssetFinance;
-import simternet.consumer.AbstractConsumerClass;
+import simternet.TraceConfig;
+import simternet.consumer.Consumer;
 import simternet.nsp.NetworkProvider;
 import simternet.temporal.Temporal;
 
@@ -46,19 +47,19 @@ public abstract class EdgeNetwork extends Network {
 		return buildCost;
 	}
 
-	final AssetFinance				assetFinance;
+	final AssetFinance		assetFinance;
 
 	/**
 	 * The location of this network in the landscape.
 	 */
-	final Int2D						location;
+	final Int2D				location;
 
 	/**
 	 * The maximum bandwidth each edge connection can support. Unlike other
 	 * networks, this is an instantaneous measure rather than a total transfer
 	 * capacity per period. I.e., bytes per second, not bytes per month.
 	 */
-	Temporal<Double>				maxBandwidth	= new Temporal<Double>(0.0);
+	Temporal<Double>		maxBandwidth	= new Temporal<Double>(0.0);
 
 	/**
 	 * The NSP that owns and operates this network.
@@ -68,7 +69,7 @@ public abstract class EdgeNetwork extends Network {
 	/**
 	 * The price of this network
 	 */
-	Temporal<Double>				price			= new Temporal<Double>(0.0);
+	Temporal<Double>		price			= new Temporal<Double>(0.0);
 
 	public EdgeNetwork(NetworkProvider owner, Int2D location) {
 		this.owner = owner;
@@ -87,6 +88,10 @@ public abstract class EdgeNetwork extends Network {
 		return bl.congestionAlgorithm.getCongestionReport();
 	}
 
+	public Int2D getLocation() {
+		return this.location;
+	}
+
 	public Double getMaxBandwidth() {
 		return this.maxBandwidth.get();
 	}
@@ -99,10 +104,10 @@ public abstract class EdgeNetwork extends Network {
 		if (b == null)
 			return 0.0;
 
-		Iterator<AbstractConsumerClass> i = b.iterator();
+		Iterator<Consumer> i = b.iterator();
 
 		while (i.hasNext()) {
-			AbstractConsumerClass acc = i.next();
+			Consumer acc = i.next();
 			customers += acc.getSubscribers(this);
 		}
 		return customers;
@@ -110,6 +115,10 @@ public abstract class EdgeNetwork extends Network {
 
 	public Double getPrice() {
 		return this.price.get();
+	}
+
+	public Double getPriceFuture() {
+		return this.price.getFuture();
 	}
 
 	protected BackboneLink getUpstreamIngress() {
@@ -122,34 +131,54 @@ public abstract class EdgeNetwork extends Network {
 		if (i == 1)
 			return l;
 
-		Logger.getRootLogger().log(Level.ERROR, "Num of Ingress links for " + this + " = " + i);
+		Logger.getLogger("Network").log(Level.ERROR, "Num of Ingress links for " + this + " = " + i);
 		return null;
 
 	}
 
-	public void processUsage(AbstractConsumerClass users) {
+	public void processUsage(Consumer users) {
 		this.receivePayment(users);
 	}
 
-	public void receivePayment(AbstractConsumerClass acc) {
+	public void receivePayment(Consumer acc) {
 		double price = this.owner.pricingStrategy.getEdgePrice(this);
 		double revenue = acc.getPopultation() * price;
 		this.owner.financials.earn(revenue);
+
+		if (TraceConfig.consumerPaidNSP && Logger.getRootLogger().isTraceEnabled())
+			Logger.getRootLogger().trace(acc + " paid " + price + " for " + this);
 	}
 
 	public void sendFlowsToCustomers() {
-		// For now, just dump information on the flows...
+
+		/*
+		 * We need to iterate over every flow, received on every ingress link.
+		 * (Actually, there should be only one, since this is an edge network,
+		 * but other networks can have many ingress links.
+		 */
 		for (BackboneLink link : this.ingressLinks.values()) {
-			// there should only be one ingress link;
-			// we should only go through this once.
 			List<NetFlow> flows = link.receiveFlows();
-			for (NetFlow flow : flows)
-				// Logger.getRootLogger().log(Level.TRACE,
-				// this + " received " + flow + " for " + flow.user);
+			for (NetFlow flow : flows) {
+				/*
+				 * Process congestion information first. This includes 1)
+				 * further congesting to the maximum bandwidth of this edge
+				 * network, 2) informing the sending network of the congestion,
+				 * 3) noting the congestion ourselves.
+				 */
+				flow.congest(this.getMaxBandwidth());
 				if (flow.isCongested()) {
-					Logger.getRootLogger().log(Level.TRACE, flow + " congested, " + flow.describeCongestion());
 					flow.source.noteCongestion(flow);
+					this.noteCongestion(flow);
 				}
+
+				/*
+				 * Flows are now ready to be received by the users. What users
+				 * do with them from here is up to them. They may discard the
+				 * information, track statistics, take certain actions, etc...
+				 */
+				flow.user.receiveFlow(flow);
+
+			}
 		}
 	}
 
@@ -176,9 +205,5 @@ public abstract class EdgeNetwork extends Network {
 		super.update();
 		this.maxBandwidth.update();
 		this.price.update();
-	}
-
-	public Int2D getLocation() {
-		return location;
 	}
 }
