@@ -24,15 +24,11 @@ import simternet.temporal.Temporal;
 
 public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate {
 	/**
-	 * 
-	 */
-	private static final long	serialVersionUID		= 1L;
-
-	/**
 	 * Other data structures will rely on this not changing, e.g., one that
 	 * keeps a lists of ASPs within an App Category.
 	 */
 	protected final AppCategory	appCategory;
+
 	// TODO: Set this better;
 	protected Temporal<Double>	bandwidth				= new Temporal<Double>(100.0);
 	protected HashSet<Network>	connectedNetworks		= new HashSet<Network>();
@@ -50,8 +46,12 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 	protected QualityStrategy	qualityStrategy			= new QualityStrategy(this);
 	protected Temporal<Double>	revenueAdvertising		= new Temporal<Double>(0.0);
 	protected Temporal<Double>	revenueSubscriptions	= new Temporal<Double>(0.0);
-
 	protected Simternet			s;
+
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID		= 1L;
 
 	public ApplicationProvider(Simternet s, AppCategory appCategory) {
 		// housekeeping
@@ -138,6 +138,13 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 		return congestionRatio;
 	}
 
+	/*
+	 * Utility function used by user interface. May be some privacy issues.
+	 */
+	public HashSet<Network> getConnectedNetworks() {
+		return this.connectedNetworks;
+	}
+
 	public double getCustomers() {
 		// TODO Get this info; will need to look at all customer objects, so
 		// value should be cached.
@@ -146,6 +153,13 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 	}
 
 	public Datacenter getDatacenter() {
+		return this.datacenter;
+	}
+
+	/* 
+	 * Utility function used by the user interface. May be some privacy issues.
+	 */
+	public Datacenter getDataCenter() {
 		return this.datacenter;
 	}
 
