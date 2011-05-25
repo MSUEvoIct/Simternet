@@ -44,7 +44,7 @@ public class SimternetWithJung {
 
 	public static void main(String[] args) {
 		SimternetWithJung simWithJung = new SimternetWithJung();
-		simWithJung.start();
+		// simWithJung.start();
 	}
 
 	SimternetWithJung() {
@@ -76,8 +76,7 @@ public class SimternetWithJung {
 		// coordinates, depending on the type of Network it is.
 		EdgeLocationTransformer edgeLocTfmr = new EdgeLocationTransformer(new Dimension(50, 50));
 		BackboneLocationTransformer bBoneLocTfmr = new BackboneLocationTransformer(new Dimension(100, 500));
-		// TODO: Does this need to be new Dimension(100, 500) instead?
-		DatacenterLocationTransformer dcenterLocTfmr = new DatacenterLocationTransformer(new Dimension(800, 500));
+		DatacenterLocationTransformer dcenterLocTfmr = new DatacenterLocationTransformer(new Dimension(100, 500));
 		RandomLocationTransformer randomLocTfmr = new RandomLocationTransformer(new Dimension(400, 400));
 
 		// Now, put all of these transformers into a composite data structure
@@ -87,7 +86,7 @@ public class SimternetWithJung {
 		CompositeLocationTransformer compositeTransformer = new CompositeLocationTransformer();
 		compositeTransformer.addTransformer(edgeLocTfmr, 1, new Dimension(100, 100));
 		compositeTransformer.addTransformer(bBoneLocTfmr, 1, new Dimension(600, 100));
-		compositeTransformer.addTransformer(dcenterLocTfmr, 1, new Dimension(500, 100));
+		compositeTransformer.addTransformer(dcenterLocTfmr, 1, new Dimension(800, 100));
 		compositeTransformer.addTransformer(randomLocTfmr, 10, new Dimension(200, 200));
 
 		AbstractLayout<Network, BackboneLink> layout = new StaticLayout<Network, BackboneLink>(this.graph,
@@ -118,18 +117,43 @@ public class SimternetWithJung {
 	}
 
 	public void resetNewSeed() {
-		// TODO Auto-generated method stub
+		this.seed = System.currentTimeMillis();
 
+		this.gui.setVisible(false);
+		this.gui.dispose();
+
+		this.stepCount = 0;
+		this.sim = new Simternet(this.seed);
+
+		// re-initialize GUI - work is done in simternet.jung.GUI
+		this.gui = new GUI(this, this.initGraphViewer());
+		this.gui.setSeedLabel(this.seed);
+		this.gui.setStepLabel(0);
+
+		this.gui.pack();
+		this.gui.setVisible(true);
 	}
 
 	public void resetSameSeed() {
-		// TODO Auto-generated method stub
+		this.gui.setVisible(false);
+		this.gui.dispose();
 
+		this.stepCount = 0;
+		this.sim = new Simternet(this.seed);
+
+		// re-initialize GUI - work is done in simternet.jung.GUI
+		this.gui = new GUI(this, this.initGraphViewer());
+		this.gui.setSeedLabel(this.seed);
+		this.gui.setStepLabel(0);
+
+		this.gui.pack();
+		this.gui.setVisible(true);
 	}
 
 	public void start() {
 		// start simulation
 		this.sim.start();
+		this.stepCount = 0;
 		this.step(this.stepCount);
 	}
 

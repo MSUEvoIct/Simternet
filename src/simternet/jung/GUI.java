@@ -1,5 +1,7 @@
 package simternet.jung;
 
+import java.awt.Dimension;
+
 import javax.swing.JPanel;
 
 import simternet.SimternetWithJung;
@@ -294,7 +296,12 @@ public class GUI extends javax.swing.JFrame {
 												javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 						.addContainerGap()));
 
+		this.stepSelector.setValue(1);
+
+		this.setPreferredSize(new Dimension(1200, 800));
+
 		this.pack();
+
 	}// </editor-fold>
 
 	private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {
