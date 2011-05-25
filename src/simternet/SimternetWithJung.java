@@ -1,21 +1,14 @@
 /**
  * This class creates a visualization of a Simternet run using the JUNG library.
  * 
- * Runs an instance of Simternet and creates a GUI display that shows 
- * 
+ * Runs an instance of Simternet and creates a GUI display that shows the state of the network.
  * 
  * @author Grayson Wright
  */
 
 package simternet;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
 
 import simternet.application.AppCategory;
 import simternet.application.ApplicationProvider;
@@ -25,10 +18,10 @@ import simternet.jung.BackboneStrokeTransformer;
 import simternet.jung.CompositeLocationTransformer;
 import simternet.jung.DatacenterLocationTransformer;
 import simternet.jung.EdgeLocationTransformer;
+import simternet.jung.GUI;
 import simternet.jung.RandomLocationTransformer;
 import simternet.network.Backbone;
 import simternet.network.BackboneLink;
-import simternet.network.Datacenter;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 import simternet.nsp.NetworkProvider;
@@ -39,114 +32,126 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.AbstractModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
-import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
-public class SimternetWithJung extends JFrame {
+public class SimternetWithJung {
 
-	private static final long	serialVersionUID	= 1L;
+	private Graph<Network, BackboneLink>	graph;
+	private GUI								gui;
+	private long							seed;
+	private Simternet						sim;
+	// private AbstractLayout<Network, BackboneLink> layout;
+	private int								stepCount;
 
 	public static void main(String[] args) {
 		SimternetWithJung simWithJung = new SimternetWithJung();
 		simWithJung.start();
 	}
 
-	private JFrame										frame;
-	private Graph<Network, BackboneLink>				graph;
-	private AbstractLayout<Network, BackboneLink>		layout;
-	private Simternet									sim;
-
-	private VisualizationViewer<Network, BackboneLink>	viewer;
-
 	SimternetWithJung() {
 		this.init();
 	}
 
 	private void init() {
+		this.stepCount = 0;
 
-		// Initialize Simulation
-		this.sim = new Simternet(System.currentTimeMillis());
+		// Initialize simulation
+		this.seed = System.currentTimeMillis();
+		this.sim = new Simternet(this.seed);
 
-		// Initialize GUI
-		this.frame = new JFrame("Simternet -- Simulates the growth of the internet");
+		// Initialize GUI - work is done in simternet.jung.GUI
+		this.gui = new GUI(this, this.initGraphViewer());
+		this.gui.setSeedLabel(this.seed);
+		this.gui.setStepLabel(0);
 
-		this.initGraphDisplay();
-
-		this.frame.add(this.viewer, BorderLayout.CENTER);
-
-		JButton updateButton = new JButton("Update graph");
-		updateButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				SimternetWithJung.this.update();
-			}
-		});
-		this.frame.add(updateButton, BorderLayout.SOUTH);
-
-		// Allow the mouse to pick and move vertices and edges.
-		@SuppressWarnings("rawtypes")
-		final AbstractModalGraphMouse graphMouse = new DefaultModalGraphMouse();
-		this.viewer.setGraphMouse(graphMouse);
-		this.viewer.addKeyListener(graphMouse.getModeKeyListener());
-		this.viewer.setToolTipText("<html><center>Type 'p' for Pick mode<p>Type 't' for Transform mode");
-
-		this.frame.pack();
-		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.frame.setVisible(true);
+		this.gui.pack();
+		this.gui.setVisible(true);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void initGraphDisplay() {
-		// TODO Auto-generated method stub
+	private VisualizationViewer<Network, BackboneLink> initGraphViewer() {
 
 		this.graph = new DirectedSparseGraph<Network, BackboneLink>();
 
 		// Set up transformers to move the vertices to the correct pixel
-		// coordinates
-		CompositeLocationTransformer compTransformer = new CompositeLocationTransformer();
-
-		EdgeLocationTransformer edgeLocTfmr = new EdgeLocationTransformer(new Dimension(200, 200));
+		// coordinates, depending on the type of Network it is.
+		EdgeLocationTransformer edgeLocTfmr = new EdgeLocationTransformer(new Dimension(50, 50));
 		BackboneLocationTransformer bBoneLocTfmr = new BackboneLocationTransformer(new Dimension(100, 500));
+		// TODO: Does this need to be new Dimension(100, 500) instead?
 		DatacenterLocationTransformer dcenterLocTfmr = new DatacenterLocationTransformer(new Dimension(800, 500));
 		RandomLocationTransformer randomLocTfmr = new RandomLocationTransformer(new Dimension(400, 400));
 
-		compTransformer.addTransformer(edgeLocTfmr, 1, new Dimension(100, 100));
-		compTransformer.addTransformer(bBoneLocTfmr, 1, new Dimension(600, 100));
-		compTransformer.addTransformer(dcenterLocTfmr, 1, new Dimension(500, 100));
-		compTransformer.addTransformer(randomLocTfmr, 10, new Dimension(200, 200));
+		// Now, put all of these transformers into a composite data structure
+		// that will handle any type of Network.
+		// The dimension argument is the pixel offset from the top left of the
+		// composite transformer.
+		CompositeLocationTransformer compositeTransformer = new CompositeLocationTransformer();
+		compositeTransformer.addTransformer(edgeLocTfmr, 1, new Dimension(100, 100));
+		compositeTransformer.addTransformer(bBoneLocTfmr, 1, new Dimension(600, 100));
+		compositeTransformer.addTransformer(dcenterLocTfmr, 1, new Dimension(500, 100));
+		compositeTransformer.addTransformer(randomLocTfmr, 10, new Dimension(200, 200));
 
-		this.layout = new StaticLayout<Network, BackboneLink>(this.graph, compTransformer);
+		AbstractLayout<Network, BackboneLink> layout = new StaticLayout<Network, BackboneLink>(this.graph,
+				compositeTransformer);
 
 		Dimension frameDimension = new Dimension(1000, 1000);
-		this.viewer = new VisualizationViewer<Network, BackboneLink>(this.layout, frameDimension);
-		this.viewer.getModel().setGraphLayout(this.layout, frameDimension);
+
+		VisualizationViewer<Network, BackboneLink> viewer = new VisualizationViewer<Network, BackboneLink>(layout,
+				frameDimension);
+		viewer.getModel().setGraphLayout(layout, frameDimension);
 
 		// Set up transformers to label and color the vertices and edges.
-		this.viewer.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
+		// viewer.getRenderContext().setVertexLabelTransformer(new
+		// ToStringLabeller());
 		// this.viewer.getRenderContext().setEdgeLabelTransformer(new
 		// ToStringLabeller());
-		this.viewer.getRenderContext().setEdgeStrokeTransformer(new BackboneStrokeTransformer());
-		this.viewer.getRenderContext().setEdgeDrawPaintTransformer(new BackbonePaintTransformer());
+		viewer.getRenderContext().setEdgeStrokeTransformer(new BackboneStrokeTransformer());
+		viewer.getRenderContext().setEdgeDrawPaintTransformer(new BackbonePaintTransformer());
+
+		// Allow the mouse to pick and move vertices and edges.
+		@SuppressWarnings("rawtypes")
+		final AbstractModalGraphMouse graphMouse = new DefaultModalGraphMouse();
+		viewer.setGraphMouse(graphMouse);
+		viewer.addKeyListener(graphMouse.getModeKeyListener());
+		viewer.setToolTipText("<html><center>Type 'p' for Pick mode<p>Type 't' for Transform mode");
+
+		return viewer;
 	}
 
-	private void start() {
+	public void resetNewSeed() {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void resetSameSeed() {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void start() {
 		// start simulation
 		this.sim.start();
-		for (int i = 0; i < 50; i++)
-			this.sim.schedule.step(this.sim);
+		this.step(this.stepCount);
 		System.out.println("Simulation Done!");
-		this.update();
 	}
 
-	public void update() {
+	public void step(int n) {
+		for (int i = 0; i < n; i++)
+			this.sim.schedule.step(this.sim);
 
-		this.sim.schedule.step(this.sim);
+		// update stepCount Label
+		this.stepCount += n;
+		this.gui.setStepLabel(this.stepCount);
+
+		this.updateGraph();
+	}
+
+	public void updateGraph() {
 
 		for (ApplicationProvider asp : this.sim.getASPs(AppCategory.COMMUNICATION)) {
-			this.graph.addVertex(asp.getDatacenter());
-			Datacenter dc = asp.getDatacenter();
-
-			for (Network net : dc.getPeers()) {
+			this.graph.addVertex(asp.getDataCenter());
+			for (Network net : asp.getConnectedNetworks()) {
 				this.graph.addVertex(net);
-				this.graph.addEdge(asp.getDatacenter().getEgressLink(net), asp.getDatacenter(), net);
+				this.graph.addEdge(asp.getDataCenter().getEgressLink(net), asp.getDataCenter(), net);
 			}
 		}
 
@@ -167,7 +172,8 @@ public class SimternetWithJung extends JFrame {
 			}
 		}
 
-		this.viewer.repaint();
-		this.frame.repaint();
+		// this.viewer.repaint();
+		this.gui.repaint();
+		System.out.println("Updated the interface!");
 	}
 }
