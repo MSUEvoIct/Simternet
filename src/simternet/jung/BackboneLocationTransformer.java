@@ -3,7 +3,7 @@ package simternet.jung;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.geom.Point2D;
-import java.util.Random;
+import java.util.HashMap;
 
 import simternet.network.Backbone;
 import simternet.network.Network;
@@ -19,13 +19,16 @@ import simternet.network.Network;
  */
 public class BackboneLocationTransformer extends LocationTransformer {
 
-	private Dimension	dimension;
-	private Random		random;
+	private Dimension			dimension;
+	int							numBackbonesPlaced;
+
+	HashMap<Network, Integer>	numberSystem;
+	final static int			diameter	= 20;
 
 	public BackboneLocationTransformer(Dimension d) {
-		// TODO Auto-generated constructor stub
+		this.numBackbonesPlaced = 0;
 		this.dimension = d;
-		this.random = new Random();
+		this.numberSystem = new HashMap<Network, Integer>();
 	}
 
 	@Override
@@ -35,10 +38,39 @@ public class BackboneLocationTransformer extends LocationTransformer {
 
 	@Override
 	public Point2D transform(Network net) {
-		// TODO Create a better-than-random distribution
 		if (!this.handles(net))
 			return null;
-		return new Point(this.dimension.width / 2, (int) (this.random.nextFloat() * this.dimension.height));
+
+		int num;
+
+		// if the backbone has already been placed, use its previously assigned
+		// number
+		if (this.numberSystem.containsKey(net))
+			num = this.numberSystem.get(net).intValue();
+		// otherwise, assign it a number and use that.
+		else {
+			num = this.numBackbonesPlaced;
+			this.numBackbonesPlaced++;
+			this.numberSystem.put(net, Integer.valueOf(num));
+		}
+
+		int numRows = this.dimension.height / BackboneLocationTransformer.diameter;
+		int numCols = this.dimension.width / BackboneLocationTransformer.diameter;
+
+		// leave every other row and column empty
+		numRows /= 2;
+		numCols /= 2;
+
+		int col = num / numRows;
+		int row = num % numRows;
+
+		if (col >= numCols)
+			System.err.println("Too many backbones placed in the graph viewer. Will not be able to display them all.");
+
+		int x = col * 40;
+		int y = (row * 40) + ((col % 2) * 20);
+
+		return new Point(x, y);
 
 	}
 }
