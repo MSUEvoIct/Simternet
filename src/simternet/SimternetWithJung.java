@@ -131,7 +131,6 @@ public class SimternetWithJung {
 		// start simulation
 		this.sim.start();
 		this.step(this.stepCount);
-		System.out.println("Simulation Done!");
 	}
 
 	public void step(int n) {
@@ -174,6 +173,5 @@ public class SimternetWithJung {
 
 		// this.viewer.repaint();
 		this.gui.repaint();
-		System.out.println("Updated the interface!");
 	}
 }

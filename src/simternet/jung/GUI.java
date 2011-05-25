@@ -321,7 +321,6 @@ public class GUI extends javax.swing.JFrame {
 		this.viewPanel.removeAll();
 		vp.setSize(this.viewPanel.getSize());
 		this.viewPanel.add(vp);
-		System.out.println("Added a view panel...");
 	}
 
 	private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {
