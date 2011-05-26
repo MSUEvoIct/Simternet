@@ -9,46 +9,66 @@
 package simternet;
 
 import java.awt.Dimension;
+import java.awt.geom.Point2D;
 
+import javax.swing.WindowConstants;
+import javax.swing.tree.TreePath;
+
+import org.apache.commons.collections15.Transformer;
+
+import sim.util.Int2D;
 import simternet.application.AppCategory;
 import simternet.application.ApplicationProvider;
-import simternet.jung.BackboneLocationTransformer;
-import simternet.jung.BackbonePaintTransformer;
-import simternet.jung.BackboneStrokeTransformer;
-import simternet.jung.CompositeLocationTransformer;
-import simternet.jung.DatacenterLocationTransformer;
-import simternet.jung.EdgeLocationTransformer;
 import simternet.jung.GUI;
-import simternet.jung.RandomLocationTransformer;
+import simternet.jung.appearance.BackbonePaintTransformer;
+import simternet.jung.appearance.BackboneStrokeTransformer;
+import simternet.jung.filter.CompositeFilter;
+import simternet.jung.filter.EasyFilter;
+import simternet.jung.filter.EasyFilterLayout;
+import simternet.jung.filter.FilterGUI;
+import simternet.jung.filter.SingleEdgeFilter;
+import simternet.jung.location.BackboneLocationTransformer;
+import simternet.jung.location.CompositeLocationTransformer;
+import simternet.jung.location.DatacenterLocationTransformer;
+import simternet.jung.location.EdgeLocationTransformer;
+import simternet.jung.location.RandomLocationTransformer;
 import simternet.network.Backbone;
 import simternet.network.BackboneLink;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 import simternet.nsp.NetworkProvider;
-import edu.uci.ics.jung.algorithms.layout.AbstractLayout;
-import edu.uci.ics.jung.algorithms.layout.StaticLayout;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
-import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.AbstractModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 
 public class SimternetWithJung {
 
-	private Graph<Network, BackboneLink>	graph;
-	private GUI								gui;
-	private long							seed;
-	private Simternet						sim;
-	// private AbstractLayout<Network, BackboneLink> layout;
-	private int								stepCount;
+	private EasyFilter<Network, BackboneLink>			filter;
+	private FilterGUI									filterGUI;
+	private DirectedSparseGraph<Network, BackboneLink>	graph;
+	private GUI											gui;
+	private EasyFilterLayout<Network, BackboneLink>		layout;
+	private long										seed;
+	private Simternet									sim;
+	private int											stepCount;
 
 	public static void main(String[] args) {
-		SimternetWithJung simWithJung = new SimternetWithJung();
-		// simWithJung.start();
+		new SimternetWithJung().start();
 	}
 
 	SimternetWithJung() {
 		this.init();
+	}
+
+	public void filterButtonPressed() {
+		if (this.filterGUI == null) {
+			this.filterGUI = new FilterGUI(this, this.filter);
+			this.filterGUI.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		}
+
+		if (!this.filterGUI.isVisible())
+			this.filterGUI.setVisible(true);
 	}
 
 	private void init() {
@@ -63,44 +83,27 @@ public class SimternetWithJung {
 		this.gui.setSeedLabel(this.seed);
 		this.gui.setStepLabel(0);
 
+		this.setUpFilters();
+
 		this.gui.pack();
 		this.gui.setVisible(true);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	// @SuppressWarnings({ "rawtypes", "unchecked" })
 	private VisualizationViewer<Network, BackboneLink> initGraphViewer() {
 
 		this.graph = new DirectedSparseGraph<Network, BackboneLink>();
-
-		// Set up transformers to move the vertices to the correct pixel
-		// coordinates, depending on the type of Network it is.
-		EdgeLocationTransformer edgeLocTfmr = new EdgeLocationTransformer(new Dimension(50, 50));
-		BackboneLocationTransformer bBoneLocTfmr = new BackboneLocationTransformer(new Dimension(100, 500));
-		DatacenterLocationTransformer dcenterLocTfmr = new DatacenterLocationTransformer(new Dimension(100, 500));
-		RandomLocationTransformer randomLocTfmr = new RandomLocationTransformer(new Dimension(400, 400));
-
-		// Now, put all of these transformers into a composite data structure
-		// that will handle any type of Network.
-		// The dimension argument is the pixel offset from the top left of the
-		// composite transformer.
-		CompositeLocationTransformer compositeTransformer = new CompositeLocationTransformer();
-		compositeTransformer.addTransformer(edgeLocTfmr, 1, new Dimension(100, 100));
-		compositeTransformer.addTransformer(bBoneLocTfmr, 1, new Dimension(600, 100));
-		compositeTransformer.addTransformer(dcenterLocTfmr, 1, new Dimension(800, 100));
-		compositeTransformer.addTransformer(randomLocTfmr, 10, new Dimension(200, 200));
-
-		AbstractLayout<Network, BackboneLink> layout = new StaticLayout<Network, BackboneLink>(this.graph,
-				compositeTransformer);
+		this.layout = new EasyFilterLayout<Network, BackboneLink>(this.graph, this.setUpLocationTransformer());
 
 		Dimension frameDimension = new Dimension(1000, 1000);
 
-		VisualizationViewer<Network, BackboneLink> viewer = new VisualizationViewer<Network, BackboneLink>(layout,
+		VisualizationViewer<Network, BackboneLink> viewer = new VisualizationViewer<Network, BackboneLink>(this.layout,
 				frameDimension);
-		viewer.getModel().setGraphLayout(layout, frameDimension);
+		viewer.getModel().setGraphLayout(this.layout, frameDimension);
 
 		// Set up transformers to label and color the vertices and edges.
 		// viewer.getRenderContext().setVertexLabelTransformer(new
-		// ToStringLabeller());
+		// ToStringLabeller<Network>());
 		// this.viewer.getRenderContext().setEdgeLabelTransformer(new
 		// ToStringLabeller());
 		viewer.getRenderContext().setEdgeStrokeTransformer(new BackboneStrokeTransformer());
@@ -118,20 +121,7 @@ public class SimternetWithJung {
 
 	public void resetNewSeed() {
 		this.seed = System.currentTimeMillis();
-
-		this.gui.setVisible(false);
-		this.gui.dispose();
-
-		this.stepCount = 0;
-		this.sim = new Simternet(this.seed);
-
-		// re-initialize GUI - work is done in simternet.jung.GUI
-		this.gui = new GUI(this, this.initGraphViewer());
-		this.gui.setSeedLabel(this.seed);
-		this.gui.setStepLabel(0);
-
-		this.gui.pack();
-		this.gui.setVisible(true);
+		this.resetSameSeed();
 	}
 
 	public void resetSameSeed() {
@@ -146,8 +136,40 @@ public class SimternetWithJung {
 		this.gui.setSeedLabel(this.seed);
 		this.gui.setStepLabel(0);
 
+		this.setUpFilters();
+
 		this.gui.pack();
 		this.gui.setVisible(true);
+		this.start();
+	}
+
+	private void setUpFilters() {
+
+		// TODO: user-generated filters, not hard-coded ones.
+		this.filter = new CompositeFilter<Network, BackboneLink>();
+		((CompositeFilter<Network, BackboneLink>) this.filter).add(new SingleEdgeFilter(new Int2D(3, 1)));
+	}
+
+	private Transformer<Network, Point2D> setUpLocationTransformer() {
+		// Set up transformers to move the vertices to the correct pixel
+		// coordinates, depending on the type of Network it is.
+		EdgeLocationTransformer edgeLocTfmr = new EdgeLocationTransformer(new Dimension(50, 50));
+		BackboneLocationTransformer bBoneLocTfmr = new BackboneLocationTransformer(new Dimension(100, 500));
+		DatacenterLocationTransformer dcenterLocTfmr = new DatacenterLocationTransformer(new Dimension(100, 500));
+		RandomLocationTransformer<Network> randomLocTfmr = new RandomLocationTransformer<Network>(new Dimension(400,
+				400));
+
+		// Now, put all of these transformers into a composite data structure
+		// that will handle any type of Network.
+		// The dimension argument is the pixel offset from the top left of the
+		// composite transformer.
+		CompositeLocationTransformer<Network> compositeTransformer = new CompositeLocationTransformer<Network>();
+		compositeTransformer.addTransformer(edgeLocTfmr, 1, new Dimension(100, 100));
+		compositeTransformer.addTransformer(bBoneLocTfmr, 1, new Dimension(600, 100));
+		compositeTransformer.addTransformer(dcenterLocTfmr, 1, new Dimension(800, 100));
+		compositeTransformer.addTransformer(randomLocTfmr, 10, new Dimension(200, 200));
+
+		return compositeTransformer;
 	}
 
 	public void start() {
@@ -166,6 +188,29 @@ public class SimternetWithJung {
 		this.gui.setStepLabel(this.stepCount);
 
 		this.updateGraph();
+	}
+
+	/*
+	 * updateFilters
+	 * 
+	 * action method, called by FilterGUI.
+	 * 
+	 * input: paths - an array of TreePaths representing all checked Filters in
+	 * the tree.
+	 */
+	public void updateFilters(TreePath[] paths) {
+		// deactivate the root filter, which will deactivate all of its
+		// sub-filters.
+		this.filter.deactivate();
+
+		// Then, re-activate all checked filters
+		if (paths != null)
+			for (TreePath tp : paths)
+				if (tp.getLastPathComponent() instanceof EasyFilter<?, ?>) {
+
+					EasyFilter<?, ?> filter = ((EasyFilter<?, ?>) tp.getLastPathComponent());
+					filter.activate();
+				}
 	}
 
 	public void updateGraph() {
@@ -191,9 +236,16 @@ public class SimternetWithJung {
 
 			for (EdgeNetwork edge : nsp.getEdgeNetworks()) {
 				this.graph.addVertex(edge);
+				// System.err.println("Adding Vertex " + edge);
 				this.graph.addEdge(backbone.getEgressLink(edge), backbone, edge);
 			}
 		}
+
+		// this.graph = (DirectedSparseGraph<Network, BackboneLink>)
+		// this.filter.transform(this.graph);
+		this.layout.setFilter(this.filter);
+
+		this.layout.setGraph(this.graph);
 
 		// this.viewer.repaint();
 		this.gui.repaint();

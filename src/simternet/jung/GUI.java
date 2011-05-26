@@ -78,7 +78,7 @@ public class GUI extends javax.swing.JFrame {
 	}
 
 	private void filterButtonActionPerformed(java.awt.event.ActionEvent evt) {
-
+		this.owner.filterButtonPressed();
 	}
 
 	/**

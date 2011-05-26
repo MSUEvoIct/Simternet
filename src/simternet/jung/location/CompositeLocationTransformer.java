@@ -1,4 +1,4 @@
-package simternet.jung;
+package simternet.jung.location;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -6,7 +6,8 @@ import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 
-import simternet.network.Network;
+import simternet.jung.CompositeTransformer;
+import simternet.jung.PriorityTransformer;
 
 /**
  * CompositeLocationTransformer
@@ -18,16 +19,18 @@ import simternet.network.Network;
  * 
  * @author graysonwright
  */
-public class CompositeLocationTransformer extends LocationTransformer {
-	private HashMap<LocationTransformer, Dimension>	offsetMap;
-	private PriorityQueue<LocationTransformer>		transformerQueue;
+public class CompositeLocationTransformer<V> extends CompositeTransformer<V, Point2D> {
+
+	private HashMap<PriorityTransformer<V, Point2D>, Dimension>	offsetMap;
+	private PriorityQueue<PriorityTransformer<V, Point2D>>		transformerQueue;
 
 	public CompositeLocationTransformer() {
-		this.transformerQueue = new PriorityQueue<LocationTransformer>();
-		this.offsetMap = new HashMap<LocationTransformer, Dimension>();
+		this.transformerQueue = new PriorityQueue<PriorityTransformer<V, Point2D>>();
+		this.offsetMap = new HashMap<PriorityTransformer<V, Point2D>, Dimension>();
 	}
 
-	public void addTransformer(LocationTransformer transformer, int priority, Dimension offset) {
+	@Override
+	public void addTransformer(PriorityTransformer<V, Point2D> transformer, int priority, Dimension offset) {
 		transformer.setPriority(priority);
 		this.transformerQueue.add(transformer);
 		this.offsetMap.put(transformer, offset);
@@ -37,15 +40,15 @@ public class CompositeLocationTransformer extends LocationTransformer {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * simternet.jung.LocationTransformer#handles(simternet.network.Network)
+	 * simternet.jung.PriorityTransformer#handles(simternet.network.Network)
 	 * 
 	 * If any transformer in the queue can handle the Network, then this class
 	 * can as well.
 	 */
 	@Override
-	public boolean handles(Network net) {
-		for (LocationTransformer ntpTransformer : this.transformerQueue)
-			if (ntpTransformer.handles(net))
+	public boolean handles(V vertex) {
+		for (PriorityTransformer<V, Point2D> ntpTransformer : this.transformerQueue)
+			if (ntpTransformer.handles(vertex))
 				return true;
 		return false;
 	}
@@ -54,23 +57,23 @@ public class CompositeLocationTransformer extends LocationTransformer {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * simternet.jung.LocationTransformer#transform(simternet.network.Network)
+	 * simternet.jung.PriorityTransformer#transform(simternet.network.Network)
 	 * 
 	 * Ask the lowest-priority transformer that handles this type of Network to
 	 * place it.
 	 */
 	@Override
-	public Point2D transform(Network net) {
+	public Point2D transform(V vertex) {
 		// TODO Auto-generated method stub
 
-		if (!this.handles(net))
+		if (!this.handles(vertex))
 			return null;
 
 		Point result = null;
 
-		for (LocationTransformer ntpTransformer : this.transformerQueue)
-			if (ntpTransformer.handles(net)) {
-				result = (Point) ntpTransformer.transform(net);
+		for (PriorityTransformer<V, Point2D> ntpTransformer : this.transformerQueue)
+			if (ntpTransformer.handles(vertex)) {
+				result = (Point) ntpTransformer.transform(vertex);
 				Dimension offset = this.offsetMap.get(ntpTransformer);
 				result.x += offset.width;
 				result.y += offset.height;

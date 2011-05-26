@@ -1,39 +1,34 @@
-package simternet.jung;
+package simternet.jung.location;
 
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.HashMap;
 
-import simternet.network.Backbone;
+import simternet.jung.PriorityTransformer;
 import simternet.network.Network;
 
 /**
- * BackboneLocationTransformer
+ * ColumnLocationTransformer
  * 
  * A transformer to move Backbones to their correct location onscreen.
  * 
- * See comments for <LocationTransformer.java>
+ * See comments for <PriorityTransformer.java>
  * 
  * @author graysonwright
  */
-public class BackboneLocationTransformer extends LocationTransformer {
+public abstract class ColumnLocationTransformer extends PriorityTransformer<Network, Point2D> {
 
 	private Dimension			dimension;
-	int							numBackbonesPlaced;
-
 	HashMap<Network, Integer>	numberSystem;
+
+	int							numNetworksPlaced;
 	final static int			diameter	= 20;
 
-	public BackboneLocationTransformer(Dimension d) {
-		this.numBackbonesPlaced = 0;
+	public ColumnLocationTransformer(Dimension d) {
+		this.numNetworksPlaced = 0;
 		this.dimension = d;
 		this.numberSystem = new HashMap<Network, Integer>();
-	}
-
-	@Override
-	public boolean handles(Network net) {
-		return (net instanceof Backbone);
 	}
 
 	@Override
@@ -43,19 +38,19 @@ public class BackboneLocationTransformer extends LocationTransformer {
 
 		int num;
 
-		// if the backbone has already been placed, use its previously assigned
+		// if the network has already been placed, use its previously assigned
 		// number
 		if (this.numberSystem.containsKey(net))
 			num = this.numberSystem.get(net).intValue();
 		// otherwise, assign it a number and use that.
 		else {
-			num = this.numBackbonesPlaced;
-			this.numBackbonesPlaced++;
+			num = this.numNetworksPlaced;
+			this.numNetworksPlaced++;
 			this.numberSystem.put(net, Integer.valueOf(num));
 		}
 
-		int numRows = this.dimension.height / BackboneLocationTransformer.diameter;
-		int numCols = this.dimension.width / BackboneLocationTransformer.diameter;
+		int numRows = this.dimension.height / ColumnLocationTransformer.diameter;
+		int numCols = this.dimension.width / ColumnLocationTransformer.diameter;
 
 		// leave every other row and column empty
 		numRows /= 2;
@@ -65,7 +60,7 @@ public class BackboneLocationTransformer extends LocationTransformer {
 		int row = num % numRows;
 
 		if (col >= numCols)
-			System.err.println("Too many backbones placed in the graph viewer. Will not be able to display them all.");
+			System.err.println("Too many networks placed in the graph viewer. Will not be able to display them all.");
 
 		int x = col * 40;
 		int y = (row * 40) + ((col % 2) * 20);

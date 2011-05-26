@@ -1,10 +1,11 @@
-package simternet.jung;
+package simternet.jung.location;
 
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 
 import sim.util.Int2D;
+import simternet.jung.PriorityTransformer;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 
@@ -12,11 +13,11 @@ import simternet.network.Network;
  * A transformer to move Edge Networks to their correct location onscreen. They
  * are arranged in a grid pattern.
  * 
- * See comments for <LocationTransformer.java>
+ * See comments for <PriorityTransformer.java>
  * 
  * @author graysonwright
  */
-public class EdgeLocationTransformer extends LocationTransformer {
+public class EdgeLocationTransformer extends PriorityTransformer<Network, Point2D> {
 
 	Dimension	cellSize;
 

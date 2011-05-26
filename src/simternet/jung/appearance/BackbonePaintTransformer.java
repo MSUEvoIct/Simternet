@@ -1,4 +1,4 @@
-package simternet.jung;
+package simternet.jung.appearance;
 
 import java.awt.Color;
 import java.awt.Paint;

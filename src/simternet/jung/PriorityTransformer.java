@@ -1,7 +1,7 @@
 package simternet.jung;
 
 /** 
- * LocationTransformer
+ * PriorityTransformer
  * 
  * An abstract class that defines transformers that are used to place Network objects in their correct onscreen positions.
  * Subclasses will override methods <handles> and <transform> to deal with specific types of Networks.
@@ -9,17 +9,13 @@ package simternet.jung;
  * @author graysonwright
  */
 
-import java.awt.geom.Point2D;
-
 import org.apache.commons.collections15.Transformer;
 
-import simternet.network.Network;
-
-public abstract class LocationTransformer implements Transformer<Network, Point2D>, Comparable<LocationTransformer> {
+public abstract class PriorityTransformer<V, E> implements Transformer<V, E>, Comparable<PriorityTransformer<V, E>> {
 
 	protected int	priority;
 
-	public int compareTo(LocationTransformer transformer) {
+	public int compareTo(PriorityTransformer<V, E> transformer) {
 		return transformer.getPriority() - this.getPriority();
 	}
 
@@ -32,12 +28,9 @@ public abstract class LocationTransformer implements Transformer<Network, Point2
 	 * to highest) if any subclass can handle the network, this class can as
 	 * well
 	 */
-	public abstract boolean handles(Network net);
+	public abstract boolean handles(V vertex);
 
 	public void setPriority(int p) {
 		this.priority = p;
 	}
-
-	@Override
-	public abstract Point2D transform(Network net);
 }

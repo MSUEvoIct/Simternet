@@ -1,4 +1,4 @@
-package simternet.jung;
+package simternet.jung.appearance;
 
 import java.awt.BasicStroke;
 import java.awt.Stroke;

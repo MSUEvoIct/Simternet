@@ -1,22 +1,22 @@
-package simternet.jung;
+package simternet.jung.location;
 
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.Random;
 
-import simternet.network.Network;
+import simternet.jung.PriorityTransformer;
 
 /**
  * RandomLocationTransformer
  * 
  * A transformer to move any Network to a random location onscreen.
  * 
- * See comments for <LocationTransformer.java>
+ * See comments for <PriorityTransformer.java>
  * 
  * @author graysonwright
  */
-public class RandomLocationTransformer extends LocationTransformer {
+public class RandomLocationTransformer<V> extends PriorityTransformer<V, Point2D> {
 
 	private Dimension	dimension;
 
@@ -25,12 +25,12 @@ public class RandomLocationTransformer extends LocationTransformer {
 	}
 
 	@Override
-	public boolean handles(Network net) {
+	public boolean handles(V vertex) {
 		return true;
 	}
 
 	@Override
-	public Point2D transform(Network net) {
+	public Point2D transform(V vertex) {
 
 		Random random = new Random();
 		Point2D randomPoint = new Point();
