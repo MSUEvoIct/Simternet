@@ -128,7 +128,7 @@ public class SimternetEvaluator extends Evaluator {
 			// for (Simternet s : simternet) {
 			for (int i = 0; i < simternet.length; i++) {
 				Simternet s = simternet[i];
-				// TODO: Save initial checkpoints
+				// Save initial checkpoints
 				if (simternetCheckpoint)
 					if ((state.generation % checkpointModulo) == 0)
 						this.generateCheckpoint(state, s, i);

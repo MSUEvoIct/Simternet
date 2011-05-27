@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
@@ -21,9 +22,9 @@ import simternet.application.ApplicationProvider;
 import simternet.consumer.Consumer;
 import simternet.consumer.DefaultConsumerProfile;
 import simternet.consumer.DefinedBehaviorConsumer;
-import simternet.network.EdgeNetwork;
 import simternet.consumer.GreedyAppManager;
 import simternet.consumer.NetworkMiser;
+import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 import simternet.nsp.DumbNetworkServiceProvider;
 import simternet.nsp.EvolvingNetworkProvider;
@@ -71,14 +72,15 @@ public class Simternet extends SimState implements Serializable {
 	/**
 	 * All consumer classes in the simulation.
 	 */
-	protected SparseGrid2D										consumerClasses;
-
-	Collection<Steppable>										deadAgents	= new ArrayList<Steppable>();
+	protected SparseGrid2D										consumerAgents;
+	Collection<Steppable>										deadAgents			= new ArrayList<Steppable>();
 
 	/**
 	 * All Network Service Providers in the simulation.
 	 */
 	protected Collection<NetworkProvider>						networkServiceProviders;
+
+	protected int												numConsumerAgents	= 0;
 
 	public Simternet(long seed) {
 		this(seed, null);
@@ -120,8 +122,9 @@ public class Simternet extends SimState implements Serializable {
 
 		if (agent instanceof Consumer) {
 			Consumer acc = (Consumer) agent;
-			this.consumerClasses.setObjectLocation(acc, acc.getLocation());
+			this.consumerAgents.setObjectLocation(acc, acc.getLocation());
 			ordering = 3;
+			this.numConsumerAgents++;
 		} else if (agent instanceof ApplicationProvider) {
 			ApplicationProvider asp = (ApplicationProvider) agent;
 			this.applicationProviders.add(asp);
@@ -197,7 +200,7 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	public SparseGrid2D getConsumerClasses() {
-		return this.consumerClasses;
+		return this.consumerAgents;
 	}
 
 	public DoubleGrid2D getMyActiveSubscribersGrid(NetworkProvider np) {
@@ -262,6 +265,10 @@ public class Simternet extends SimState implements Serializable {
 		return this.networkServiceProviders;
 	}
 
+	public int getNumConsumerAgents() {
+		return this.numConsumerAgents;
+	}
+
 	public Double getNumNetworkProviders(Int2D location) {
 		Double providersWithNetworks = 0.0;
 		for (NetworkProvider nsp : this.networkServiceProviders)
@@ -281,7 +288,7 @@ public class Simternet extends SimState implements Serializable {
 	public Double getPopulation() {
 		Double pop = new Double(0);
 
-		Iterator<Consumer> i = this.consumerClasses.iterator();
+		Iterator<Consumer> i = this.consumerAgents.iterator();
 		while (i.hasNext()) {
 			Consumer acc = i.next();
 			pop += acc.getPopulation();
@@ -298,7 +305,7 @@ public class Simternet extends SimState implements Serializable {
 	public Double getPopulation(Int2D location) {
 		Double pop = new Double(0);
 
-		Iterator<Consumer> i = this.consumerClasses.getObjectsAtLocation(location).iterator();
+		Iterator<Consumer> i = this.consumerAgents.getObjectsAtLocation(location).iterator();
 		while (i.hasNext()) {
 			Consumer acc = i.next();
 			pop += acc.getPopulation();
@@ -400,7 +407,7 @@ public class Simternet extends SimState implements Serializable {
 		this.config.resetNameCounters();
 
 		// Initialize Consumer Agents
-		this.consumerClasses = new SparseGrid2D(this.config.x(), this.config.y());
+		this.consumerAgents = new SparseGrid2D(this.config.x(), this.config.y());
 		this.initConsumerClasses();
 
 		// Initialize Network Service Providers

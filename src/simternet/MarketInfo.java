@@ -64,8 +64,7 @@ public class MarketInfo {
 	 *         system.
 	 */
 	Integer numberOfAgents() {
-		return this.s.applicationProviders.size() + this.s.networkServiceProviders.size()
-				+ this.s.consumerClasses.size();
+		return this.numberOfApplicationProviders() + this.numberOfNetworkProviders() + this.numberOfConsumerAgents();
 	}
 
 	/**
@@ -80,7 +79,7 @@ public class MarketInfo {
 	 * @return The number of consumer agents active in the Simternet system.
 	 */
 	Integer numberOfConsumerAgents() {
-		return this.s.consumerClasses.size();
+		return this.s.getNumConsumerAgents();
 	}
 
 	/**
@@ -89,7 +88,7 @@ public class MarketInfo {
 	 */
 	Double numberOfConsumers() {
 		double numCustomers = 0.0;
-		for (Object o : this.s.consumerClasses.allObjects) {
+		for (Object o : this.s.consumerAgents.allObjects) {
 			Consumer acc = (Consumer) o;
 			numCustomers += acc.getPopulation();
 		}
