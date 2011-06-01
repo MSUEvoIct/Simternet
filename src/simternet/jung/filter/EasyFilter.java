@@ -21,6 +21,10 @@ public abstract class EasyFilter<V, E> implements Filter<V, E>, TreeNode {
 
 	public abstract boolean acceptVertex(V vertex);
 
+	/*
+	 * Sets this filter and all ancestors to active As opposed to
+	 * setActive(true), which only applies to this filter.
+	 */
 	public void activate() {
 		if (this.parent != null)
 			this.parent.activate();
@@ -42,6 +46,10 @@ public abstract class EasyFilter<V, E> implements Filter<V, E>, TreeNode {
 
 	public void print() {
 		System.err.println(this + " is currently active? = " + this.active);
+	}
+
+	public void setActive(boolean flag) {
+		this.active = flag;
 	}
 
 	public void setParent(EasyFilter<V, E> p) {

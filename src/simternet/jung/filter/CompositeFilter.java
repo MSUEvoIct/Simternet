@@ -16,7 +16,7 @@ public class CompositeFilter<V, E> extends EasyFilter<V, E> {
 	@Override
 	public boolean acceptEdge(E edge) {
 		for (EasyFilter<V, E> f : this.filters)
-			if (!f.acceptEdge(edge))
+			if (f.isActive() && !f.acceptEdge(edge))
 				return false;
 		return true;
 	}
@@ -24,7 +24,7 @@ public class CompositeFilter<V, E> extends EasyFilter<V, E> {
 	@Override
 	public boolean acceptVertex(V vertex) {
 		for (EasyFilter<V, E> f : this.filters)
-			if (!f.acceptVertex(vertex))
+			if (f.isActive() && !f.acceptVertex(vertex))
 				return false;
 		return true;
 	}
@@ -44,6 +44,10 @@ public class CompositeFilter<V, E> extends EasyFilter<V, E> {
 		return this.filters.elements();
 	}
 
+	/*
+	 * Sets this filter and all descendents to inactive As opposed to
+	 * setActive(false), which only applies to this filter.
+	 */
 	@Override
 	public void deactivate() {
 		for (EasyFilter<V, E> f : this.filters)
