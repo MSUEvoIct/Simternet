@@ -43,9 +43,7 @@ public class EasyFilterLayout<V, E> extends StaticLayout<V, E> {
 	 */
 	@Override
 	public void setGraph(Graph<V, E> g) {
-		if (this.filter != null) {
+		if (this.filter != null)
 			super.setGraph(this.filter.transform(g));
-			this.filter.print();
-		}
 	}
 }

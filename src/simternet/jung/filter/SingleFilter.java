@@ -7,7 +7,7 @@ import javax.swing.tree.TreeNode;
 public abstract class SingleFilter<V, E> extends EasyFilter<V, E> {
 
 	@Override
-	public Enumeration children() {
+	public Enumeration<EasyFilter<V, E>> children() {
 		return null;
 	}
 

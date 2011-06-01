@@ -44,10 +44,6 @@ public abstract class EasyFilter<V, E> implements Filter<V, E>, TreeNode {
 		return this.active;
 	}
 
-	public void print() {
-		System.err.println(this + " is currently active? = " + this.active);
-	}
-
 	public void setActive(boolean flag) {
 		this.active = flag;
 	}

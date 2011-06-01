@@ -40,7 +40,7 @@ public class CompositeFilter<V, E> extends EasyFilter<V, E> {
 	}
 
 	@Override
-	public Enumeration children() {
+	public Enumeration<EasyFilter<V, E>> children() {
 		return this.filters.elements();
 	}
 
@@ -79,13 +79,6 @@ public class CompositeFilter<V, E> extends EasyFilter<V, E> {
 	@Override
 	public boolean isLeaf() {
 		return false;
-	}
-
-	@Override
-	public void print() {
-		super.print();
-		for (EasyFilter<V, E> f : this.filters)
-			f.print();
 	}
 
 	public boolean removeFilter(EasyFilter<V, E> filter) {

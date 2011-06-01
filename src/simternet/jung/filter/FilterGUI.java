@@ -19,6 +19,10 @@ public class FilterGUI extends JFrame implements TreeCheckingListener {
 	private JPanel				panel;
 	private TreeNode			root;
 	private CheckboxTree		tree;
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= 1L;
 
 	// public FilterGUI() {
 	// super("Available Filters");
