@@ -23,7 +23,7 @@ public class BackbonePaintTransformer implements Transformer<BackboneLink, Paint
 	public Paint transform(BackboneLink link) {
 
 		double congestion = link.getCongestionAlgorithm().getCongestionRatio();
-		System.out.println(link.toString() + "\tCongestion = " + congestion);
+		// System.out.println(link.toString() + "\tCongestion = " + congestion);
 
 		double min = 0;
 		double max = 1.3;

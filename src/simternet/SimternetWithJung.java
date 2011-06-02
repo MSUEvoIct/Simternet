@@ -22,10 +22,14 @@ import simternet.application.ApplicationProvider;
 import simternet.jung.GUI;
 import simternet.jung.appearance.BackbonePaintTransformer;
 import simternet.jung.appearance.BackboneStrokeTransformer;
+import simternet.jung.appearance.EdgePaintTransformer;
+import simternet.jung.appearance.EdgeShapeTransformer;
 import simternet.jung.filter.CompositeFilter;
+import simternet.jung.filter.DatacenterNameFilter;
 import simternet.jung.filter.EasyFilter;
 import simternet.jung.filter.EasyFilterLayout;
 import simternet.jung.filter.FilterGUI;
+import simternet.jung.filter.HighPassFilter;
 import simternet.jung.filter.SingleEdgeFilter;
 import simternet.jung.location.BackboneLocationTransformer;
 import simternet.jung.location.CompositeLocationTransformer;
@@ -102,11 +106,24 @@ public class SimternetWithJung {
 		viewer.getModel().setGraphLayout(this.layout, frameDimension);
 
 		// Set up transformers to label and color the vertices and edges.
+
+		// Adjust Vertex Size:
+		viewer.getRenderContext().setVertexShapeTransformer(new EdgeShapeTransformer(this.sim));
+
+		// Adjust Vertex Color:
+		viewer.getRenderContext().setVertexFillPaintTransformer(new EdgePaintTransformer(this.sim));
+
+		// Label Vertices:
 		// viewer.getRenderContext().setVertexLabelTransformer(new
 		// ToStringLabeller<Network>());
-		// this.viewer.getRenderContext().setEdgeLabelTransformer(new
-		// ToStringLabeller());
+
+		// Label Edges:
+		// viewer.getRenderContext().setEdgeLabelTransformer(new
+		// ToStringLabeller<BackboneLink>());
+
+		// Set BackboneLink thickness:
 		viewer.getRenderContext().setEdgeStrokeTransformer(new BackboneStrokeTransformer());
+		// Set BackboneLink color:
 		viewer.getRenderContext().setEdgeDrawPaintTransformer(new BackbonePaintTransformer());
 
 		// Allow the mouse to pick and move vertices and edges.
@@ -148,6 +165,8 @@ public class SimternetWithJung {
 		// TODO: user-generated filters, not hard-coded ones.
 		this.filter = new CompositeFilter<Network, BackboneLink>();
 		((CompositeFilter<Network, BackboneLink>) this.filter).add(new SingleEdgeFilter(new Int2D(3, 1)));
+		((CompositeFilter<Network, BackboneLink>) this.filter).add(new DatacenterNameFilter("Datacenter of ASP-2"));
+		((CompositeFilter<Network, BackboneLink>) this.filter).add(new HighPassFilter(1000000.0));
 	}
 
 	private Transformer<Network, Point2D> setUpLocationTransformer() {
@@ -209,8 +228,10 @@ public class SimternetWithJung {
 				if (tp.getLastPathComponent() instanceof EasyFilter<?, ?>) {
 
 					EasyFilter<?, ?> filter = ((EasyFilter<?, ?>) tp.getLastPathComponent());
-					filter.activate();
+					filter.setActive(true);
 				}
+
+		this.updateGraph();
 	}
 
 	public void updateGraph() {
