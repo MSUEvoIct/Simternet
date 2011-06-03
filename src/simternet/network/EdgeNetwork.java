@@ -113,6 +113,10 @@ public abstract class EdgeNetwork extends Network {
 		return customers;
 	}
 
+	public NetworkProvider getOwner() {
+		return this.owner;
+	}
+
 	public Double getPrice() {
 		return this.price.get();
 	}

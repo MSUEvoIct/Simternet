@@ -29,6 +29,7 @@ import simternet.network.Network;
 import simternet.nsp.DumbNetworkServiceProvider;
 import simternet.nsp.EvolvingNetworkProvider;
 import simternet.nsp.NetworkProvider;
+import simternet.reporters.Reporter;
 import simternet.temporal.Arbiter;
 
 /**
@@ -92,6 +93,10 @@ public class Simternet extends SimState implements Serializable {
 			this.config = config;
 		else
 			this.config = new Parameters();
+	}
+
+	public void addReporter(Reporter r) {
+		this.schedule.scheduleRepeating(Schedule.EPOCH, 100, r);
 	}
 
 	/**
@@ -418,6 +423,15 @@ public class Simternet extends SimState implements Serializable {
 		this.applicationProviders = new ArrayList<ApplicationProvider>();
 		this.ASPsByCategory = new HashMap<AppCategory, Collection<ApplicationProvider>>();
 		this.initApplicationServiceProviders();
+
+		// Reporter edr = new EdgeDataReporter();
+		// edr.setGeneration(0);
+		// edr.setChunk(0);
+		// this.addReporter(edr);
+		// Reporter nfr = new NetworkProviderFitnessReporter();
+		// nfr.setGeneration(0);
+		// nfr.setChunk(0);
+		// this.addReporter(nfr);
 
 		this.initArbiter();
 	}

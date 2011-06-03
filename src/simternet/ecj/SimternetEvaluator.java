@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import simternet.Simternet;
 import simternet.application.ApplicationProvider;
 import simternet.nsp.NetworkProvider;
+import simternet.reporters.NetworkProviderFitnessReporter;
 import ec.Evaluator;
 import ec.EvolutionState;
 import ec.Individual;
@@ -70,6 +71,16 @@ public class SimternetEvaluator extends Evaluator {
 			// " = " + seed);
 			simternet[i] = new Simternet(seed);
 			simternet[i].start();
+		}
+
+		// Add reporters for data output
+
+		for (int i = 0; i < simternet.length; i++) {
+			// add reporters
+			NetworkProviderFitnessReporter npfr = new NetworkProviderFitnessReporter();
+			npfr.setGeneration(state.generation);
+			npfr.setChunk(i);
+			simternet[i].addReporter(npfr);
 		}
 
 		// Populate them with agents
