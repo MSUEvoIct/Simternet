@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import simternet.Simternet;
 import simternet.application.ApplicationProvider;
 import simternet.nsp.NetworkProvider;
+import simternet.reporters.ApplicationProviderFitnessReporter;
 import simternet.reporters.NetworkProviderFitnessReporter;
 import ec.Evaluator;
 import ec.EvolutionState;
@@ -28,8 +29,8 @@ import ec.util.Parameter;
  */
 public class SimternetEvaluator extends Evaluator {
 
-	private static final long	serialVersionUID	= 1L;
 	boolean						inStep				= false;
+	private static final long	serialVersionUID	= 1L;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -81,6 +82,11 @@ public class SimternetEvaluator extends Evaluator {
 			npfr.setGeneration(state.generation);
 			npfr.setChunk(i);
 			simternet[i].addReporter(npfr);
+
+			ApplicationProviderFitnessReporter apfr = new ApplicationProviderFitnessReporter();
+			apfr.setGeneration(state.generation);
+			apfr.setChunk(i);
+			simternet[i].addReporter(apfr);
 		}
 
 		// Populate them with agents
