@@ -27,7 +27,6 @@ import simternet.consumer.NetworkMiser;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 import simternet.nsp.DumbNetworkServiceProvider;
-import simternet.nsp.EvolvingNetworkProvider;
 import simternet.nsp.NetworkProvider;
 import simternet.reporters.Reporter;
 import simternet.temporal.Arbiter;
@@ -39,27 +38,6 @@ import simternet.temporal.Arbiter;
  * @author kkoning
  */
 public class Simternet extends SimState implements Serializable {
-
-	/*
-	 * Do we use an LCS to evolve the NSP?
-	 */
-	private static boolean		evolve				= false;
-
-	/**
-	 * Storing a version identifier is appropriate for this class, as we will
-	 * likely be saving it often and may want to read older versions in a
-	 * predictable, specified way.
-	 * 
-	 */
-	private static final long	serialVersionUID	= 1L;
-
-	public static void main(String[] args) {
-		for (String s : args)
-			if (s.equals("--evolve"))
-				Simternet.evolve = true;
-		SimState.doLoop(Simternet.class, args);
-		System.exit(0);
-	}
 
 	/**
 	 * All application service providers in the simulation
@@ -74,6 +52,7 @@ public class Simternet extends SimState implements Serializable {
 	 * All consumer classes in the simulation.
 	 */
 	protected SparseGrid2D										consumerAgents;
+
 	Collection<Steppable>										deadAgents			= new ArrayList<Steppable>();
 
 	/**
@@ -82,17 +61,49 @@ public class Simternet extends SimState implements Serializable {
 	protected Collection<NetworkProvider>						networkServiceProviders;
 
 	protected int												numConsumerAgents	= 0;
+	/*
+	 * Do we use an LCS to evolve the NSP?
+	 */
+	private static boolean										evolve				= false;
+
+	/**
+	 * Storing a version identifier is appropriate for this class, as we will
+	 * likely be saving it often and may want to read older versions in a
+	 * predictable, specified way.
+	 * 
+	 */
+	private static final long									serialVersionUID	= 1L;
+
+	public static void main(String[] args) {
+		for (String s : args)
+			if (s.equals("--evolve"))
+				Simternet.evolve = true;
+		SimState.doLoop(Simternet.class, args);
+		System.exit(0);
+	}
 
 	public Simternet(long seed) {
 		this(seed, null);
 	}
 
+	public Simternet(long seed, boolean evolve) {
+		this(seed, null, evolve);
+	}
+
 	public Simternet(long seed, Parameters config) {
+		this(seed, config, Simternet.evolve);
+	}
+
+	public Simternet(long seed, Parameters config, boolean evolve) {
 		super(seed);
+
+		Simternet.evolve = evolve;
+
 		if (config != null)
 			this.config = config;
 		else
 			this.config = new Parameters();
+
 	}
 
 	public void addReporter(Reporter r) {
@@ -399,7 +410,8 @@ public class Simternet extends SimState implements Serializable {
 	 */
 	private void initNetworkServiceProviders() {
 		if (Simternet.evolve)
-			this.enterMarket(new EvolvingNetworkProvider(this));
+			// this.enterMarket(new EvolvingNetworkProvider(this));
+			;
 		else
 			this.enterMarket(new DumbNetworkServiceProvider(this));
 	}

@@ -18,6 +18,30 @@ import simternet.temporal.Temporal;
 
 public abstract class EdgeNetwork extends Network {
 
+	final AssetFinance			assetFinance;
+
+	/**
+	 * The location of this network in the landscape.
+	 */
+	final Int2D					location;
+
+	/**
+	 * The maximum bandwidth each edge connection can support. Unlike other
+	 * networks, this is an instantaneous measure rather than a total transfer
+	 * capacity per period. I.e., bytes per second, not bytes per month.
+	 */
+	Temporal<Double>			maxBandwidth		= new Temporal<Double>(0.0);
+
+	/**
+	 * The NSP that owns and operates this network.
+	 */
+	final NetworkProvider		owner;
+
+	/**
+	 * The price of this network
+	 */
+	Temporal<Double>			price				= new Temporal<Double>(0.0);
+
 	private static final long	serialVersionUID	= 1L;
 
 	/**
@@ -46,30 +70,6 @@ public abstract class EdgeNetwork extends Network {
 
 		return buildCost;
 	}
-
-	final AssetFinance		assetFinance;
-
-	/**
-	 * The location of this network in the landscape.
-	 */
-	final Int2D				location;
-
-	/**
-	 * The maximum bandwidth each edge connection can support. Unlike other
-	 * networks, this is an instantaneous measure rather than a total transfer
-	 * capacity per period. I.e., bytes per second, not bytes per month.
-	 */
-	Temporal<Double>		maxBandwidth	= new Temporal<Double>(0.0);
-
-	/**
-	 * The NSP that owns and operates this network.
-	 */
-	final NetworkProvider	owner;
-
-	/**
-	 * The price of this network
-	 */
-	Temporal<Double>		price			= new Temporal<Double>(0.0);
 
 	public EdgeNetwork(NetworkProvider owner, Int2D location) {
 		this.owner = owner;
@@ -201,7 +201,7 @@ public abstract class EdgeNetwork extends Network {
 
 	@Override
 	public String toString() {
-		return "Edge of " + this.owner.getName() + " @" + this.getLocation();
+		return "Edge of " + this.owner.toString() + " @" + this.getLocation();
 	}
 
 	@Override

@@ -13,8 +13,8 @@ import simternet.nsp.NetworkProvider;
  */
 public class Backbone extends Network {
 
-	private static final long				serialVersionUID	= 1L;
 	protected final NetworkProvider	owner;
+	private static final long		serialVersionUID	= 1L;
 
 	public Backbone(final NetworkProvider nsp) {
 		this.owner = nsp;
@@ -32,7 +32,7 @@ public class Backbone extends Network {
 
 	@Override
 	public String toString() {
-		return "Backbone of " + this.owner.getName();
+		return "Backbone of " + this.owner.toString();
 	}
 
 }

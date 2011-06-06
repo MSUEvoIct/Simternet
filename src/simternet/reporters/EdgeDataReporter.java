@@ -1,6 +1,7 @@
 package simternet.reporters;
 
 import java.util.Collection;
+import java.util.HashMap;
 
 import sim.engine.SimState;
 import sim.util.Int2D;
@@ -10,19 +11,26 @@ import simternet.network.Network;
 
 public class EdgeDataReporter extends Reporter {
 
-	private static final long	serialVersionUID	= 1L;
-	public static final String	specificHeaders		= "LocactionX,LocationY,NSP,NetworkType,Price,Customers";
+	protected static HashMap<String, String>	netTypeAbbreviations;
+	private static final long					serialVersionUID	= 1L;
+	public static final String					specificHeaders		= "LocactionX,LocationY,NSP,NetworkType,Price,Customers";
 
 	static {
 		new EdgeDataReporter().logHeaders();
+	}
+
+	static {
+		// Initialize the hash table for abbreviations of network types.
+		EdgeDataReporter.netTypeAbbreviations = new HashMap<String, String>();
+		EdgeDataReporter.netTypeAbbreviations.put("class simternet.network.SimpleEdgeNetwork", "Simple");
 	}
 
 	public EdgeDataReporter() {
 		super();
 	}
 
-	public EdgeDataReporter(int i) {
-		super(i);
+	public EdgeDataReporter(int interval) {
+		super(interval);
 	}
 
 	@Override
@@ -33,9 +41,10 @@ public class EdgeDataReporter extends Reporter {
 			Collection<Network> edgeNets = s.getNetworks(null, EdgeNetwork.class, location);
 			for (Network edgeNet : edgeNets) {
 				EdgeNetwork en = (EdgeNetwork) edgeNet;
-				this.report(location.x + Reporter.separater + location.y + Reporter.separater + en.getOwner()
-						+ Reporter.separater + en.getClass() + Reporter.separater + en.getPrice() + Reporter.separater
-						+ en.getNumSubscribers());
+				this.report(location.x + Reporter.separater + location.y + Reporter.separater
+						+ en.getOwner().getName() + Reporter.separater
+						+ EdgeDataReporter.netTypeAbbreviations.get(en.getClass().toString()) + Reporter.separater
+						+ en.getPrice() + Reporter.separater + en.getNumSubscribers());
 			}
 		}
 

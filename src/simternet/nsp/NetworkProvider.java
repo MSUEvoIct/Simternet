@@ -33,22 +33,22 @@ import simternet.temporal.TemporalSparseGrid2D;
  */
 public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 
-	protected static DecimalFormat	numCustFormat		= new DecimalFormat("0000000");
-	protected static DecimalFormat	positionFormat		= new DecimalFormat("00");
-	protected static DecimalFormat	priceFormat			= new DecimalFormat("000.00");
-	private static final long		serialVersionUID	= 1L;
-
 	protected Backbone				backboneNetwork;
 	public boolean					bankrupt			= false;
 	public Double					deltaRevenue		= 0.0;
 	protected TemporalSparseGrid2D	edgeNetworks;
+
 	public Financials				financials;
 	protected Int2D					homeBase;
 	protected InvestmentStrategy	investmentStrategy;
 	protected String				name;
 	public PricingStrategy			pricingStrategy;
-
 	public Simternet				simternet			= null;
+	protected static DecimalFormat	numCustFormat		= new DecimalFormat("0000000");
+	protected static DecimalFormat	positionFormat		= new DecimalFormat("00");
+	protected static DecimalFormat	priceFormat			= new DecimalFormat("000.00");
+
+	private static final long		serialVersionUID	= 1L;
 
 	public NetworkProvider(Simternet simternet) {
 		this.simternet = simternet;
@@ -180,7 +180,7 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	}
 
 	public String getName() {
-		return this.getClass().getCanonicalName() + "-" + this.name;
+		return this.name;
 	}
 
 	public Network getNetworkAt(Class<? extends Network> net, Int2D location) {
@@ -330,6 +330,10 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 		return sb;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	/**
 	 * NOTE: The order in which this function is called vis-a-vis other agents
 	 * is unspecified.
@@ -388,7 +392,7 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 
 	@Override
 	public String toString() {
-		return this.getName();
+		return this.getClass().getCanonicalName() + "-" + this.name;
 	}
 
 	public void update() {

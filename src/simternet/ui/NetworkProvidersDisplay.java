@@ -20,8 +20,7 @@ public class NetworkProvidersDisplay extends JFrame {
 
 	protected class NSPTableModel extends AbstractTableModel {
 
-		String[] columnNames = { "Network Service Provider", "Resouces",
-				"Total Customers" };
+		String[]	columnNames	= { "Network Service Provider", "Resouces", "Total Customers" };
 
 		@Override
 		public int getColumnCount() {
@@ -38,8 +37,7 @@ public class NetworkProvidersDisplay extends JFrame {
 		}
 
 		protected NetworkProvider getNSP(int rowIndex) {
-			Object[] anp = NetworkProvidersDisplay.this.networkServiceProviders
-					.toArray();
+			Object[] anp = NetworkProvidersDisplay.this.networkServiceProviders.toArray();
 			return (NetworkProvider) anp[rowIndex];
 		}
 
@@ -56,7 +54,7 @@ public class NetworkProvidersDisplay extends JFrame {
 		public Object getValueAt(int rowIndex, int columnIndex) {
 
 			if (columnIndex == 0)
-				return this.getNSP(rowIndex).getName();
+				return this.getNSP(rowIndex).toString();
 			if (columnIndex == 1)
 				return this.getLiquidAssets(rowIndex);
 			if (columnIndex == 2)
@@ -67,14 +65,12 @@ public class NetworkProvidersDisplay extends JFrame {
 
 	}
 
-	protected Collection<NetworkProvider> networkServiceProviders;
+	protected Collection<NetworkProvider>	networkServiceProviders;
 
-	public NetworkProvidersDisplay(double width, double height,
-			GUIState simulation, long interval) {
+	public NetworkProvidersDisplay(double width, double height, GUIState simulation, long interval) {
 
 		SimternetWithUI gui = (SimternetWithUI) simulation;
-		this.networkServiceProviders = ((Simternet) (gui.state))
-				.getNetworkServiceProviders();
+		this.networkServiceProviders = ((Simternet) (gui.state)).getNetworkServiceProviders();
 
 		this.setTitle("Network Service Providers Console");
 

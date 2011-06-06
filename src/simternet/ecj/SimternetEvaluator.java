@@ -71,7 +71,7 @@ public class SimternetEvaluator extends Evaluator {
 			int seed = state.random[0].nextInt();
 			// System.out.println("Seed for g" + state.generation + "s" + i +
 			// " = " + seed);
-			simternet[i] = new Simternet(seed);
+			simternet[i] = new Simternet(seed, true);
 			simternet[i].start();
 		}
 
@@ -79,17 +79,17 @@ public class SimternetEvaluator extends Evaluator {
 
 		for (int i = 0; i < simternet.length; i++) {
 			// add reporters
-			NetworkProviderFitnessReporter npfr = new NetworkProviderFitnessReporter(29);
+			NetworkProviderFitnessReporter npfr = new NetworkProviderFitnessReporter();
 			npfr.setGeneration(state.generation);
 			npfr.setChunk(i);
 			simternet[i].addReporter(npfr);
 
-			ApplicationProviderFitnessReporter apfr = new ApplicationProviderFitnessReporter(29);
+			ApplicationProviderFitnessReporter apfr = new ApplicationProviderFitnessReporter();
 			apfr.setGeneration(state.generation);
 			apfr.setChunk(i);
 			simternet[i].addReporter(apfr);
 
-			EdgeDataReporter edr = new EdgeDataReporter(29);
+			EdgeDataReporter edr = new EdgeDataReporter();
 			edr.setGeneration(state.generation);
 			edr.setChunk(i);
 			simternet[i].addReporter(edr);
@@ -133,6 +133,7 @@ public class SimternetEvaluator extends Evaluator {
 
 				if (agent instanceof NetworkProvider) {
 					NetworkProvider nsp = (NetworkProvider) agent;
+					nsp.setName("" + whichSimternet + "-" + nsp.getName());
 					simternet[whichSimternet].enterMarket(nsp);
 				} else if (agent instanceof ApplicationProvider) {
 					ApplicationProvider asp = (ApplicationProvider) agent;
