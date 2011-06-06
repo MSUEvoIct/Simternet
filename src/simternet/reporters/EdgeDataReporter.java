@@ -9,22 +9,17 @@ import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 
 public class EdgeDataReporter extends Reporter {
+
 	private static final long	serialVersionUID	= 1L;
 	public static final String	specificHeaders		= "LocactionX,LocationY,NSP,NetworkType,Price,Customers";
 
-	@Override
-	public String getLogger() {
-		return "EdgeDataReporter";
+	public EdgeDataReporter() {
+		super();
 	}
 
 	@Override
-	public String getSpecificHeaders() {
-		return EdgeDataReporter.specificHeaders;
-	}
-
-	@Override
-	public void step(SimState state) {
-		super.step(state);
+	public void collectData(SimState state) {
+		// TODO Auto-generated method stub
 		Simternet s = (Simternet) state;
 		for (Int2D location : s.allLocations()) {
 			Collection<Network> edgeNets = s.getNetworks(null, EdgeNetwork.class, location);
@@ -37,4 +32,15 @@ public class EdgeDataReporter extends Reporter {
 		}
 
 	}
+
+	@Override
+	public String getLogger() {
+		return "EdgeData";
+	}
+
+	@Override
+	public String getSpecificHeaders() {
+		return EdgeDataReporter.specificHeaders;
+	}
+
 }

@@ -12,6 +12,7 @@ import simternet.Simternet;
 import simternet.application.ApplicationProvider;
 import simternet.nsp.NetworkProvider;
 import simternet.reporters.ApplicationProviderFitnessReporter;
+import simternet.reporters.EdgeDataReporter;
 import simternet.reporters.NetworkProviderFitnessReporter;
 import ec.Evaluator;
 import ec.EvolutionState;
@@ -87,6 +88,11 @@ public class SimternetEvaluator extends Evaluator {
 			apfr.setGeneration(state.generation);
 			apfr.setChunk(i);
 			simternet[i].addReporter(apfr);
+
+			EdgeDataReporter edr = new EdgeDataReporter();
+			edr.setGeneration(state.generation);
+			edr.setChunk(i);
+			simternet[i].addReporter(edr);
 		}
 
 		// Populate them with agents
