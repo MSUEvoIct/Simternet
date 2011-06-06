@@ -84,12 +84,12 @@ public class SimternetEvaluator extends Evaluator {
 			npfr.setChunk(i);
 			simternet[i].addReporter(npfr);
 
-			ApplicationProviderFitnessReporter apfr = new ApplicationProviderFitnessReporter();
+			ApplicationProviderFitnessReporter apfr = new ApplicationProviderFitnessReporter(29);
 			apfr.setGeneration(state.generation);
 			apfr.setChunk(i);
 			simternet[i].addReporter(apfr);
 
-			EdgeDataReporter edr = new EdgeDataReporter();
+			EdgeDataReporter edr = new EdgeDataReporter(29);
 			edr.setGeneration(state.generation);
 			edr.setChunk(i);
 			simternet[i].addReporter(edr);

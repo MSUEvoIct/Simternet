@@ -7,15 +7,15 @@ import sim.engine.Steppable;
 
 public abstract class Reporter implements Steppable {
 
-	public Integer				chunk				= null;
-
-	public Integer				generation			= null;
-	protected int				interval			= 1;
-	public Long					step				= null;
 	public static final String	commonFields		= "Generation,Chunk,Step,";
+
 	public static final String	dataFileSuffix		= ".out.csv";
 	public static final String	separater			= ",";
 	private static final long	serialVersionUID	= 1L;
+	public Integer				chunk				= null;
+	public Integer				generation			= null;
+	protected int				interval			= 1;
+	public Long					step				= null;
 
 	public Reporter() {
 		super();
@@ -61,7 +61,7 @@ public abstract class Reporter implements Steppable {
 	 */
 	public void report(String line) {
 		Logger l = Logger.getLogger(this.getLogger());
-		l.info(this.getGeneration() + Reporter.separater + this.getChunk().toString() + Reporter.separater
+		l.trace(this.getGeneration() + Reporter.separater + this.getChunk().toString() + Reporter.separater
 				+ this.getStep().toString() + Reporter.separater + line);
 	}
 
@@ -80,8 +80,9 @@ public abstract class Reporter implements Steppable {
 	@Override
 	public void step(SimState state) {
 		this.step = state.schedule.getSteps();
-		if (this.step % this.interval == 0)
-			this.collectData(state);
+		if (this.step > 0)
+			if (this.step % this.interval == 0)
+				this.collectData(state);
 	}
 
 }

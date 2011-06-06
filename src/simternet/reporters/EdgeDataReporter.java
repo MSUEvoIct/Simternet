@@ -21,6 +21,10 @@ public class EdgeDataReporter extends Reporter {
 		super();
 	}
 
+	public EdgeDataReporter(int i) {
+		super(i);
+	}
+
 	@Override
 	public void collectData(SimState state) {
 

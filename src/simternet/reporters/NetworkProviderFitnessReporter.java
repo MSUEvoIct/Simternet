@@ -21,7 +21,6 @@ public class NetworkProviderFitnessReporter extends Reporter {
 		super(i);
 	}
 
-	@Override
 	public void collectData(SimState state) {
 		Simternet s = (Simternet) state;
 		for (NetworkProvider nsp : s.getNetworkServiceProviders()) {
@@ -32,7 +31,7 @@ public class NetworkProviderFitnessReporter extends Reporter {
 
 		}
 	}
-
+	
 	@Override
 	public String getLogger() {
 		return "NetworkProviderFitness";
