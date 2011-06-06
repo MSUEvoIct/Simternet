@@ -8,6 +8,11 @@ public class NetworkProviderFitnessReporter extends Reporter {
 
 	private static final long	serialVersionUID	= 1L;
 	public static final String	specificHeaders		= "NSP,Fitness";
+	private Integer				interval			= 1;
+
+	public NetworkProviderFitnessReporter(Integer interval) {
+		this.interval = interval;
+	}
 
 	@Override
 	public String getLogger() {
@@ -21,10 +26,17 @@ public class NetworkProviderFitnessReporter extends Reporter {
 
 	@Override
 	public void step(SimState state) {
+		if ((state.schedule.getSteps() % this.interval) != 0)
+			return;
 		super.step(state);
 		Simternet s = (Simternet) state;
-		for (NetworkProvider nsp : s.getNetworkServiceProviders())
-			this.report(nsp.toString() + Reporter.separater + nsp.financials.getNetWorth());
+		for (NetworkProvider nsp : s.getNetworkServiceProviders()) {
+			Double reportedFitness = nsp.financials.getNetWorth();
+			if (reportedFitness < 0)
+				reportedFitness = -1000000.0;
+			this.report(nsp.toString() + Reporter.separater + reportedFitness);
+
+		}
 	}
 
 }
