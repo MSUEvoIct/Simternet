@@ -23,7 +23,7 @@ import simternet.jung.GUI;
 import simternet.jung.appearance.BackbonePaintTransformer;
 import simternet.jung.appearance.BackboneStrokeTransformer;
 import simternet.jung.appearance.EdgePaintTransformer;
-import simternet.jung.appearance.EdgeShapeTransformer;
+import simternet.jung.appearance.NetworkShapeTransformer;
 import simternet.jung.filter.CompositeFilter;
 import simternet.jung.filter.DatacenterNameFilter;
 import simternet.jung.filter.EasyFilter;
@@ -108,7 +108,7 @@ public class SimternetWithJung {
 		// Set up transformers to label and color the vertices and edges.
 
 		// Adjust Vertex Size:
-		viewer.getRenderContext().setVertexShapeTransformer(new EdgeShapeTransformer(this.sim));
+		viewer.getRenderContext().setVertexShapeTransformer(new NetworkShapeTransformer(this.sim));
 
 		// Adjust Vertex Color:
 		viewer.getRenderContext().setVertexFillPaintTransformer(new EdgePaintTransformer(this.sim));

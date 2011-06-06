@@ -7,11 +7,11 @@ import org.apache.commons.collections15.Transformer;
 
 import simternet.Simternet;
 import simternet.network.EdgeNetwork;
-import simternet.network.Network;
 
-public class EdgeShapeTransformer implements Transformer<Network, Shape> {
+public class EdgeShapeTransformer implements Transformer<EdgeNetwork, Shape> {
 
 	protected Simternet	s;
+
 	protected double	scale	= .002;
 
 	public EdgeShapeTransformer(Simternet s) {
@@ -22,20 +22,17 @@ public class EdgeShapeTransformer implements Transformer<Network, Shape> {
 	public EdgeShapeTransformer(Simternet s, double scale) {
 		super();
 		this.s = s;
-		if (scale > 0)
-			this.scale = scale;
+		this.scale = scale;
 	}
 
 	@Override
-	public Shape transform(Network net) {
-		if (net instanceof EdgeNetwork) {
-			EdgeNetwork edge = (EdgeNetwork) net;
-			Double pop = this.s.getPopulation(edge.getLocation());
-			Shape shape = new Ellipse2D.Double(-pop * this.scale / 2, -pop * this.scale / 2, pop * this.scale, pop
-					* this.scale);
+	public Shape transform(EdgeNetwork edge) {
+		Double pop = this.s.getPopulation(edge.getLocation());
+		Shape shape = new Ellipse2D.Double(-pop * this.scale / 2, -pop * this.scale / 2, pop * this.scale, pop
+				* this.scale);
 
-			return shape;
-		} else
-			return new Ellipse2D.Double(-10, -10, 20, 20);
+		return shape;
+
 	}
+
 }
