@@ -78,7 +78,7 @@ public class SimternetEvaluator extends Evaluator {
 
 		for (int i = 0; i < simternet.length; i++) {
 			// add reporters
-			NetworkProviderFitnessReporter npfr = new NetworkProviderFitnessReporter();
+			NetworkProviderFitnessReporter npfr = new NetworkProviderFitnessReporter(29);
 			npfr.setGeneration(state.generation);
 			npfr.setChunk(i);
 			simternet[i].addReporter(npfr);
