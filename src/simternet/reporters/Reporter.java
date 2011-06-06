@@ -51,7 +51,6 @@ public abstract class Reporter implements Steppable {
 	public void logHeaders() {
 		Logger l = Logger.getLogger(this.getLogger());
 		l.info(this.getFullHeader());
-
 	}
 
 	/**

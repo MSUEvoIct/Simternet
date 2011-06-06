@@ -7,8 +7,11 @@ import simternet.application.ApplicationProvider;
 public class ApplicationProviderFitnessReporter extends Reporter {
 
 	private static final long	serialVersionUID	= 1L;
-
 	public static final String	specificHeaders		= "ASP,Fitness";
+
+	static {
+		new ApplicationProviderFitnessReporter().logHeaders();
+	}
 
 	public ApplicationProviderFitnessReporter() {
 		super();
@@ -20,7 +23,7 @@ public class ApplicationProviderFitnessReporter extends Reporter {
 
 	@Override
 	public void collectData(SimState state) {
-		// TODO Auto-generated method stub
+
 		Simternet s = (Simternet) state;
 		for (ApplicationProvider asp : s.getASPs())
 			this.report(asp.toString() + Reporter.separater + asp.getFinancials().getNetWorth());
