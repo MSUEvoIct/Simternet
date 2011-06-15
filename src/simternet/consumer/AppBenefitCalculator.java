@@ -1,5 +1,7 @@
 package simternet.consumer;
 
+import java.io.Serializable;
+
 import simternet.application.ApplicationProvider;
 import simternet.network.EdgeNetwork;
 
@@ -12,8 +14,9 @@ import simternet.network.EdgeNetwork;
  * @author kkoning
  * 
  */
-public class AppBenefitCalculator {
+public class AppBenefitCalculator implements Serializable {
 
+	private static final long			serialVersionUID	= 1L;
 	private static AppBenefitCalculator	singleton;
 
 	public static AppBenefitCalculator getSingleton() {

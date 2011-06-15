@@ -1,14 +1,17 @@
 package simternet.application;
 
+import java.io.Serializable;
+
 /**
  * Generic, deterministic Quality Investment Strategy.
  * 
  * @author kkoning
  * 
  */
-public class QualityStrategy {
+public class QualityStrategy implements Serializable {
 
 	protected final ApplicationProvider	asp;
+	private static final long			serialVersionUID	= 1L;
 
 	public QualityStrategy(ApplicationProvider asp) {
 		this.asp = asp;

@@ -1,25 +1,22 @@
-/**
- * This class creates a visualization of a Simternet run using the JUNG library.
- * 
- * Runs an instance of Simternet and creates a GUI display that shows the state of the network.
- * 
- * @author Grayson Wright
- */
+package simternet.jung.gui;
 
-package simternet;
-
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.geom.Point2D;
+import java.util.HashMap;
 
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.WindowConstants;
+import javax.swing.border.BevelBorder;
 import javax.swing.tree.TreePath;
 
 import org.apache.commons.collections15.Transformer;
 
 import sim.util.Int2D;
-import simternet.application.AppCategory;
+import simternet.Simternet;
 import simternet.application.ApplicationProvider;
-import simternet.jung.GUI;
 import simternet.jung.appearance.BackbonePaintTransformer;
 import simternet.jung.appearance.BackboneStrokeTransformer;
 import simternet.jung.appearance.EdgePaintTransformer;
@@ -38,6 +35,7 @@ import simternet.jung.location.EdgeLocationTransformer;
 import simternet.jung.location.RandomLocationTransformer;
 import simternet.network.Backbone;
 import simternet.network.BackboneLink;
+import simternet.network.Datacenter;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 import simternet.nsp.NetworkProvider;
@@ -46,23 +44,32 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.AbstractModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 
-public class SimternetWithJung {
+public class GUI extends JPanel {
 
-	private EasyFilter<Network, BackboneLink>			filter;
-	private FilterGUI									filterGUI;
-	private DirectedSparseGraph<Network, BackboneLink>	graph;
-	private GUI											gui;
-	private EasyFilterLayout<Network, BackboneLink>		layout;
-	private long										seed;
-	private Simternet									sim;
-	private int											stepCount;
+	protected ControlPanel									controlPanel;
+	private EasyFilter<Network, BackboneLink>				filter;
+	private FilterGUI										filterGUI;
+	private DirectedSparseGraph<Network, BackboneLink>		graph;
+	protected InfoPanel										infoPanel;
+	protected HashMap<Object, Inspector>					inspectors;
+	private EasyFilterLayout<Network, BackboneLink>			layout;
+	protected Simternet										simternet;
+	protected VisualizationViewer<Network, BackboneLink>	viewer;
+
+	private static final long								serialVersionUID	= 1L;
 
 	public static void main(String[] args) {
-		new SimternetWithJung().start();
+		JFrame jFrame = new JFrame("Test");
+		jFrame.setContentPane(new GUI(new Simternet(System.currentTimeMillis())));
+		((GUI) jFrame.getContentPane()).start();
+		jFrame.pack();
+		jFrame.setVisible(true);
 	}
 
-	SimternetWithJung() {
-		this.init();
+	public GUI(Simternet simternet) {
+		super();
+		this.simternet = simternet;
+		this.initComponents();
 	}
 
 	public void filterButtonPressed() {
@@ -75,43 +82,41 @@ public class SimternetWithJung {
 			this.filterGUI.setVisible(true);
 	}
 
-	private void init() {
-		this.stepCount = 0;
+	protected void initComponents() {
+		this.inspectors = new HashMap<Object, Inspector>();
 
-		// Initialize simulation
-		this.seed = System.currentTimeMillis();
-		this.sim = new Simternet(this.seed);
+		this.setLayout(new BorderLayout());
 
-		// Initialize GUI - work is done in simternet.jung.GUI
-		this.gui = new GUI(this, this.initGraphViewer());
-		this.gui.setSeedLabel(this.seed);
-		this.gui.setStepLabel(0);
+		this.controlPanel = new ControlPanel(this);
+		this.controlPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+		this.add(this.controlPanel, BorderLayout.EAST);
 
-		this.setUpFilters();
+		this.infoPanel = new InfoPanel(this.simternet);
+		this.infoPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+		this.add(this.infoPanel, BorderLayout.SOUTH);
 
-		this.gui.pack();
-		this.gui.setVisible(true);
+		this.initViewer();
+		this.add(this.viewer, BorderLayout.CENTER);
+
+		this.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 	}
 
-	// @SuppressWarnings({ "rawtypes", "unchecked" })
-	private VisualizationViewer<Network, BackboneLink> initGraphViewer() {
+	protected void initViewer() {
 
 		this.graph = new DirectedSparseGraph<Network, BackboneLink>();
 		this.layout = new EasyFilterLayout<Network, BackboneLink>(this.graph, this.setUpLocationTransformer());
 
 		Dimension frameDimension = new Dimension(1000, 1000);
-
-		VisualizationViewer<Network, BackboneLink> viewer = new VisualizationViewer<Network, BackboneLink>(this.layout,
-				frameDimension);
-		viewer.getModel().setGraphLayout(this.layout, frameDimension);
+		this.viewer = new VisualizationViewer<Network, BackboneLink>(this.layout, frameDimension);
+		this.viewer.getModel().setGraphLayout(this.layout, frameDimension);
 
 		// Set up transformers to label and color the vertices and edges.
 
 		// Adjust Vertex Size:
-		viewer.getRenderContext().setVertexShapeTransformer(new NetworkShapeTransformer(this.sim));
+		this.viewer.getRenderContext().setVertexShapeTransformer(new NetworkShapeTransformer(this.simternet));
 
 		// Adjust Vertex Color:
-		viewer.getRenderContext().setVertexFillPaintTransformer(new EdgePaintTransformer(this.sim));
+		this.viewer.getRenderContext().setVertexFillPaintTransformer(new EdgePaintTransformer(this.simternet));
 
 		// Label Vertices:
 		// viewer.getRenderContext().setVertexLabelTransformer(new
@@ -122,46 +127,53 @@ public class SimternetWithJung {
 		// ToStringLabeller<BackboneLink>());
 
 		// Set BackboneLink thickness:
-		viewer.getRenderContext().setEdgeStrokeTransformer(new BackboneStrokeTransformer());
+		this.viewer.getRenderContext().setEdgeStrokeTransformer(new BackboneStrokeTransformer());
 		// Set BackboneLink color:
-		viewer.getRenderContext().setEdgeDrawPaintTransformer(new BackbonePaintTransformer());
+		this.viewer.getRenderContext().setEdgeDrawPaintTransformer(new BackbonePaintTransformer());
 
 		// Allow the mouse to pick and move vertices and edges.
-		@SuppressWarnings("rawtypes")
-		final AbstractModalGraphMouse graphMouse = new DefaultModalGraphMouse();
-		viewer.setGraphMouse(graphMouse);
-		viewer.addKeyListener(graphMouse.getModeKeyListener());
-		viewer.setToolTipText("<html><center>Type 'p' for Pick mode<p>Type 't' for Transform mode");
+		AbstractModalGraphMouse graphMouse = new DefaultModalGraphMouse<Network, BackboneLink>();
+		graphMouse.add(new VertexPickPlugin(this));
+		this.viewer.setGraphMouse(graphMouse);
+		this.viewer.addKeyListener(graphMouse.getModeKeyListener());
+		this.viewer.setToolTipText("<html><center>Type 'p' for Pick mode<p>Type 't' for Transform mode");
 
-		return viewer;
+		this.viewer.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+
 	}
 
-	public void resetNewSeed() {
-		this.seed = System.currentTimeMillis();
-		this.resetSameSeed();
+	public void removeInspector(Object object) {
+		if (this.inspectors.containsKey(object))
+			this.inspectors.remove(object);
 	}
 
-	public void resetSameSeed() {
-		this.gui.setVisible(false);
-		this.gui.dispose();
+	/**
+	 * Sets a new Simternet object for the GUI to display. Called when the user
+	 * loads a new Simternet object from a checkpoint file, or when they reload
+	 * the current checkpoint from the beginning.
+	 * 
+	 * @param sim
+	 *            - The new Simternet object to be represented
+	 */
+	public void setSimternet(Simternet sim) {
+		// clean up from last checkpoint
+		for (Inspector i : this.inspectors.values())
+			i.dispose();
+		this.inspectors.clear();
 
-		this.stepCount = 0;
-		this.sim = new Simternet(this.seed);
+		this.simternet = sim;
+		this.remove(this.viewer);
+		this.initViewer();
+		this.add(this.viewer, BorderLayout.CENTER);
+		this.updateAll();
 
-		// re-initialize GUI - work is done in simternet.jung.GUI
-		this.gui = new GUI(this, this.initGraphViewer());
-		this.gui.setSeedLabel(this.seed);
-		this.gui.setStepLabel(0);
-
-		this.setUpFilters();
-
-		this.gui.pack();
-		this.gui.setVisible(true);
-		this.start();
+		// refresh the labels in our InfoPanel
+		this.infoPanel.generationLabel.setText(Integer.toString(sim.generation));
+		this.infoPanel.chunkLabel.setText(Integer.toString(sim.chunk));
+		this.infoPanel.stepLabel.setText(Long.toString(sim.schedule.getSteps()));
 	}
 
-	private void setUpFilters() {
-
+	protected void setUpFilters() {
 		// TODO: user-generated filters, not hard-coded ones.
 		this.filter = new CompositeFilter<Network, BackboneLink>();
 		((CompositeFilter<Network, BackboneLink>) this.filter).add(new SingleEdgeFilter(new Int2D(3, 1)));
@@ -169,7 +181,7 @@ public class SimternetWithJung {
 		((CompositeFilter<Network, BackboneLink>) this.filter).add(new HighPassFilter(1000000.0));
 	}
 
-	private Transformer<Network, Point2D> setUpLocationTransformer() {
+	protected Transformer<Network, Point2D> setUpLocationTransformer() {
 		// Set up transformers to move the vertices to the correct pixel
 		// coordinates, depending on the type of Network it is.
 		EdgeLocationTransformer edgeLocTfmr = new EdgeLocationTransformer(new Dimension(50, 50));
@@ -191,22 +203,27 @@ public class SimternetWithJung {
 		return compositeTransformer;
 	}
 
-	public void start() {
+	protected void start() {
 		// start simulation
-		this.sim.start();
-		this.stepCount = 0;
-		this.step(this.stepCount);
+		this.simternet.start();
+		this.updateAll();
 	}
 
 	public void step(int n) {
 		for (int i = 0; i < n; i++)
-			this.sim.schedule.step(this.sim);
+			this.simternet.schedule.step(this.simternet);
 
 		// update stepCount Label
-		this.stepCount += n;
-		this.gui.setStepLabel(this.stepCount);
+		this.infoPanel.stepLabel.setText(Long.toString(this.simternet.schedule.getSteps()));
 
+		this.updateAll();
+	}
+
+	protected void updateAll() {
 		this.updateGraph();
+
+		for (Inspector i : this.inspectors.values())
+			i.update();
 	}
 
 	/*
@@ -231,12 +248,15 @@ public class SimternetWithJung {
 					filter.setActive(true);
 				}
 
-		this.updateGraph();
+		this.updateAll();
 	}
 
 	public void updateGraph() {
 
-		for (ApplicationProvider asp : this.sim.getASPs(AppCategory.COMMUNICATION)) {
+		if (this.filter == null)
+			this.setUpFilters();
+
+		for (ApplicationProvider asp : this.simternet.getASPs()) {
 			this.graph.addVertex(asp.getDataCenter());
 			for (Network net : asp.getConnectedNetworks()) {
 				this.graph.addVertex(net);
@@ -244,9 +264,7 @@ public class SimternetWithJung {
 			}
 		}
 
-		for (NetworkProvider nsp : this.sim.getNetworkServiceProviders()) {
-			// TODO: Display Each NSP in a different color
-
+		for (NetworkProvider nsp : this.simternet.getNetworkServiceProviders()) {
 			/*
 			 * If a vertex or edge is already represented in the graph, it will
 			 * not be duplicated by this function. It is safe to add an object
@@ -269,6 +287,29 @@ public class SimternetWithJung {
 		this.layout.setGraph(this.graph);
 
 		// this.viewer.repaint();
-		this.gui.repaint();
+		this.repaint();
+	}
+
+	public void vertexPicked(Network vertex) {
+
+		if (this.inspectors.containsKey(vertex)) {
+			Inspector i = this.inspectors.get(vertex);
+			i.toFront();
+		} else {
+			Inspector inspector = null;
+
+			if (vertex instanceof EdgeNetwork)
+				inspector = new EdgeInspector((EdgeNetwork) vertex, this);
+			else if (vertex instanceof Backbone)
+				inspector = new NetworkProviderInspector(((Backbone) vertex).getOwner(), this);
+			else if (vertex instanceof Datacenter)
+				inspector = new ApplicationProviderInspector(((Datacenter) vertex).getOwner(), this);
+
+			if (inspector != null) {
+				this.inspectors.put(vertex, inspector);
+				inspector.pack();
+				inspector.setVisible(true);
+			}
+		}
 	}
 }

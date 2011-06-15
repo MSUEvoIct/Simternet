@@ -7,18 +7,19 @@ import sim.engine.Steppable;
 
 public abstract class Reporter implements Steppable {
 
-	public static final String	commonFields		= "Generation,Chunk,Step,";
+	public Integer				chunk				= null;
 
+	public Integer				generation			= null;
+
+	protected int				interval			= 1;
+	public Long					step				= null;
+	public static final String	commonFields		= "Generation,Chunk,Step,";
 	public static final String	dataFileSuffix		= ".out.csv";
 	public static final String	separater			= ",";
 	private static final long	serialVersionUID	= 1L;
-	public Integer				chunk				= null;
-	public Integer				generation			= null;
-	protected int				interval			= 1;
-	public Long					step				= null;
 
 	public Reporter() {
-		super();
+		this(1);
 	}
 
 	public Reporter(int i) {
@@ -55,7 +56,7 @@ public abstract class Reporter implements Steppable {
 
 	/**
 	 * Called by Reporter's children when outputting data. Reporter enforces
-	 * output of generation, chunk, and step data each line.
+	 * output of generation, chunkLabel, and step data each line.
 	 * 
 	 * @param line
 	 */

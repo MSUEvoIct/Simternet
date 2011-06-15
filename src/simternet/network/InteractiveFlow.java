@@ -1,15 +1,19 @@
 package simternet.network;
 
+import java.io.Serializable;
+
 import simternet.consumer.Consumer;
 
-public class InteractiveFlow extends NetFlow {
+public class InteractiveFlow extends NetFlow implements Serializable {
 
 	/**
 	 * The speed this flow would <i>like</i> to have, in an uncongested network.
 	 * This will be set for <i>interactive</i> flows, e.g., streaming.
 	 * Non-interactive flows will transmit as quickly as possible.
 	 */
-	protected Double bandwidthRequested;
+	protected Double			bandwidthRequested;
+
+	private static final long	serialVersionUID	= 1L;
 
 	/**
 	 * Create an interactive flow
@@ -26,8 +30,7 @@ public class InteractiveFlow extends NetFlow {
 	 *            bandwidthRequested only so that the user can compare actual
 	 *            and requested once they receive the flow.
 	 */
-	public InteractiveFlow(Network source, Network destination,
-			Consumer user, Double durationActual,
+	public InteractiveFlow(Network source, Network destination, Consumer user, Double durationActual,
 			Double bandwidthRequested, Double bandwidthActual) {
 
 		super(source, destination, user);

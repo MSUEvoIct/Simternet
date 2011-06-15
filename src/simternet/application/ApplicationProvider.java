@@ -156,7 +156,7 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 		return this.datacenter;
 	}
 
-	/* 
+	/*
 	 * Utility function used by the user interface. May be some privacy issues.
 	 */
 	public Datacenter getDataCenter() {
@@ -211,6 +211,10 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 		NetFlow flow = this.createNetFlow(consumer, network);
 
 		this.datacenter.originate(flow);
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Override

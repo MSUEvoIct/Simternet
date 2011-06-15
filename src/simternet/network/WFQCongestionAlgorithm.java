@@ -1,5 +1,6 @@
 package simternet.network;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.List;
@@ -11,11 +12,13 @@ import java.util.List;
  * @author kkoning
  * 
  */
-public class WFQCongestionAlgorithm implements CongestionAlgorithm {
+public class WFQCongestionAlgorithm implements CongestionAlgorithm, Serializable {
 
-	protected Double		congestionRatio	= 0D;
-	protected String		congestionReport;
-	protected BackboneLink	link;
+	protected Double			congestionRatio		= 0D;
+	protected String			congestionReport;
+	protected BackboneLink		link;
+
+	private static final long	serialVersionUID	= 1L;
 
 	public WFQCongestionAlgorithm(BackboneLink link) {
 		this.link = link;

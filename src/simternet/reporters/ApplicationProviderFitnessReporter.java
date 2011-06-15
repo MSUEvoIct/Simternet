@@ -12,10 +12,6 @@ public class ApplicationProviderFitnessReporter extends Reporter {
 	static {
 		new ApplicationProviderFitnessReporter().logHeaders();
 	}
-	
-	public ApplicationProviderFitnessReporter(Integer interval) {
-		super(interval);
-	}
 
 	public ApplicationProviderFitnessReporter() {
 		super();
@@ -23,6 +19,10 @@ public class ApplicationProviderFitnessReporter extends Reporter {
 
 	public ApplicationProviderFitnessReporter(int i) {
 		super(i);
+	}
+
+	public ApplicationProviderFitnessReporter(Integer interval) {
+		super(interval);
 	}
 
 	@Override

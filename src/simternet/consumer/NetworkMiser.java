@@ -1,5 +1,6 @@
 package simternet.consumer;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import simternet.network.EdgeNetwork;
@@ -11,8 +12,9 @@ import simternet.network.Network;
  * @author kkoning
  * 
  */
-public class NetworkMiser extends NetManager {
+public class NetworkMiser extends NetManager implements Serializable {
 
+	private static final long	serialVersionUID			= 1L;
 	private static NetworkMiser	singleton;
 	private static Double		willSwitchPriceDifference	= 20.0;
 

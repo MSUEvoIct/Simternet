@@ -1,5 +1,6 @@
 package simternet.consumer;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,8 +9,9 @@ import java.util.List;
 import simternet.application.AppCategory;
 import simternet.application.ApplicationProvider;
 
-public class GreedyAppManager extends AppManager {
+public class GreedyAppManager extends AppManager implements Serializable {
 
+	private static final long		serialVersionUID	= 1L;
 	private static GreedyAppManager	singleton;
 
 	public static GreedyAppManager getSingleton() {

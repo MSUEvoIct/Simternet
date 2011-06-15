@@ -11,11 +11,11 @@ import javax.swing.JPanel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import simternet.SimternetWithJung;
+import simternet.jung.gui.GUI;
 
 public class FilterGUI extends JFrame implements TreeCheckingListener {
 
-	private SimternetWithJung	owner;
+	private GUI				owner;
 	private JPanel				panel;
 	private TreeNode			root;
 	private CheckboxTree		tree;
@@ -29,15 +29,15 @@ public class FilterGUI extends JFrame implements TreeCheckingListener {
 	// this.init();
 	// }
 
-	public FilterGUI(SimternetWithJung o, TreeNode r) {
+	public FilterGUI(GUI owner, TreeNode r) {
 		super("Available Filters");
 
-		this.init(o, r);
+		this.init(owner, r);
 	}
 
-	private void init(SimternetWithJung o, TreeNode r) {
+	private void init(GUI owner, TreeNode r) {
 
-		this.owner = o;
+		this.owner = owner;
 
 		this.panel = new JPanel();
 

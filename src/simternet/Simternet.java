@@ -46,8 +46,10 @@ public class Simternet extends SimState implements Serializable {
 
 	protected Map<AppCategory, Collection<ApplicationProvider>>	ASPsByCategory;
 
-	public Parameters											config;
+	// Simply for record-keeping if run with ECJ
+	public int													chunk;
 
+	public Parameters											config;
 	/**
 	 * All consumer classes in the simulation.
 	 */
@@ -55,14 +57,18 @@ public class Simternet extends SimState implements Serializable {
 
 	Collection<Steppable>										deadAgents			= new ArrayList<Steppable>();
 
+	// Simply for record-keeping if run with ECJ
+	public int													generation;
+
 	/**
 	 * All Network Service Providers in the simulation.
 	 */
 	protected Collection<NetworkProvider>						networkServiceProviders;
 
 	protected int												numConsumerAgents	= 0;
-	/*
-	 * Do we use an LCS to evolve the NSP?
+
+	/**
+	 * Is this instance of Simternet run within ECJ?
 	 */
 	private static boolean										evolve				= false;
 
@@ -370,8 +376,9 @@ public class Simternet extends SimState implements Serializable {
 		// create three ASPs for each application class
 
 		for (AppCategory ac : AppCategory.values())
-			for (int i = 0; i <= 1; i++)
-				this.enterMarket(new ApplicationProvider(this, ac));
+			if (!Simternet.evolve)
+				for (int i = 0; i <= 1; i++)
+					this.enterMarket(new ApplicationProvider(this, ac));
 	}
 
 	private void initArbiter() {
@@ -409,11 +416,10 @@ public class Simternet extends SimState implements Serializable {
 	 * DO: Specify this somehow in parameters, rather than source.
 	 */
 	private void initNetworkServiceProviders() {
-		if (Simternet.evolve)
-			// this.enterMarket(new EvolvingNetworkProvider(this));
-			;
-		else
+		if (!Simternet.evolve) {
 			this.enterMarket(new DumbNetworkServiceProvider(this));
+			this.enterMarket(new DumbNetworkServiceProvider(this));
+		}
 	}
 
 	@Override

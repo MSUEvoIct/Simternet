@@ -9,6 +9,7 @@ public class GPQualityStrategy extends QualityStrategy {
 
 	protected final GPIndividual	ind;
 	protected final GPTree			tree;
+	private static final long		serialVersionUID	= 1L;
 
 	public GPQualityStrategy(ApplicationProvider asp, GPIndividual ind, GPTree tree) {
 		super(asp);
