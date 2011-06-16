@@ -20,6 +20,8 @@ import edu.uci.ics.jung.visualization.control.AnimatedPickingGraphMousePlugin;
 
 /**
  * Calls GUI.vertexPicked(Network) when a single vertex is selected.
+ * 
+ * @author graysonwright
  */
 /*
  * Slight abuse of standard object-oriented rules here... This class doesn't
@@ -55,12 +57,12 @@ public class VertexPickPlugin extends AnimatedPickingGraphMousePlugin<Network, B
 	 * If a Vertex was picked in the mousePressed event, notify the
 	 * VisualizationViewer of the selection.
 	 * 
-	 * @param e
-	 *            the event
+	 * @param event
+	 *            the MouseEvent
 	 */
 	@Override
-	public void mouseReleased(MouseEvent e) {
-		if (e.getModifiers() == this.modifiers)
+	public void mouseReleased(MouseEvent event) {
+		if (event.getModifiers() == this.modifiers)
 			if (this.vertex != null)
 				this.owner.vertexPicked(this.vertex);
 	}

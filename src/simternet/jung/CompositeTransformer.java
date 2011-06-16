@@ -21,8 +21,14 @@ public abstract class CompositeTransformer<V, E> extends PriorityTransformer<V, 
 		this.transformerQueue = new PriorityQueue<PriorityTransformer<V, E>>();
 	}
 
+	/**
+	 * Stores a transformer, which it will later ask to transform objects (if it
+	 * can handle them)
+	 * 
+	 * @param transformer
+	 *            the transformer to add
+	 */
 	public void addTransformer(PriorityTransformer<V, E> transformer, int priority, Dimension offset) {
-		transformer.setPriority(priority);
 		this.transformerQueue.add(transformer);
 	}
 

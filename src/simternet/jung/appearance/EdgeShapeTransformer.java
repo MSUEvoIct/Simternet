@@ -8,6 +8,16 @@ import org.apache.commons.collections15.Transformer;
 import simternet.Simternet;
 import simternet.network.EdgeNetwork;
 
+/**
+ * Defines the shape and size of EdgeNetworks
+ * 
+ * Shape: Circle
+ * 
+ * Size: proportional to the consumer population at that location
+ * 
+ * @author graysonwright
+ * 
+ */
 public class EdgeShapeTransformer implements Transformer<EdgeNetwork, Shape> {
 
 	protected Simternet	s;

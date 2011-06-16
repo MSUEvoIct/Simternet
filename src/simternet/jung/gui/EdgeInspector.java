@@ -6,13 +6,30 @@ import javax.swing.JLabel;
 
 import simternet.network.EdgeNetwork;
 
+/**
+ * Inspects EdgeNetwork objects.
+ * 
+ * Currently displays the location, owner (NSP), bandwidth, and price of the
+ * edge network
+ * 
+ * @author graysonwright
+ * 
+ */
 public class EdgeInspector extends Inspector {
 
 	protected JLabel			locationLabel, ownerLabel, bandwidthLabel, priceLabel;
-	protected static final int	numRows				= 5;
+	protected static final int	numRows				= 4;
 
 	private static final long	serialVersionUID	= 1L;
 
+	/**
+	 * Initializes the object and defines the layout
+	 * 
+	 * @param net
+	 *            the object to be inspected
+	 * @param owner
+	 *            the GUI that this object reports to
+	 */
 	public EdgeInspector(EdgeNetwork net, GUI owner) {
 		super(net, owner);
 
@@ -35,12 +52,13 @@ public class EdgeInspector extends Inspector {
 		this.add(new JLabel("Price"));
 		this.add(this.priceLabel);
 
-		this.add(new JLabel("0"));
-		this.add(new JLabel("0"));
-
 		this.update();
 	}
 
+	/**
+	 * Updates the displayed information to reflect recent changes in the
+	 * simulation
+	 */
 	@Override
 	public void update() {
 

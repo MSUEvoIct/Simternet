@@ -13,7 +13,7 @@ import org.apache.commons.collections15.Transformer;
 
 public abstract class PriorityTransformer<V, E> implements Transformer<V, E>, Comparable<PriorityTransformer<V, E>> {
 
-	protected int	priority;
+	protected int	priority	= 1;
 
 	public int compareTo(PriorityTransformer<V, E> transformer) {
 		return transformer.getPriority() - this.getPriority();

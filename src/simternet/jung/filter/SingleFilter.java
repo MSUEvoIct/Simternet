@@ -4,6 +4,17 @@ import java.util.Enumeration;
 
 import javax.swing.tree.TreeNode;
 
+/**
+ * A single EasyFilter (non-composite). Compatible with JTreeChart, which is
+ * used to turn filters on and off in the graphical interface.
+ * 
+ * @author graysonwright
+ * 
+ * @param <V>
+ *            vertex type
+ * @param <E>
+ *            edge type
+ */
 public abstract class SingleFilter<V, E> extends EasyFilter<V, E> {
 
 	@Override

@@ -6,13 +6,28 @@ import javax.swing.JLabel;
 
 import simternet.nsp.NetworkProvider;
 
+/**
+ * Inspects NetworkProvider objects
+ * 
+ * Currently displays no information. TODO: Add information to display
+ * 
+ * @author graysonwright
+ * 
+ */
 public class NetworkProviderInspector extends Inspector {
 
-	protected JLabel			locationLabel, ownerLabel, bandwidthLabel, priceLabel;
-	protected static final int	numRows				= 5;
+	protected static final int	numRows				= 1;
 
 	private static final long	serialVersionUID	= 1L;
 
+	/**
+	 * Initializes the object and defines the layout
+	 * 
+	 * @param nsp
+	 *            object to inspect
+	 * @param owner
+	 *            the GUI in charge of this inspector
+	 */
 	public NetworkProviderInspector(NetworkProvider nsp, GUI owner) {
 		super(nsp, owner);
 
@@ -30,10 +45,14 @@ public class NetworkProviderInspector extends Inspector {
 		// this.add(new JLabel("Price"));
 		// this.add(new JLabel(nsp.getPrice().toString()));
 
-		this.add(new JLabel("0"));
-		this.add(new JLabel("0"));
+		this.add(new JLabel("Place"));
+		this.add(new JLabel("Holder"));
 	}
 
+	/**
+	 * Updates the displayed values with the current values in the Simternet
+	 * simulation.
+	 */
 	@Override
 	public void update() {
 		// TODO Auto-generated method stub

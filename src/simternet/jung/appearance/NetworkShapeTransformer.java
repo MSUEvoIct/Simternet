@@ -11,6 +11,11 @@ import simternet.network.Datacenter;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 
+/**
+ * Defines the size and shape of Network objects in the graph.
+ * 
+ * @author graysonwright
+ */
 public class NetworkShapeTransformer implements Transformer<Network, Shape> {
 
 	protected Simternet	s;

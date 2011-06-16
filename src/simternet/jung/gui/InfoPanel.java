@@ -7,17 +7,20 @@ import javax.swing.JPanel;
 
 import simternet.Simternet;
 
-/*
- * Sets up a JPanel that displays information about the current Simternet in the display.
+/**
+ * Sets up a JPanel that displays information about the current displayed
+ * Simternet.
+ * 
+ * @author graysonwright
+ * 
  */
 public class InfoPanel extends JPanel {
 
-	public JLabel				chunkLabel;
-	public JLabel				generationLabel;
-	public JLabel				stepLabel;
+	protected JLabel			chunkLabel;
+	protected JLabel			generationLabel;
+	protected JLabel			stepLabel;
 
 	protected static final int	numCols				= 3;
-
 	private static final long	serialVersionUID	= 1L;
 
 	public InfoPanel() {
@@ -54,5 +57,17 @@ public class InfoPanel extends JPanel {
 		this.stepLabel = new JLabel("0");
 		this.add(this.stepLabel);
 
+	}
+
+	public void setChunk(int chunk) {
+		this.chunkLabel.setText(Integer.toString(chunk));
+	}
+
+	public void setGeneration(int generation) {
+		this.generationLabel.setText(Integer.toString(generation));
+	}
+
+	public void setStep(long step) {
+		this.stepLabel.setText(Long.toString(step));
 	}
 }

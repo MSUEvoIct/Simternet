@@ -6,11 +6,9 @@ import simternet.network.Datacenter;
 import simternet.network.Network;
 
 /**
- * DatacenterLocationTransformer
- * 
  * A transformer to move DataCenters to their correct location onscreen.
  * 
- * See comments for <PriorityTransformer.java>
+ * See comments for <ColumnLocationTransformer.java>
  * 
  * @author graysonwright
  */

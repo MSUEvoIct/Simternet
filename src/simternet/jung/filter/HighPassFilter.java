@@ -3,6 +3,13 @@ package simternet.jung.filter;
 import simternet.network.BackboneLink;
 import simternet.network.Network;
 
+/**
+ * Filters for BackboneLinks that have a bandwidth higher than a given cutoff
+ * value
+ * 
+ * @author graysonwright
+ * 
+ */
 public class HighPassFilter extends SingleFilter<Network, BackboneLink> {
 
 	private double	cutoff;

@@ -6,12 +6,27 @@ import javax.swing.JLabel;
 
 import simternet.application.ApplicationProvider;
 
+/**
+ * Inspects ApplicationProvider objects
+ * 
+ * Currently displays the category, quality, and price of an ApplicationProvider
+ * 
+ * @author graysonwright
+ */
 public class ApplicationProviderInspector extends Inspector {
 
 	protected JLabel			categoryLabel, qualityLabel, priceLabel;
 	protected static final int	numRows				= 3;
 	private static final long	serialVersionUID	= 1L;
 
+	/**
+	 * Initializes the object and defines the layout
+	 * 
+	 * @param asp
+	 *            the object to be inspected
+	 * @param owner
+	 *            the GUI to which this inspector reports
+	 */
 	public ApplicationProviderInspector(ApplicationProvider asp, GUI owner) {
 		super(asp, owner);
 
@@ -33,6 +48,10 @@ public class ApplicationProviderInspector extends Inspector {
 		this.update();
 	}
 
+	/**
+	 * Updates the information displayed to reflect recent changes in the
+	 * simulation
+	 */
 	@Override
 	public void update() {
 

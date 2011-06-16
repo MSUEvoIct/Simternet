@@ -11,7 +11,8 @@ import simternet.network.Network;
 
 /**
  * A transformer to move Edge Networks to their correct location onscreen. They
- * are arranged in a grid pattern.
+ * are arranged in a grid pattern, with each EdgeNetwork occupying a rectangular
+ * "cell"
  * 
  * See comments for <PriorityTransformer.java>
  * 
@@ -19,6 +20,7 @@ import simternet.network.Network;
  */
 public class EdgeLocationTransformer extends PriorityTransformer<Network, Point2D> {
 
+	// Each EdgeNetwork location corresponds to a cell in a grid in the display.
 	Dimension	cellSize;
 
 	public EdgeLocationTransformer(Dimension cSize) {

@@ -71,6 +71,12 @@ public class CompositeLocationTransformer<V> extends CompositeTransformer<V, Poi
 
 		Point result = null;
 
+		/*
+		 * TODO: This does not traverse the priority queue in order. At this
+		 * point, this does not make a big difference, because the Transformers
+		 * we are using are mutually exclusive, and we don't need to worry about
+		 * their priorities over one another.
+		 */
 		for (PriorityTransformer<V, Point2D> ntpTransformer : this.transformerQueue)
 			if (ntpTransformer.handles(vertex)) {
 				result = (Point) ntpTransformer.transform(vertex);

@@ -11,9 +11,9 @@ import simternet.network.Network;
 /**
  * ColumnLocationTransformer
  * 
- * A transformer to move Backbones to their correct location onscreen.
+ * A transformer to move Networks to their correct location onscreen.
  * 
- * See comments for <PriorityTransformer.java>
+ * See <PriorityTransformer.java>
  * 
  * @author graysonwright
  */

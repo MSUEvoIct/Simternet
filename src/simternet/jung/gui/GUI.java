@@ -20,6 +20,7 @@ import simternet.application.ApplicationProvider;
 import simternet.jung.appearance.BackbonePaintTransformer;
 import simternet.jung.appearance.BackboneStrokeTransformer;
 import simternet.jung.appearance.EdgePaintTransformer;
+import simternet.jung.appearance.NetworkLabeller;
 import simternet.jung.appearance.NetworkShapeTransformer;
 import simternet.jung.filter.CompositeFilter;
 import simternet.jung.filter.DatacenterNameFilter;
@@ -59,19 +60,29 @@ public class GUI extends JPanel {
 	private static final long								serialVersionUID	= 1L;
 
 	public static void main(String[] args) {
-		JFrame jFrame = new JFrame("Test");
+		JFrame jFrame = new JFrame("Simternet Checkpoint Reader");
 		jFrame.setContentPane(new GUI(new Simternet(System.currentTimeMillis())));
 		((GUI) jFrame.getContentPane()).start();
 		jFrame.pack();
 		jFrame.setVisible(true);
 	}
 
+	/**
+	 * Initializes the GUI with a given Simternet simulation
+	 * 
+	 * @param simternet
+	 *            the simulation to display
+	 */
 	public GUI(Simternet simternet) {
 		super();
 		this.simternet = simternet;
 		this.initComponents();
 	}
 
+	/**
+	 * Called by ControlPanel when the filter button is pressed. Opens a JFrame
+	 * that allows the user to pick filters to apply
+	 */
 	public void filterButtonPressed() {
 		if (this.filterGUI == null) {
 			this.filterGUI = new FilterGUI(this, this.filter);
@@ -82,6 +93,9 @@ public class GUI extends JPanel {
 			this.filterGUI.setVisible(true);
 	}
 
+	/**
+	 * Defines the layout of the GUI
+	 */
 	protected void initComponents() {
 		this.inspectors = new HashMap<Object, Inspector>();
 
@@ -101,6 +115,10 @@ public class GUI extends JPanel {
 		this.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 	}
 
+	/**
+	 * Initializes the VisualizationViewer used for displaying the Simternet
+	 * graph. Initializes transformers to modify the portrayal of the graph
+	 */
 	protected void initViewer() {
 
 		this.graph = new DirectedSparseGraph<Network, BackboneLink>();
@@ -112,17 +130,16 @@ public class GUI extends JPanel {
 
 		// Set up transformers to label and color the vertices and edges.
 
-		// Adjust Vertex Size:
+		// Adjust vertex shape/size:
 		this.viewer.getRenderContext().setVertexShapeTransformer(new NetworkShapeTransformer(this.simternet));
 
-		// Adjust Vertex Color:
+		// Adjust vertex color:
 		this.viewer.getRenderContext().setVertexFillPaintTransformer(new EdgePaintTransformer(this.simternet));
 
-		// Label Vertices:
-		// viewer.getRenderContext().setVertexLabelTransformer(new
-		// ToStringLabeller<Network>());
+		// Label vertices:
+		this.viewer.getRenderContext().setVertexLabelTransformer(new NetworkLabeller());
 
-		// Label Edges:
+		// Label edges:
 		// viewer.getRenderContext().setEdgeLabelTransformer(new
 		// ToStringLabeller<BackboneLink>());
 
@@ -133,16 +150,20 @@ public class GUI extends JPanel {
 
 		// Allow the mouse to pick and move vertices and edges.
 		AbstractModalGraphMouse graphMouse = new DefaultModalGraphMouse<Network, BackboneLink>();
+		// Use a special PickPlugin to notify this GUI class when a vertex is
+		// picked.
 		graphMouse.add(new VertexPickPlugin(this));
 		this.viewer.setGraphMouse(graphMouse);
 		this.viewer.addKeyListener(graphMouse.getModeKeyListener());
-		this.viewer.setToolTipText("<html><center>Type 'p' for Pick mode<p>Type 't' for Transform mode");
+		this.viewer.setToolTipText("<html><center>Drag and scroll to translate and zoom<p>Control-click to inspect");
 
 		this.viewer.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 
 	}
 
 	public void removeInspector(Object object) {
+		// FIXME: This is not correctly removing the inspectors. Slight memory
+		// leak.
 		if (this.inspectors.containsKey(object))
 			this.inspectors.remove(object);
 	}
@@ -168,11 +189,15 @@ public class GUI extends JPanel {
 		this.updateAll();
 
 		// refresh the labels in our InfoPanel
-		this.infoPanel.generationLabel.setText(Integer.toString(sim.generation));
-		this.infoPanel.chunkLabel.setText(Integer.toString(sim.chunk));
-		this.infoPanel.stepLabel.setText(Long.toString(sim.schedule.getSteps()));
+		this.infoPanel.setGeneration(sim.generation);
+		this.infoPanel.setChunk(sim.chunk);
+		this.infoPanel.setStep(sim.schedule.getSteps());
 	}
 
+	/**
+	 * Initializes filters (initially non-active) that the user can later apply
+	 * to the simulation
+	 */
 	protected void setUpFilters() {
 		// TODO: user-generated filters, not hard-coded ones.
 		this.filter = new CompositeFilter<Network, BackboneLink>();
@@ -181,6 +206,13 @@ public class GUI extends JPanel {
 		((CompositeFilter<Network, BackboneLink>) this.filter).add(new HighPassFilter(1000000.0));
 	}
 
+	/**
+	 * Initializes and returns a Transformer that will lay out the contents of
+	 * the graph onscreen
+	 * 
+	 * @return a transformer that dictates where in the visualization of the
+	 *         graph each item should be displayed
+	 */
 	protected Transformer<Network, Point2D> setUpLocationTransformer() {
 		// Set up transformers to move the vertices to the correct pixel
 		// coordinates, depending on the type of Network it is.
@@ -203,25 +235,41 @@ public class GUI extends JPanel {
 		return compositeTransformer;
 	}
 
+	/**
+	 * Starts a simternet simulation and updates the GUI components to reflect
+	 * the changes
+	 */
 	protected void start() {
 		// start simulation
 		this.simternet.start();
 		this.updateAll();
 	}
 
+	/**
+	 * Steps the Simternet simulation a given number of times, and updates the
+	 * GUI components to reflect any changes
+	 * 
+	 * @param n
+	 *            the number of steps to execute
+	 */
 	public void step(int n) {
 		for (int i = 0; i < n; i++)
 			this.simternet.schedule.step(this.simternet);
 
-		// update stepCount Label
-		this.infoPanel.stepLabel.setText(Long.toString(this.simternet.schedule.getSteps()));
-
 		this.updateAll();
 	}
 
+	/**
+	 * Updates the GUI's components (the graph, infoPanel, and inspectors)
+	 */
 	protected void updateAll() {
+		// Update the graph visualization
 		this.updateGraph();
 
+		// update the stepCount Label in the infoPanel
+		this.infoPanel.setStep(this.simternet.schedule.getSteps());
+
+		// Update each of the inspectors
 		for (Inspector i : this.inspectors.values())
 			i.update();
 	}
@@ -290,6 +338,12 @@ public class GUI extends JPanel {
 		this.repaint();
 	}
 
+	/**
+	 * Opens an inspector window for the given vertex
+	 * 
+	 * @param vertex
+	 *            the vertex to inspect
+	 */
 	public void vertexPicked(Network vertex) {
 
 		if (this.inspectors.containsKey(vertex)) {
@@ -299,7 +353,7 @@ public class GUI extends JPanel {
 			Inspector inspector = null;
 
 			if (vertex instanceof EdgeNetwork)
-				inspector = new EdgeInspector((EdgeNetwork) vertex, this);
+				inspector = new LocationInspector(((EdgeNetwork) vertex).getLocation(), this);
 			else if (vertex instanceof Backbone)
 				inspector = new NetworkProviderInspector(((Backbone) vertex).getOwner(), this);
 			else if (vertex instanceof Datacenter)

@@ -9,6 +9,15 @@ import simternet.Simternet;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 
+/**
+ * Defines the color of Edge Networks
+ * 
+ * the color follows a gradient from red to green, representing the percentage
+ * of consumer who are actively subscribing to a network provider at that time
+ * 
+ * @author graysonwright
+ * 
+ */
 public class EdgePaintTransformer implements Transformer<Network, Paint> {
 
 	protected Simternet	sim;

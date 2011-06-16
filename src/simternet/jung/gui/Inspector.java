@@ -5,12 +5,28 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 
+/**
+ * A gui that, given an object from a Simternet simulation, displays information
+ * about that object to the user
+ * 
+ * @author graysonwright
+ * 
+ */
 public abstract class Inspector extends JFrame {
 
 	protected Object			object;
 	protected GUI				owner;
 	private static final long	serialVersionUID	= 1L;
 
+	/**
+	 * Initializes the JFrame and defines behavior to notify the owner when the
+	 * inspector is closed
+	 * 
+	 * @param object
+	 *            the object to be inspected
+	 * @param owner
+	 *            the GUI that this inspector reports to, if any
+	 */
 	public Inspector(Object object, GUI owner) {
 		super(object.toString());
 
@@ -21,15 +37,20 @@ public abstract class Inspector extends JFrame {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				Inspector.this.frameClosed();
-				Inspector.this.dispose();
 			}
 		});
 	}
 
 	protected void frameClosed() {
-		this.owner.removeInspector(this.object);
+		if (this.owner != null)
+			this.owner.removeInspector(this.object);
+		this.dispose();
 	}
 
+	/**
+	 * Updates the displayed information to reflect recent changes in the
+	 * Simternet simulation
+	 */
 	abstract public void update();
 
 }

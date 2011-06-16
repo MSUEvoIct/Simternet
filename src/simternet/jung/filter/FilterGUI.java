@@ -13,9 +13,16 @@ import javax.swing.tree.TreePath;
 
 import simternet.jung.gui.GUI;
 
+/**
+ * A GUI that allows the user to select which filters are currently enabled, and
+ * which are not. Does not allow the user to create new filters
+ * 
+ * @author graysonwright
+ * 
+ */
 public class FilterGUI extends JFrame implements TreeCheckingListener {
 
-	private GUI				owner;
+	private GUI					owner;
 	private JPanel				panel;
 	private TreeNode			root;
 	private CheckboxTree		tree;
@@ -35,7 +42,15 @@ public class FilterGUI extends JFrame implements TreeCheckingListener {
 		this.init(owner, r);
 	}
 
-	private void init(GUI owner, TreeNode r) {
+	/**
+	 * Initializes and defines layout (a tree structure)
+	 * 
+	 * @param owner
+	 *            the GUI that this JFrame reports to
+	 * @param root
+	 *            the root of the filter tree
+	 */
+	private void init(GUI owner, TreeNode root) {
 
 		this.owner = owner;
 
@@ -44,7 +59,7 @@ public class FilterGUI extends JFrame implements TreeCheckingListener {
 		this.setContentPane(this.panel);
 		this.panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-		this.root = r;
+		this.root = root;
 		this.setTree(new CheckboxTree(this.root));
 
 		this.tree.getCheckingModel().setCheckingMode(CheckingMode.PROPAGATE_PRESERVING_UNCHECK);
@@ -59,6 +74,10 @@ public class FilterGUI extends JFrame implements TreeCheckingListener {
 		this.tree = tree;
 	}
 
+	/**
+	 * Called by the gui when a node is selected or de-selected. Notifies the
+	 * owner that changes were made
+	 */
 	public void valueChanged(TreeCheckingEvent e) {
 		TreePath[] paths = this.tree.getCheckingPaths();
 		this.owner.updateFilters(paths);

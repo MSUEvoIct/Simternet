@@ -18,7 +18,7 @@ import simternet.jung.PriorityTransformer;
  */
 public class RandomLocationTransformer<V> extends PriorityTransformer<V, Point2D> {
 
-	private Dimension	dimension;
+	protected Dimension	dimension;
 
 	public RandomLocationTransformer(Dimension d) {
 		this.dimension = d;
@@ -29,9 +29,11 @@ public class RandomLocationTransformer<V> extends PriorityTransformer<V, Point2D
 		return true;
 	}
 
+	/**
+	 * Returns a random point within the bounds of the dimension
+	 */
 	@Override
 	public Point2D transform(V vertex) {
-
 		Random random = new Random();
 		Point2D randomPoint = new Point();
 		randomPoint.setLocation(random.nextFloat() * this.dimension.width, random.nextFloat() * this.dimension.height);
