@@ -30,8 +30,8 @@ import ec.util.Parameter;
  */
 public class SimternetEvaluator extends Evaluator {
 
-	boolean						inStep				= false;
 	private static final long	serialVersionUID	= 1L;
+	boolean						inStep				= false;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -63,7 +63,8 @@ public class SimternetEvaluator extends Evaluator {
 		int numChunks = state.parameters.getInt(base.push("chunks"), null);
 		int numSteps = state.parameters.getInt(base.push("steps"), null);
 		boolean simternetCheckpoint = state.parameters.getBoolean(base.push("checkpoint"), null, false);
-		int checkpointModulo = state.parameters.getInt(new Parameter("checkpoint-modulo"), null);
+		int checkpointModulo = state.parameters.getInt(base.push("checkpoint-modulo"), new Parameter(
+				"checkpoint-modulo"));
 
 		// Create and initialize our simulations
 		Simternet[] simternet = new Simternet[numChunks];

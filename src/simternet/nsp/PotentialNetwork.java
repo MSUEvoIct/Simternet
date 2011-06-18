@@ -11,7 +11,7 @@ public class PotentialNetwork implements Serializable, Comparable {
 	public Double						distanceFromHome;
 	public Int2D						location;
 	public Class<? extends EdgeNetwork>	networkType;
-	public Double						numCompetitors;
+	public Integer						numCompetitors;
 	public Double						population;
 	public Double						score;
 

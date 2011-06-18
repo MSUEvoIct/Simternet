@@ -40,16 +40,37 @@ import simternet.temporal.Arbiter;
 public class Simternet extends SimState implements Serializable {
 
 	/**
+	 * Is this instance of Simternet run within ECJ?
+	 */
+	private static boolean		evolve				= false;
+
+	/**
+	 * Storing a version identifier is appropriate for this class, as we will
+	 * likely be saving it often and may want to read older versions in a
+	 * predictable, specified way.
+	 * 
+	 */
+	private static final long	serialVersionUID	= 1L;
+
+	public static void main(String[] args) {
+		for (String s : args)
+			if (s.equals("--evolve"))
+				Simternet.evolve = true;
+		SimState.doLoop(Simternet.class, args);
+		System.exit(0);
+	}
+
+	/**
 	 * All application service providers in the simulation
 	 */
 	protected Collection<ApplicationProvider>					applicationProviders;
-
 	protected Map<AppCategory, Collection<ApplicationProvider>>	ASPsByCategory;
 
 	// Simply for record-keeping if run with ECJ
 	public int													chunk;
 
 	public Parameters											config;
+
 	/**
 	 * All consumer classes in the simulation.
 	 */
@@ -66,27 +87,6 @@ public class Simternet extends SimState implements Serializable {
 	protected Collection<NetworkProvider>						networkServiceProviders;
 
 	protected int												numConsumerAgents	= 0;
-
-	/**
-	 * Is this instance of Simternet run within ECJ?
-	 */
-	private static boolean										evolve				= false;
-
-	/**
-	 * Storing a version identifier is appropriate for this class, as we will
-	 * likely be saving it often and may want to read older versions in a
-	 * predictable, specified way.
-	 * 
-	 */
-	private static final long									serialVersionUID	= 1L;
-
-	public static void main(String[] args) {
-		for (String s : args)
-			if (s.equals("--evolve"))
-				Simternet.evolve = true;
-		SimState.doLoop(Simternet.class, args);
-		System.exit(0);
-	}
 
 	public Simternet(long seed) {
 		this(seed, null);
@@ -291,8 +291,8 @@ public class Simternet extends SimState implements Serializable {
 		return this.numConsumerAgents;
 	}
 
-	public Double getNumNetworkProviders(Int2D location) {
-		Double providersWithNetworks = 0.0;
+	public Integer getNumNetworkProviders(Int2D location) {
+		Integer providersWithNetworks = 0;
 		for (NetworkProvider nsp : this.networkServiceProviders)
 			if (nsp.hasNetworkAt(EdgeNetwork.class, location))
 				providersWithNetworks++;
