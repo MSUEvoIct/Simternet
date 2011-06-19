@@ -26,8 +26,8 @@ public class GPFunctionSetSet extends GPFunctionSet {
 		GPFunctionSet old_functionset = (GPFunctionSet) (((GPInitializer) state.initializer).functionSetRepository.put(
 				this.name, this));
 		if (old_functionset != null)
-			state.output.fatal("The GPFunctionSet \"" + this.name + "\" has been defined multiple times.", base
-					.push(GPFunctionSet.P_NAME));
+			state.output.fatal("The GPFunctionSet \"" + this.name + "\" has been defined multiple times.",
+					base.push(GPFunctionSet.P_NAME));
 
 		int numFuncSets = state.parameters.getInt(base.push(GPFunctionSet.P_SIZE), null, 1);
 		Vector<String> funcSetBasesList = new Vector<String>();
@@ -42,13 +42,17 @@ public class GPFunctionSetSet extends GPFunctionSet {
 
 		for (String funcSetBase : funcSetBasesList) {
 
+			if (funcSetBase == null)
+				throw new RuntimeException("Error setting up " + this
+						+ ", are all sub-function sets correctly specified and NUMBERED?");
+
 			Parameter newBase = new Parameter(funcSetBase);
 
 			// How many functions do I have?
 			int numFuncs = state.parameters.getInt(newBase.push(GPFunctionSet.P_SIZE), null, 1);
 			if (numFuncs < 1)
-				state.output.error("The GPFunctionSet \"" + this.name + "\" has no functions.", newBase
-						.push(GPFunctionSet.P_SIZE));
+				state.output.error("The GPFunctionSet \"" + this.name + "\" has no functions.",
+						newBase.push(GPFunctionSet.P_SIZE));
 
 			Parameter p = newBase.push(GPFunctionSet.P_FUNC);
 			for (int x = 0; x < numFuncs; x++) {

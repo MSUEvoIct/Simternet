@@ -64,8 +64,8 @@ public class Simternet extends SimState implements Serializable {
 	 * All application service providers in the simulation
 	 */
 	protected Collection<ApplicationProvider>					applicationProviders;
-	protected Map<AppCategory, Collection<ApplicationProvider>>	ASPsByCategory;
 
+	protected Map<AppCategory, Collection<ApplicationProvider>>	ASPsByCategory;
 	// Simply for record-keeping if run with ECJ
 	public int													chunk;
 
@@ -80,6 +80,8 @@ public class Simternet extends SimState implements Serializable {
 
 	// Simply for record-keeping if run with ECJ
 	public int													generation;
+
+	public MarketInfo											marketInfo			= new MarketInfo(this);
 
 	/**
 	 * All Network Service Providers in the simulation.
@@ -236,6 +238,10 @@ public class Simternet extends SimState implements Serializable {
 						System.out.println(ret.get(i, j));
 					}
 		return ret;
+	}
+
+	public Collection<Network> getNetworks(Int2D location) {
+		return this.getNetworks(null, null, location);
 	}
 
 	/**
@@ -453,4 +459,5 @@ public class Simternet extends SimState implements Serializable {
 
 		this.initArbiter();
 	}
+
 }

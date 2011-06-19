@@ -1,6 +1,8 @@
 package simternet.ecj.problems;
 
+import sim.util.Int2D;
 import simternet.Financials;
+import simternet.Simternet;
 import simternet.network.EdgeNetwork;
 import simternet.nsp.NetworkProvider;
 import ec.Problem;
@@ -15,7 +17,8 @@ import ec.Problem;
  * @author kkoning
  * 
  */
-public class PriceEdgeNetworkProblem extends Problem implements HasEdgeNetwork, HasFinancials {
+public class PriceEdgeNetworkProblem extends Problem implements HasEdgeNetwork, HasFinancials, HasSimternet,
+		HasLocation {
 
 	private static final long	serialVersionUID	= 1L;
 	private EdgeNetwork			aen;
@@ -38,6 +41,16 @@ public class PriceEdgeNetworkProblem extends Problem implements HasEdgeNetwork, 
 
 	public NetworkProvider getNsp() {
 		return this.nsp;
+	}
+
+	@Override
+	public Simternet getSimternet() {
+		return this.nsp.simternet;
+	}
+
+	@Override
+	public Int2D location() {
+		return this.aen.getLocation();
 	}
 
 }
