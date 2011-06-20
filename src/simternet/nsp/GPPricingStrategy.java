@@ -8,11 +8,11 @@ import ec.gp.GPTree;
 
 public class GPPricingStrategy extends PricingStrategy {
 
-	public static final Double	MAX_PRICE			= 1.0E25;
+	public static final Double	MAX_PRICE			= 1.0E9;
 	/**
 	 * Rediculous minimal price just prevents infinite negative prices etc...
 	 */
-	public static final Double	MIN_PRICE			= -1.0E25;
+	public static final Double	MIN_PRICE			= -1.0E9;
 
 	private static final long	serialVersionUID	= 1L;
 	GPIndividual				individual			= null;

@@ -23,35 +23,33 @@ import simternet.temporal.AsyncUpdate;
 import simternet.temporal.Temporal;
 
 public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate {
+	private static final long			serialVersionUID		= 1L;
+
 	/**
 	 * Other data structures will rely on this not changing, e.g., one that
 	 * keeps a lists of ASPs within an App Category.
 	 */
-	protected final AppCategory	appCategory;
-
+	protected final AppCategory			appCategory;
 	// TODO: Set this better;
-	protected Temporal<Double>	bandwidth				= new Temporal<Double>(100.0);
-	protected HashSet<Network>	connectedNetworks		= new HashSet<Network>();
-	protected Datacenter		datacenter;
-	protected Temporal<Double>	duration				= new Temporal<Double>(100.0);
-	protected Financials		financials;
-	protected String			name;
-	protected Temporal<Double>	priceAdvertising		= new Temporal<Double>(3.0);
-	protected Temporal<Double>	priceSubscriptions		= new Temporal<Double>(3.0);
+	protected Temporal<Double>			bandwidth				= new Temporal<Double>(100.0);
+	protected HashSet<Network>			connectedNetworks		= new HashSet<Network>();
+	protected Datacenter				datacenter;
+	protected Temporal<Double>			duration				= new Temporal<Double>(100.0);
+	protected Financials				financials;
+	protected String					name;
+	protected Temporal<Double>			priceAdvertising		= new Temporal<Double>(3.0);
+	protected Temporal<Double>			priceSubscriptions		= new Temporal<Double>(3.0);
 	/**
 	 * Quick-and-dirty measure of an application's quality. Should reflect
 	 * investment in all qualities other than network transport.
 	 */
-	protected Temporal<Double>	quality					= new Temporal<Double>(0.0);
-	protected QualityStrategy	qualityStrategy			= new QualityStrategy(this);
-	protected Temporal<Double>	revenueAdvertising		= new Temporal<Double>(0.0);
-	protected Temporal<Double>	revenueSubscriptions	= new Temporal<Double>(0.0);
-	protected Simternet			s;
+	protected Temporal<Double>			quality					= new Temporal<Double>(0.0);
+	protected QualityStrategy			qualityStrategy			= new QualityStrategy(this);
+	protected Temporal<Double>			revenueAdvertising		= new Temporal<Double>(0.0);
+	protected Temporal<Double>			revenueSubscriptions	= new Temporal<Double>(0.0);
+	protected Simternet					s;
 
-	/**
-	 * 
-	 */
-	private static final long	serialVersionUID		= 1L;
+	protected TransitPurchaseStrategy	transitStrategy;
 
 	public ApplicationProvider(Simternet s, AppCategory appCategory) {
 		// housekeeping

@@ -93,6 +93,16 @@ public class Financials implements Serializable, AsyncUpdate {
 	}
 
 	public void earn(Double revenue) {
+		
+		if (revenue.isNaN()) 
+			throw new RuntimeException("Cannot Earn NaN");
+
+		if (revenue > 1E17)		// something is wrong
+			revenue = 1E17; // suggested breakpoint for debug
+
+		if (revenue < -1E17)			// something is wrong
+			revenue = -1E17; // suggested breakpoint for debug
+
 		this.assetsLiquid.increase(revenue);
 		this.totalRevenue.increase(revenue);
 		this.perStepRevenue.increase(revenue);

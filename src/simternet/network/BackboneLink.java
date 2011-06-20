@@ -65,13 +65,16 @@ public class BackboneLink implements Serializable {
 	/**
 	 * This is the set of network flows which the source/transmittion network
 	 * would like to send using this link. They are not transmitted (placed in
-	 * the outputQueue) until processing by this link's congestion algorithm.
+	 * the outputQueue) until processing by this link's congestion algorithm. It
+	 * is analogous to the output queue of the transmitting router for this
+	 * interface.
 	 */
 	protected List<NetFlow>			inputQueue				= new ArrayList<NetFlow>();
 
 	/**
 	 * This is the set of network flows which are ready to be received by the
-	 * destination network.
+	 * destination network. It represents the packets actually transmitted by
+	 * the source router.
 	 */
 	protected List<NetFlow>			outputQueue				= new ArrayList<NetFlow>();
 
@@ -94,6 +97,8 @@ public class BackboneLink implements Serializable {
 	 * 
 	 * @param source
 	 * @param destination
+	 * @param bandwidth
+	 *            The link's bandwidth, or Double.MAX_VALUE if null.
 	 */
 	public BackboneLink(final Network source, final Network destination, Double bandwidth) {
 		this.source = source;

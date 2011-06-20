@@ -17,11 +17,13 @@ import simternet.Financials;
 import simternet.Simternet;
 import simternet.TraceConfig;
 import simternet.Utils;
+import simternet.application.ApplicationProvider;
 import simternet.network.Backbone;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 import simternet.network.RoutingProtocolConfig;
 import simternet.temporal.AsyncUpdate;
+import simternet.temporal.TemporalHashMap;
 import simternet.temporal.TemporalSparseGrid2D;
 
 /**
@@ -33,22 +35,24 @@ import simternet.temporal.TemporalSparseGrid2D;
  */
 public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 
-	protected Backbone				backboneNetwork;
-	public boolean					bankrupt			= false;
-	public Double					deltaRevenue		= 0.0;
-	protected TemporalSparseGrid2D	edgeNetworks;
+	protected static DecimalFormat							numCustFormat			= new DecimalFormat("0000000");
+	protected static DecimalFormat							positionFormat			= new DecimalFormat("00");
+	protected static DecimalFormat							priceFormat				= new DecimalFormat("000.00");
+	private static final long								serialVersionUID		= 1L;
 
-	public Financials				financials;
-	protected Int2D					homeBase;
-	protected InvestmentStrategy	investmentStrategy;
-	protected String				name;
-	public PricingStrategy			pricingStrategy;
-	public Simternet				simternet			= null;
-	protected static DecimalFormat	numCustFormat		= new DecimalFormat("0000000");
-	protected static DecimalFormat	positionFormat		= new DecimalFormat("00");
-	protected static DecimalFormat	priceFormat			= new DecimalFormat("000.00");
+	protected TemporalHashMap<ApplicationProvider, Double>	aspTransitPrice			= new TemporalHashMap<ApplicationProvider, Double>();
+	protected Backbone										backboneNetwork;
+	public boolean											bankrupt				= false;
+	public Double											deltaRevenue			= 0.0;
+	protected TemporalSparseGrid2D							edgeNetworks;
+	public Financials										financials;
+	protected Int2D											homeBase;
+	protected NSPInterconnectPricingStrategy				interconnectStrategy	= null;
+	protected InvestmentStrategy							investmentStrategy;
+	protected String										name;
 
-	private static final long		serialVersionUID	= 1L;
+	public PricingStrategy									pricingStrategy;
+	public Simternet										simternet				= null;
 
 	public NetworkProvider(Simternet simternet) {
 		this.simternet = simternet;
@@ -107,6 +111,18 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 			sb.append("\n");
 		}
 		return sb.toString();
+	}
+
+	public Double getASPTransitPrice(ApplicationProvider asp) {
+		Double price = this.aspTransitPrice.get(asp);
+		Double min_price = 0.000000000001;
+		if (price == null)
+			price = min_price;
+		else if (price.isNaN())
+			price = min_price;
+		else if (price <= 0.0)
+			price = min_price;
+		return price;
 	}
 
 	public Backbone getBackboneNetwork() {
@@ -407,6 +423,7 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 
 		this.edgeNetworks.update();
 		this.backboneNetwork.update();
+		this.aspTransitPrice.update();
 
 		for (Object o : this.edgeNetworks) {
 			EdgeNetwork aen = (EdgeNetwork) o;
