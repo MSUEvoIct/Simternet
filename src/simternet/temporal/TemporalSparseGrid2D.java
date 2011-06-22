@@ -37,11 +37,13 @@ import sim.util.Int2D;
  * @see simternet.temporal.TemporalHashMap
  * @see simternet.temporal.Arbiter
  */
-public class TemporalSparseGrid2D extends SparseGrid2D implements AsyncUpdate,
-		Serializable, Iterable {
-	private class LocatedObject {
-		Int2D location;
-		Object obj;
+public class TemporalSparseGrid2D extends SparseGrid2D implements AsyncUpdate, Serializable, Iterable {
+
+	private class LocatedObject implements Serializable {
+		Int2D						location;
+		Object						obj;
+
+		private static final long	serialVersionUID	= 1L;
 
 		private LocatedObject(Object obj, Int2D location) {
 			this.obj = obj;
@@ -49,11 +51,11 @@ public class TemporalSparseGrid2D extends SparseGrid2D implements AsyncUpdate,
 		}
 	}
 
-	private static final long serialVersionUID = 1L;
+	private List<Object>		toRemove			= null;
 
-	private List<Object> toRemove = null;
-	private List<Int2D> toRemoveLoc = null;
-	private List<LocatedObject> toSet = null;
+	private List<Int2D>			toRemoveLoc			= null;
+	private List<LocatedObject>	toSet				= null;
+	private static final long	serialVersionUID	= 1L;
 
 	public TemporalSparseGrid2D(int width, int height) {
 		super(width, height);

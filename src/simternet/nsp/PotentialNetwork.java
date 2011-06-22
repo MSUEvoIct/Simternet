@@ -5,8 +5,7 @@ import java.io.Serializable;
 import sim.util.Int2D;
 import simternet.network.EdgeNetwork;
 
-public class PotentialNetwork implements Serializable, Comparable {
-	protected static final long			serialVersionUID	= 1L;
+public class PotentialNetwork implements Serializable, Comparable<PotentialNetwork> {
 	public Double						cost;
 	public Double						distanceFromHome;
 	public Int2D						location;
@@ -14,6 +13,7 @@ public class PotentialNetwork implements Serializable, Comparable {
 	public Integer						numCompetitors;
 	public Double						population;
 	public Double						score;
+	protected static final long			serialVersionUID	= 1L;
 
 	public PotentialNetwork(NetworkProvider nsp, Class<? extends EdgeNetwork> networkType, Int2D location) {
 		this.networkType = networkType;
@@ -27,8 +27,7 @@ public class PotentialNetwork implements Serializable, Comparable {
 	}
 
 	@Override
-	public int compareTo(Object o) {
-		PotentialNetwork pn = (PotentialNetwork) o;
+	public int compareTo(PotentialNetwork pn) {
 		if (this.score > pn.score)
 			return -1;
 		if (this.score < pn.score)
