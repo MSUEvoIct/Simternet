@@ -94,7 +94,6 @@ public class CompositeFilter<V, E> extends EasyFilter<V, E> {
 
 	@Override
 	public int getIndex(TreeNode arg0) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 

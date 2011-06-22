@@ -8,16 +8,16 @@ import org.apache.commons.collections15.Transformer;
 import simternet.network.BackboneLink;
 
 /**
- * BackbonePaintTransformer
+ * LinkPaintTransformer
  * 
  * Works with JUNG's RenderContext to define the graphical representation of
  * Backbone Links. Each link is given a color dependent on its congestion ratio.
  * Line pattern and width is defined in a separate class,
- * BackboneStrokeTransformer
+ * LinkStrokeTransformer
  * 
  * @author graysonwright
  */
-public class BackbonePaintTransformer implements Transformer<BackboneLink, Paint> {
+public class LinkPaintTransformer implements Transformer<BackboneLink, Paint> {
 
 	@Override
 	public Paint transform(BackboneLink link) {

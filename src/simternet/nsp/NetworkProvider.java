@@ -35,24 +35,24 @@ import simternet.temporal.TemporalSparseGrid2D;
  */
 public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 
-	protected static DecimalFormat							numCustFormat			= new DecimalFormat("0000000");
-	protected static DecimalFormat							positionFormat			= new DecimalFormat("00");
-	protected static DecimalFormat							priceFormat				= new DecimalFormat("000.00");
-	private static final long								serialVersionUID		= 1L;
-
 	protected TemporalHashMap<ApplicationProvider, Double>	aspTransitPrice			= new TemporalHashMap<ApplicationProvider, Double>();
 	protected Backbone										backboneNetwork;
 	public boolean											bankrupt				= false;
 	public Double											deltaRevenue			= 0.0;
+
 	protected TemporalSparseGrid2D							edgeNetworks;
 	public Financials										financials;
 	protected Int2D											homeBase;
 	protected NSPInterconnectPricingStrategy				interconnectStrategy	= null;
 	protected InvestmentStrategy							investmentStrategy;
 	protected String										name;
-
 	public PricingStrategy									pricingStrategy;
 	public Simternet										simternet				= null;
+	protected static DecimalFormat							numCustFormat			= new DecimalFormat("0000000");
+	protected static DecimalFormat							positionFormat			= new DecimalFormat("00");
+
+	protected static DecimalFormat							priceFormat				= new DecimalFormat("000.00");
+	private static final long								serialVersionUID		= 1L;
 
 	public NetworkProvider(Simternet simternet) {
 		this.simternet = simternet;
@@ -238,6 +238,21 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 			list.add(this.getBackboneNetwork());
 
 		return list;
+	}
+
+	/**
+	 * Extracts the number from the network's name, and returns it
+	 * 
+	 * @return -1 if number extraction failed, or the number if it succeeded.
+	 */
+	public int getNumber() {
+		int start = this.name.lastIndexOf('-') + 1;
+		try {
+			int number = Integer.parseInt(this.name.substring(start));
+			return number;
+		} catch (NumberFormatException e) {
+			return -1;
+		}
 	}
 
 	/**

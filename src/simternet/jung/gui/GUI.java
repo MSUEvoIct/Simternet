@@ -2,7 +2,6 @@ package simternet.jung.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.geom.Point2D;
 import java.util.HashMap;
 
 import javax.swing.BorderFactory;
@@ -12,28 +11,27 @@ import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.tree.TreePath;
 
-import org.apache.commons.collections15.Transformer;
-
 import sim.util.Int2D;
 import simternet.Simternet;
 import simternet.application.ApplicationProvider;
-import simternet.jung.appearance.BackbonePaintTransformer;
-import simternet.jung.appearance.BackboneStrokeTransformer;
-import simternet.jung.appearance.EdgePaintTransformer;
+import simternet.jung.ConsumerNetwork;
+import simternet.jung.LocationTransformer;
+import simternet.jung.VertexPickPlugin;
+import simternet.jung.appearance.LinkPaintTransformer;
+import simternet.jung.appearance.LinkStrokeTransformer;
 import simternet.jung.appearance.NetworkLabeller;
+import simternet.jung.appearance.NetworkPaintTransformer;
 import simternet.jung.appearance.NetworkShapeTransformer;
 import simternet.jung.filter.CompositeFilter;
 import simternet.jung.filter.DatacenterNameFilter;
 import simternet.jung.filter.EasyFilter;
 import simternet.jung.filter.EasyFilterLayout;
-import simternet.jung.filter.FilterGUI;
 import simternet.jung.filter.HighPassFilter;
 import simternet.jung.filter.SingleEdgeFilter;
-import simternet.jung.location.BackboneLocationTransformer;
-import simternet.jung.location.CompositeLocationTransformer;
-import simternet.jung.location.DatacenterLocationTransformer;
-import simternet.jung.location.EdgeLocationTransformer;
-import simternet.jung.location.RandomLocationTransformer;
+import simternet.jung.inspector.ApplicationProviderInspector;
+import simternet.jung.inspector.ConsumerNetworkInspector;
+import simternet.jung.inspector.Inspector;
+import simternet.jung.inspector.NetworkProviderInspector;
 import simternet.network.Backbone;
 import simternet.network.BackboneLink;
 import simternet.network.Datacenter;
@@ -122,9 +120,12 @@ public class GUI extends JPanel {
 	protected void initViewer() {
 
 		this.graph = new DirectedSparseGraph<Network, BackboneLink>();
-		this.layout = new EasyFilterLayout<Network, BackboneLink>(this.graph, this.setUpLocationTransformer());
 
-		Dimension frameDimension = new Dimension(1000, 1000);
+		// Define the layout, which will enable filtering, and use our
+		// LocationTransformer class to lay everything out.
+		this.layout = new EasyFilterLayout<Network, BackboneLink>(this.graph, new LocationTransformer(this.simternet));
+
+		Dimension frameDimension = new Dimension(800, 500);
 		this.viewer = new VisualizationViewer<Network, BackboneLink>(this.layout, frameDimension);
 		this.viewer.getModel().setGraphLayout(this.layout, frameDimension);
 
@@ -134,7 +135,7 @@ public class GUI extends JPanel {
 		this.viewer.getRenderContext().setVertexShapeTransformer(new NetworkShapeTransformer(this.simternet));
 
 		// Adjust vertex color:
-		this.viewer.getRenderContext().setVertexFillPaintTransformer(new EdgePaintTransformer(this.simternet));
+		this.viewer.getRenderContext().setVertexFillPaintTransformer(new NetworkPaintTransformer(this.simternet));
 
 		// Label vertices:
 		this.viewer.getRenderContext().setVertexLabelTransformer(new NetworkLabeller());
@@ -144,9 +145,9 @@ public class GUI extends JPanel {
 		// ToStringLabeller<BackboneLink>());
 
 		// Set BackboneLink thickness:
-		this.viewer.getRenderContext().setEdgeStrokeTransformer(new BackboneStrokeTransformer());
+		this.viewer.getRenderContext().setEdgeStrokeTransformer(new LinkStrokeTransformer());
 		// Set BackboneLink color:
-		this.viewer.getRenderContext().setEdgeDrawPaintTransformer(new BackbonePaintTransformer());
+		this.viewer.getRenderContext().setEdgeDrawPaintTransformer(new LinkPaintTransformer());
 
 		// Allow the mouse to pick and move vertices and edges.
 		AbstractModalGraphMouse graphMouse = new DefaultModalGraphMouse<Network, BackboneLink>();
@@ -188,10 +189,6 @@ public class GUI extends JPanel {
 		this.add(this.viewer, BorderLayout.CENTER);
 		this.updateAll();
 
-		// refresh the labels in our InfoPanel
-		this.infoPanel.setGeneration(sim.generation);
-		this.infoPanel.setChunk(sim.chunk);
-		this.infoPanel.setStep(sim.schedule.getSteps());
 	}
 
 	/**
@@ -204,35 +201,6 @@ public class GUI extends JPanel {
 		((CompositeFilter<Network, BackboneLink>) this.filter).add(new SingleEdgeFilter(new Int2D(3, 1)));
 		((CompositeFilter<Network, BackboneLink>) this.filter).add(new DatacenterNameFilter("Datacenter of ASP-2"));
 		((CompositeFilter<Network, BackboneLink>) this.filter).add(new HighPassFilter(1000000.0));
-	}
-
-	/**
-	 * Initializes and returns a Transformer that will lay out the contents of
-	 * the graph onscreen
-	 * 
-	 * @return a transformer that dictates where in the visualization of the
-	 *         graph each item should be displayed
-	 */
-	protected Transformer<Network, Point2D> setUpLocationTransformer() {
-		// Set up transformers to move the vertices to the correct pixel
-		// coordinates, depending on the type of Network it is.
-		EdgeLocationTransformer edgeLocTfmr = new EdgeLocationTransformer(new Dimension(50, 50));
-		BackboneLocationTransformer bBoneLocTfmr = new BackboneLocationTransformer(new Dimension(100, 500));
-		DatacenterLocationTransformer dcenterLocTfmr = new DatacenterLocationTransformer(new Dimension(100, 500));
-		RandomLocationTransformer<Network> randomLocTfmr = new RandomLocationTransformer<Network>(new Dimension(400,
-				400));
-
-		// Now, put all of these transformers into a composite data structure
-		// that will handle any type of Network.
-		// The dimension argument is the pixel offset from the top left of the
-		// composite transformer.
-		CompositeLocationTransformer<Network> compositeTransformer = new CompositeLocationTransformer<Network>();
-		compositeTransformer.addTransformer(edgeLocTfmr, 1, new Dimension(100, 100));
-		compositeTransformer.addTransformer(bBoneLocTfmr, 1, new Dimension(600, 100));
-		compositeTransformer.addTransformer(dcenterLocTfmr, 1, new Dimension(800, 100));
-		compositeTransformer.addTransformer(randomLocTfmr, 10, new Dimension(200, 200));
-
-		return compositeTransformer;
 	}
 
 	/**
@@ -266,7 +234,9 @@ public class GUI extends JPanel {
 		// Update the graph visualization
 		this.updateGraph();
 
-		// update the stepCount Label in the infoPanel
+		// refresh the labels in our InfoPanel
+		this.infoPanel.setGeneration(this.simternet.generation);
+		this.infoPanel.setChunk(this.simternet.chunk);
 		this.infoPanel.setStep(this.simternet.schedule.getSteps());
 
 		// Update each of the inspectors
@@ -274,13 +244,14 @@ public class GUI extends JPanel {
 			i.update();
 	}
 
-	/*
+	/**
 	 * updateFilters
 	 * 
 	 * action method, called by FilterGUI.
 	 * 
-	 * input: paths - an array of TreePaths representing all checked Filters in
-	 * the tree.
+	 * @param paths
+	 *            an array of TreePaths representing all checked Filters in the
+	 *            tree.
 	 */
 	public void updateFilters(TreePath[] paths) {
 		// deactivate the root filter, which will deactivate all of its
@@ -322,9 +293,9 @@ public class GUI extends JPanel {
 			this.graph.addVertex(backbone);
 
 			for (EdgeNetwork edge : nsp.getEdgeNetworks()) {
-				this.graph.addVertex(edge);
+				this.graph.addVertex(ConsumerNetwork.get(edge));
 				// System.err.println("Adding Vertex " + edge);
-				this.graph.addEdge(backbone.getEgressLink(edge), backbone, edge);
+				this.graph.addEdge(backbone.getEgressLink(edge), backbone, ConsumerNetwork.get(edge));
 			}
 		}
 
@@ -352,8 +323,8 @@ public class GUI extends JPanel {
 		} else {
 			Inspector inspector = null;
 
-			if (vertex instanceof EdgeNetwork)
-				inspector = new LocationInspector(((EdgeNetwork) vertex).getLocation(), this);
+			if (vertex instanceof ConsumerNetwork)
+				inspector = new ConsumerNetworkInspector((ConsumerNetwork) vertex, this);
 			else if (vertex instanceof Backbone)
 				inspector = new NetworkProviderInspector(((Backbone) vertex).getOwner(), this);
 			else if (vertex instanceof Datacenter)

@@ -1,10 +1,11 @@
-package simternet.jung.gui;
+package simternet.jung.inspector;
 
 import java.awt.GridLayout;
 
 import javax.swing.JLabel;
 
 import simternet.application.ApplicationProvider;
+import simternet.jung.gui.GUI;
 
 /**
  * Inspects ApplicationProvider objects

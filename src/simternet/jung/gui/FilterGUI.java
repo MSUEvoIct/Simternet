@@ -1,4 +1,4 @@
-package simternet.jung.filter;
+package simternet.jung.gui;
 
 import it.cnr.imaa.essi.lablib.gui.checkboxtree.CheckboxTree;
 import it.cnr.imaa.essi.lablib.gui.checkboxtree.TreeCheckingEvent;
@@ -11,7 +11,6 @@ import javax.swing.JPanel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import simternet.jung.gui.GUI;
 
 /**
  * A GUI that allows the user to select which filters are currently enabled, and

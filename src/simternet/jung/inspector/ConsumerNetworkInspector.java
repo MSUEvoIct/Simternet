@@ -1,11 +1,11 @@
-package simternet.jung.gui;
+package simternet.jung.inspector;
 
 import java.awt.GridLayout;
 
 import javax.swing.JLabel;
 
-import sim.util.Int2D;
-import simternet.Simternet;
+import simternet.jung.ConsumerNetwork;
+import simternet.jung.gui.GUI;
 
 /**
  * Inspects a location (Int2D) of a Simternet run
@@ -17,7 +17,7 @@ import simternet.Simternet;
  * @author graysonwright
  * 
  */
-public class LocationInspector extends Inspector {
+public class ConsumerNetworkInspector extends Inspector {
 
 	protected JLabel			locationLabel, populationLabel, percentageLabel, nspLabel;
 	protected static final int	numRows				= 4;
@@ -26,13 +26,13 @@ public class LocationInspector extends Inspector {
 	/**
 	 * Initializes the object and defines the layout
 	 * 
-	 * @param location
-	 *            the location to be inspected
+	 * @param network
+	 *            the ConsumerNetwork to be inspected
 	 * @param owner
 	 *            the GUI in charge of this inspector
 	 */
-	public LocationInspector(Int2D location, GUI owner) {
-		super(location, owner);
+	public ConsumerNetworkInspector(ConsumerNetwork network, GUI owner) {
+		super(network, owner);
 
 		this.setLayout(new GridLayout(EdgeInspector.numRows, 2, 20, 5));
 
@@ -44,10 +44,10 @@ public class LocationInspector extends Inspector {
 		this.add(new JLabel("Category"));
 		this.add(this.locationLabel);
 
-		this.add(new JLabel("Quality"));
+		this.add(new JLabel("Population"));
 		this.add(this.populationLabel);
 
-		this.add(new JLabel("Subscription Price"));
+		this.add(new JLabel("Percentage Subscribing"));
 		this.add(this.percentageLabel);
 
 		this.add(new JLabel("Connected NSPs"));
@@ -61,17 +61,16 @@ public class LocationInspector extends Inspector {
 	 */
 	@Override
 	public void update() {
-		Simternet sim = this.owner.simternet;
-		Int2D loc = (Int2D) this.object;
+		ConsumerNetwork net = (ConsumerNetwork) this.object;
 
-		this.locationLabel.setText(loc.toString());
+		this.locationLabel.setText(net.toString());
 
-		this.populationLabel.setText(sim.getPopulation(loc).toString());
+		this.populationLabel.setText(net.getPopulation().toString());
 
-		double percentage = sim.getPopulation(loc) / sim.getAllActiveSubscribersGrid().get(loc.x, loc.y);
+		double percentage = net.getActiveSubscribers() / net.getPopulation();
 		this.percentageLabel.setText(Double.toString(percentage));
 
-		this.nspLabel.setText(sim.getNumNetworkProviders(loc).toString());
+		this.nspLabel.setText(net.getNumNetworkProviders().toString());
 
 		// for(Network net : sim.getNetworks(null, null, loc)){
 		// if(net instanceof EdgeNetwork){

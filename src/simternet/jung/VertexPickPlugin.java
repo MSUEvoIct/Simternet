@@ -1,4 +1,4 @@
-package simternet.jung.gui;
+package simternet.jung;
 
 /*
  * Copyright (c) 2005, the JUNG Project and the Regents of the University 
@@ -14,6 +14,7 @@ package simternet.jung.gui;
 
 import java.awt.event.MouseEvent;
 
+import simternet.jung.gui.GUI;
 import simternet.network.BackboneLink;
 import simternet.network.Network;
 import edu.uci.ics.jung.visualization.control.AnimatedPickingGraphMousePlugin;

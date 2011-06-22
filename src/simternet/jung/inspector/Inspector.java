@@ -1,9 +1,11 @@
-package simternet.jung.gui;
+package simternet.jung.inspector;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
+
+import simternet.jung.gui.GUI;
 
 /**
  * A gui that, given an object from a Simternet simulation, displays information

@@ -2,13 +2,14 @@ package simternet.jung.appearance;
 
 import java.awt.Polygon;
 import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
 import org.apache.commons.collections15.Transformer;
 
 import simternet.Simternet;
+import simternet.jung.ConsumerNetwork;
 import simternet.network.Datacenter;
-import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 
 /**
@@ -35,9 +36,15 @@ public class NetworkShapeTransformer implements Transformer<Network, Shape> {
 
 	@Override
 	public Shape transform(Network net) {
-		if (net instanceof EdgeNetwork)
-			return (new EdgeShapeTransformer(this.s).transform((EdgeNetwork) net));
-		else if (net instanceof Datacenter) {
+		if (net instanceof ConsumerNetwork) {
+
+			Double pop = ((ConsumerNetwork) net).getPopulation();
+
+			Shape shape = new Ellipse2D.Double(-pop * this.scale / 2, -pop * this.scale / 2, pop * this.scale, pop
+					* this.scale);
+			return shape;
+
+		} else if (net instanceof Datacenter) {
 			int x[] = { 0, 10, -10 };
 			int y[] = { -10, 10, 10 };
 			return new Polygon(x, y, 3);
