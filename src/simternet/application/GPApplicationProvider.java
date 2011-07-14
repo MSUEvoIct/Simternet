@@ -11,8 +11,8 @@ import ec.Individual;
 
 public class GPApplicationProvider extends ApplicationProvider implements EvolvableAgent {
 
-	private static final long		serialVersionUID	= 1L;
 	protected SimternetGPIndividual	ind;
+	private static final long		serialVersionUID	= 1L;
 
 	public GPApplicationProvider(Simternet s) {
 		// XXX: FIX
@@ -28,6 +28,16 @@ public class GPApplicationProvider extends ApplicationProvider implements Evolva
 	@Override
 	public Individual getIndividual() {
 		return this.ind;
+	}
+
+	public String printQualityTree() {
+		return this.ind.trees[0].toString();
+
+	}
+
+	public String printTransitPurchaseTree() {
+		return this.ind.trees[1].toString();
+
 	}
 
 	@Override
@@ -48,11 +58,13 @@ public class GPApplicationProvider extends ApplicationProvider implements Evolva
 			Double totalPrice = 0.0;
 			Double price = nsp.getASPTransitPrice(this);
 			Double gpBW = this.transitStrategy.bandwidthToPurchase(nsp, price);
-			Double totalGPPrice = gpBW * price;
-			if (totalGPPrice * 10 > this.financials.getNetWorth())
+
+			if (gpBW * price * 10 > this.financials.getNetWorth())
 				// Can't spend more than 10% of net worth each step;
 				bw = (this.financials.getNetWorth() / 10) / price;
-			totalPrice = bw * price;
+			else
+				bw = gpBW;
+			totalPrice = gpBW * price;
 
 			BackboneLink bl;
 			bl = this.datacenter.getEgressLink(nsp.getBackboneNetwork());

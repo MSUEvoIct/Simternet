@@ -24,11 +24,14 @@ public class LinkStrokeTransformer implements Transformer<BackboneLink, Stroke> 
 
 		double bw = link.getBandwidth().doubleValue();
 
-		float width = 1;
-		if (bw > 0)
-			width = (float) (Math.log(bw));
-		else
-			System.out.println("Illegal bandwidth: " + link.toString());
+		float width = (float) (Math.log(bw));
+		if (bw <= 0) {
+			System.err.println("Illegal bandwidth: " + link.toString());
+			float[] dash = { 5.0f, 5.0f };
+			return new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0);
+		}
+		if (width < 1)
+			width = 1;
 		return new BasicStroke(width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
 	}
 }

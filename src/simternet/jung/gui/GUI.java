@@ -59,8 +59,10 @@ public class GUI extends JPanel {
 
 	public static void main(String[] args) {
 		JFrame jFrame = new JFrame("Simternet Checkpoint Reader");
-		jFrame.setContentPane(new GUI(new Simternet(System.currentTimeMillis())));
-		((GUI) jFrame.getContentPane()).start();
+		GUI gui = new GUI(new Simternet(System.currentTimeMillis()));
+
+		jFrame.setContentPane(gui);
+		gui.start();
 		jFrame.pack();
 		jFrame.setVisible(true);
 	}
@@ -187,6 +189,8 @@ public class GUI extends JPanel {
 		this.remove(this.viewer);
 		this.initViewer();
 		this.add(this.viewer, BorderLayout.CENTER);
+
+		this.infoPanel.setSimternet(sim);
 		this.updateAll();
 
 	}
@@ -235,9 +239,7 @@ public class GUI extends JPanel {
 		this.updateGraph();
 
 		// refresh the labels in our InfoPanel
-		this.infoPanel.setGeneration(this.simternet.generation);
-		this.infoPanel.setChunk(this.simternet.chunk);
-		this.infoPanel.setStep(this.simternet.schedule.getSteps());
+		this.infoPanel.update();
 
 		// Update each of the inspectors
 		for (Inspector i : this.inspectors.values())

@@ -38,7 +38,6 @@ public class DoubleSelector extends GPNode {
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
 		return "if";
 	}
 

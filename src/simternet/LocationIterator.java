@@ -30,7 +30,6 @@ public class LocationIterator implements Iterator<Int2D>, Iterable<Int2D> {
 
 	@Override
 	public Iterator<Int2D> iterator() {
-		// TODO Auto-generated method stub
 		return this;
 	}
 

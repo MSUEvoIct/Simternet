@@ -26,7 +26,6 @@ public class Backbone extends Network {
 
 	@Override
 	public void step(SimState state) {
-		// TODO Auto-generated method stub
 		super.step(state);
 	}
 

@@ -18,21 +18,21 @@ public class InfoPanel extends JPanel {
 
 	protected JLabel			chunkLabel;
 	protected JLabel			generationLabel;
+	protected Simternet			sim;
 	protected JLabel			stepLabel;
 
 	protected static final int	numCols				= 3;
+
 	private static final long	serialVersionUID	= 1L;
 
-	public InfoPanel() {
+	public InfoPanel(Simternet sim) {
 		super();
+		this.sim = sim;
 		this.initComponents();
 	}
 
-	public InfoPanel(Simternet simternet) {
-		this();
-		this.stepLabel.setText(Long.toString(simternet.schedule.getSteps()));
-		this.generationLabel.setText(Integer.toString(simternet.generation));
-		this.chunkLabel.setText(Integer.toString(simternet.chunk));
+	public Simternet getSim() {
+		return this.sim;
 	}
 
 	/**
@@ -57,17 +57,18 @@ public class InfoPanel extends JPanel {
 		this.stepLabel = new JLabel("0");
 		this.add(this.stepLabel);
 
+		this.update();
+
 	}
 
-	public void setChunk(int chunk) {
-		this.chunkLabel.setText(Integer.toString(chunk));
+	public void setSimternet(Simternet sim) {
+		this.sim = sim;
+		this.update();
 	}
 
-	public void setGeneration(int generation) {
-		this.generationLabel.setText(Integer.toString(generation));
-	}
-
-	public void setStep(long step) {
-		this.stepLabel.setText(Long.toString(step));
+	public void update() {
+		this.generationLabel.setText(Integer.toString(this.sim.generation));
+		this.chunkLabel.setText(Integer.toString(this.sim.chunk));
+		this.stepLabel.setText(Long.toString(this.sim.schedule.getSteps()));
 	}
 }

@@ -15,7 +15,6 @@ import simternet.temporal.TemporalHashSet;
 
 public class Datacenter extends Network {
 
-	private static final long					serialVersionUID	= 1L;
 	protected TemporalHashSet<NetFlow>			inputQueue			= new TemporalHashSet<NetFlow>();
 	/**
 	 * Stores the congestion this application sees on each network. Congestion
@@ -24,7 +23,8 @@ public class Datacenter extends Network {
 	 * use to calculate a percentage of congestion.
 	 */
 	protected TemporalHashMap<Network, Double>	observedBandwidth	= new TemporalHashMap<Network, Double>();
-	protected final ApplicationProvider	owner;
+	protected final ApplicationProvider			owner;
+	private static final long					serialVersionUID	= 1L;
 
 	public Datacenter(ApplicationProvider owner) {
 		this.owner = owner;
@@ -118,7 +118,6 @@ public class Datacenter extends Network {
 
 	@Override
 	public void step(SimState state) {
-		// TODO Auto-generated method stub
 		super.step(state);
 
 		if (TraceConfig.congestionASPSummary && Logger.getRootLogger().isTraceEnabled())

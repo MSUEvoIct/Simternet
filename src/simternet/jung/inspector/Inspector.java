@@ -49,6 +49,13 @@ public abstract class Inspector extends JFrame {
 		this.dispose();
 	}
 
+	public void setObject(Object o) {
+		if (o.getClass() == this.object.getClass())
+			this.object = o;
+		else
+			System.err.println("Incorrect Type assignment. (simternet.jung.inspector.Inspector, 56)");
+	}
+
 	/**
 	 * Updates the displayed information to reflect recent changes in the
 	 * Simternet simulation

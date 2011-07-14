@@ -72,11 +72,5 @@ public class ConsumerNetworkInspector extends Inspector {
 
 		this.nspLabel.setText(net.getNumNetworkProviders().toString());
 
-		// for(Network net : sim.getNetworks(null, null, loc)){
-		// if(net instanceof EdgeNetwork){
-		// EdgeNetwork edge = (EdgeNetwork) net;
-		//
-		// }
-		// }
 	}
 }

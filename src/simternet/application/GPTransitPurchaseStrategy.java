@@ -11,16 +11,19 @@ import ec.gp.GPTree;
 
 public class GPTransitPurchaseStrategy implements TransitPurchaseStrategy, Serializable {
 
-    // prevent infinities
-	public static final Double			MAX_AMOUNT	= 1E50; 
+	protected final ApplicationProvider	asp;
 
+	protected final GPIndividual		ind;
+
+	protected final GPTree				tree;
+
+	// prevent infinities
+	public static final Double			MAX_AMOUNT	= 1E50;
 	// can't purchase negative bandwidth;
 	public static final Double			MIN_AMOUNT	= 0.0;
 
-
-	protected final ApplicationProvider	asp;
-	protected final GPIndividual		ind;
-	protected final GPTree				tree;
+	// TODO: uncomment this. Commented for debugging.
+	// private static final long serialVersionUID = 1L;
 
 	public GPTransitPurchaseStrategy(ApplicationProvider asp, GPIndividual ind, GPTree tree) {
 		this.asp = asp;
@@ -43,6 +46,12 @@ public class GPTransitPurchaseStrategy implements TransitPurchaseStrategy, Seria
 
 		if (d.value < GPTransitPurchaseStrategy.MIN_AMOUNT)
 			d.value = GPTransitPurchaseStrategy.MIN_AMOUNT;
+
+		if (new Double(d.value).isNaN())
+			// Printing out the full exception takes up too much console space.
+			// System.err
+			// .println("Exception at simternet.application.GPTransitPurchaseStrategy(52): Purchase amount is NaN");
+			return 0.0;
 
 		return d.value;
 	}

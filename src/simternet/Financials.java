@@ -15,10 +15,6 @@ import simternet.temporal.Temporal;
  * 
  */
 public class Financials implements Serializable, AsyncUpdate {
-	/**
-	 * 
-	 */
-	private static final long	serialVersionUID	= 1L;
 	private Temporal<Double>	assetsCapital;
 	private Temporal<Double>	assetsLiquid;
 	private Temporal<Double>	debtBalance;
@@ -33,8 +29,12 @@ public class Financials implements Serializable, AsyncUpdate {
 	private Temporal<Double>	totalFinancingCost;
 	private Temporal<Double>	totalInvestment;
 	private Temporal<Double>	totalOperationsCost;
-
 	private Temporal<Double>	totalRevenue;
+
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= 1L;
 
 	public Financials(Simternet s, Double endowment) {
 		this.s = s;
@@ -93,14 +93,14 @@ public class Financials implements Serializable, AsyncUpdate {
 	}
 
 	public void earn(Double revenue) {
-		
-		if (revenue.isNaN()) 
-			throw new RuntimeException("Cannot Earn NaN");
 
-		if (revenue > 1E17)		// something is wrong
+		if (revenue.isNaN())
+			System.err.println("Exception at simternet.Financials.earn(98): Cannot Earn NaN");
+
+		if (revenue > 1E17) // something is wrong
 			revenue = 1E17; // suggested breakpoint for debug
 
-		if (revenue < -1E17)			// something is wrong
+		if (revenue < -1E17) // something is wrong
 			revenue = -1E17; // suggested breakpoint for debug
 
 		this.assetsLiquid.increase(revenue);

@@ -11,10 +11,10 @@ import ec.Problem;
 public class ASPPurchaseTransitProblem extends Problem implements HasSimternet, HasFinancials, HasNetworkProvider,
 		HasApplicationProvider {
 
-	private static final long			serialVersionUID	= 1L;
 	protected final ApplicationProvider	customer;
 	protected final BackboneLink		existing;
 	protected final NetworkProvider		nsp;
+	private static final long			serialVersionUID	= 1L;
 
 	public ASPPurchaseTransitProblem(ApplicationProvider asp, NetworkProvider nsp, BackboneLink existing) {
 		this.customer = asp;
@@ -39,7 +39,6 @@ public class ASPPurchaseTransitProblem extends Problem implements HasSimternet, 
 
 	@Override
 	public PotentialNetwork getPotentialNetwork() {
-		// TODO Auto-generated method stub
 		// TODO This shouldn't be here
 		return null;
 	}

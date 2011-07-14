@@ -5,6 +5,7 @@ import java.awt.GridLayout;
 import javax.swing.JLabel;
 
 import simternet.jung.gui.GUI;
+import simternet.nsp.GPNetworkProvider;
 import simternet.nsp.NetworkProvider;
 
 /**
@@ -16,8 +17,11 @@ import simternet.nsp.NetworkProvider;
  * 
  */
 public class NetworkProviderInspector extends Inspector {
+	// TODO: add tree visualization
 
-	protected static final int	numRows				= 1;
+	protected JLabel			nameLabel, treeLabel;
+
+	protected static final int	numRows				= 2;
 
 	private static final long	serialVersionUID	= 1L;
 
@@ -32,22 +36,18 @@ public class NetworkProviderInspector extends Inspector {
 	public NetworkProviderInspector(NetworkProvider nsp, GUI owner) {
 		super(nsp, owner);
 
-		this.setLayout(new GridLayout(EdgeInspector.numRows, 2, 20, 5));
-		//
-		// this.add(new JLabel("Location"));
-		// this.add(new JLabel(nsp.getLocation().toString()));
-		//
-		// this.add(new JLabel("Owner"));
-		// this.add(new JLabel(nsp.getOwner().toString()));
-		//
-		// this.add(new JLabel("Max Bandwidth"));
-		// this.add(new JLabel(nsp.getMaxBandwidth().toString()));
-		//
-		// this.add(new JLabel("Price"));
-		// this.add(new JLabel(nsp.getPrice().toString()));
+		this.setLayout(new GridLayout(NetworkProviderInspector.numRows, 2, 20, 5));
 
-		this.add(new JLabel("Place"));
-		this.add(new JLabel("Holder"));
+		this.nameLabel = new JLabel();
+		this.treeLabel = new JLabel();
+
+		this.add(new JLabel("Name"));
+		this.add(this.nameLabel);
+
+		this.add(new JLabel("ECJ tree"));
+		this.add(this.treeLabel);
+
+		this.update();
 	}
 
 	/**
@@ -56,7 +56,22 @@ public class NetworkProviderInspector extends Inspector {
 	 */
 	@Override
 	public void update() {
-		// TODO Auto-generated method stub
 
+		GPNetworkProvider nsp = (GPNetworkProvider) this.object;
+
+		this.nameLabel.setText(nsp.getName());
+
+		// try {
+		// PipedOutputStream pipeOut = new PipedOutputStream();
+		// PipedInputStream pipeIn = new PipedInputStream(pipeOut);
+		// DataOutput dataOut = new DataOutputStream(pipeOut);
+		// DataInput dataIn = new DataInputStream(pipeIn);
+		// nsp.printPricingTree(this.owner.getState(), dataOut);
+		// this.treeLabel.setText(dataIn.readLine());
+		// } catch (IOException e) {
+		this.treeLabel.setText("Could not read tree.");
+		// }
+
+		this.pack();
 	}
 }
