@@ -11,8 +11,9 @@ import ec.Individual;
 
 public class GPApplicationProvider extends ApplicationProvider implements EvolvableAgent {
 
-	protected SimternetGPIndividual	ind;
 	private static final long		serialVersionUID	= 1L;
+	private BandwidthStrategy		bandwidthStrategy;
+	protected SimternetGPIndividual	ind;
 
 	public GPApplicationProvider(Simternet s) {
 		// XXX: FIX
@@ -46,6 +47,7 @@ public class GPApplicationProvider extends ApplicationProvider implements Evolva
 		this.ind.setAgent(this);
 		this.qualityStrategy = new GPQualityStrategy(this, this.ind, this.ind.trees[0]);
 		this.transitStrategy = new GPTransitPurchaseStrategy(this, this.ind, this.ind.trees[1]);
+		this.bandwidthStrategy = new GPBandwidthStrategy(this, this.ind, this.ind.trees[2]);
 	}
 
 	@Override
@@ -58,13 +60,11 @@ public class GPApplicationProvider extends ApplicationProvider implements Evolva
 			Double totalPrice = 0.0;
 			Double price = nsp.getASPTransitPrice(this);
 			Double gpBW = this.transitStrategy.bandwidthToPurchase(nsp, price);
-
-			if (gpBW * price * 10 > this.financials.getNetWorth())
+			Double totalGPPrice = gpBW * price;
+			if (totalGPPrice * 10 > this.financials.getNetWorth())
 				// Can't spend more than 10% of net worth each step;
 				bw = (this.financials.getNetWorth() / 10) / price;
-			else
-				bw = gpBW;
-			totalPrice = gpBW * price;
+			totalPrice = bw * price;
 
 			BackboneLink bl;
 			bl = this.datacenter.getEgressLink(nsp.getBackboneNetwork());
@@ -79,6 +79,10 @@ public class GPApplicationProvider extends ApplicationProvider implements Evolva
 			nsp.financials.earn(totalPrice);
 
 		}
+		// TODO: Create generic strategy and move this code to
+		// ApplicationProvider.step()
+		Double bwIncrease = this.bandwidthStrategy.increaseBandwidth();
+		this.bandwidth.increase(bwIncrease);
 
 	}
 

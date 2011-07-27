@@ -11,7 +11,9 @@ import org.apache.log4j.Logger;
 import simternet.Simternet;
 import simternet.application.ApplicationProvider;
 import simternet.nsp.NetworkProvider;
+import simternet.reporters.ASPInterconnectionReporter;
 import simternet.reporters.ApplicationProviderFitnessReporter;
+import simternet.reporters.ConsumerDataReporter;
 import simternet.reporters.EdgeDataReporter;
 import simternet.reporters.NetworkProviderFitnessReporter;
 import ec.Evaluator;
@@ -30,8 +32,8 @@ import ec.util.Parameter;
  */
 public class SimternetEvaluator extends Evaluator {
 
-	boolean						inStep				= false;
 	private static final long	serialVersionUID	= 1L;
+	boolean						inStep				= false;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -82,20 +84,31 @@ public class SimternetEvaluator extends Evaluator {
 
 		for (int i = 0; i < simternet.length; i++) {
 			// add reporters
-			NetworkProviderFitnessReporter npfr = new NetworkProviderFitnessReporter(19);
+			NetworkProviderFitnessReporter npfr = new NetworkProviderFitnessReporter(29);
 			npfr.setGeneration(state.generation);
 			npfr.setChunk(i);
 			simternet[i].addReporter(npfr);
 
-			ApplicationProviderFitnessReporter apfr = new ApplicationProviderFitnessReporter(19);
+			ApplicationProviderFitnessReporter apfr = new ApplicationProviderFitnessReporter(29);
 			apfr.setGeneration(state.generation);
 			apfr.setChunk(i);
 			simternet[i].addReporter(apfr);
 
-			EdgeDataReporter edr = new EdgeDataReporter(19);
+			EdgeDataReporter edr = new EdgeDataReporter(29);
 			edr.setGeneration(state.generation);
 			edr.setChunk(i);
 			simternet[i].addReporter(edr);
+
+			ConsumerDataReporter cdr = new ConsumerDataReporter(29);
+			cdr.setGeneration(state.generation);
+			cdr.setChunk(i);
+			simternet[i].addReporter(cdr);
+
+			ASPInterconnectionReporter air = new ASPInterconnectionReporter(29);
+			air.setGeneration(state.generation);
+			air.setChunk(i);
+			simternet[i].addReporter(air);
+
 		}
 
 		// Populate them with agents
@@ -122,6 +135,14 @@ public class SimternetEvaluator extends Evaluator {
 
 			// How many agents to a chunk?
 			int numAgents = this.numAgents(sp.individuals.length, numChunks);
+
+			// Randomize the subpopulation before populating simulations
+			for (int j = 0; j < sp.individuals.length; j++) {
+				int randomPosition = state.random[0].nextInt(sp.individuals.length);
+				Individual temp = sp.individuals[j];
+				sp.individuals[j] = sp.individuals[randomPosition];
+				sp.individuals[randomPosition] = temp;
+			}
 
 			// Main loop creating individuals & populating simulations
 			for (int j = 0; j < sp.individuals.length; j++) {

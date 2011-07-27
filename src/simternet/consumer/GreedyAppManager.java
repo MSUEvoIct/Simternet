@@ -32,7 +32,8 @@ public class GreedyAppManager extends AppManager implements Serializable {
 
 				AppBenefit ab = new AppBenefit();
 				ab.app = asp;
-				ab.benefit = c.getAppBenefitCalculator().calculateBenefit(c, null, asp);
+				ab.benefit = c.getAppBenefitCalculator().congestedBenefit(c, asp,
+						asp.getDatacenter().getCongestionRatio(c.edgeNetwork.get()));
 				ab.cost = asp.getPriceSubscriptions();
 				appBenefits.add(ab);
 			}

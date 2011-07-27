@@ -7,7 +7,7 @@ import simternet.nsp.NetworkProvider;
 public class NetworkProviderFitnessReporter extends Reporter {
 
 	private static final long	serialVersionUID	= 1L;
-	public static final String	specificHeaders		= "NSP,Fitness";
+	public static final String	specificHeaders		= "NSP,Fitness,CapitalAssets,LiquidAssets,TotalInvestment,TotalFinancing,TotalOperating,TotalRevenue,NumEdges,Bankrupt";
 
 	static {
 		new NetworkProviderFitnessReporter().logHeaders();
@@ -27,8 +27,30 @@ public class NetworkProviderFitnessReporter extends Reporter {
 		for (NetworkProvider nsp : s.getNetworkServiceProviders()) {
 			Double reportedFitness = nsp.financials.getNetWorth();
 			if (reportedFitness < 0)
-				reportedFitness = -1000000.0;
-			this.report(nsp.getName() + Reporter.separater + reportedFitness);
+				reportedFitness = 0.0;
+
+			StringBuffer report = new StringBuffer();
+			report.append(nsp.getName());
+			report.append(Reporter.separater);
+			report.append(reportedFitness);
+			report.append(Reporter.separater);
+			report.append(nsp.financials.getAssetsCapital());
+			report.append(Reporter.separater);
+			report.append(nsp.financials.getAssetsLiquid());
+			report.append(Reporter.separater);
+			report.append(nsp.financials.getTotalInvestment());
+			report.append(Reporter.separater);
+			report.append(nsp.financials.getTotalFinancingCost());
+			report.append(Reporter.separater);
+			report.append(nsp.financials.getTotalOperationsCost());
+			report.append(Reporter.separater);
+			report.append(nsp.financials.getTotalRevenue());
+			report.append(Reporter.separater);
+			report.append(nsp.getEdgeNetworks().size());
+			report.append(Reporter.separater);
+			report.append(nsp.bankrupt);
+
+			this.report(report.toString());
 
 		}
 	}

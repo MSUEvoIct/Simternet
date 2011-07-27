@@ -33,37 +33,37 @@ public abstract class NetFlow {
 	}
 
 	/**
-	 * The actual bandwidth of this flow.
+	 * The actual current bandwidth of this flow, which changes as it transits
+	 * the network.
 	 */
-	protected Double						bandwidth;
+	protected Double			bandwidth;
 
 	/**
 	 * Has this flow ever been congested?
 	 */
-	protected Boolean						congested	= false;
-
+	protected Boolean			congested	= false;
 	/**
 	 * The network this NetFlow object will be delivered to.
 	 */
-	protected final Network			destination;
+	protected final Network		destination;
 
 	/**
 	 * The actual duration of this flow. For interactive flows, this should
 	 * always be equal to maxTime. For non-interactive flows, this may be less
 	 * because the flows will transfer as quickly as possible.
 	 */
-	protected Double						duration;
+	protected Double			duration;
 
 	/**
 	 * The accumulated latency of this flow
 	 */
-	protected Double						latency		= 0D;
+	protected Double			latency		= 0D;
 
 	/**
 	 * The source network, should be a RoutingPoint operated by an application
 	 * provider.
 	 */
-	protected final Network			source;
+	protected final Network		source;
 
 	/**
 	 * Exactly analogous to TTL in real networks. We should never have a network
@@ -71,7 +71,7 @@ public abstract class NetFlow {
 	 * because it's more of a debug/sanity check than anything else. We should
 	 * probably quit with an error if this ever reaches zero.
 	 */
-	protected Integer						TTL			= 20;
+	protected Integer			TTL			= 20;
 
 	/**
 	 * The user this traffic is intended for, once we reach the destination
@@ -81,7 +81,7 @@ public abstract class NetFlow {
 
 	protected NetFlow(Network source, Network destination, Consumer user) {
 		if (destination == null)
-			throw new RuntimeException("Can't send a packet nowhere");
+			throw new RuntimeException("Can't send a packet to nowhere");
 		this.source = source;
 		this.destination = destination;
 		this.user = user;
@@ -126,6 +126,8 @@ public abstract class NetFlow {
 	public Double getUsage() {
 		return this.bandwidth * this.duration * this.user.getPopulation();
 	}
+
+	public abstract Double getUsageBlocked();
 
 	public Boolean isCongested() {
 		return this.congested;

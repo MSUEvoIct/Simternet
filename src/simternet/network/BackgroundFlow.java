@@ -10,14 +10,14 @@ public class BackgroundFlow extends NetFlow {
 	 * to maxBandwidth. In a non-interactive flow, it will be determined by the
 	 * total amount to be transferred and maxTime.
 	 */
-	protected Double bandwidthInteractive;
+	protected Double	bandwidthInteractive;
 
 	/**
 	 * The maximum length of time a non-interactive flow may take to transit the
 	 * network. If the total requested amount cannot be transmitted in this time
 	 * due to congestion, this flow will reduce the
 	 */
-	protected Double maxDuration;
+	protected Double	maxDuration;
 
 	/**
 	 * Create a non-interactive flow. Non-interactive flows are those that
@@ -40,8 +40,7 @@ public class BackgroundFlow extends NetFlow {
 	 * @param maxDuration
 	 *            The maximum time to wait for this data transfer.
 	 */
-	public BackgroundFlow(Network source, Network destination,
-			Consumer user, Double usage, Double maxDuration) {
+	public BackgroundFlow(Network source, Network destination, Consumer user, Double usage, Double maxDuration) {
 
 		super(source, destination, user);
 
@@ -85,6 +84,12 @@ public class BackgroundFlow extends NetFlow {
 	@Override
 	public Double getCongestionDuration() {
 		return this.maxDuration * this.user.getPopulation();
+	}
+
+	@Override
+	public Double getUsageBlocked() {
+		// TODO: Implement
+		return null;
 	}
 
 }

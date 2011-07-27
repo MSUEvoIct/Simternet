@@ -35,7 +35,7 @@ public class GPPricingStrategy extends PricingStrategy {
 
 		if (d.value < GPPricingStrategy.MIN_PRICE)
 			return GPPricingStrategy.MIN_PRICE;
-		else if (d.value > GPPricingStrategy.MAX_PRICE)
+		else if ((d.value > GPPricingStrategy.MAX_PRICE) || (d.value == Double.NaN))
 			return GPPricingStrategy.MAX_PRICE;
 		else
 			return d.value;

@@ -15,6 +15,7 @@ import simternet.temporal.TemporalHashSet;
 
 public class Datacenter extends Network {
 
+	private static final long					serialVersionUID	= 1L;
 	protected TemporalHashSet<NetFlow>			inputQueue			= new TemporalHashSet<NetFlow>();
 	/**
 	 * Stores the congestion this application sees on each network. Congestion
@@ -24,10 +25,18 @@ public class Datacenter extends Network {
 	 */
 	protected TemporalHashMap<Network, Double>	observedBandwidth	= new TemporalHashMap<Network, Double>();
 	protected final ApplicationProvider			owner;
-	private static final long					serialVersionUID	= 1L;
 
 	public Datacenter(ApplicationProvider owner) {
 		this.owner = owner;
+	}
+
+	public Double getCongestionRatio(EdgeNetwork en) {
+		Double observedBandwidth = this.getObservedBandwidth(en);
+		Double requestedBandwidth = this.owner.getBandwidth();
+		if ((observedBandwidth == null) || (requestedBandwidth == null))
+			return 1.0;
+		else
+			return observedBandwidth / requestedBandwidth;
 	}
 
 	/**

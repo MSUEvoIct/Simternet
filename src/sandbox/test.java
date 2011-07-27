@@ -1,43 +1,52 @@
 package sandbox;
 
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 
-public class test {
+import ec.util.MersenneTwisterFast;
 
-	private JFrame frame;
+public class test {
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					test window = new test();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		// EventQueue.invokeLater(new Runnable() {
+		// public void run() {
+		// try {
+		// test window = new test();
+		// window.frame.setVisible(true);
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		// }
+		// });
+
+		MersenneTwisterFast mtf = new MersenneTwisterFast(4000);
+		for (int i = 0; i < 10; i++)
+			System.out.println(i + " = " + mtf.nextInt());
+
+		mtf = new MersenneTwisterFast(-1465451779);
+		for (int i = 0; i < 10; i++)
+			System.out.println(i + " = " + mtf.nextInt());
+
 	}
+
+	private JFrame	frame;
 
 	/**
 	 * Create the application.
 	 */
 	public test() {
-		initialize();
+		this.initialize();
 	}
 
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 300);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.frame = new JFrame();
+		this.frame.setBounds(100, 100, 450, 300);
+		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 }

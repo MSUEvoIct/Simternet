@@ -6,14 +6,14 @@ import simternet.consumer.Consumer;
 
 public class InteractiveFlow extends NetFlow implements Serializable {
 
+	private static final long	serialVersionUID	= 1L;
+
 	/**
 	 * The speed this flow would <i>like</i> to have, in an uncongested network.
 	 * This will be set for <i>interactive</i> flows, e.g., streaming.
 	 * Non-interactive flows will transmit as quickly as possible.
 	 */
 	protected Double			bandwidthRequested;
-
-	private static final long	serialVersionUID	= 1L;
 
 	/**
 	 * Create an interactive flow
@@ -69,6 +69,11 @@ public class InteractiveFlow extends NetFlow implements Serializable {
 	@Override
 	public Double getCongestionDuration() {
 		return this.duration * this.user.getPopulation();
+	}
+
+	@Override
+	public Double getUsageBlocked() {
+		return (this.bandwidthRequested - this.bandwidth) * this.duration;
 	}
 
 }

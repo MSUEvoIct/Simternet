@@ -22,8 +22,8 @@ import simternet.temporal.TemporalHashMap;
 @SuppressWarnings("serial")
 public class Consumer implements Steppable, AsyncUpdate, Serializable {
 
-	protected AppBenefitCalculator												appBenefitCalculator	= AppBenefitCalculator
-																												.getSingleton();
+	protected AppBenefitCalculator										appBenefitCalculator	= AppBenefitCalculator
+																										.getSingleton();
 	/**
 	 * Consumers do not consume all applications. Whether the budget constraint
 	 * is measured in time or dollars, consumers will not spend more than this
@@ -32,7 +32,7 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 * consuming entertainment content), this should be reflected by changing
 	 * these values.
 	 */
-	protected TemporalHashMap<AppCategory, Double>								appBudgetConstraints	= new TemporalHashMap<AppCategory, Double>();
+	protected TemporalHashMap<AppCategory, Double>						appBudgetConstraints	= new TemporalHashMap<AppCategory, Double>();
 
 	/**
 	 * Controls the consumer's application consumption behavior; it controlls
@@ -40,8 +40,8 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 * separate object rather than code within an individual class so that
 	 * distinct behaviors can be mixed and matched without refactoring code.
 	 */
-	protected AppManager														appManager				= AppManager
-																												.getSingleton();
+	protected AppManager												appManager				= AppManager
+																										.getSingleton();
 
 	/**
 	 * The actual list of application service providers selected for use, sorted
@@ -51,18 +51,24 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 */
 	protected TemporalHashMap<AppCategory, List<ApplicationProvider>>	appsUsed				= new TemporalHashMap<AppCategory, List<ApplicationProvider>>();
 
-	protected Temporal<EdgeNetwork>												edgeNetwork				= new Temporal<EdgeNetwork>(
-																												null);
+	public Double														bandwidthRequested		= 0.0;
+
+	public Double														benefitSeen;
+
+	public Double														congestionSeen			= 0.0;
+
+	protected Temporal<EdgeNetwork>										edgeNetwork				= new Temporal<EdgeNetwork>(
+																										null);
 
 	/**
 	 * The physical location of this set of consumers.
 	 */
-	protected final Int2D														location;
+	protected final Int2D												location;
 
 	/**
 	 * A human-readable name to distinguish this consumer agent
 	 */
-	protected final String														name;
+	protected final String												name;
 
 	/**
 	 * Controls the consumer's network consumption behavior; it controlls which
@@ -70,26 +76,26 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 * object rather than code within an individual class so that distinct
 	 * behaviors can be mixed and matched without refactoring code.
 	 */
-	protected NetManager														netManager				= NetManager
-																												.getSingleton();
+	protected NetManager												netManager				= NetManager
+																										.getSingleton();
+
+	public Double														paidToNSPs;
 
 	/**
 	 * The number of consumers represented by this agent.
 	 */
-	protected final Temporal<Double>											population;
-
+	protected final Temporal<Double>									population;
 	/**
 	 * Details describing the properties of this set of consumers.
 	 */
-	protected ConsumerProfile													profile					= ConsumerProfile
-																												.getSingleton();
-
+	protected ConsumerProfile											profile					= ConsumerProfile
+																										.getSingleton();
 	/**
 	 * A link back to the simulation we are running under. Use of a singleton
 	 * would be inappropriate given that Mason initializes multiple instances of
 	 * a single simulation simultaneously.
 	 */
-	protected final Simternet													s;
+	protected final Simternet											s;
 
 	/**
 	 * Create a new consumer class in simulation s with location, population,
@@ -209,6 +215,10 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 		if (TraceConfig.consumerFlowReceived && Logger.getRootLogger().isTraceEnabled())
 			Logger.getRootLogger().log(Level.TRACE,
 					this + " received " + flow + ", congestion = " + flow.describeCongestion());
+
+		// this.bandwidthRequested += flow
+
+		this.congestionSeen += flow.getUsageBlocked();
 
 	}
 
