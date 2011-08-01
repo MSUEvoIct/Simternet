@@ -2,6 +2,7 @@ package simternet.jung.inspector;
 
 import java.awt.GridLayout;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 
 import simternet.application.ApplicationProvider;
@@ -14,10 +15,10 @@ import simternet.jung.gui.GUI;
  * 
  * @author graysonwright
  */
-public class ApplicationProviderInspector extends Inspector {
+public class ApplicationProviderInspector extends EvolvableAgentInspector {
 
 	protected JLabel			categoryLabel, qualityLabel, priceLabel;
-	protected static final int	numRows				= 3;
+	protected static final int	numRows				= 4;
 	private static final long	serialVersionUID	= 1L;
 
 	/**
@@ -45,6 +46,11 @@ public class ApplicationProviderInspector extends Inspector {
 
 		this.add(new JLabel("Subscription Price"));
 		this.add(this.priceLabel);
+
+		this.add(new JLabel("Trees"));
+		JButton button = new JButton("Print");
+		button.addActionListener(this);
+		this.add(button);
 
 		this.update();
 	}

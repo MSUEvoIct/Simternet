@@ -2,6 +2,7 @@ package simternet.jung.inspector;
 
 import java.awt.GridLayout;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 
 import simternet.jung.gui.GUI;
@@ -16,11 +17,9 @@ import simternet.nsp.NetworkProvider;
  * @author graysonwright
  * 
  */
-public class NetworkProviderInspector extends Inspector {
-	// TODO: add tree visualization
+public class NetworkProviderInspector extends EvolvableAgentInspector {
 
-	protected JLabel			nameLabel, treeLabel;
-
+	protected JLabel			nameLabel;
 	protected static final int	numRows				= 2;
 
 	private static final long	serialVersionUID	= 1L;
@@ -38,14 +37,18 @@ public class NetworkProviderInspector extends Inspector {
 
 		this.setLayout(new GridLayout(NetworkProviderInspector.numRows, 2, 20, 5));
 
+		// Initialize components
 		this.nameLabel = new JLabel();
-		this.treeLabel = new JLabel();
 
+		JButton button = new JButton("Print");
+		button.addActionListener(this);
+
+		// Add them to frame
 		this.add(new JLabel("Name"));
 		this.add(this.nameLabel);
 
 		this.add(new JLabel("ECJ tree"));
-		this.add(this.treeLabel);
+		this.add(button);
 
 		this.update();
 	}
@@ -56,22 +59,8 @@ public class NetworkProviderInspector extends Inspector {
 	 */
 	@Override
 	public void update() {
-
 		GPNetworkProvider nsp = (GPNetworkProvider) this.object;
-
 		this.nameLabel.setText(nsp.getName());
-
-		// try {
-		// PipedOutputStream pipeOut = new PipedOutputStream();
-		// PipedInputStream pipeIn = new PipedInputStream(pipeOut);
-		// DataOutput dataOut = new DataOutputStream(pipeOut);
-		// DataInput dataIn = new DataInputStream(pipeIn);
-		// nsp.printPricingTree(this.owner.getState(), dataOut);
-		// this.treeLabel.setText(dataIn.readLine());
-		// } catch (IOException e) {
-		this.treeLabel.setText("Could not read tree.");
-		// }
-
 		this.pack();
 	}
 }
