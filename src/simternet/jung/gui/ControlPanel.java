@@ -108,6 +108,15 @@ public class ControlPanel extends JPanel {
 		});
 		this.add(filterButton);
 
+		JButton printDataButton = new JButton("View Data");
+		printDataButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				ControlPanel.this.owner.printDataButtonPressed();
+			}
+		});
+		this.add(printDataButton);
+
 		// We want empty space to be at the bottom of the panel
 		this.add(Box.createVerticalGlue());
 	}

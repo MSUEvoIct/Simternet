@@ -23,13 +23,12 @@ import simternet.temporal.AsyncUpdate;
 import simternet.temporal.Temporal;
 
 public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate {
-	private static final long			serialVersionUID		= 1L;
-
 	/**
 	 * Other data structures will rely on this not changing, e.g., one that
 	 * keeps a lists of ASPs within an App Category.
 	 */
 	protected final AppCategory			appCategory;
+
 	// TODO: Set this better;
 	protected Temporal<Double>			bandwidth				= new Temporal<Double>(100.0);
 	protected HashSet<Network>			connectedNetworks		= new HashSet<Network>();
@@ -48,8 +47,9 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 	protected Temporal<Double>			revenueAdvertising		= new Temporal<Double>(0.0);
 	protected Temporal<Double>			revenueSubscriptions	= new Temporal<Double>(0.0);
 	public Simternet					s;
-
 	protected TransitPurchaseStrategy	transitStrategy;
+
+	private static final long			serialVersionUID		= 1L;
 
 	public ApplicationProvider(Simternet s, AppCategory appCategory) {
 		// housekeeping
@@ -106,6 +106,25 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 
 	public AppCategory getAppCategory() {
 		return this.appCategory;
+	}
+
+	public String getAppCategoryString() {
+		String categoryString;
+		switch (this.appCategory) {
+		case COMMUNICATION:
+			categoryString = "Communication";
+			break;
+		case ENTERTAINMENT:
+			categoryString = "Entertainment";
+			break;
+		case INFORMATION:
+			categoryString = "Information";
+			break;
+		default:
+			categoryString = "Undefined";
+			break;
+		}
+		return categoryString;
 	}
 
 	public Double getBandwidth() {

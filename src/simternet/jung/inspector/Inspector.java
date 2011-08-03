@@ -1,11 +1,19 @@
 package simternet.jung.inspector;
 
+import java.awt.Component;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.BevelBorder;
 
 import simternet.jung.gui.GUI;
+import simternet.jung.inspector.property.Property;
+import simternet.jung.inspector.property.TrackableProperty;
 
 /**
  * A gui that, given an object from a Simternet simulation, displays information
@@ -16,23 +24,25 @@ import simternet.jung.gui.GUI;
  */
 public abstract class Inspector extends JFrame {
 
-	protected Object			object;
-	protected GUI				owner;
-	private static final long	serialVersionUID	= 1L;
+	protected JPanel				contentPanel;
+	protected GUI					owner;
+	protected ArrayList<Property>	properties;
+	private static final long		serialVersionUID	= 1L;
 
 	/**
 	 * Initializes the JFrame and defines behavior to notify the owner when the
 	 * inspector is closed
 	 * 
-	 * @param object
-	 *            the object to be inspected
+	 * @param title
+	 *            the title of the JFrame
 	 * @param owner
 	 *            the GUI that this inspector reports to, if any
 	 */
-	public Inspector(Object object, GUI owner) {
-		super(object.toString());
+	public Inspector(String title, GUI owner) {
+		super(title);
+		this.contentPanel = new JPanel();
+		this.setContentPane(this.contentPanel);
 
-		this.object = object;
 		this.owner = owner;
 
 		this.addWindowListener(new WindowAdapter() {
@@ -41,19 +51,33 @@ public abstract class Inspector extends JFrame {
 				Inspector.this.frameClosed();
 			}
 		});
+
+		this.setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
+		this.properties = new ArrayList<Property>();
+
+		this.contentPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+	}
+
+	/**
+	 * Allows the Inspector to keep a list of all Properties added to its Frame.
+	 */
+	@Override
+	public Component add(Component component) {
+		if (component instanceof Property)
+			this.properties.add((Property) component);
+		return super.add(component);
 	}
 
 	protected void frameClosed() {
 		if (this.owner != null)
-			this.owner.removeInspector(this.object);
+			this.owner.removeInspector(this);
 		this.dispose();
 	}
 
-	public void setObject(Object o) {
-		if (o.getClass() == this.object.getClass())
-			this.object = o;
-		else
-			System.err.println("Incorrect Type assignment. (simternet.jung.inspector.Inspector, 56)");
+	public void printData() {
+		for (Property p : this.properties)
+			if (p instanceof TrackableProperty)
+				((TrackableProperty) p).printTrackedData();
 	}
 
 	/**
@@ -61,5 +85,4 @@ public abstract class Inspector extends JFrame {
 	 * Simternet simulation
 	 */
 	abstract public void update();
-
 }

@@ -1,11 +1,10 @@
 package simternet.jung.inspector;
 
-import java.awt.GridLayout;
-
-import javax.swing.JLabel;
-
 import simternet.jung.ConsumerNetwork;
 import simternet.jung.gui.GUI;
+import simternet.jung.inspector.property.DoubleProperty;
+import simternet.jung.inspector.property.IntegerProperty;
+import simternet.jung.inspector.property.StringProperty;
 
 /**
  * Inspects a location (Int2D) of a Simternet run
@@ -19,7 +18,10 @@ import simternet.jung.gui.GUI;
  */
 public class ConsumerNetworkInspector extends Inspector {
 
-	protected JLabel			locationLabel, populationLabel, percentageLabel, nspLabel;
+	protected StringProperty	location;
+	protected ConsumerNetwork	net;
+	protected IntegerProperty	numNSPs, population;
+	protected DoubleProperty	percentage;
 	protected static final int	numRows				= 4;
 	private static final long	serialVersionUID	= 1L;
 
@@ -32,26 +34,20 @@ public class ConsumerNetworkInspector extends Inspector {
 	 *            the GUI in charge of this inspector
 	 */
 	public ConsumerNetworkInspector(ConsumerNetwork network, GUI owner) {
-		super(network, owner);
+		super(network.toString(), owner);
+		this.net = network;
 
-		this.setLayout(new GridLayout(EdgeInspector.numRows, 2, 20, 5));
+		this.location = new StringProperty("Location");
+		this.add(this.location);
 
-		this.locationLabel = new JLabel();
-		this.populationLabel = new JLabel();
-		this.percentageLabel = new JLabel();
-		this.nspLabel = new JLabel();
+		this.population = new IntegerProperty("Population");
+		this.add(this.population);
 
-		this.add(new JLabel("Category"));
-		this.add(this.locationLabel);
+		this.percentage = new DoubleProperty("Percentage Subscribing");
+		this.add(this.percentage);
 
-		this.add(new JLabel("Population"));
-		this.add(this.populationLabel);
-
-		this.add(new JLabel("Percentage Subscribing"));
-		this.add(this.percentageLabel);
-
-		this.add(new JLabel("Connected NSPs"));
-		this.add(this.nspLabel);
+		this.numNSPs = new IntegerProperty("Connected NSPs");
+		this.add(this.numNSPs);
 
 		this.update();
 	}
@@ -61,16 +57,10 @@ public class ConsumerNetworkInspector extends Inspector {
 	 */
 	@Override
 	public void update() {
-		ConsumerNetwork net = (ConsumerNetwork) this.object;
-
-		this.locationLabel.setText(net.toString());
-
-		this.populationLabel.setText(net.getPopulation().toString());
-
-		double percentage = net.getActiveSubscribers() / net.getPopulation();
-		this.percentageLabel.setText(Double.toString(percentage));
-
-		this.nspLabel.setText(net.getNumNetworkProviders().toString());
+		this.location.setValue(this.net.getLocation().toCoordinates());
+		this.population.setValue(new Integer(this.net.getPopulation().intValue()));
+		this.percentage.setValue(this.net.getPercentageSubscribing());
+		this.numNSPs.setValue(this.net.getNumNetworkProviders());
 
 	}
 }

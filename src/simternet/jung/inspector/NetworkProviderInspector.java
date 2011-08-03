@@ -1,12 +1,9 @@
 package simternet.jung.inspector;
 
-import java.awt.GridLayout;
-
-import javax.swing.JButton;
-import javax.swing.JLabel;
-
+import simternet.ecj.EvolvableAgent;
 import simternet.jung.gui.GUI;
-import simternet.nsp.GPNetworkProvider;
+import simternet.jung.inspector.property.StringProperty;
+import simternet.jung.inspector.property.TreeProperty;
 import simternet.nsp.NetworkProvider;
 
 /**
@@ -17,39 +14,32 @@ import simternet.nsp.NetworkProvider;
  * @author graysonwright
  * 
  */
-public class NetworkProviderInspector extends EvolvableAgentInspector {
+public class NetworkProviderInspector extends Inspector {
 
-	protected JLabel			nameLabel;
-	protected static final int	numRows				= 2;
-
+	protected StringProperty	name;
+	protected NetworkProvider	nsp;
+	protected TreeProperty		trees;
 	private static final long	serialVersionUID	= 1L;
 
 	/**
 	 * Initializes the object and defines the layout
 	 * 
-	 * @param nsp
+	 * @param numNSPs
 	 *            object to inspect
 	 * @param owner
 	 *            the GUI in charge of this inspector
 	 */
 	public NetworkProviderInspector(NetworkProvider nsp, GUI owner) {
-		super(nsp, owner);
+		super(nsp.toString(), owner);
+		this.nsp = nsp;
 
-		this.setLayout(new GridLayout(NetworkProviderInspector.numRows, 2, 20, 5));
+		this.name = new StringProperty("Name", nsp.getName());
+		this.add(this.name);
 
-		// Initialize components
-		this.nameLabel = new JLabel();
-
-		JButton button = new JButton("Print");
-		button.addActionListener(this);
-
-		// Add them to frame
-		this.add(new JLabel("Name"));
-		this.add(this.nameLabel);
-
-		this.add(new JLabel("ECJ tree"));
-		this.add(button);
-
+		if (this.nsp instanceof EvolvableAgent) {
+			this.trees = new TreeProperty("ECJ Trees", (EvolvableAgent) nsp);
+			this.add(this.trees);
+		}
 		this.update();
 	}
 
@@ -59,8 +49,6 @@ public class NetworkProviderInspector extends EvolvableAgentInspector {
 	 */
 	@Override
 	public void update() {
-		GPNetworkProvider nsp = (GPNetworkProvider) this.object;
-		this.nameLabel.setText(nsp.getName());
-		this.pack();
+		this.name.setValue(this.nsp.getName());
 	}
 }

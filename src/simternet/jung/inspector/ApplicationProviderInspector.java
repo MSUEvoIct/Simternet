@@ -1,12 +1,11 @@
 package simternet.jung.inspector;
 
-import java.awt.GridLayout;
-
-import javax.swing.JButton;
-import javax.swing.JLabel;
-
 import simternet.application.ApplicationProvider;
+import simternet.ecj.EvolvableAgent;
 import simternet.jung.gui.GUI;
+import simternet.jung.inspector.property.DoubleProperty;
+import simternet.jung.inspector.property.StringProperty;
+import simternet.jung.inspector.property.TreeProperty;
 
 /**
  * Inspects ApplicationProvider objects
@@ -15,11 +14,13 @@ import simternet.jung.gui.GUI;
  * 
  * @author graysonwright
  */
-public class ApplicationProviderInspector extends EvolvableAgentInspector {
+public class ApplicationProviderInspector extends Inspector {
 
-	protected JLabel			categoryLabel, qualityLabel, priceLabel;
-	protected static final int	numRows				= 4;
-	private static final long	serialVersionUID	= 1L;
+	protected ApplicationProvider	asp;
+	protected StringProperty		category;
+	protected DoubleProperty		quality, price;
+	protected TreeProperty			trees;
+	private static final long		serialVersionUID	= 1L;
 
 	/**
 	 * Initializes the object and defines the layout
@@ -30,27 +31,22 @@ public class ApplicationProviderInspector extends EvolvableAgentInspector {
 	 *            the GUI to which this inspector reports
 	 */
 	public ApplicationProviderInspector(ApplicationProvider asp, GUI owner) {
-		super(asp, owner);
+		super(asp.toString(), owner);
+		this.asp = asp;
 
-		this.setLayout(new GridLayout(EdgeInspector.numRows, 2, 20, 5));
+		this.category = new StringProperty("Category", asp.getAppCategoryString());
+		this.add(this.category);
 
-		this.categoryLabel = new JLabel();
-		this.qualityLabel = new JLabel();
-		this.priceLabel = new JLabel();
+		this.quality = new DoubleProperty("Quality", asp.getQuality());
+		this.add(this.quality);
 
-		this.add(new JLabel("Category"));
-		this.add(this.categoryLabel);
+		this.price = new DoubleProperty("Subscription Price", asp.getPriceSubscriptions());
+		this.add(this.price);
 
-		this.add(new JLabel("Quality"));
-		this.add(this.qualityLabel);
-
-		this.add(new JLabel("Subscription Price"));
-		this.add(this.priceLabel);
-
-		this.add(new JLabel("Trees"));
-		JButton button = new JButton("Print");
-		button.addActionListener(this);
-		this.add(button);
+		if (this.asp instanceof EvolvableAgent) {
+			this.trees = new TreeProperty("ECJ Trees", (EvolvableAgent) this.asp);
+			this.add(this.trees);
+		}
 
 		this.update();
 	}
@@ -61,29 +57,9 @@ public class ApplicationProviderInspector extends EvolvableAgentInspector {
 	 */
 	@Override
 	public void update() {
-
-		ApplicationProvider asp = (ApplicationProvider) this.object;
-
-		String categoryString;
-		switch (asp.getAppCategory()) {
-		case COMMUNICATION:
-			categoryString = "Communication";
-			break;
-		case ENTERTAINMENT:
-			categoryString = "Entertainment";
-			break;
-		case INFORMATION:
-			categoryString = "Information";
-			break;
-		default:
-			categoryString = "Undefined";
-			break;
-		}
-		this.categoryLabel.setText(categoryString);
-
-		this.qualityLabel.setText(asp.getQuality().toString());
-
-		this.priceLabel.setText(asp.getPriceSubscriptions().toString());
+		this.category.setValue(this.asp.getAppCategoryString());
+		this.quality.setValue(this.asp.getQuality());
+		this.price.setValue(this.asp.getPriceSubscriptions());
 	}
 
 }

@@ -32,6 +32,7 @@ import simternet.jung.inspector.ApplicationProviderInspector;
 import simternet.jung.inspector.ConsumerNetworkInspector;
 import simternet.jung.inspector.Inspector;
 import simternet.jung.inspector.NetworkProviderInspector;
+import simternet.jung.inspector.property.TrackableProperty;
 import simternet.network.Backbone;
 import simternet.network.BackboneLink;
 import simternet.network.Datacenter;
@@ -97,6 +98,8 @@ public class GUI extends JPanel {
 	 * Defines the layout of the GUI
 	 */
 	protected void initComponents() {
+
+		TrackableProperty.setSimState(this.simternet);
 		this.inspectors = new HashMap<Object, Inspector>();
 
 		this.setLayout(new BorderLayout());
@@ -162,6 +165,11 @@ public class GUI extends JPanel {
 
 		this.viewer.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 
+	}
+
+	public void printDataButtonPressed() {
+		for (Inspector i : this.inspectors.values())
+			i.printData();
 	}
 
 	public void removeInspector(Object object) {

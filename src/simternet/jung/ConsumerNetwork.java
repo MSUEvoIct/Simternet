@@ -81,6 +81,10 @@ public class ConsumerNetwork extends Network {
 		return this.simternet.getNumNetworkProviders(this.location);
 	}
 
+	public Double getPercentageSubscribing() {
+		return new Double(this.getActiveSubscribers() / this.getPopulation());
+	}
+
 	public Double getPopulation() {
 		return this.simternet.getPopulation(this.location);
 	}
