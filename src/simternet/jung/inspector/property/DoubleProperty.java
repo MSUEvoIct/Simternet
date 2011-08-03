@@ -6,10 +6,10 @@ import javax.swing.JLabel;
 
 public class DoubleProperty extends TrackableProperty {
 
-	protected HashMap<Long, Double>	changes;
-	protected Double				value;
-	protected JLabel				valueLabel;
-	private static final long		serialVersionUID	= 1L;
+	protected HashMap<Integer, Double>	changes;
+	protected Double					value;
+	protected JLabel					valueLabel;
+	private static final long			serialVersionUID	= 1L;
 
 	public DoubleProperty(String propertyName) {
 		this(propertyName, new Double(0));
@@ -35,8 +35,7 @@ public class DoubleProperty extends TrackableProperty {
 	}
 
 	private void recordValue(Double value) {
-		Long step = new Long(TrackableProperty.sim.schedule.getSteps());
-		this.changes.put(step, value);
+		this.changes.put(this.getStep(), value);
 	}
 
 	public void setValue(Double value) {
@@ -51,7 +50,7 @@ public class DoubleProperty extends TrackableProperty {
 	@Override
 	protected void trackingStateChanged() {
 		if (this.tracking) {
-			this.changes = new HashMap<Long, Double>();
+			this.changes = new HashMap<Integer, Double>();
 			this.recordValue(this.value);
 		}
 	}

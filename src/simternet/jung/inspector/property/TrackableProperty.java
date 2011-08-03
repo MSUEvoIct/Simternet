@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JCheckBox;
 
 import simternet.Simternet;
+import simternet.jung.gui.GUI;
 
 public abstract class TrackableProperty extends Property {
 
@@ -32,6 +33,10 @@ public abstract class TrackableProperty extends Property {
 
 	public TrackableProperty(String propertyName) {
 		super(propertyName);
+	}
+
+	protected Integer getStep() {
+		return new Integer((int) GUI.getSimternet().schedule.getSteps());
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package simternet.jung.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.util.HashMap;
+import java.util.HashSet;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -51,12 +51,16 @@ public class GUI extends JPanel {
 	private FilterGUI										filterGUI;
 	private DirectedSparseGraph<Network, BackboneLink>		graph;
 	protected InfoPanel										infoPanel;
-	protected HashMap<Object, Inspector>					inspectors;
+	protected HashSet<Inspector>							inspectors;
 	private EasyFilterLayout<Network, BackboneLink>			layout;
-	protected Simternet										simternet;
 	protected VisualizationViewer<Network, BackboneLink>	viewer;
-
 	private static final long								serialVersionUID	= 1L;
+
+	protected static Simternet								simternet;
+
+	public static Simternet getSimternet() {
+		return GUI.simternet;
+	}
 
 	public static void main(String[] args) {
 		JFrame jFrame = new JFrame("Simternet Checkpoint Reader");
@@ -76,7 +80,7 @@ public class GUI extends JPanel {
 	 */
 	public GUI(Simternet simternet) {
 		super();
-		this.simternet = simternet;
+		GUI.simternet = simternet;
 		this.initComponents();
 	}
 
@@ -99,8 +103,8 @@ public class GUI extends JPanel {
 	 */
 	protected void initComponents() {
 
-		TrackableProperty.setSimState(this.simternet);
-		this.inspectors = new HashMap<Object, Inspector>();
+		TrackableProperty.setSimState(GUI.simternet);
+		this.inspectors = new HashSet<Inspector>();
 
 		this.setLayout(new BorderLayout());
 
@@ -108,7 +112,7 @@ public class GUI extends JPanel {
 		this.controlPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 		this.add(this.controlPanel, BorderLayout.EAST);
 
-		this.infoPanel = new InfoPanel(this.simternet);
+		this.infoPanel = new InfoPanel(GUI.simternet);
 		this.infoPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 		this.add(this.infoPanel, BorderLayout.SOUTH);
 
@@ -128,7 +132,7 @@ public class GUI extends JPanel {
 
 		// Define the layout, which will enable filtering, and use our
 		// LocationTransformer class to lay everything out.
-		this.layout = new EasyFilterLayout<Network, BackboneLink>(this.graph, new LocationTransformer(this.simternet));
+		this.layout = new EasyFilterLayout<Network, BackboneLink>(this.graph, new LocationTransformer(GUI.simternet));
 
 		Dimension frameDimension = new Dimension(800, 500);
 		this.viewer = new VisualizationViewer<Network, BackboneLink>(this.layout, frameDimension);
@@ -137,10 +141,10 @@ public class GUI extends JPanel {
 		// Set up transformers to label and color the vertices and edges.
 
 		// Adjust vertex shape/size:
-		this.viewer.getRenderContext().setVertexShapeTransformer(new NetworkShapeTransformer(this.simternet));
+		this.viewer.getRenderContext().setVertexShapeTransformer(new NetworkShapeTransformer(GUI.simternet));
 
 		// Adjust vertex color:
-		this.viewer.getRenderContext().setVertexFillPaintTransformer(new NetworkPaintTransformer(this.simternet));
+		this.viewer.getRenderContext().setVertexFillPaintTransformer(new NetworkPaintTransformer(GUI.simternet));
 
 		// Label vertices:
 		this.viewer.getRenderContext().setVertexLabelTransformer(new NetworkLabeller());
@@ -168,15 +172,12 @@ public class GUI extends JPanel {
 	}
 
 	public void printDataButtonPressed() {
-		for (Inspector i : this.inspectors.values())
+		for (Inspector i : this.inspectors)
 			i.printData();
 	}
 
-	public void removeInspector(Object object) {
-		// FIXME: This is not correctly removing the inspectors. Slight memory
-		// leak.
-		if (this.inspectors.containsKey(object))
-			this.inspectors.remove(object);
+	public void removeInspector(Inspector closedInspector) {
+		this.inspectors.remove(closedInspector);
 	}
 
 	/**
@@ -189,11 +190,11 @@ public class GUI extends JPanel {
 	 */
 	public void setSimternet(Simternet sim) {
 		// clean up from last checkpoint
-		for (Inspector i : this.inspectors.values())
+		for (Inspector i : this.inspectors)
 			i.dispose();
 		this.inspectors.clear();
 
-		this.simternet = sim;
+		GUI.simternet = sim;
 		this.remove(this.viewer);
 		this.initViewer();
 		this.add(this.viewer, BorderLayout.CENTER);
@@ -221,7 +222,7 @@ public class GUI extends JPanel {
 	 */
 	protected void start() {
 		// start simulation
-		this.simternet.start();
+		GUI.simternet.start();
 		this.updateAll();
 	}
 
@@ -233,8 +234,11 @@ public class GUI extends JPanel {
 	 *            the number of steps to execute
 	 */
 	public void step(int n) {
-		for (int i = 0; i < n; i++)
-			this.simternet.schedule.step(this.simternet);
+		for (int i = 0; i < n; i++) {
+			GUI.simternet.schedule.step(GUI.simternet);
+			for (Inspector inspector : this.inspectors)
+				inspector.update();
+		}
 
 		this.updateAll();
 	}
@@ -250,7 +254,7 @@ public class GUI extends JPanel {
 		this.infoPanel.update();
 
 		// Update each of the inspectors
-		for (Inspector i : this.inspectors.values())
+		for (Inspector i : this.inspectors)
 			i.update();
 	}
 
@@ -285,7 +289,7 @@ public class GUI extends JPanel {
 		if (this.filter == null)
 			this.setUpFilters();
 
-		for (ApplicationProvider asp : this.simternet.getASPs()) {
+		for (ApplicationProvider asp : GUI.simternet.getASPs()) {
 			this.graph.addVertex(asp.getDataCenter());
 			for (Network net : asp.getConnectedNetworks()) {
 				this.graph.addVertex(net);
@@ -293,7 +297,7 @@ public class GUI extends JPanel {
 			}
 		}
 
-		for (NetworkProvider nsp : this.simternet.getNetworkServiceProviders()) {
+		for (NetworkProvider nsp : GUI.simternet.getNetworkServiceProviders()) {
 			/*
 			 * If a vertex or edge is already represented in the graph, it will
 			 * not be duplicated by this function. It is safe to add an object
@@ -327,24 +331,19 @@ public class GUI extends JPanel {
 	 */
 	public void vertexPicked(Network vertex) {
 
-		if (this.inspectors.containsKey(vertex)) {
-			Inspector i = this.inspectors.get(vertex);
-			i.toFront();
-		} else {
-			Inspector inspector = null;
+		Inspector inspector = null;
 
-			if (vertex instanceof ConsumerNetwork)
-				inspector = new ConsumerNetworkInspector((ConsumerNetwork) vertex, this);
-			else if (vertex instanceof Backbone)
-				inspector = new NetworkProviderInspector(((Backbone) vertex).getOwner(), this);
-			else if (vertex instanceof Datacenter)
-				inspector = new ApplicationProviderInspector(((Datacenter) vertex).getOwner(), this);
+		if (vertex instanceof ConsumerNetwork)
+			inspector = new ConsumerNetworkInspector((ConsumerNetwork) vertex, this);
+		else if (vertex instanceof Backbone)
+			inspector = new NetworkProviderInspector(((Backbone) vertex).getOwner(), this);
+		else if (vertex instanceof Datacenter)
+			inspector = new ApplicationProviderInspector(((Datacenter) vertex).getOwner(), this);
 
-			if (inspector != null) {
-				this.inspectors.put(vertex, inspector);
-				inspector.pack();
-				inspector.setVisible(true);
-			}
+		if (inspector != null) {
+			this.inspectors.add(inspector);
+			inspector.pack();
+			inspector.setVisible(true);
 		}
 	}
 }

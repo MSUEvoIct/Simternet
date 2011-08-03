@@ -75,6 +75,7 @@ public abstract class Inspector extends JFrame {
 	}
 
 	public void printData() {
+		System.out.println(this.getTitle());
 		for (Property p : this.properties)
 			if (p instanceof TrackableProperty)
 				((TrackableProperty) p).printTrackedData();

@@ -34,8 +34,7 @@ public class IntegerProperty extends TrackableProperty {
 	}
 
 	private void recordChange(Integer value) {
-		Integer step = (int) TrackableProperty.sim.schedule.getSteps();
-		this.changes.put(step, value);
+		this.changes.put(this.getStep(), value);
 	}
 
 	public void setValue(Integer value) {
