@@ -31,10 +31,10 @@ public class DivideGP extends GPNode {
 
 		this.children[0].eval(state, thread, result, stack, individual, problem);
 
-		if (result.value == 0.0) {
-			if (first > 0.0)
+		if (first == 0.0) {
+			if (result.value > 0.0)
 				result.value = Double.POSITIVE_INFINITY;
-			if (first < 0.0)
+			if (result.value < 0.0)
 				result.value = Double.NEGATIVE_INFINITY;
 			result.value = 1.0;
 			return;

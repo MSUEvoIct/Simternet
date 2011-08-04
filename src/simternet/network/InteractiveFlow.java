@@ -33,7 +33,7 @@ public class InteractiveFlow extends NetFlow implements Serializable {
 	public InteractiveFlow(Network source, Network destination, Consumer user, Double durationActual,
 			Double bandwidthRequested, Double bandwidthActual) {
 
-		super(source, destination, user);
+		super(source, destination, user, durationActual * bandwidthRequested * user.getPopulation());
 		this.bandwidthRequested = bandwidthRequested;
 
 		// pre congest if requested
@@ -72,7 +72,7 @@ public class InteractiveFlow extends NetFlow implements Serializable {
 	}
 
 	@Override
-	public Double getUsageBlocked() {
+	public Double getTransferBlocked() {
 		return (this.bandwidthRequested - this.bandwidth) * this.duration;
 	}
 

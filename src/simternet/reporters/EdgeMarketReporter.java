@@ -7,10 +7,18 @@ import simternet.Simternet;
 public class EdgeMarketReporter extends Reporter {
 
 	private static final long	serialVersionUID	= 1L;
-	public static final String	specificHeaders		= "LocactionX,LocationY,NumNetworks";
+	public static final String	specificHeaders		= "LocactionX,LocationY,NumConsumers,NumNetworks";
 
 	static {
 		new EdgeMarketReporter().logHeaders();
+	}
+
+	public EdgeMarketReporter() {
+
+	}
+
+	public EdgeMarketReporter(int interval) {
+		super(interval);
 	}
 
 	@Override
@@ -18,7 +26,17 @@ public class EdgeMarketReporter extends Reporter {
 		Simternet s = (Simternet) state;
 		for (Int2D location : s.allLocations()) {
 			int numNets = s.getNumNetworkProviders(location);
-			this.report(location.x + Reporter.separater + location.y + Reporter.separater + numNets);
+
+			StringBuffer sb = new StringBuffer();
+			sb.append(location.x);
+			sb.append(Reporter.separater);
+			sb.append(location.y);
+			sb.append(Reporter.separater);
+			sb.append(s.getPopulation(location));
+			sb.append(Reporter.separater);
+			sb.append(numNets);
+
+			this.report(sb.toString());
 		}
 	}
 
@@ -29,7 +47,7 @@ public class EdgeMarketReporter extends Reporter {
 
 	@Override
 	public String getSpecificHeaders() {
-		return EdgeDataReporter.specificHeaders;
+		return EdgeMarketReporter.specificHeaders;
 	}
 
 }

@@ -59,7 +59,7 @@ public class WFQCongestionAlgorithm implements CongestionAlgorithm, Serializable
 		Double congestedDurationRemaining = 0D;
 
 		for (NetFlow flow : flows) {
-			remainingUsage += flow.getUsage();
+			remainingUsage += flow.getTransferActual();
 			congestedDurationRemaining += flow.getCongestionDuration();
 		}
 
@@ -97,7 +97,7 @@ public class WFQCongestionAlgorithm implements CongestionAlgorithm, Serializable
 			if ((bandwidth * congestedDurationRemaining) < remainingCapacity) {
 				// then every flow can go at least this fast
 				maxBandwidth = bandwidth;
-				remainingCapacity -= flow.getUsage();
+				remainingCapacity -= flow.getTransferActual();
 				congestedDurationRemaining -= flow.getCongestionDuration();
 				continue;
 			} else {

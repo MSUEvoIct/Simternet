@@ -42,11 +42,11 @@ public abstract class NetFlow {
 	 * Has this flow ever been congested?
 	 */
 	protected Boolean			congested	= false;
+
 	/**
 	 * The network this NetFlow object will be delivered to.
 	 */
 	protected final Network		destination;
-
 	/**
 	 * The actual duration of this flow. For interactive flows, this should
 	 * always be equal to maxTime. For non-interactive flows, this may be less
@@ -65,6 +65,8 @@ public abstract class NetFlow {
 	 */
 	protected final Network		source;
 
+	protected final Double		transferRequested;
+
 	/**
 	 * Exactly analogous to TTL in real networks. We should never have a network
 	 * larger than 20 hops. This has not been placed in an external parameter
@@ -79,12 +81,16 @@ public abstract class NetFlow {
 	 */
 	protected final Consumer	user;
 
-	protected NetFlow(Network source, Network destination, Consumer user) {
+	protected NetFlow(Network source, Network destination, Consumer user, Double transferRequested) {
 		if (destination == null)
 			throw new RuntimeException("Can't send a packet to nowhere");
 		this.source = source;
 		this.destination = destination;
 		this.user = user;
+		this.transferRequested = transferRequested;
+		// DEBUG
+		if (this.transferRequested.isInfinite() || this.transferRequested.isNaN())
+			throw new RuntimeException();
 	}
 
 	/**
@@ -123,11 +129,21 @@ public abstract class NetFlow {
 	 */
 	public abstract Double getCongestionDuration();
 
-	public Double getUsage() {
-		return this.bandwidth * this.duration * this.user.getPopulation();
+	public Double getTransferActual() {
+		double transferActual = this.bandwidth * this.duration * this.user.getPopulation();
+		// DEBUG
+		if (transferActual < 0)
+			throw new RuntimeException();
+		return transferActual;
 	}
 
-	public abstract Double getUsageBlocked();
+	public Double getTransferBlocked() {
+		return this.getTransferRequested() - this.getTransferActual();
+	}
+
+	public Double getTransferRequested() {
+		return this.transferRequested;
+	}
 
 	public Boolean isCongested() {
 		return this.congested;

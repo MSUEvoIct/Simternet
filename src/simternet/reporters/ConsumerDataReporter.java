@@ -7,7 +7,7 @@ import simternet.consumer.Consumer;
 
 public class ConsumerDataReporter extends Reporter {
 
-	public static final String	specificHeaders	= "Consumer,Size";
+	public static final String	specificHeaders	= "Consumer,Population,TransferRequested,TransferActual";
 
 	static {
 		new ConsumerDataReporter().logHeaders();
@@ -31,7 +31,15 @@ public class ConsumerDataReporter extends Reporter {
 		Bag bag = s.getConsumerClasses().allObjects;
 		for (int i = 0; i < bag.numObjs; i++) {
 			Consumer c = (Consumer) bag.objs[i];
-			this.report(c.toString().replace(',', '-') + Reporter.separater + c.getPopulation());
+			StringBuffer report = new StringBuffer();
+			report.append(c.toString().replace(',', '-')); // consumer id
+			report.append(Reporter.separater);
+			report.append(c.getPopulation());
+			report.append(Reporter.separater);
+			report.append(c.transferRequested);
+			report.append(Reporter.separater);
+			report.append(c.transferActual);
+			this.report(report.toString());
 		}
 
 	}

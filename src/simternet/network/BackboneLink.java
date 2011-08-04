@@ -188,7 +188,10 @@ public class BackboneLink implements Serializable {
 	}
 
 	public void setBandwidth(Double bandwidth) {
-		this.bandwidth = bandwidth;
+		if (bandwidth < 0)
+			this.bandwidth = 0.0;
+		else
+			this.bandwidth = bandwidth;
 	}
 
 	public void setCongestionAlgorithm(CongestionAlgorithm congestionAlgorithm) {

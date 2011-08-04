@@ -42,7 +42,7 @@ public class BackgroundFlow extends NetFlow {
 	 */
 	public BackgroundFlow(Network source, Network destination, Consumer user, Double usage, Double maxDuration) {
 
-		super(source, destination, user);
+		super(source, destination, user, usage);
 
 		this.bandwidth = Double.MAX_VALUE;
 		this.duration = usage / this.bandwidth;
@@ -78,7 +78,7 @@ public class BackgroundFlow extends NetFlow {
 
 	@Override
 	public Double getCongestionBandwidth() {
-		return this.getUsage() / this.maxDuration;
+		return this.getTransferActual() / this.maxDuration;
 	}
 
 	@Override
@@ -87,7 +87,7 @@ public class BackgroundFlow extends NetFlow {
 	}
 
 	@Override
-	public Double getUsageBlocked() {
+	public Double getTransferBlocked() {
 		// TODO: Implement
 		return null;
 	}

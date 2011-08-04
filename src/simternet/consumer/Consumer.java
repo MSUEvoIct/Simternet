@@ -51,11 +51,8 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 */
 	protected TemporalHashMap<AppCategory, List<ApplicationProvider>>	appsUsed				= new TemporalHashMap<AppCategory, List<ApplicationProvider>>();
 
-	public Double														bandwidthRequested		= 0.0;
-
 	public Double														benefitSeen;
-
-	public Double														congestionSeen			= 0.0;
+	public double														congestionSeen			= 0.0;
 
 	protected Temporal<EdgeNetwork>										edgeNetwork				= new Temporal<EdgeNetwork>(
 																										null);
@@ -85,17 +82,21 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 * The number of consumers represented by this agent.
 	 */
 	protected final Temporal<Double>									population;
+
 	/**
 	 * Details describing the properties of this set of consumers.
 	 */
 	protected ConsumerProfile											profile					= ConsumerProfile
 																										.getSingleton();
+
 	/**
 	 * A link back to the simulation we are running under. Use of a singleton
 	 * would be inappropriate given that Mason initializes multiple instances of
 	 * a single simulation simultaneously.
 	 */
 	protected final Simternet											s;
+	public Double														transferActual			= 0.0;
+	public Double														transferRequested		= 0.0;
 
 	/**
 	 * Create a new consumer class in simulation s with location, population,
@@ -199,7 +200,7 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	/**
 	 * @param aen
 	 *            Network
-	 * @return If the agent is connected to the specifid network, this function
+	 * @return If the agent is connected to the specific network, this function
 	 *         returns its population, and zero otherwise.
 	 */
 	public Double getSubscribers(EdgeNetwork aen) {
@@ -210,16 +211,20 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 			return 0.0;
 	}
 
+	/**
+	 * The flow is ultimately received by the consumer, and statistics about the
+	 * flow are sent to NSPs and ASPs.
+	 * 
+	 * @param flow
+	 */
 	public void receiveFlow(NetFlow flow) {
 
 		if (TraceConfig.consumerFlowReceived && Logger.getRootLogger().isTraceEnabled())
 			Logger.getRootLogger().log(Level.TRACE,
 					this + " received " + flow + ", congestion = " + flow.describeCongestion());
 
-		// this.bandwidthRequested += flow
-
-		this.congestionSeen += flow.getUsageBlocked();
-
+		this.transferRequested += flow.getTransferRequested();
+		this.transferActual += flow.getTransferActual();
 	}
 
 	@Override

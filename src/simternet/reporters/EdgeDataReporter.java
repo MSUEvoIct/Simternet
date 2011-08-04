@@ -13,7 +13,7 @@ public class EdgeDataReporter extends Reporter {
 
 	protected static HashMap<String, String>	netTypeAbbreviations;
 	private static final long					serialVersionUID	= 1L;
-	public static final String					specificHeaders		= "LocactionX,LocationY,NSP,NetworkType,Price,Customers,Competitors";
+	public static final String					specificHeaders		= "LocactionX,LocationY,NSP,NetworkType,TransitBandwidth,Congestion,Price,Customers,Competitors,MarketShare";
 
 	static {
 		new EdgeDataReporter().logHeaders();
@@ -39,10 +39,27 @@ public class EdgeDataReporter extends Reporter {
 			Collection<Network> edgeNets = s.getNetworks(null, EdgeNetwork.class, location);
 			for (Network edgeNet : edgeNets) {
 				EdgeNetwork en = (EdgeNetwork) edgeNet;
-				this.report(location.x + Reporter.separater + location.y + Reporter.separater + en.getOwner().getName()
-						+ Reporter.separater + EdgeDataReporter.netTypeAbbreviations.get(en.getClass().toString())
-						+ Reporter.separater + en.getPrice() + Reporter.separater + en.getNumSubscribers()
-						+ Reporter.separater + s.getNumNetworkProviders(location));
+				StringBuffer report = new StringBuffer();
+				report.append(location.x);
+				report.append(Reporter.separater);
+				report.append(location.y);
+				report.append(Reporter.separater);
+				report.append(en.getOwner().getName());
+				report.append(Reporter.separater);
+				report.append(EdgeDataReporter.netTypeAbbreviations.get(en.getClass().toString()));
+				report.append(Reporter.separater);
+				report.append(en.getUpstreamIngress().getBandwidth());
+				report.append(Reporter.separater);
+				report.append(en.getUpstreamIngress().getCongestionAlgorithm().getCongestionRatio());
+				report.append(Reporter.separater);
+				report.append(en.getPrice());
+				report.append(Reporter.separater);
+				report.append(en.getNumSubscribers());
+				report.append(Reporter.separater);
+				report.append(s.getNumNetworkProviders(location));
+				report.append(Reporter.separater);
+				report.append(en.getNumSubscribers() / s.getPopulation(location));
+				this.report(report.toString());
 			}
 		}
 

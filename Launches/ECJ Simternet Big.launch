@@ -9,5 +9,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="ec.Evolve"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-file data/configuration/bigsim.properties -p stat.gather-full=true"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Simternet"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx3500M -d64 -server"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx3500M -server"/>
 </launchConfiguration>

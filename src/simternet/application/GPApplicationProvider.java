@@ -61,9 +61,9 @@ public class GPApplicationProvider extends ApplicationProvider implements Evolva
 			Double price = nsp.getASPTransitPrice(this);
 			Double gpBW = this.transitStrategy.bandwidthToPurchase(nsp, price);
 			Double totalGPPrice = gpBW * price;
-			if (totalGPPrice * 10 > this.financials.getNetWorth())
-				// Can't spend more than 10% of net worth each step;
-				bw = (this.financials.getNetWorth() / 10) / price;
+			if ((totalGPPrice * 3) > this.financials.getNetWorth())
+				// Can't spend more than 33% of net worth each step;
+				bw = (this.financials.getNetWorth() / 3) / price;
 			totalPrice = bw * price;
 
 			BackboneLink bl;
@@ -81,8 +81,8 @@ public class GPApplicationProvider extends ApplicationProvider implements Evolva
 		}
 		// TODO: Create generic strategy and move this code to
 		// ApplicationProvider.step()
-		Double bwIncrease = this.bandwidthStrategy.increaseBandwidth();
-		this.bandwidth.increase(bwIncrease);
+		// Double bwIncrease = this.bandwidthStrategy.increaseBandwidth();
+		// this.bandwidth.increase(bwIncrease);
 
 	}
 

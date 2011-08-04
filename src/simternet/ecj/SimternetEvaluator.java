@@ -15,6 +15,7 @@ import simternet.reporters.ASPInterconnectionReporter;
 import simternet.reporters.ApplicationProviderFitnessReporter;
 import simternet.reporters.ConsumerDataReporter;
 import simternet.reporters.EdgeDataReporter;
+import simternet.reporters.EdgeMarketReporter;
 import simternet.reporters.NetworkProviderFitnessReporter;
 import ec.Evaluator;
 import ec.EvolutionState;
@@ -108,6 +109,11 @@ public class SimternetEvaluator extends Evaluator {
 			air.setGeneration(state.generation);
 			air.setChunk(i);
 			simternet[i].addReporter(air);
+
+			EdgeMarketReporter emr = new EdgeMarketReporter(29);
+			emr.setGeneration(state.generation);
+			emr.setChunk(i);
+			simternet[i].addReporter(emr);
 
 		}
 

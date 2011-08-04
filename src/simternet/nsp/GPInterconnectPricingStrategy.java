@@ -8,9 +8,15 @@ import simternet.ecj.problems.PriceASPTransitProblem;
 import ec.gp.GPIndividual;
 import ec.gp.GPTree;
 
+/**
+ * Scaled prices by 1E-9 (price is per GB)
+ * 
+ * @author kkoning
+ * 
+ */
 public class GPInterconnectPricingStrategy implements NSPInterconnectPricingStrategy, Serializable {
 
-	private static final Double		MAX_PRICE	= 1.0;	// $1/byte is very high
+	private static final Double		MAX_PRICE	= 10.0; // $10/GB is high
 	private static final Double		MIN_PRICE	= 0.0;
 	protected final GPIndividual	ind;
 	protected final NetworkProvider	nsp;
@@ -37,6 +43,6 @@ public class GPInterconnectPricingStrategy implements NSPInterconnectPricingStra
 		if (d.value > GPInterconnectPricingStrategy.MAX_PRICE)
 			d.value = GPInterconnectPricingStrategy.MAX_PRICE;
 
-		return d.value;
+		return d.value / 1E9;
 	}
 }
