@@ -9,32 +9,34 @@ import simternet.nsp.PotentialNetwork;
 import ec.Problem;
 
 public class ASPPurchaseTransitProblem extends Problem implements HasSimternet, HasFinancials, HasNetworkProvider,
-		HasApplicationProvider {
+		HasApplicationProvider, HasPrice, HasBackboneLink {
 
 	protected final ApplicationProvider	customer;
 	protected final BackboneLink		existing;
 	protected final NetworkProvider		nsp;
+	protected final double				price;
 	private static final long			serialVersionUID	= 1L;
 
 	public ASPPurchaseTransitProblem(ApplicationProvider asp, NetworkProvider nsp, BackboneLink existing) {
-		this.customer = asp;
+		customer = asp;
 		this.nsp = nsp;
 		this.existing = existing;
+		price = nsp.getASPTransitPrice(asp);
 	}
 
 	@Override
 	public ApplicationProvider getApplicationProvider() {
-		return this.customer;
+		return customer;
 	}
 
 	@Override
 	public Financials getFinancials() {
-		return this.customer.getFinancials();
+		return customer.getFinancials();
 	}
 
 	@Override
 	public NetworkProvider getNetworkProvider() {
-		return this.nsp;
+		return nsp;
 	}
 
 	@Override
@@ -45,7 +47,17 @@ public class ASPPurchaseTransitProblem extends Problem implements HasSimternet, 
 
 	@Override
 	public Simternet getSimternet() {
-		return this.nsp.s;
+		return nsp.s;
+	}
+
+	@Override
+	public double getPrice() {
+		return price;
+	}
+
+	@Override
+	public BackboneLink getBackboneLink() {
+		return existing;
 	}
 
 }
