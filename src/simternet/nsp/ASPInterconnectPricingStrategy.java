@@ -2,6 +2,6 @@ package simternet.nsp;
 
 import simternet.application.ApplicationProvider;
 
-public interface NSPInterconnectPricingStrategy {
+public interface ASPInterconnectPricingStrategy {
 	public Double getASPTransitPrice(ApplicationProvider other);
 }
