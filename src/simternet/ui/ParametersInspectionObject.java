@@ -1,6 +1,5 @@
 package simternet.ui;
 
-import simternet.Parameters;
 
 /**
  * Bean objects allows MASON GUI to change model parameters in the interface,
@@ -10,20 +9,20 @@ import simternet.Parameters;
  * @author kkoning
  * 
  */
-public class ParametersInspectionObject {
-
-	protected Parameters config;
-
-	public ParametersInspectionObject(Parameters config) {
-		this.config = config;
-	}
-
-	public Double getInterestRate() {
-		return 0.7;
-	}
-
-	public void setInterestRate(Double rate) {
-
-	}
-
-}
+//public class ParametersInspectionObject {
+//
+//	protected Parameters config;
+//
+//	public ParametersInspectionObject(Parameters config) {
+//		this.config = config;
+//	}
+//
+//	public Double getInterestRate() {
+//		return 0.7;
+//	}
+//
+//	public void setInterestRate(Double rate) {
+//
+//	}
+//
+// }
