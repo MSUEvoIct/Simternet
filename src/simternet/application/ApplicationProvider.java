@@ -266,9 +266,12 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 
 		double ads = priceAdvertising.get();
 		double sub = priceSubscriptions.get();
-		revenueAdvertising.increase(ads);
-		revenueSubscriptions.increase(sub);
-		financials.earn(ads + sub);
+		double popSize = consumer.getPopulation();
+		double adRev = ads * popSize;
+		double subRev = sub * popSize;
+		revenueAdvertising.increase(adRev);
+		revenueSubscriptions.increase(subRev);
+		financials.earn(adRev + subRev);
 
 		NetFlow flow = createNetFlow(consumer, network);
 
