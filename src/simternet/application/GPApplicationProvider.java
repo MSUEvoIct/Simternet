@@ -23,31 +23,35 @@ public class GPApplicationProvider extends ApplicationProvider implements Evolva
 	@Override
 	public Double getFitness() {
 		// TODO: Think about the proper fitness measure.
-		return this.financials.getNetWorth();
+		double netWorth = financials.getNetWorth();
+		if (netWorth > 0)
+			return netWorth;
+		else
+			return 0.0;
 	}
 
 	@Override
 	public Individual getIndividual() {
-		return this.ind;
+		return ind;
 	}
 
 	public String printQualityTree() {
-		return this.ind.trees[0].toString();
+		return ind.trees[0].toString();
 
 	}
 
 	public String printTransitPurchaseTree() {
-		return this.ind.trees[1].toString();
+		return ind.trees[1].toString();
 
 	}
 
 	@Override
 	public void setIndividual(Individual i) {
-		this.ind = (SimternetGPIndividual) i;
-		this.ind.setAgent(this);
-		this.qualityStrategy = new GPQualityStrategy(this, this.ind, this.ind.trees[0]);
-		this.transitStrategy = new GPTransitPurchaseStrategy(this, this.ind, this.ind.trees[1]);
-		this.bandwidthStrategy = new GPBandwidthStrategy(this, this.ind, this.ind.trees[2]);
+		ind = (SimternetGPIndividual) i;
+		ind.setAgent(this);
+		qualityStrategy = new GPQualityStrategy(this, ind, ind.trees[0]);
+		transitStrategy = new GPTransitPurchaseStrategy(this, ind, ind.trees[1]);
+		bandwidthStrategy = new GPBandwidthStrategy(this, ind, ind.trees[2]);
 	}
 
 	@Override
@@ -55,27 +59,28 @@ public class GPApplicationProvider extends ApplicationProvider implements Evolva
 		super.step(state);
 		// TODO: Create generic strategy and move this code to
 		// ApplicationProvider.step()
-		for (NetworkProvider nsp : this.s.getNetworkServiceProviders()) {
+		for (NetworkProvider nsp : s.getNetworkServiceProviders()) {
 			Double bw = 0.0;
 			Double totalPrice = 0.0;
 			Double price = nsp.getASPTransitPrice(this);
-			Double gpBW = this.transitStrategy.bandwidthToPurchase(nsp, price);
+			Double gpBW = transitStrategy.bandwidthToPurchase(nsp, price);
 			Double totalGPPrice = gpBW * price;
-			if ((totalGPPrice * 3) > this.financials.getNetWorth())
+			if (totalGPPrice * 3 > financials.getNetWorth()) {
 				// Can't spend more than 33% of net worth each step;
-				bw = (this.financials.getNetWorth() / 3) / price;
+				bw = financials.getNetWorth() / 3 / price;
+			}
 			totalPrice = bw * price;
 
 			BackboneLink bl;
-			bl = this.datacenter.getEgressLink(nsp.getBackboneNetwork());
+			bl = datacenter.getEgressLink(nsp.getBackboneNetwork());
 			if (bl == null) {
-				this.datacenter.createEgressLinkTo(nsp.getBackboneNetwork(), bw, RoutingProtocolConfig.TRANSIT);
-				bl = this.datacenter.getEgressLink(nsp.getBackboneNetwork());
+				datacenter.createEgressLinkTo(nsp.getBackboneNetwork(), bw, RoutingProtocolConfig.TRANSIT);
+				bl = datacenter.getEgressLink(nsp.getBackboneNetwork());
 			}
 
 			// TODO Clean this up
 			bl.setBandwidth(bw);
-			this.financials.earn(-totalPrice);
+			financials.earn(-totalPrice);
 			nsp.financials.earn(totalPrice);
 
 		}
