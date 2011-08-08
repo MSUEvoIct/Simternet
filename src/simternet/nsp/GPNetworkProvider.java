@@ -51,7 +51,7 @@ public class GPNetworkProvider extends NetworkProvider implements EvolvableAgent
 		super.step(state);
 		// TODO, Create generic strategy and put this code into
 		// NetworkProvider.step()
-		for (ApplicationProvider asp : this.simternet.getASPs()) {
+		for (ApplicationProvider asp : this.s.getASPs()) {
 			double price = this.interconnectStrategy.getASPTransitPrice(asp);
 			this.aspTransitPrice.put(asp, price);
 		}

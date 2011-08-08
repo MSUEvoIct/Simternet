@@ -14,7 +14,7 @@ import ec.gp.GPTree;
  * @author kkoning
  * 
  */
-public class GPInterconnectPricingStrategy implements NSPInterconnectPricingStrategy, Serializable {
+public class GPInterconnectPricingStrategy implements ASPInterconnectPricingStrategy, Serializable {
 
 	private static final Double		MAX_PRICE	= 10.0; // $10/GB is high
 	private static final Double		MIN_PRICE	= 0.0;

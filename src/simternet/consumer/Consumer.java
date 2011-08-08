@@ -35,7 +35,7 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	protected TemporalHashMap<AppCategory, Double>						appBudgetConstraints	= new TemporalHashMap<AppCategory, Double>();
 
 	/**
-	 * Controls the consumer's application consumption behavior; it controlls
+	 * Controls the consumer's application consumption behavior; it controls
 	 * which applications the consumer uses. This behavior is specified in a
 	 * separate object rather than code within an individual class so that
 	 * distinct behaviors can be mixed and matched without refactoring code.
@@ -52,8 +52,8 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	protected TemporalHashMap<AppCategory, List<ApplicationProvider>>	appsUsed				= new TemporalHashMap<AppCategory, List<ApplicationProvider>>();
 
 	public Double														benefitSeen;
-	public double														congestionSeen			= 0.0;
 
+	public double														congestionSeen			= 0.0;
 	protected Temporal<EdgeNetwork>										edgeNetwork				= new Temporal<EdgeNetwork>(
 																										null);
 
@@ -65,7 +65,7 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	/**
 	 * A human-readable name to distinguish this consumer agent
 	 */
-	protected final String												name;
+	protected String													name;
 
 	/**
 	 * Controls the consumer's network consumption behavior; it controlls which
@@ -95,7 +95,9 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 * a single simulation simultaneously.
 	 */
 	protected final Simternet											s;
+
 	public Double														transferActual			= 0.0;
+
 	public Double														transferRequested		= 0.0;
 
 	/**
@@ -106,7 +108,7 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	public Consumer(Simternet s, Int2D location, Double population, ConsumerProfile profile, NetManager netManager,
 			AppManager appManager, AppBenefitCalculator abc) {
 		this.s = s;
-		this.name = s.config.getCCName();
+		// this.name = s.config.getCCName();
 
 		if (location != null)
 			this.location = location;
@@ -189,6 +191,10 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 		return this.location;
 	}
 
+	public String getName() {
+		return this.name;
+	}
+
 	/**
 	 * @return The TOTAL population of this specific Consumer Class at ALL
 	 *         locations.
@@ -212,6 +218,19 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	}
 
 	/**
+	 * @param asp
+	 * @return True if this consumer is subscribed to this ASP
+	 */
+	public boolean isSubscriber(ApplicationProvider asp) {
+		AppCategory category = asp.getAppCategory();
+		List<ApplicationProvider> categoryList = this.appsUsed.get(category);
+		if (categoryList == null)
+			return false;
+		else
+			return categoryList.contains(asp);
+	}
+
+	/**
 	 * The flow is ultimately received by the consumer, and statistics about the
 	 * flow are sent to NSPs and ASPs.
 	 * 
@@ -225,6 +244,10 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 
 		this.transferRequested += flow.getTransferRequested();
 		this.transferActual += flow.getTransferActual();
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Override

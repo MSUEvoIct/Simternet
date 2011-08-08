@@ -27,7 +27,7 @@ public class ConsumerNetwork extends Network {
 	private static final long									serialVersionUID	= 1L;
 
 	public static ConsumerNetwork get(EdgeNetwork edge) {
-		return ConsumerNetwork.get(edge.getOwner().simternet, edge.getLocation());
+		return ConsumerNetwork.get(edge.getOwner().s, edge.getLocation());
 	}
 
 	/**

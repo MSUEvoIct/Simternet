@@ -39,14 +39,14 @@ public class LocationTransformer implements Transformer<Network, Point2D> {
 		int x = 0, y = 0;
 
 		// leave some space for the ConsumerNetworks...
-		x += this.gap.width;
-		x += this.sim.config.x() * this.cellDimension.width;
-		x += this.gap.width;
+		x += gap.width;
+		x += sim.config.gridSize.x * cellDimension.width;
+		x += gap.width;
 
-		y += this.gap.height;
-		y += (net.getOwner().getNumber() - 1) * this.cellDimension.height;
+		y += gap.height;
+		y += (net.getOwner().getNumber() - 1) * cellDimension.height;
 
-		return (new Point(x, y));
+		return new Point(x, y);
 	}
 
 	/**
@@ -59,13 +59,13 @@ public class LocationTransformer implements Transformer<Network, Point2D> {
 	protected Point2D transform(ConsumerNetwork net) {
 		int x = 0, y = 0;
 
-		x += this.gap.width;
-		x += net.getLocation().x * this.cellDimension.width;
+		x += gap.width;
+		x += net.getLocation().x * cellDimension.width;
 
-		y += this.gap.height;
-		y += net.getLocation().y * this.cellDimension.height;
+		y += gap.height;
+		y += net.getLocation().y * cellDimension.height;
 
-		return (new Point(x, y));
+		return new Point(x, y);
 	}
 
 	/**
@@ -79,17 +79,17 @@ public class LocationTransformer implements Transformer<Network, Point2D> {
 		int x = 0, y = 0;
 
 		// Leave some space for the ConsumerNetworks...
-		x += this.gap.width;
-		x += this.sim.config.x() * this.cellDimension.width;
-		x += this.gap.width;
+		x += gap.width;
+		x += sim.config.gridSize.y * cellDimension.width;
+		x += gap.width;
 		// And for the Backbones...
-		x += this.cellDimension.width;
-		x += this.gap.width;
+		x += cellDimension.width;
+		x += gap.width;
 
-		y += this.gap.height;
-		y += (net.getOwner().getNumber() - 1) * this.cellDimension.height;
+		y += gap.height;
+		y += (net.getOwner().getNumber() - 1) * cellDimension.height;
 
-		return (new Point(x, y));
+		return new Point(x, y);
 	}
 
 	@Override

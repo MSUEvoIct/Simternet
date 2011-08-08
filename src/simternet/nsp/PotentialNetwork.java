@@ -20,8 +20,8 @@ public class PotentialNetwork implements Serializable, Comparable<PotentialNetwo
 		this.location = location;
 		this.cost = EdgeNetwork.getBuildCost(networkType, nsp, location);
 		this.distanceFromHome = nsp.getHomeBase().distance(location);
-		this.population = nsp.simternet.getPopulation(location);
-		this.numCompetitors = nsp.simternet.getNumNetworkProviders(location);
+		this.population = nsp.s.getPopulation(location);
+		this.numCompetitors = nsp.s.getNumNetworkProviders(location);
 
 		this.score = Double.NEGATIVE_INFINITY;
 	}

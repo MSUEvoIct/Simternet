@@ -56,10 +56,10 @@ public class SimternetEvaluator extends Evaluator {
 		 * therefore can be run in parallel.
 		 */
 
-		if (this.inStep)
+		if (inStep)
 			throw new RuntimeException("evaluatePopulaiton() is not reentrant, yet is being called recursively.");
 
-		this.inStep = true;
+		inStep = true;
 
 		Parameter base = new Parameter("simternet");
 		int numThreads = state.parameters.getIntWithDefault(base.push("threads"), null, 1);
@@ -73,9 +73,7 @@ public class SimternetEvaluator extends Evaluator {
 		Simternet[] simternet = new Simternet[numChunks];
 		for (int i = 0; i < simternet.length; i++) {
 			int seed = state.random[0].nextInt();
-			// System.out.println("Seed for g" + state.generation + "s" + i +
-			// " = " + seed);
-			simternet[i] = new Simternet(seed, true);
+			simternet[i] = new Simternet(seed);
 			simternet[i].chunk = i;
 			simternet[i].generation = state.generation;
 			simternet[i].start();
@@ -140,7 +138,7 @@ public class SimternetEvaluator extends Evaluator {
 			}
 
 			// How many agents to a chunk?
-			int numAgents = this.numAgents(sp.individuals.length, numChunks);
+			int numAgents = numAgents(sp.individuals.length, numChunks);
 
 			// Randomize the subpopulation before populating simulations
 			for (int j = 0; j < sp.individuals.length; j++) {
@@ -185,8 +183,9 @@ public class SimternetEvaluator extends Evaluator {
 				Simternet s = simternet[i];
 				// Save initial checkpoints
 				if (simternetCheckpoint)
-					if ((state.generation % checkpointModulo) == 0)
-						this.generateCheckpoint(state, s, i);
+					if (state.generation % checkpointModulo == 0) {
+						generateCheckpoint(state, s, i);
+					}
 
 				SimternetRunner sr = new SimternetRunner(s, numSteps);
 				threadPool.execute(sr);
@@ -201,8 +200,9 @@ public class SimternetEvaluator extends Evaluator {
 					if (threadPool.isTerminated()) {
 						Logger.getRootLogger().info("Comleted evaluation of population");
 						break;
-					} else
+					} else {
 						Logger.getRootLogger().info("Evaluating population, " + seconds + "/" + timeout + "s");
+					}
 					threadPool.awaitTermination(waiting, TimeUnit.SECONDS);
 					seconds += waiting;
 				}
@@ -213,23 +213,27 @@ public class SimternetEvaluator extends Evaluator {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		} else
+		} else {
 			for (int i = 0; i < simternet.length; i++) {
 				Simternet s = simternet[i];
 				SimternetRunner sr = new SimternetRunner(s, numSteps);
 				if (simternetCheckpoint)
-					if ((state.generation % checkpointModulo) == 0)
-						this.generateCheckpoint(state, s, i);
+					if (state.generation % checkpointModulo == 0) {
+						generateCheckpoint(state, s, i);
+					}
 				sr.run();
 			}
+		}
 
 		// Look at each agent and assign fitness
-		SimpleProblemForm spf = (SimpleProblemForm) this.p_problem.clone();
-		for (Subpopulation sp : state.population.subpops)
-			for (Individual individual : sp.individuals)
+		SimpleProblemForm spf = (SimpleProblemForm) p_problem.clone();
+		for (Subpopulation sp : state.population.subpops) {
+			for (Individual individual : sp.individuals) {
 				spf.evaluate(state, individual, 0, 0);
+			}
+		}
 
-		this.inStep = false;
+		inStep = false;
 
 	}
 
@@ -249,8 +253,9 @@ public class SimternetEvaluator extends Evaluator {
 		// if it doesn't divide evenly, add one so we don't have a leftover set
 		// with 1 agent
 		int remainder = numIndividuals % numChunks;
-		if (remainder > 0)
+		if (remainder > 0) {
 			agents++;
+		}
 		return agents;
 	}
 
@@ -266,9 +271,10 @@ public class SimternetEvaluator extends Evaluator {
 	@Override
 	public void setup(EvolutionState state, Parameter base) {
 		super.setup(state, base);
-		if (!(this.p_problem instanceof SimpleProblemForm))
+		if (!(p_problem instanceof SimpleProblemForm)) {
 			state.output.fatal("" + this.getClass() + " used, but the Problem is not of SimpleProblemForm",
 					base.push(Evaluator.P_PROBLEM));
+		}
 
 	}
 

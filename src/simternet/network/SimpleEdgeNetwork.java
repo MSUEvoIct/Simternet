@@ -7,13 +7,16 @@ public class SimpleEdgeNetwork extends EdgeNetwork {
 
 	private static final long	serialVersionUID	= 1L;
 
-	public static Double getBuildCost(NetworkProvider builder,
-			Int2D location) {
-		return 10000.0;
-	}
-
 	public SimpleEdgeNetwork(NetworkProvider owner, Int2D location) {
 		super(owner, location);
+	}
+
+	@Override
+	public Double getOperationCost() {
+		double variableCost = owner.s.config.networkSimpleOpCostPerUser * getNumSubscribers();
+		double fixedCost = owner.s.config.networkSimpleOpCostFixed;
+		double totalOperationCost = variableCost + fixedCost;
+		return totalOperationCost;
 	}
 
 }

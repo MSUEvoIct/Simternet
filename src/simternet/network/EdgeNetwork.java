@@ -1,6 +1,5 @@
 package simternet.network;
 
-import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,13 +35,14 @@ public abstract class EdgeNetwork extends Network {
 	 * @return The cost of building the network in question.
 	 */
 	public static Double getBuildCost(Class<? extends EdgeNetwork> type, NetworkProvider builder, Int2D location) {
-		Double buildCost;
-		try {
-			Method m = type.getMethod("getBuildCost", NetworkProvider.class, Int2D.class);
-			buildCost = (Double) m.invoke(null, builder, location);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		double buildCost;
+		double numUsersAtLocation = builder.s.getPopulation(location);
+
+		if (type.equals(SimpleEdgeNetwork.class)) {
+			buildCost = builder.s.config.networkSimpleBuildCostFixed + builder.s.config.networkSimpleBuildCostPerUser
+					* numUsersAtLocation;
+		} else
+			throw new RuntimeException("Don't have build costs for edge networks other than SimpleEdgeNetwork");
 
 		return buildCost;
 	}
@@ -74,14 +74,14 @@ public abstract class EdgeNetwork extends Network {
 	public EdgeNetwork(NetworkProvider owner, Int2D location) {
 		this.owner = owner;
 		this.location = location;
-		this.assetFinance = new AssetFinance(this, this.owner.financials);
+		assetFinance = new AssetFinance(this, this.owner.financials);
 
 		Double firstPrice = this.owner.pricingStrategy.getEdgePrice(this);
-		this.price = new Temporal<Double>(firstPrice);
+		price = new Temporal<Double>(firstPrice);
 	}
 
 	public String getCongestionReport() {
-		BackboneLink bl = this.getUpstreamIngress();
+		BackboneLink bl = getUpstreamIngress();
 		if (bl == null)
 			return "Not Connected";
 
@@ -89,18 +89,18 @@ public abstract class EdgeNetwork extends Network {
 	}
 
 	public Int2D getLocation() {
-		return this.location;
+		return location;
 	}
 
 	public Double getMaxBandwidth() {
-		return this.maxBandwidth.get();
+		return maxBandwidth.get();
 	}
 
 	@SuppressWarnings("unchecked")
 	public Double getNumSubscribers() {
 		double customers = 0;
 
-		Bag b = this.owner.simternet.getConsumerClasses().getObjectsAtLocation(this.getLocation());
+		Bag b = owner.s.getConsumerClasses().getObjectsAtLocation(getLocation());
 		if (b == null)
 			return 0.0;
 
@@ -113,22 +113,27 @@ public abstract class EdgeNetwork extends Network {
 		return customers;
 	}
 
+	/**
+	 * @return the cost of operating this network per step.
+	 */
+	public abstract Double getOperationCost();
+
 	public NetworkProvider getOwner() {
-		return this.owner;
+		return owner;
 	}
 
 	public Double getPrice() {
-		return this.price.get();
+		return price.get();
 	}
 
 	public Double getPriceFuture() {
-		return this.price.getFuture();
+		return price.getFuture();
 	}
 
 	public BackboneLink getUpstreamIngress() {
 		int i = 0;
 		BackboneLink l = null;
-		for (BackboneLink link : this.ingressLinks.values()) {
+		for (BackboneLink link : ingressLinks.values()) {
 			i++;
 			l = link;
 		}
@@ -140,16 +145,17 @@ public abstract class EdgeNetwork extends Network {
 	}
 
 	public void processUsage(Consumer users) {
-		this.receivePayment(users);
+		receivePayment(users);
 	}
 
 	public void receivePayment(Consumer acc) {
-		double price = this.owner.pricingStrategy.getEdgePrice(this);
+		double price = owner.pricingStrategy.getEdgePrice(this);
 		double revenue = acc.getPopulation() * price;
-		this.owner.financials.earn(revenue);
+		owner.financials.earn(revenue);
 
-		if (TraceConfig.consumerPaidNSP && Logger.getRootLogger().isTraceEnabled())
+		if (TraceConfig.consumerPaidNSP && Logger.getRootLogger().isTraceEnabled()) {
 			Logger.getRootLogger().trace(acc + " paid " + price + " for " + this);
+		}
 	}
 
 	public void sendFlowsToCustomers() {
@@ -159,7 +165,7 @@ public abstract class EdgeNetwork extends Network {
 		 * (Actually, there should be only one, since this is an edge network,
 		 * but other networks can have many ingress links.
 		 */
-		for (BackboneLink link : this.ingressLinks.values()) {
+		for (BackboneLink link : ingressLinks.values()) {
 			List<NetFlow> flows = link.receiveFlows();
 			for (NetFlow flow : flows) {
 				/*
@@ -168,10 +174,10 @@ public abstract class EdgeNetwork extends Network {
 				 * network, 2) informing the sending network of the congestion,
 				 * 3) noting the congestion ourselves.
 				 */
-				flow.congest(this.getMaxBandwidth());
+				flow.congest(getMaxBandwidth());
 				if (flow.isCongested()) {
 					flow.source.noteCongestion(flow);
-					this.noteCongestion(flow);
+					noteCongestion(flow);
 				}
 
 				/*
@@ -195,18 +201,21 @@ public abstract class EdgeNetwork extends Network {
 
 	@Override
 	public void step(SimState state) {
-		this.sendFlowsToCustomers();
+		sendFlowsToCustomers();
+		// Pay for operating this network.
+		double operationsCost = getOperationCost();
+		owner.financials.earn(-operationsCost);
 	}
 
 	@Override
 	public String toString() {
-		return "Edge of " + this.owner.toString() + " @" + this.getLocation();
+		return "Edge of " + owner.toString() + " @" + getLocation();
 	}
 
 	@Override
 	public void update() {
 		super.update();
-		this.maxBandwidth.update();
-		this.price.update();
+		maxBandwidth.update();
+		price.update();
 	}
 }

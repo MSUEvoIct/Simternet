@@ -25,7 +25,7 @@ public class AssetFinance implements AsyncUpdate, Serializable {
 	public AssetFinance(Object asset, Financials owner) {
 		this.asset = asset;
 		this.owner = owner;
-		owner.registerAsset(this);
+		// owner.registerAsset(this);
 	}
 
 	public AssetFinance(Object asset, Financials owner, Double depreciationRate) {
@@ -34,33 +34,33 @@ public class AssetFinance implements AsyncUpdate, Serializable {
 	}
 
 	public void depreciate() {
-		Double amount = this.capitalBalance.get() * this.depreciationRate.get();
-		this.accumulatedDepreciation.increase(amount);
-		this.capitalBalance.reduce(amount);
+		Double amount = capitalBalance.get() * depreciationRate.get();
+		accumulatedDepreciation.increase(amount);
+		capitalBalance.reduce(amount);
 	}
 
 	public void earn(Double amount) {
-		this.revenueFrom.increase(amount);
-		this.owner.earn(this, amount);
+		revenueFrom.increase(amount);
+		owner.earn(this, amount);
 	}
 
 	public void invest(Double amount) {
-		this.amountInvested.increase(amount);
-		this.capitalBalance.increase(amount);
+		amountInvested.increase(amount);
+		capitalBalance.increase(amount);
 	}
 
 	public void maintain() {
-		Double onAmount = ((this.maintenanceRatio.get() * this.amountInvested.get()) + ((1 - this.maintenanceRatio
-				.get()) * this.capitalBalance.get())) / 2.0;
-		Double amount = onAmount * this.maintenanceRate.get();
-		this.maintenancePaid.increase(amount);
-		this.owner.payMaintenance(this);
+		Double onAmount = (maintenanceRatio.get() * amountInvested.get() + (1 - maintenanceRatio.get())
+				* capitalBalance.get()) / 2.0;
+		Double amount = onAmount * maintenanceRate.get();
+		maintenancePaid.increase(amount);
+		// owner.payMaintenance(this);
 	}
 
 	public void setDepreciationRate(Double rate) {
-		if ((rate < 0) || (rate > 1))
+		if (rate < 0 || rate > 1)
 			throw new RuntimeException("Depreciation rate must be between 0 and 1");
-		this.depreciationRate.set(rate);
+		depreciationRate.set(rate);
 	}
 
 	/**
@@ -70,9 +70,9 @@ public class AssetFinance implements AsyncUpdate, Serializable {
 	 * @param rate
 	 */
 	public void setMaintenanceRate(Double rate) {
-		if ((rate < 0) || (rate > 1))
+		if (rate < 0 || rate > 1)
 			throw new RuntimeException("Maintenance rate must be between 0 and 1");
-		this.maintenanceRate.set(rate);
+		maintenanceRate.set(rate);
 	}
 
 	/**
@@ -84,24 +84,24 @@ public class AssetFinance implements AsyncUpdate, Serializable {
 	 * @param ratio
 	 */
 	public void setMaintenanceRatio(Double ratio) {
-		if ((ratio < 0) || (ratio > 1))
+		if (ratio < 0 || ratio > 1)
 			throw new RuntimeException("Maintenance ratio must be between 0 and 1");
-		this.maintenanceRate.set(ratio);
+		maintenanceRate.set(ratio);
 	}
 
 	@Override
 	public void update() {
-		this.depreciate();
-		this.maintain();
+		depreciate();
+		maintain();
 
-		this.accumulatedDepreciation.update();
-		this.amountInvested.update();
-		this.capitalBalance.update();
-		this.depreciationRate.update();
-		this.revenueFrom.update();
-		this.maintenancePaid.update();
-		this.maintenanceRate.update();
-		this.maintenanceRatio.update();
+		accumulatedDepreciation.update();
+		amountInvested.update();
+		capitalBalance.update();
+		depreciationRate.update();
+		revenueFrom.update();
+		maintenancePaid.update();
+		maintenanceRate.update();
+		maintenanceRatio.update();
 	}
 
 }

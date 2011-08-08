@@ -37,23 +37,22 @@ public class Financials implements Serializable, AsyncUpdate {
 
 	public Financials(Simternet s, Double endowment) {
 		this.s = s;
-		this.assetsLiquid = new Temporal<Double>(endowment);
+		assetsLiquid = new Temporal<Double>(endowment);
 
 		// Initialize tracking variables with zero values.
-		this.assetsCapital = new Temporal<Double>(0.0);
-		this.debtBalance = new Temporal<Double>(0.0);
-		this.debtInterestRate = new Temporal<Double>(Double.parseDouble(s.config.getProperty("financial.interestRate")));
-		this.debtPayoffRate = new Temporal<Double>(Double.parseDouble(s.config.getProperty("financial.paybackRate")));
-		this.perStepFinancingCost = new Temporal<Double>(0.0, 0.0);
-		this.perStepInvestment = new Temporal<Double>(0.0, 0.0);
-		this.perStepOperationsCost = new Temporal<Double>(0.0, 0.0);
-		this.perStepRevenue = new Temporal<Double>(0.0, 0.0);
-		this.totalFinancingCost = new Temporal<Double>(0.0);
-		this.totalInvestment = new Temporal<Double>(0.0);
-		this.totalOperationsCost = new Temporal<Double>(0.0);
-		this.totalRevenue = new Temporal<Double>(0.0);
-		this.depreciationRate = new Temporal<Double>(Double.parseDouble(s.config
-				.getProperty("financial.depreciationRate")));
+		assetsCapital = new Temporal<Double>(0.0);
+		debtBalance = new Temporal<Double>(0.0);
+		debtInterestRate = new Temporal<Double>(s.config.financeInterestRate);
+		debtPayoffRate = new Temporal<Double>(s.config.financePaybackRate);
+		perStepFinancingCost = new Temporal<Double>(0.0, 0.0);
+		perStepInvestment = new Temporal<Double>(0.0, 0.0);
+		perStepOperationsCost = new Temporal<Double>(0.0, 0.0);
+		perStepRevenue = new Temporal<Double>(0.0, 0.0);
+		totalFinancingCost = new Temporal<Double>(0.0);
+		totalInvestment = new Temporal<Double>(0.0);
+		totalOperationsCost = new Temporal<Double>(0.0);
+		totalRevenue = new Temporal<Double>(0.0);
+		depreciationRate = new Temporal<Double>(s.config.financeDepreciationRate);
 	}
 
 	/**
@@ -62,28 +61,28 @@ public class Financials implements Serializable, AsyncUpdate {
 	 * @return true unless capital is not available
 	 */
 	public boolean capitalize(Double capitalInvestment) {
-		if (capitalInvestment > this.getAvailableFinancing())
+		if (capitalInvestment > getAvailableFinancing())
 			return false;
 
-		this.debtBalance.increase(capitalInvestment);
-		this.assetsCapital.increase(capitalInvestment);
-		this.perStepInvestment.increase(capitalInvestment);
-		this.totalInvestment.increase(capitalInvestment);
+		debtBalance.increase(capitalInvestment);
+		assetsCapital.increase(capitalInvestment);
+		perStepInvestment.increase(capitalInvestment);
+		totalInvestment.increase(capitalInvestment);
 		return true;
 	}
 
 	private void chargeInterest() {
-		Double interestRate = this.debtInterestRate.get();
-		Double balance = this.debtBalance.get();
+		Double interestRate = debtInterestRate.get();
+		Double balance = debtBalance.get();
 		Double amount = interestRate * balance;
-		this.debtBalance.increase(amount);
-		this.perStepFinancingCost.increase(amount);
-		this.totalFinancingCost.increase(amount);
+		debtBalance.increase(amount);
+		perStepFinancingCost.increase(amount);
+		totalFinancingCost.increase(amount);
 	}
 
 	private void depreciateCapital() {
-		double depreciation = this.assetsCapital.get() * this.depreciationRate.get();
-		this.assetsCapital.reduce(depreciation);
+		double depreciation = assetsCapital.get() * depreciationRate.get();
+		assetsCapital.reduce(depreciation);
 	}
 
 	public void earn(AssetFinance assetFinance, Double amount) {
@@ -96,23 +95,25 @@ public class Financials implements Serializable, AsyncUpdate {
 		if (revenue.isNaN())
 			throw new RuntimeException("Cannot Earn NaN");
 
-		if (revenue > 1E17) // something is wrong
+		if (revenue > 1E17) {
 			revenue = 1E17; // suggested breakpoint for debug
+		}
 
-		if (revenue < -1E17) // something is wrong
+		if (revenue < -1E17) {
 			revenue = -1E17; // suggested breakpoint for debug
+		}
 
-		this.assetsLiquid.increase(revenue);
-		this.totalRevenue.increase(revenue);
-		this.perStepRevenue.increase(revenue);
+		assetsLiquid.increase(revenue);
+		totalRevenue.increase(revenue);
+		perStepRevenue.increase(revenue);
 	}
 
 	public Double getAssetsCapital() {
-		return this.assetsCapital.get();
+		return assetsCapital.get();
 	}
 
 	public Double getAssetsLiquid() {
-		return this.assetsLiquid.get();
+		return assetsLiquid.get();
 	}
 
 	/**
@@ -122,56 +123,56 @@ public class Financials implements Serializable, AsyncUpdate {
 	 * @return the amount this firm can borrow.
 	 */
 	public Double getAvailableFinancing() {
-		Double liquidAssets = this.assetsLiquid.get();
-		Double revenue = this.perStepRevenue.get();
-		return (2 * liquidAssets) + (2 * revenue) - this.debtBalance.getFuture();
+		Double liquidAssets = assetsLiquid.get();
+		Double revenue = perStepRevenue.get();
+		return 2 * liquidAssets + 2 * revenue - debtBalance.getFuture();
 	}
 
 	public Double getDebtBalance() {
-		return this.debtBalance.get();
+		return debtBalance.get();
 	}
 
 	public Double getDebtInterestRate() {
-		return this.debtInterestRate.get();
+		return debtInterestRate.get();
 	}
 
 	public Double getDebtPayment() {
-		Double interestRate = this.debtInterestRate.get();
-		Double payoffRate = this.debtPayoffRate.get();
-		Double balance = this.debtBalance.get();
+		Double interestRate = debtInterestRate.get();
+		Double payoffRate = debtPayoffRate.get();
+		Double balance = debtBalance.get();
 		return balance * (interestRate + payoffRate);
 	}
 
 	public Double getDebtPayoffRate() {
-		return this.debtPayoffRate.get();
+		return debtPayoffRate.get();
 	}
 
 	public double getDeltaRevenue() {
-		return this.perStepRevenue.getPastDelta();
+		return perStepRevenue.getPastDelta();
 	}
 
 	public Double getDepreciationRate() {
-		return this.depreciationRate.get();
+		return depreciationRate.get();
 	}
 
 	public Double getNetWorth() {
-		return this.assetsCapital.get() + this.assetsLiquid.get() - this.debtBalance.get();
+		return assetsCapital.get() + assetsLiquid.get() - debtBalance.get();
 	}
 
 	public Double getPerStepFinancingCost() {
-		return this.perStepFinancingCost.get();
+		return perStepFinancingCost.get();
 	}
 
 	public Double getPerStepInvestment() {
-		return this.perStepInvestment.get();
+		return perStepInvestment.get();
 	}
 
 	public Double getPerStepOperationsCost() {
-		return this.perStepOperationsCost.get();
+		return perStepOperationsCost.get();
 	}
 
 	public Double getPerStepRevenue() {
-		return this.perStepRevenue.get();
+		return perStepRevenue.get();
 	}
 
 	/**
@@ -182,61 +183,51 @@ public class Financials implements Serializable, AsyncUpdate {
 	 * @return net present value of enterprise
 	 */
 	public Double getPresentValue() {
-		Double presentValue = this.getNetWorth();
-		Double totalRevenues = this.totalRevenue.get();
-		Double totalExpenses = this.totalFinancingCost.get() + this.totalOperationsCost.get()
-				+ this.totalInvestment.get();
-		Double averageProfits = (totalRevenues - totalExpenses) / this.s.schedule.getSteps();
-		presentValue += averageProfits * (1 / this.getDebtInterestRate());
+		Double presentValue = getNetWorth();
+		Double totalRevenues = totalRevenue.get();
+		Double totalExpenses = totalFinancingCost.get() + totalOperationsCost.get() + totalInvestment.get();
+		Double averageProfits = (totalRevenues - totalExpenses) / s.schedule.getSteps();
+		presentValue += averageProfits * (1 / getDebtInterestRate());
 		return presentValue;
 	}
 
 	public Double getTotalFinancingCost() {
-		return this.totalFinancingCost.get();
+		return totalFinancingCost.get();
 	}
 
 	public Double getTotalInvestment() {
-		return this.totalInvestment.get();
+		return totalInvestment.get();
 	}
 
 	public Double getTotalOperationsCost() {
-		return this.totalOperationsCost.get();
+		return totalOperationsCost.get();
 	}
 
 	public Double getTotalRevenue() {
-		return this.totalRevenue.get();
+		return totalRevenue.get();
 	}
 
 	public void makeDebtPayment(Double amount) {
-		this.assetsLiquid.reduce(amount);
-		this.debtBalance.reduce(amount);
-	}
-
-	public void payMaintenance(AssetFinance assetFinance) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void registerAsset(AssetFinance assetFinance) {
-		// TODO Auto-generated method stub
-
+		assetsLiquid.reduce(amount);
+		debtBalance.reduce(amount);
 	}
 
 	private void serviceDebt() {
-		Double payment = this.getDebtPayment();
+		Double payment = getDebtPayment();
 		Double amountToPay;
-		if (payment > this.assetsLiquid.getFuture())
-			amountToPay = this.assetsLiquid.getFuture();
-		else
+		if (payment > assetsLiquid.getFuture()) {
+			amountToPay = assetsLiquid.getFuture();
+		} else {
 			amountToPay = payment;
+		}
 
-		this.makeDebtPayment(amountToPay);
+		makeDebtPayment(amountToPay);
 	}
 
 	@Override
 	public String toString() {
-		return "Cash: " + this.assetsLiquid.get() + ", Assets: " + this.assetsCapital.get() + ", Debt/Avail: "
-				+ this.debtBalance.get() + "/" + this.getAvailableFinancing() + ", NetWorth: " + this.getNetWorth();
+		return "Cash: " + assetsLiquid.get() + ", Assets: " + assetsCapital.get() + ", Debt/Avail: "
+				+ debtBalance.get() + "/" + getAvailableFinancing() + ", NetWorth: " + getNetWorth();
 	}
 
 	/*
@@ -249,23 +240,23 @@ public class Financials implements Serializable, AsyncUpdate {
 	 */
 	@Override
 	public void update() {
-		this.chargeInterest();
-		this.serviceDebt();
-		this.depreciateCapital();
+		chargeInterest();
+		serviceDebt();
+		depreciateCapital();
 
-		this.assetsCapital.update();
-		this.assetsLiquid.update();
-		this.debtBalance.update();
-		this.debtInterestRate.update();
-		this.debtPayoffRate.update();
-		this.perStepFinancingCost.update();
-		this.perStepInvestment.update();
-		this.perStepOperationsCost.update();
-		this.perStepRevenue.update();
-		this.totalFinancingCost.update();
-		this.totalInvestment.update();
-		this.totalOperationsCost.update();
-		this.totalRevenue.update();
+		assetsCapital.update();
+		assetsLiquid.update();
+		debtBalance.update();
+		debtInterestRate.update();
+		debtPayoffRate.update();
+		perStepFinancingCost.update();
+		perStepInvestment.update();
+		perStepOperationsCost.update();
+		perStepRevenue.update();
+		totalFinancingCost.update();
+		totalInvestment.update();
+		totalOperationsCost.update();
+		totalRevenue.update();
 	}
 
 }

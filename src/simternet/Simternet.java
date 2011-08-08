@@ -16,17 +16,16 @@ import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.grid.DoubleGrid2D;
 import sim.field.grid.SparseGrid2D;
+import sim.util.Bag;
 import sim.util.Int2D;
 import simternet.application.AppCategory;
 import simternet.application.ApplicationProvider;
 import simternet.consumer.Consumer;
 import simternet.consumer.DefaultConsumerProfile;
-import simternet.consumer.DefinedBehaviorConsumer;
 import simternet.consumer.GreedyAppManager;
 import simternet.consumer.NetworkMiser;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
-import simternet.nsp.DumbNetworkServiceProvider;
 import simternet.nsp.NetworkProvider;
 import simternet.reporters.Reporter;
 import simternet.temporal.Arbiter;
@@ -38,88 +37,47 @@ import simternet.temporal.Arbiter;
  * @author kkoning
  */
 public class Simternet extends SimState implements Serializable {
+	private static final long									serialVersionUID	= 1L;
 
-	/**
-	 * Is this instance of Simternet run within ECJ?
-	 */
-	private static boolean		evolve				= false;
-
-	/**
-	 * Storing a version identifier is appropriate for this class, as we will
-	 * likely be saving it often and may want to read older versions in a
-	 * predictable, specified way.
-	 * 
-	 */
-	private static final long	serialVersionUID	= 1L;
-
-	public static void main(String[] args) {
-		for (String s : args)
-			if (s.equals("--evolve"))
-				Simternet.evolve = true;
-		SimState.doLoop(Simternet.class, args);
-		System.exit(0);
-	}
-
-	/**
-	 * All application service providers in the simulation
+	/*
+	 * Data structures to keep track of agents
 	 */
 	protected Collection<ApplicationProvider>					applicationProviders;
+	protected Map<AppCategory, Collection<ApplicationProvider>>	applicationProvidersByCategory;
+	protected SparseGrid2D										consumerAgents;
+	protected Collection<Steppable>								deadAgents			= new ArrayList<Steppable>();
+	protected Collection<NetworkProvider>						networkServiceProviders;
+	public int													numASPs				= 0;
+	public int													numConsumerAgents	= 0;
+	public int													numNSPs				= 0;
 
-	protected Map<AppCategory, Collection<ApplicationProvider>>	ASPsByCategory;
-	// Simply for record-keeping if run with ECJ
+	/*
+	 * Tracking Variables for ECJ
+	 */
+	public int													generation;
 	public int													chunk;
 
-	public Parameters											config;
-
-	/**
-	 * All consumer classes in the simulation.
+	/*
+	 * Exogenous model parameters
 	 */
-	protected SparseGrid2D										consumerAgents;
-
-	Collection<Steppable>										deadAgents			= new ArrayList<Steppable>();
-
-	// Simply for record-keeping if run with ECJ
-	public int													generation;
+	public SimternetConfig										config				= new SimternetConfig(this);
 
 	public MarketInfo											marketInfo			= new MarketInfo(this);
 
 	/**
-	 * All Network Service Providers in the simulation.
+	 * @param seed
+	 *            Random seed for this Simternet
 	 */
-	protected Collection<NetworkProvider>						networkServiceProviders;
-
-	protected int												numConsumerAgents	= 0;
-
 	public Simternet(long seed) {
-		this(seed, null);
-	}
-
-	public Simternet(long seed, boolean evolve) {
-		this(seed, null, evolve);
-	}
-
-	public Simternet(long seed, Parameters config) {
-		this(seed, config, Simternet.evolve);
-	}
-
-	public Simternet(long seed, Parameters config, boolean evolve) {
 		super(seed);
-
-		Simternet.evolve = evolve;
-
-		if (config != null)
-			this.config = config;
-		else
-			this.config = new Parameters();
-
 	}
 
 	public void addReporter(Reporter r) {
-		this.schedule.scheduleRepeating(Schedule.EPOCH, 100, r);
+		schedule.scheduleRepeating(Schedule.EPOCH, 100, r);
 	}
 
 	/**
-	 * A convienence method providing an iterator for all locations.
+	 * A convenience method providing an iterator for all locations.
 	 * 
 	 * @return An iterator of all locations as Int2D objects.
 	 */
@@ -127,7 +85,7 @@ public class Simternet extends SimState implements Serializable {
 		return new Iterable<Int2D>() {
 			@Override
 			public Iterator<Int2D> iterator() {
-				return new LocationIterator(Simternet.this.config.x(), Simternet.this.config.y());
+				return new LocationIterator(config.gridSize.x, config.gridSize.y);
 			}
 		};
 	}
@@ -146,29 +104,35 @@ public class Simternet extends SimState implements Serializable {
 
 		if (agent instanceof Consumer) {
 			Consumer acc = (Consumer) agent;
-			this.consumerAgents.setObjectLocation(acc, acc.getLocation());
+			acc.setName(config.prefixConsumer + numConsumerAgents++);
+
+			consumerAgents.setObjectLocation(acc, acc.getLocation());
 			ordering = 3;
-			this.numConsumerAgents++;
 		} else if (agent instanceof ApplicationProvider) {
 			ApplicationProvider asp = (ApplicationProvider) agent;
-			this.applicationProviders.add(asp);
-			Collection<ApplicationProvider> appsInCategory = this.ASPsByCategory.get(asp.getAppCategory());
+			asp.setName(config.prefixASP + numASPs++);
+
+			applicationProviders.add(asp);
+			Collection<ApplicationProvider> appsInCategory = applicationProvidersByCategory.get(asp.getAppCategory());
 			if (appsInCategory == null) {
 				appsInCategory = new ArrayList<ApplicationProvider>();
-				this.ASPsByCategory.put(asp.getAppCategory(), appsInCategory);
+				applicationProvidersByCategory.put(asp.getAppCategory(), appsInCategory);
 			}
 			appsInCategory.add(asp);
 			ordering = 2;
 		} else if (agent instanceof NetworkProvider) {
-			ordering = 1;
 			NetworkProvider nsp = (NetworkProvider) agent;
-			this.networkServiceProviders.add(nsp);
+			nsp.setName(config.prefixNSP + numNSPs++);
+
+			ordering = 1;
+			networkServiceProviders.add(nsp);
 		} else
 			throw new RuntimeException("Adding unknown agent");
 
-		this.schedule.scheduleRepeating(Schedule.EPOCH, ordering, agent);
-		if (TraceConfig.marketEntry && Logger.getRootLogger().isTraceEnabled())
+		schedule.scheduleRepeating(Schedule.EPOCH, ordering, agent);
+		if (TraceConfig.marketEntry && Logger.getRootLogger().isTraceEnabled()) {
 			Logger.getRootLogger().log(Level.INFO, "Market Entry: " + agent);
+		}
 	}
 
 	@Override
@@ -177,13 +141,17 @@ public class Simternet extends SimState implements Serializable {
 
 		List<Network> nets = new ArrayList<Network>();
 
-		for (ApplicationProvider asp : this.applicationProviders)
+		// TODO: Why is this here? isn't finish() called just before Simternet
+		// is garbage collected?
+		for (ApplicationProvider asp : applicationProviders) {
 			nets.add(asp.getDatacenter());
+		}
 
-		for (NetworkProvider nsp : this.networkServiceProviders) {
+		for (NetworkProvider nsp : networkServiceProviders) {
 			nets.add(nsp.getBackboneNetwork());
-			for (Network aen : nsp.getEdgeNetworks())
+			for (Network aen : nsp.getEdgeNetworks()) {
 				nets.add(aen);
+			}
 		}
 
 		NetworkGraphDataOutput ngdo = new NetworkGraphDataOutput(this, nets);
@@ -193,50 +161,53 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	/**
-	 * This is only used by the user interface, and therefore efficiency is not
-	 * a priority
-	 * 
 	 * @return A grid containing the number of active subscribers in each
-	 *         square.
+	 *         square. This result is calculated, and so any modification is of
+	 *         course ineffective.
 	 */
 	public DoubleGrid2D getAllActiveSubscribersGrid() {
 		final Double initValue = 0.0;
-		DoubleGrid2D ret = new DoubleGrid2D(this.config.x(), this.config.y(), initValue);
+		DoubleGrid2D ret = new DoubleGrid2D(config.gridSize.x, config.gridSize.y, initValue);
 
-		for (NetworkProvider nsp : this.networkServiceProviders)
-			for (int i = 0; i < ret.getWidth(); i++)
-				for (int j = 0; j < ret.getHeight(); j++)
+		for (NetworkProvider nsp : networkServiceProviders) {
+			for (int i = 0; i < ret.getWidth(); i++) {
+				for (int j = 0; j < ret.getHeight(); j++) {
 					ret.set(i, j, ret.get(i, j) + nsp.getCustomers(new Int2D(i, j)));
+				}
+			}
+		}
 		return ret;
 	}
 
 	public Collection<ApplicationProvider> getASPs() {
-		return this.applicationProviders;
+		return applicationProviders;
 	}
 
 	public Collection<ApplicationProvider> getASPs(AppCategory c) {
-		Collection<ApplicationProvider> asps = this.ASPsByCategory.get(c);
+		Collection<ApplicationProvider> asps = applicationProvidersByCategory.get(c);
 		if (asps == null) {
 			asps = new ArrayList<ApplicationProvider>();
-			this.ASPsByCategory.put(c, asps);
+			applicationProvidersByCategory.put(c, asps);
 		}
 		return asps;
 	}
 
 	public SparseGrid2D getConsumerClasses() {
-		return this.consumerAgents;
+		return consumerAgents;
 	}
 
 	public DoubleGrid2D getMyActiveSubscribersGrid(NetworkProvider np) {
 		final Double initValue = 0.0;
-		DoubleGrid2D ret = new DoubleGrid2D(this.config.x(), this.config.y(), initValue);
-		for (NetworkProvider nsp : this.networkServiceProviders)
-			if (this.networkServiceProviders == np)
-				for (int i = 0; i < ret.getWidth(); i++)
+		DoubleGrid2D ret = new DoubleGrid2D(config.gridSize.x, config.gridSize.y, initValue);
+		for (NetworkProvider nsp : networkServiceProviders)
+			if (networkServiceProviders == np) {
+				for (int i = 0; i < ret.getWidth(); i++) {
 					for (int j = 0; j < ret.getHeight(); j++) {
 						ret.set(i, j, ret.get(i, j) + nsp.getCustomers(new Int2D(i, j)));
 						System.out.println(ret.get(i, j));
 					}
+				}
+			}
 		return ret;
 	}
 
@@ -261,9 +232,9 @@ public class Simternet extends SimState implements Serializable {
 
 		Collection<NetworkProvider> carriers;
 
-		if (nsp == null)
-			carriers = this.networkServiceProviders;
-		else {
+		if (nsp == null) {
+			carriers = networkServiceProviders;
+		} else {
 			carriers = new ArrayList<NetworkProvider>();
 			carriers.add(nsp);
 		}
@@ -271,18 +242,22 @@ public class Simternet extends SimState implements Serializable {
 		for (NetworkProvider carrier : carriers) {
 			Collection<Network> carrierNetworks;
 
-			if (location == null)
+			if (location == null) {
 				carrierNetworks = carrier.getNetworks();
-			else
+			} else {
 				carrierNetworks = carrier.getNetworks(location);
+			}
 
-			if (netType == null)
-				for (Network net : carrierNetworks)
+			if (netType == null) {
+				for (Network net : carrierNetworks) {
 					networks.add(net);
-			else
+				}
+			} else {
 				for (Network net : carrierNetworks)
-					if (netType.isInstance(net))
+					if (netType.isInstance(net)) {
 						networks.add(net);
+					}
+			}
 
 		}
 
@@ -290,24 +265,25 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	public Collection<NetworkProvider> getNetworkServiceProviders() {
-		return this.networkServiceProviders;
+		return networkServiceProviders;
 	}
 
 	public int getNumConsumerAgents() {
-		return this.numConsumerAgents;
+		return numConsumerAgents;
 	}
 
 	public Integer getNumNetworkProviders(Int2D location) {
 		Integer providersWithNetworks = 0;
-		for (NetworkProvider nsp : this.networkServiceProviders)
-			if (nsp.hasNetworkAt(EdgeNetwork.class, location))
+		for (NetworkProvider nsp : networkServiceProviders)
+			if (nsp.hasNetworkAt(EdgeNetwork.class, location)) {
 				providersWithNetworks++;
+			}
 		return providersWithNetworks;
 	}
 
-	public Parameters getParameters() {
-		return this.config;
-	}
+	// public Parameters getParameters() {
+	// return this.config;
+	// }
 
 	/**
 	 * @return The total population of All consumers at ALL locations.
@@ -316,7 +292,7 @@ public class Simternet extends SimState implements Serializable {
 	public Double getPopulation() {
 		Double pop = new Double(0);
 
-		Iterator<Consumer> i = this.consumerAgents.iterator();
+		Iterator<Consumer> i = consumerAgents.iterator();
 		while (i.hasNext()) {
 			Consumer acc = i.next();
 			pop += acc.getPopulation();
@@ -333,7 +309,11 @@ public class Simternet extends SimState implements Serializable {
 	public Double getPopulation(Int2D location) {
 		Double pop = new Double(0);
 
-		Iterator<Consumer> i = this.consumerAgents.getObjectsAtLocation(location).iterator();
+		Bag consumers = consumerAgents.getObjectsAtLocation(location);
+		if (consumers == null)
+			return 0.0;
+
+		Iterator<Consumer> i = consumerAgents.getObjectsAtLocation(location).iterator();
 		while (i.hasNext()) {
 			Consumer acc = i.next();
 			pop += acc.getPopulation();
@@ -343,16 +323,18 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	/**
-	 * This is only used by the user interface, and therefor efficiency is not a
-	 * priority
+	 * This is only used by the user interface, and therefore efficiency is not
+	 * a priority
 	 * 
 	 * @return A grid containing the population of each square.
 	 */
 	public DoubleGrid2D getPopulationGrid() {
-		DoubleGrid2D ret = new DoubleGrid2D(this.config.x(), this.config.y());
-		for (int i = 0; i < ret.getWidth(); i++)
-			for (int j = 0; j < ret.getHeight(); j++)
+		DoubleGrid2D ret = new DoubleGrid2D(config.gridSize.x, config.gridSize.y);
+		for (int i = 0; i < ret.getWidth(); i++) {
+			for (int j = 0; j < ret.getHeight(); j++) {
 				ret.set(i, j, this.getPopulation(new Int2D(i, j)));
+			}
+		}
 		return ret;
 	}
 
@@ -377,87 +359,47 @@ public class Simternet extends SimState implements Serializable {
 	// return prices;
 	// }
 
-	private void initApplicationServiceProviders() {
-
-		// create three ASPs for each application class
-
-		for (AppCategory ac : AppCategory.values())
-			if (!Simternet.evolve)
-				for (int i = 0; i <= 1; i++)
-					this.enterMarket(new ApplicationProvider(this, ac));
-	}
-
 	private void initArbiter() {
-		this.schedule.scheduleRepeating(new Arbiter(), 99999999, 1);
+		schedule.scheduleRepeating(new Arbiter(), 99999999, 1);
 	}
 
 	/**
-	 * Specify this somehow in parameters, rather than source.
+	 * Adds 40 consumer agents at each grid square.
+	 * 
+	 * TODO: Parameterize?
 	 */
 	protected void initConsumerClasses() {
 
 		DefaultConsumerProfile defaultProfile = new DefaultConsumerProfile();
-		for (int i = 0; i < 40; i++)
+		for (int i = 0; i < 40; i++) {
 			// TODO: Clean this up.
 			// Populate the landscape with a simpleconsumer class.
-			for (Int2D location : this.allLocations()) {
-				Double pop = this.random.nextDouble()
-						* Double.parseDouble(this.config.getProperty("landscape.population.max"));
+			for (Int2D location : allLocations()) {
+				Double pop = random.nextDouble() * config.consumerPopulationMax;
 				Consumer acc = new Consumer(this, location, pop, defaultProfile, NetworkMiser.getSingleton(),
 						GreedyAppManager.getSingleton(), null);
-				this.enterMarket(acc);
+				enterMarket(acc);
 			}
-
-		// Add some consumers with defined behavior
-		for (Int2D location : this.allLocations()) {
-			Double pop = this.random.nextDouble()
-					* Double.parseDouble(this.config.getProperty("landscape.population.max"));
-			Consumer acc = new DefinedBehaviorConsumer(this, location, pop, defaultProfile);
-			this.enterMarket(acc);
-		}
-
-	}
-
-	/**
-	 * DO: Specify this somehow in parameters, rather than source.
-	 */
-	private void initNetworkServiceProviders() {
-		if (!Simternet.evolve) {
-			this.enterMarket(new DumbNetworkServiceProvider(this));
-			this.enterMarket(new DumbNetworkServiceProvider(this));
 		}
 	}
 
 	@Override
 	public void start() {
 		super.start();
-
-		// Reset name counters, for consistency between runs in the GUI.
-		this.config.resetNameCounters();
-
-		// Initialize Consumer Agents
-		this.consumerAgents = new SparseGrid2D(this.config.x(), this.config.y());
-		this.initConsumerClasses();
+		initArbiter();
 
 		// Initialize Network Service Providers
-		this.networkServiceProviders = new ArrayList<NetworkProvider>();
-		this.initNetworkServiceProviders();
+		networkServiceProviders = new ArrayList<NetworkProvider>();
 
 		// Initialize Application Service Providers
-		this.applicationProviders = new ArrayList<ApplicationProvider>();
-		this.ASPsByCategory = new HashMap<AppCategory, Collection<ApplicationProvider>>();
-		this.initApplicationServiceProviders();
+		applicationProviders = new ArrayList<ApplicationProvider>();
+		applicationProvidersByCategory = new HashMap<AppCategory, Collection<ApplicationProvider>>();
 
-		// Reporter edr = new EdgeDataReporter();
-		// edr.setGeneration(0);
-		// edr.setChunk(0);
-		// this.addReporter(edr);
-		// Reporter nfr = new NetworkProviderFitnessReporter();
-		// nfr.setGeneration(0);
-		// nfr.setChunk(0);
-		// this.addReporter(nfr);
+		// Initialize Consumer Agents
+		consumerAgents = new SparseGrid2D(config.gridSize.x, config.gridSize.y);
+		initConsumerClasses();
+		// Do not insert NSP or ASP agents ourselves; let ECJ handle that.
 
-		this.initArbiter();
 	}
 
 }

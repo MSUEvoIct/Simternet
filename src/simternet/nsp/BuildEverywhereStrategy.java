@@ -17,14 +17,10 @@ import simternet.network.SimpleEdgeNetwork;
  */
 public class BuildEverywhereStrategy implements InvestmentStrategy, Serializable {
 
-	private static Integer							reserve				= 10000;	// don't
-																					// build
-																					// with
-																					// the
-																					// last
-																					// X
-																					// of
-																					// $
+	/**
+	 * Keep some $ in reserve so we don't go bankrupt immediately
+	 */
+	private static Integer							reserve				= 10000;
 	/**
 	 * 
 	 */
@@ -66,15 +62,15 @@ public class BuildEverywhereStrategy implements InvestmentStrategy, Serializable
 	@Override
 	public void makeNetworkInvestment() {
 
-		if (this.built == true)
+		if (built == true)
 			return;
 
-		Double amountAvailable = this.nsp.financials.getAvailableFinancing();
+		Double amountAvailable = nsp.financials.getAvailableFinancing();
 
 		// Figure out costs, build if we can afford to. All or nothing for each
 		// square.
-		for (int x = this.builtThroughX; x < this.nsp.simternet.config.x(); x++) {
-			for (int y = this.builtThroughY; y < this.nsp.simternet.config.y(); y++) {
+		for (int x = builtThroughX; x < nsp.s.config.gridSize.x; x++) {
+			for (int y = builtThroughY; y < nsp.s.config.gridSize.y; y++) {
 				Double costForThisPixel = 0.0;
 
 				// figure out the cost to build one of each network at this
@@ -83,30 +79,32 @@ public class BuildEverywhereStrategy implements InvestmentStrategy, Serializable
 				// (i.e., instantiating the class), use reflection to call a
 				// static
 				// method instead.
-				for (Class<? extends EdgeNetwork> cl : this.networkTypes)
-					costForThisPixel = +EdgeNetwork.getBuildCost(cl, this.nsp, new Int2D(x, y));
+				for (Class<? extends EdgeNetwork> cl : networkTypes) {
+					costForThisPixel = +EdgeNetwork.getBuildCost(cl, nsp, new Int2D(x, y));
+				}
 
 				// if we have enough funding available to build the networks,
 				// do so. When we run out of money, stop building.
 				if (costForThisPixel < amountAvailable - BuildEverywhereStrategy.reserve) {
 
-					for (Class<? extends EdgeNetwork> cl : this.networkTypes)
+					for (Class<? extends EdgeNetwork> cl : networkTypes) {
 						try {
-							this.nsp.buildNetwork(cl, new Int2D(x, y));
+							nsp.buildNetwork(cl, new Int2D(x, y));
 							amountAvailable -= costForThisPixel;
 						} catch (Exception e) {
 							throw new RuntimeException(e);
 						}
-					this.builtThroughY = y + 1;
+					}
+					builtThroughY = y + 1;
 				} else
 					return;
 
 			}
-			this.builtThroughX = x + 1;
-			this.builtThroughY = 0;
+			builtThroughX = x + 1;
+			builtThroughY = 0;
 		}
 
-		this.built = true;
+		built = true;
 
 	}
 

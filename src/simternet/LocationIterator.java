@@ -12,18 +12,18 @@ public class LocationIterator implements Iterator<Int2D>, Iterable<Int2D> {
 	private final int	yMax;
 
 	public LocationIterator(int x, int y) {
-		this.xMax = x - 1;
-		this.yMax = y - 1;
-		this.remaining = x * y;
+		xMax = x - 1;
+		yMax = y - 1;
+		remaining = x * y;
 	}
 
 	public LocationIterator(Simternet s) {
-		this(s.config.x(), s.config.y());
+		this(s.config.gridSize.x, s.config.gridSize.y);
 	}
 
 	@Override
 	public boolean hasNext() {
-		if (this.remaining > 0)
+		if (remaining > 0)
 			return true;
 		return false;
 	}
@@ -35,13 +35,13 @@ public class LocationIterator implements Iterator<Int2D>, Iterable<Int2D> {
 
 	@Override
 	public Int2D next() {
-		Int2D toReturn = new Int2D(this.xCur, this.yCur);
-		this.xCur++;
-		if (this.xCur > this.xMax) {
-			this.xCur = 0;
-			this.yCur++;
+		Int2D toReturn = new Int2D(xCur, yCur);
+		xCur++;
+		if (xCur > xMax) {
+			xCur = 0;
+			yCur++;
 		}
-		this.remaining--;
+		remaining--;
 
 		return toReturn;
 	}

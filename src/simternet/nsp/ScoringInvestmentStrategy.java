@@ -41,37 +41,47 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy, Serializab
 			networkTypes.add(SimpleEdgeNetwork.class);
 		}
 		this.networkTypes = networkTypes;
-		this.potentialNetworks = new ArrayList<PotentialNetwork>();
-		this.populatePotentialNetworks();
+		potentialNetworks = new ArrayList<PotentialNetwork>();
+		populatePotentialNetworks();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void makeNetworkInvestment() {
-		Double availableFinancing = this.nsp.financials.getAvailableFinancing();
+		Double availableFinancing = nsp.financials.getAvailableFinancing();
 		List<PotentialNetwork> networksBuilt = new ArrayList<PotentialNetwork>();
-		this.updateScores();
-		Collections.sort(this.potentialNetworks);
+		updateScores();
+		Collections.sort(potentialNetworks);
 
-		for (PotentialNetwork pn : this.potentialNetworks) {
-			if (pn.cost > availableFinancing)
+		for (PotentialNetwork pn : potentialNetworks) {
+			if (pn.cost > availableFinancing) {
 				break;
-
-			this.nsp.buildNetwork(pn.networkType, pn.location);
+			}
+			if (pn.score < 0) {
+				break;
+			}
+			nsp.buildNetwork(pn.networkType, pn.location);
 			availableFinancing -= pn.cost;
 			networksBuilt.add(pn);
 		}
 
-		this.potentialNetworks.removeAll(networksBuilt);
+		potentialNetworks.removeAll(networksBuilt);
 
 	}
 
 	private void populatePotentialNetworks() {
-		for (Class<? extends EdgeNetwork> networkType : this.networkTypes)
-			for (Int2D location : new LocationIterator(this.nsp.simternet))
-				this.potentialNetworks.add(new PotentialNetwork(this.nsp, networkType, location));
+		for (Class<? extends EdgeNetwork> networkType : networkTypes) {
+			for (Int2D location : new LocationIterator(nsp.s)) {
+				potentialNetworks.add(new PotentialNetwork(nsp, networkType, location));
+			}
+		}
 	}
 
+	/**
+	 * The standard method just uses a simplistic score for testing purposes.
+	 * 
+	 * @param pn
+	 */
 	protected void scoreSimpleNetwork(PotentialNetwork pn) {
 		Double score = 0.0;
 
@@ -81,8 +91,7 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy, Serializab
 
 		// population. This is all people, not just those we specifically
 		// know will demand SimpleNetwork.
-		score += Math.pow(this.nsp.simternet.getPopulation(pn.location), 1.5)
-				/ Double.parseDouble(this.nsp.simternet.config.getProperty("landscape.population.max"))
+		score += Math.pow(nsp.s.getPopulation(pn.location), 1.5) / nsp.s.config.consumerPopulationMax
 				* populationWeight;
 		score -= pn.cost * costWeight;
 		score -= pn.distanceFromHome * distanceWeight;
@@ -97,11 +106,12 @@ public class ScoringInvestmentStrategy implements InvestmentStrategy, Serializab
 	}
 
 	protected void updateScores() {
-		for (PotentialNetwork pn : this.potentialNetworks)
-			if (pn.networkType.equals(SimpleEdgeNetwork.class))
-				this.scoreSimpleNetwork(pn);
-			else
+		for (PotentialNetwork pn : potentialNetworks)
+			if (pn.networkType.equals(SimpleEdgeNetwork.class)) {
+				scoreSimpleNetwork(pn);
+			} else {
 				pn.score = Double.NEGATIVE_INFINITY;
+			}
 	}
 
 }

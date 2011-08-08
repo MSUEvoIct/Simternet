@@ -37,13 +37,15 @@ public class NetworkGraphDataOutput {
 
 		StringBuffer sb = new StringBuffer();
 
-		for (Network n1 : this.networks) {
+		for (Network n1 : networks) {
 			boolean first = true;
-			for (Network n2 : this.networks) {
-				if (!first)
+			for (Network n2 : networks) {
+				if (!first) {
 					sb.append(",");
-				if (n1.isConnectedTo(n2))
+				}
+				if (n1.isConnectedTo(n2)) {
 					sb.append("1");
+				}
 				first = false;
 			}
 			sb.append("\n");
@@ -65,7 +67,7 @@ public class NetworkGraphDataOutput {
 		sb.append("Size");
 		sb.append("\n");
 
-		for (Network an : this.networks) {
+		for (Network an : networks) {
 			// Label
 			sb.append(an.toString() + "\t");
 
@@ -123,17 +125,17 @@ public class NetworkGraphDataOutput {
 
 	public void output() {
 
-		String outputDir = this.s.getParameters().getProperty("output.dir", "./data/output/");
+		String outputDir = s.config.simternetOutputDir;
 
 		try {
-			FileOutputStream connectionMatrixFile = new FileOutputStream(outputDir + this.connectionMatrixOutputFile);
-			FileOutputStream vertexDataFile = new FileOutputStream(outputDir + this.vertexDataOutputFile);
+			FileOutputStream connectionMatrixFile = new FileOutputStream(outputDir + connectionMatrixOutputFile);
+			FileOutputStream vertexDataFile = new FileOutputStream(outputDir + vertexDataOutputFile);
 
 			Writer connectionMatrixWriter = new OutputStreamWriter(connectionMatrixFile);
 			Writer vertexDataWriter = new OutputStreamWriter(vertexDataFile);
 
-			connectionMatrixWriter.write(this.getConnectionMatrix());
-			vertexDataWriter.write(this.getVertexData());
+			connectionMatrixWriter.write(getConnectionMatrix());
+			vertexDataWriter.write(getVertexData());
 
 			connectionMatrixWriter.flush();
 			connectionMatrixWriter.close();

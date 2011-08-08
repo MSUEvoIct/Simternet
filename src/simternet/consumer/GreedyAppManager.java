@@ -53,6 +53,8 @@ public class GreedyAppManager extends AppManager implements Serializable {
 
 			// clear out our current applications, "start from scratch"
 			List<ApplicationProvider> newASPs = new ArrayList<ApplicationProvider>();
+			// Put our new list object into the structure used to actualize
+			// consumption.
 			c.appsUsed.put(ac, newASPs);
 
 			// apps are now properly sorted. consume in order everything that

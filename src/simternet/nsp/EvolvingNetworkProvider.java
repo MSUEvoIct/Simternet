@@ -51,7 +51,7 @@ public class EvolvingNetworkProvider extends NetworkProvider implements Serializ
 	public void runLCSIfNecessary() {
 		if (!this.hasLCSRun) {
 			System.out.println("Running LCS placeholder and passing " + this.getDeltaRevenue()
-					+ " as delta revenue at time step " + this.simternet.schedule.getSteps());
+					+ " as delta revenue at time step " + this.s.schedule.getSteps());
 
 			this.hasLCSRun = true;
 

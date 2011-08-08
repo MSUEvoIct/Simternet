@@ -18,6 +18,7 @@ import simternet.Simternet;
 import simternet.TraceConfig;
 import simternet.Utils;
 import simternet.application.ApplicationProvider;
+import simternet.ecj.problems.HasFinancials;
 import simternet.network.Backbone;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
@@ -33,42 +34,43 @@ import simternet.temporal.TemporalSparseGrid2D;
  * 
  * @author kkoning
  */
-public abstract class NetworkProvider implements Steppable, AsyncUpdate {
+public abstract class NetworkProvider implements Steppable, AsyncUpdate, HasFinancials {
+
+	protected static DecimalFormat							numCustFormat			= new DecimalFormat("0000000");
+	protected static DecimalFormat							positionFormat			= new DecimalFormat("00");
+	protected static DecimalFormat							priceFormat				= new DecimalFormat("000.00");
+	private static final long								serialVersionUID		= 1L;
 
 	protected TemporalHashMap<ApplicationProvider, Double>	aspTransitPrice			= new TemporalHashMap<ApplicationProvider, Double>();
 	protected Backbone										backboneNetwork;
 	public boolean											bankrupt				= false;
-	public Double											deltaRevenue			= 0.0;
 
+	public Double											deltaRevenue			= 0.0;
 	protected TemporalSparseGrid2D							edgeNetworks;
 	public Financials										financials;
 	protected Int2D											homeBase;
-	protected NSPInterconnectPricingStrategy				interconnectStrategy	= null;
+	protected ASPInterconnectPricingStrategy				interconnectStrategy	= null;
 	protected InvestmentStrategy							investmentStrategy;
 	protected String										name;
 	public PricingStrategy									pricingStrategy;
-	public Simternet										simternet				= null;
-	protected static DecimalFormat							numCustFormat			= new DecimalFormat("0000000");
-	protected static DecimalFormat							positionFormat			= new DecimalFormat("00");
 
-	protected static DecimalFormat							priceFormat				= new DecimalFormat("000.00");
-	private static final long								serialVersionUID		= 1L;
+	public Simternet										s				= null;
 
 	public NetworkProvider(Simternet simternet) {
-		this.simternet = simternet;
+		this.s = simternet;
 
-		this.name = simternet.config.getNSPName();
+		// this.name = simternet.config.getNSPName();
 
-		Double endowment = Double.parseDouble(this.simternet.config.getProperty("nsp.financial.endowment"));
-		this.financials = new Financials(simternet, endowment);
+		financials = new Financials(simternet, simternet.config.nspEndowment);
 
-		int homeX = simternet.random.nextInt(this.simternet.config.x());
-		int homeY = simternet.random.nextInt(this.simternet.config.y());
-		this.homeBase = new Int2D(homeX, homeY);
+		// Give them a random "home base" somewhere on the grid.
+		int homeX = simternet.random.nextInt(simternet.config.gridSize.x);
+		int homeY = simternet.random.nextInt(simternet.config.gridSize.y);
+		homeBase = new Int2D(homeX, homeY);
 
-		this.edgeNetworks = new TemporalSparseGrid2D(this.simternet.config.x(), this.simternet.config.y());
+		edgeNetworks = new TemporalSparseGrid2D(simternet.config.gridSize.x, simternet.config.gridSize.y);
 
-		this.backboneNetwork = new Backbone(this);
+		backboneNetwork = new Backbone(this);
 
 	}
 
@@ -87,14 +89,15 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 
 			Double buildCost = EdgeNetwork.getBuildCost(type, this, location);
 			EdgeNetwork aen = constr.newInstance(this, location);
-			this.financials.capitalize(buildCost);
-			this.edgeNetworks.setObjectLocation(aen, location);
+			financials.capitalize(buildCost);
+			edgeNetworks.setObjectLocation(aen, location);
 
 			// for now, create a fixed bandwidth link to this network.
-			this.getBackboneNetwork().createEgressLinkTo(aen, 1.0E5, RoutingProtocolConfig.NONE);
+			getBackboneNetwork().createEgressLinkTo(aen, 1.0E5, RoutingProtocolConfig.NONE);
 
-			if (TraceConfig.NSPBuiltNetwork && Logger.getRootLogger().isTraceEnabled())
+			if (TraceConfig.NSPBuiltNetwork && Logger.getRootLogger().isTraceEnabled()) {
 				Logger.getRootLogger().trace(this + " building " + type + " @ " + location);
+			}
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -104,7 +107,7 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	public String edgeCongestionReport() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("Edge congestion for " + this + "\n");
-		for (Object o : this.edgeNetworks) {
+		for (Object o : edgeNetworks) {
 			EdgeNetwork aen = (EdgeNetwork) o;
 			sb.append(aen + ": ");
 			sb.append(aen.getCongestionReport());
@@ -114,19 +117,20 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	}
 
 	public Double getASPTransitPrice(ApplicationProvider asp) {
-		Double price = this.aspTransitPrice.get(asp);
+		Double price = aspTransitPrice.get(asp);
 		Double min_price = 0.000000000001;
-		if (price == null)
+		if (price == null) {
 			price = min_price;
-		else if (price.isNaN())
+		} else if (price.isNaN()) {
 			price = min_price;
-		else if (price <= 0.0)
+		} else if (price <= 0.0) {
 			price = min_price;
+		}
 		return price;
 	}
 
 	public Backbone getBackboneNetwork() {
-		return this.backboneNetwork;
+		return backboneNetwork;
 	}
 
 	/**
@@ -137,7 +141,7 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	@SuppressWarnings("unchecked")
 	public Double getCustomers() {
 		double numCustomers = 0.0;
-		Iterator<EdgeNetwork> allNetworks = this.edgeNetworks.iterator();
+		Iterator<EdgeNetwork> allNetworks = edgeNetworks.iterator();
 		while (allNetworks.hasNext()) {
 			EdgeNetwork aen = allNetworks.next();
 			numCustomers += aen.getNumSubscribers();
@@ -153,7 +157,7 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	public Double getCustomers(Int2D location) {
 		Double numCustomers = 0.0;
 
-		Bag networks = this.edgeNetworks.getObjectsAtLocation(location);
+		Bag networks = edgeNetworks.getObjectsAtLocation(location);
 		if (networks == null)
 			return 0.0;
 
@@ -174,33 +178,38 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	 * @return change in revenue in units of currency
 	 */
 	public Double getDeltaRevenue() {
-		return this.deltaRevenue;
+		return deltaRevenue;
 	}
 
 	public Collection<EdgeNetwork> getEdgeNetworks() {
 		ArrayList<EdgeNetwork> list = new ArrayList<EdgeNetwork>();
-		Bag nets = this.edgeNetworks.allObjects;
+		Bag nets = edgeNetworks.allObjects;
 
 		// If there are 0 objects, the Bag will be null rather than empty. :/
 		if (null == nets)
 			return list;
 
-		for (int i = 0; i < nets.numObjs; i++)
+		for (int i = 0; i < nets.numObjs; i++) {
 			list.add((EdgeNetwork) nets.objs[i]);
+		}
 
 		return list;
 	}
 
+	public Financials getFinancials() {
+		return financials;
+	}
+
 	public Int2D getHomeBase() {
-		return this.homeBase;
+		return homeBase;
 	}
 
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
 	public Network getNetworkAt(Class<? extends Network> net, Int2D location) {
-		Bag allNets = this.edgeNetworks.getObjectsAtLocation(location);
+		Bag allNets = edgeNetworks.getObjectsAtLocation(location);
 		if (allNets == null) // we have no nets at this loc
 			return null;
 		if (allNets.isEmpty()) // we have no nets at this loc
@@ -224,18 +233,22 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	public Collection<Network> getNetworks(Int2D location) {
 		ArrayList<Network> list = new ArrayList<Network>();
 		Bag edgeNets;
-		if (location != null)
-			edgeNets = this.edgeNetworks.getObjectsAtLocation(location.x, location.y);
-		else
-			edgeNets = this.edgeNetworks.allObjects;
+		if (location != null) {
+			edgeNets = edgeNetworks.getObjectsAtLocation(location.x, location.y);
+		} else {
+			edgeNets = edgeNetworks.allObjects;
+		}
 
 		// If there are 0 objects, the Bag will be null rather than empty. :/
-		if (edgeNets != null)
-			for (int i = 0; i < edgeNets.numObjs; i++)
+		if (edgeNets != null) {
+			for (int i = 0; i < edgeNets.numObjs; i++) {
 				list.add((Network) edgeNets.objs[i]);
+			}
+		}
 
-		if (location == null)
-			list.add(this.getBackboneNetwork());
+		if (location == null) {
+			list.add(getBackboneNetwork());
+		}
 
 		return list;
 	}
@@ -246,9 +259,9 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	 * @return -1 if number extraction failed, or the number if it succeeded.
 	 */
 	public int getNumber() {
-		int start = this.name.lastIndexOf('-') + 1;
+		int start = name.lastIndexOf('-') + 1;
 		try {
-			int number = Integer.parseInt(this.name.substring(start));
+			int number = Integer.parseInt(name.substring(start));
 			return number;
 		} catch (NumberFormatException e) {
 			return -1;
@@ -259,17 +272,19 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	 * Dispose of all assets, exit market
 	 */
 	private void goBankrupt() {
-		if (TraceConfig.bankruptcyNSP && Logger.getRootLogger().isTraceEnabled())
-			Logger.getRootLogger().trace(this + " going bankrupt: " + this.financials);
-		for (EdgeNetwork edge : (Iterable<EdgeNetwork>) this.edgeNetworks)
+		if (TraceConfig.bankruptcyNSP && Logger.getRootLogger().isTraceEnabled()) {
+			Logger.getRootLogger().trace(this + " going bankrupt: " + financials);
+		}
+		for (EdgeNetwork edge : (Iterable<EdgeNetwork>) edgeNetworks) {
 			edge.disconnect();
-		this.edgeNetworks.clear();
-		this.backboneNetwork.disconnect();
-		this.bankrupt = true;
+		}
+		edgeNetworks.clear();
+		backboneNetwork.disconnect();
+		bankrupt = true;
 	}
 
 	public boolean hasNetworkAt(Class<? extends Network> net, Int2D location) {
-		Network an = this.getNetworkAt(net, location);
+		Network an = getNetworkAt(net, location);
 		if (an == null)
 			return false;
 		else
@@ -277,7 +292,7 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	}
 
 	protected void makeNetworkInvestment() {
-		this.investmentStrategy.makeNetworkInvestment();
+		investmentStrategy.makeNetworkInvestment();
 	}
 
 	private StringBuffer printAllNetworkGrid() {
@@ -288,13 +303,13 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 		int curY = 0;
 
 		sb.append(positionFormat.format(0));
-		for (Int2D location : this.simternet.allLocations()) {
+		for (Int2D location : s.allLocations()) {
 			if (location.y > curY) {
 				sb.append("\n");
 				curY++;
 				sb.append(positionFormat.format(curY));
 			}
-			sb.append(Utils.padLeft(String.valueOf(this.simternet.getNetworks(null, null, location).size()), 4));
+			sb.append(Utils.padLeft(String.valueOf(s.getNetworks(null, null, location).size()), 4));
 		}
 
 		return sb;
@@ -306,7 +321,7 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 		int curY = 0;
 
 		sb.append(NetworkProvider.positionFormat.format(0));
-		for (Int2D location : this.simternet.allLocations()) {
+		for (Int2D location : s.allLocations()) {
 			if (location.y > curY) {
 				sb.append("\n");
 				curY++;
@@ -326,7 +341,7 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 		int curY = 0;
 
 		sb.append(positionFormat.format(0));
-		for (Int2D location : this.simternet.allLocations()) {
+		for (Int2D location : s.allLocations()) {
 			if (location.y > curY) {
 				sb.append("\n");
 				curY++;
@@ -343,18 +358,19 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 		int curY = 0;
 
 		sb.append(NetworkProvider.positionFormat.format(0));
-		for (Int2D location : this.simternet.allLocations()) {
+		for (Int2D location : s.allLocations()) {
 			if (location.y > curY) {
 				sb.append("\n");
 				curY++;
 				sb.append(NetworkProvider.positionFormat.format(curY));
 			}
-			EdgeNetwork net = (EdgeNetwork) this.getNetworkAt(EdgeNetwork.class, location);
+			EdgeNetwork net = (EdgeNetwork) getNetworkAt(EdgeNetwork.class, location);
 			String price;
-			if (net == null)
+			if (net == null) {
 				price = "   N/A";
-			else
+			} else {
 				price = NetworkProvider.priceFormat.format(net.getPrice());
+			}
 			sb.append(" " + price);
 		}
 
@@ -374,73 +390,78 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate {
 	@Override
 	public void step(SimState state) {
 
-		if (this.bankrupt)
+		if (bankrupt)
 			return;
 
-		this.makeNetworkInvestment();
+		makeNetworkInvestment();
 
-		this.pricingStrategy.priceEdges(); // Set prices for the next period.
+		pricingStrategy.priceEdges(); // Set prices for the next period.
 
 		// operate our backbone network
-		this.backboneNetwork.step(state);
+		backboneNetwork.step(state);
 
 		// operate our edge networks
-		for (Object o : this.edgeNetworks) {
+		for (Object o : edgeNetworks) {
 			EdgeNetwork aen = (EdgeNetwork) o;
 			aen.step(state);
 		}
 
 		if (Logger.getRootLogger().isTraceEnabled()) {
 			// Log financials
-			if (TraceConfig.financialStatusNSP)
-				Logger.getRootLogger().trace(this + " Financials: " + this.financials);
+			if (TraceConfig.financialStatusNSP) {
+				Logger.getRootLogger().trace(this + " Financials: " + financials);
+			}
 
 			// Log price map
-			if (TraceConfig.NSPPriceTables)
-				Logger.getRootLogger().trace(this + " Price Map:\n" + this.printPriceGrid());
+			if (TraceConfig.NSPPriceTables) {
+				Logger.getRootLogger().trace(this + " Price Map:\n" + printPriceGrid());
+			}
 
 			// Log customer map
-			if (TraceConfig.NSPCustomerTables)
-				Logger.getRootLogger().trace(this + " Customer Map:\n" + this.printCustomerGrid());
+			if (TraceConfig.NSPCustomerTables) {
+				Logger.getRootLogger().trace(this + " Customer Map:\n" + printCustomerGrid());
+			}
 			// Log this NSP's Network
-			Logger.getRootLogger().log(Level.INFO, this + " Network Map:\n" + this.printNetworkGrid());
+			Logger.getRootLogger().log(Level.INFO, this + " Network Map:\n" + printNetworkGrid());
 
 			// Log ALL NSP's networks
-			Logger.getRootLogger().log(Level.INFO, "Unified Network Map:\n" + this.printAllNetworkGrid());
+			Logger.getRootLogger().log(Level.INFO, "Unified Network Map:\n" + printAllNetworkGrid());
 
 			// Log edge congestion
-			Logger.getRootLogger().log(Level.INFO, this.edgeCongestionReport());
+			Logger.getRootLogger().log(Level.INFO, edgeCongestionReport());
 
 			// Log edge congestion
-			if (TraceConfig.congestionNSPSummary)
-				Logger.getRootLogger().trace(this.edgeCongestionReport());
+			if (TraceConfig.congestionNSPSummary) {
+				Logger.getRootLogger().trace(edgeCongestionReport());
+			}
 
 		}
 
-		if (this.financials.getNetWorth() < -10000.0)
-			this.goBankrupt();
+		if (financials.getNetWorth() < -10000.0) {
+			goBankrupt();
+		}
 	}
 
 	@Override
 	public String toString() {
-		return this.getClass().getCanonicalName() + "-" + this.name;
+		return this.getClass().getCanonicalName() + "-" + name;
 	}
 
 	public void update() {
 
-		if (this.bankrupt)
+		if (bankrupt)
 			return;
 
-		this.deltaRevenue = this.financials.getTotalRevenue();
-		this.financials.update();
+		deltaRevenue = financials.getTotalRevenue();
+		financials.update();
 		// Calculate delta revenue as current revenue - past revenue
-		this.deltaRevenue = this.financials.getTotalRevenue() - this.deltaRevenue;
+		deltaRevenue = financials.getTotalRevenue() - deltaRevenue;
 
-		this.edgeNetworks.update();
-		this.backboneNetwork.update();
-		this.aspTransitPrice.update();
+		edgeNetworks.update();
+		backboneNetwork.update();
+		aspTransitPrice.update();
 
-		for (Object o : this.edgeNetworks) {
+		for (Object o : edgeNetworks) {
 			EdgeNetwork aen = (EdgeNetwork) o;
 			aen.update();
 		}

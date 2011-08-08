@@ -7,9 +7,9 @@ import ec.gp.GPTree;
 
 public class GPQualityStrategy extends QualityStrategy {
 
+	private static final long		serialVersionUID	= 1L;
 	protected final GPIndividual	ind;
 	protected final GPTree			tree;
-	private static final long		serialVersionUID	= 1L;
 
 	public GPQualityStrategy(ApplicationProvider asp, GPIndividual ind, GPTree tree) {
 		super(asp);
@@ -25,7 +25,11 @@ public class GPQualityStrategy extends QualityStrategy {
 		AppQualityInvestmentProblem aqip = new AppQualityInvestmentProblem(this.asp, this.asp.financials);
 		this.tree.child.eval(null, 0, d, null, this.ind, aqip);
 
-		Quality.increaseQuality(this.asp, d.value);
+		double amountToIncrease = d.value;
+		if (amountToIncrease < 0)
+			amountToIncrease = 0.0;
+
+		Quality.increaseQuality(this.asp, amountToIncrease);
 	}
 
 }

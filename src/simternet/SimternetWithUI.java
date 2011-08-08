@@ -9,10 +9,8 @@ import sim.display.Controller;
 import sim.display.Display2D;
 import sim.display.GUIState;
 import sim.engine.SimState;
-import sim.portrayal.Inspector;
 import simternet.ui.ActiveCustomersPortrayal2D;
 import simternet.ui.NetworkProvidersDisplay;
-import simternet.ui.ParametersInspectionObject;
 
 public class SimternetWithUI extends GUIState {
 
@@ -39,12 +37,14 @@ public class SimternetWithUI extends GUIState {
 		c.setVisible(true);
 	}
 
-	public JFrame displayFrameOverallActiveCustomers;
+	public JFrame						displayFrameOverallActiveCustomers;
 
-	public Display2D displayOverallActiveCustomers;
-	protected NetworkProvidersDisplay netProvidersDisplay;
+	public Display2D					displayOverallActiveCustomers;
+	protected NetworkProvidersDisplay	netProvidersDisplay;
 
-	public ActiveCustomersPortrayal2D overallActiveCustomersPortrayal = null;
+	public ActiveCustomersPortrayal2D	overallActiveCustomersPortrayal	= null;
+
+	public Simternet					s;
 
 	public SimternetWithUI() {
 		this(new Simternet(System.currentTimeMillis()));
@@ -52,6 +52,7 @@ public class SimternetWithUI extends GUIState {
 
 	public SimternetWithUI(SimState state) {
 		super(state);
+		s = (Simternet) state;
 	}
 
 	@Override
@@ -59,34 +60,36 @@ public class SimternetWithUI extends GUIState {
 		// TODO Auto-generated method stub
 		super.finish();
 
-		this.controller.unregisterAllFrames();
+		controller.unregisterAllFrames();
 
-		if (this.displayFrameOverallActiveCustomers != null)
-			this.displayFrameOverallActiveCustomers.dispose();
+		if (displayFrameOverallActiveCustomers != null) {
+			displayFrameOverallActiveCustomers.dispose();
+		}
 
-		if (this.netProvidersDisplay != null)
-			this.netProvidersDisplay.dispose();
+		if (netProvidersDisplay != null) {
+			netProvidersDisplay.dispose();
+		}
 
 		// Allow garbage collection
-		this.displayFrameOverallActiveCustomers = null;
-		this.displayOverallActiveCustomers = null;
-		this.netProvidersDisplay = null;
+		displayFrameOverallActiveCustomers = null;
+		displayOverallActiveCustomers = null;
+		netProvidersDisplay = null;
 
 	}
 
-	@Override
-	public Inspector getInspector() {
-		Inspector i = super.getInspector();
-		i.setVolatile(true);
-		return i;
-	}
+	// @Override
+	// public Inspector getInspector() {
+	// Inspector i = super.getInspector();
+	// i.setVolatile(true);
+	// return i;
+	// }
 
-	@Override
-	public Object getSimulationInspectedObject() {
-		// TODO: Return custom parameters object
-		return new ParametersInspectionObject(((Simternet) this.state)
-				.getParameters());
-	}
+	// @Override
+	// public Object getSimulationInspectedObject() {
+	// // TODO: Return custom parameters object
+	// return new ParametersInspectionObject(((Simternet) this.state)
+	// .getParameters());
+	// }
 
 	@Override
 	public void init(Controller c) {
@@ -96,7 +99,7 @@ public class SimternetWithUI extends GUIState {
 	@Override
 	public void load(SimState state) {
 		super.load(state);
-		this.setupPortrayals();
+		setupPortrayals();
 	}
 
 	@Override
@@ -107,43 +110,36 @@ public class SimternetWithUI extends GUIState {
 
 	public void setupPortrayals() {
 
-		this.overallActiveCustomersPortrayal = new ActiveCustomersPortrayal2D(
-				"All Active Subscribers", (Simternet) this.state);
+		overallActiveCustomersPortrayal = new ActiveCustomersPortrayal2D("All Active Subscribers", (Simternet) state);
 
-		this.displayOverallActiveCustomers = new Display2D(400, 400, this, 1);
-		this.displayFrameOverallActiveCustomers = this.displayOverallActiveCustomers
-				.createFrame();
+		displayOverallActiveCustomers = new Display2D(400, 400, this, 1);
+		displayFrameOverallActiveCustomers = displayOverallActiveCustomers.createFrame();
 
-		this.controller.registerFrame(this.displayFrameOverallActiveCustomers);
-		this.displayFrameOverallActiveCustomers.setVisible(true);
-		this.displayOverallActiveCustomers.setBackdrop(Color.black);
-		this.displayOverallActiveCustomers.attach(
-				this.overallActiveCustomersPortrayal, "All Active Subscribers");
+		controller.registerFrame(displayFrameOverallActiveCustomers);
+		displayFrameOverallActiveCustomers.setVisible(true);
+		displayOverallActiveCustomers.setBackdrop(Color.black);
+		displayOverallActiveCustomers.attach(overallActiveCustomersPortrayal, "All Active Subscribers");
 
 		// tell the portrayals what to
 		// portray and how to portray them
-		this.overallActiveCustomersPortrayal
-				.setMap(new sim.util.gui.SimpleColorMap(0.0, Integer
-						.parseInt(((Simternet) this.state).config
-								.getProperty("landscape.population.max")),
-						Color.black, Color.white));
+		overallActiveCustomersPortrayal.setMap(new sim.util.gui.SimpleColorMap(0.0, s.config.consumerPopulationMax,
+				Color.black, Color.white));
 
 		// reschedule the displayer
-		this.displayOverallActiveCustomers.reset();
+		displayOverallActiveCustomers.reset();
 		// redraw the display
-		this.displayOverallActiveCustomers.repaint();
+		displayOverallActiveCustomers.repaint();
 
 		// Network Providers Display
-		this.netProvidersDisplay = new NetworkProvidersDisplay(400, 400, this,
-				1);
-		this.controller.registerFrame(this.netProvidersDisplay);
+		netProvidersDisplay = new NetworkProvidersDisplay(400, 400, this, 1);
+		controller.registerFrame(netProvidersDisplay);
 
 	}
 
 	@Override
 	public void start() {
 		super.start();
-		this.setupPortrayals(); // set up our portrayals
+		setupPortrayals(); // set up our portrayals
 	}
 
 }
