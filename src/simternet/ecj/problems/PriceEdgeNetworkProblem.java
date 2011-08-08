@@ -45,7 +45,7 @@ public class PriceEdgeNetworkProblem extends Problem implements HasEdgeNetwork, 
 
 	@Override
 	public Simternet getSimternet() {
-		return this.nsp.simternet;
+		return this.nsp.s;
 	}
 
 	@Override

@@ -45,7 +45,7 @@ public class ASPPurchaseTransitProblem extends Problem implements HasSimternet, 
 
 	@Override
 	public Simternet getSimternet() {
-		return this.nsp.simternet;
+		return this.nsp.s;
 	}
 
 }
