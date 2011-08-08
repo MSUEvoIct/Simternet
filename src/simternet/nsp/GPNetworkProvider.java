@@ -21,29 +21,33 @@ public class GPNetworkProvider extends NetworkProvider implements EvolvableAgent
 		super(simternet);
 		List<Class<? extends EdgeNetwork>> edgeTypes = new ArrayList<Class<? extends EdgeNetwork>>();
 		edgeTypes.add(SimpleEdgeNetwork.class);
-		this.investmentStrategy = new ScoringInvestmentStrategy(this, edgeTypes, 0.0);
+		investmentStrategy = new ScoringInvestmentStrategy(this, edgeTypes, 0.0);
 	}
 
 	@Override
 	public Double getFitness() {
 		// TODO: Think about the proper fitness measure.
-		return this.financials.getNetWorth();
+		double netWorth = financials.getNetWorth();
+		if (netWorth > 0)
+			return netWorth;
+		else
+			return 0.0;
 	}
 
 	@Override
 	public Individual getIndividual() {
-		return this.ind;
+		return ind;
 	}
 
 	@Override
 	public void setIndividual(Individual i) {
-		this.ind = (SimternetGPIndividual) i;
-		this.ind.setAgent(this);
-		this.pricingStrategy = new GPPricingStrategy(this, this.ind, this.ind.trees[0]);
+		ind = (SimternetGPIndividual) i;
+		ind.setAgent(this);
+		pricingStrategy = new GPPricingStrategy(this, ind, ind.trees[0]);
 		List<Class<? extends EdgeNetwork>> edgeTypes = new ArrayList<Class<? extends EdgeNetwork>>();
 		edgeTypes.add(SimpleEdgeNetwork.class);
-		this.investmentStrategy = new GPScoringInvestmentStrategy(this, edgeTypes, this.ind, this.ind.trees[1]);
-		this.interconnectStrategy = new GPInterconnectPricingStrategy(this, this.ind, this.ind.trees[2]);
+		investmentStrategy = new GPScoringInvestmentStrategy(this, edgeTypes, ind, ind.trees[1]);
+		interconnectStrategy = new GPInterconnectPricingStrategy(this, ind, ind.trees[2]);
 	}
 
 	@Override
@@ -51,9 +55,9 @@ public class GPNetworkProvider extends NetworkProvider implements EvolvableAgent
 		super.step(state);
 		// TODO, Create generic strategy and put this code into
 		// NetworkProvider.step()
-		for (ApplicationProvider asp : this.s.getASPs()) {
-			double price = this.interconnectStrategy.getASPTransitPrice(asp);
-			this.aspTransitPrice.put(asp, price);
+		for (ApplicationProvider asp : s.getASPs()) {
+			double price = interconnectStrategy.getASPTransitPrice(asp);
+			aspTransitPrice.put(asp, price);
 		}
 
 	}
