@@ -6,7 +6,7 @@ import simternet.network.EdgeNetwork;
 
 public abstract class PricingStrategy implements Serializable {
 
-	private static final long			serialVersionUID	= 1L;
+	private static final long	serialVersionUID	= 1L;
 
 	protected NetworkProvider	nsp;
 
@@ -31,11 +31,18 @@ public abstract class PricingStrategy implements Serializable {
 	}
 
 	/**
-	 * By default,
+	 * 
 	 */
 	public void priceEdges() {
-		for (EdgeNetwork edge : this.nsp.getEdgeNetworks()) {
-			Double price = this.calculateEdgePrice(edge);
+		for (EdgeNetwork edge : nsp.getEdgeNetworks()) {
+			Double price = calculateEdgePrice(edge);
+			// If the price is more than the consumer will ever pay, set a price
+			// of that number + 1 (prevent 1E8 prices, throwing off averages
+			// etc...)
+			if (price > nsp.s.config.consumerMaxPriceNSP) {
+				price = nsp.s.config.consumerMaxPriceNSP + 1;
+			}
+
 			edge.setPrice(price);
 		}
 	}
