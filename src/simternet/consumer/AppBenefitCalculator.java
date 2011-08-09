@@ -19,20 +19,21 @@ public class AppBenefitCalculator implements Serializable {
 	private static AppBenefitCalculator	singleton;
 
 	public static AppBenefitCalculator getSingleton() {
-		if (AppBenefitCalculator.singleton == null)
+		if (AppBenefitCalculator.singleton == null) {
 			AppBenefitCalculator.singleton = new AppBenefitCalculator();
+		}
 		return AppBenefitCalculator.singleton;
 	}
 
 	public Double congestedBenefit(Consumer c, ApplicationProvider app, Double congestionRatio) {
 
-		Double uncongestedBenefit = this.uncongestedBenefit(c, app);
+		Double uncongestedBenefit = uncongestedBenefit(c, app);
 		return uncongestedBenefit * congestionRatio;
 	}
 
 	public Double uncongestedBenefit(Consumer c, ApplicationProvider asp) {
 		Double benefit = 0.0;
-		benefit = Math.pow(asp.getQuality(), 0.5) * Math.pow(asp.getBandwidth(), 0.5);
+		benefit = Math.pow(asp.getQuality(), 0.5);
 		return benefit;
 	}
 

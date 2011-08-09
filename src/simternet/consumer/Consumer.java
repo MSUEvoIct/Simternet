@@ -110,24 +110,28 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 		this.s = s;
 		// this.name = s.config.getCCName();
 
-		if (location != null)
+		if (location != null) {
 			this.location = location;
-		else
+		} else
 			throw new RuntimeException("Consumer must have a location");
 
-		if (population != null)
+		if (population != null) {
 			this.population = new Temporal<Double>(population);
-		else
+		} else
 			throw new RuntimeException("Consumer must have a population");
 
-		if (profile != null)
+		if (profile != null) {
 			this.profile = profile;
-		if (netManager != null)
+		}
+		if (netManager != null) {
 			this.netManager = netManager;
-		if (appManager != null)
+		}
+		if (appManager != null) {
 			this.appManager = appManager;
-		if (abc != null)
-			this.appBenefitCalculator = abc;
+		}
+		if (abc != null) {
+			appBenefitCalculator = abc;
+		}
 	}
 
 	/**
@@ -148,18 +152,20 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 
 		// if we are not subscribed to a network, we cannot consume any network
 		// applications
-		if (this.edgeNetwork.get() == null)
+		if (edgeNetwork.get() == null)
 			return;
 
 		// For Each Category
-		for (List<ApplicationProvider> asps : this.appsUsed.values())
+		for (List<ApplicationProvider> asps : appsUsed.values()) {
 			// Each ASP with that category
 			for (ApplicationProvider asp : asps) {
 				// Use that app on the network we're subscribed to
-				this.consumeApplication(asp, this.edgeNetwork.get());
-				if (TraceConfig.consumerUsedApp && Logger.getRootLogger().isTraceEnabled())
+				consumeApplication(asp, edgeNetwork.get());
+				if (TraceConfig.consumerUsedApp && Logger.getRootLogger().isTraceEnabled()) {
 					Logger.getRootLogger().trace(this + " consumed " + asp);
+				}
 			}
+		}
 	}
 
 	/**
@@ -179,20 +185,21 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 * consumeNetwork(AbstractEdgeNetwork) to handle the details.
 	 */
 	protected void consumeNetworks() {
-		if (this.edgeNetwork.get() != null)
-			this.consumeNetwork(this.edgeNetwork.get());
+		if (edgeNetwork.get() != null) {
+			consumeNetwork(edgeNetwork.get());
+		}
 	}
 
 	public AppBenefitCalculator getAppBenefitCalculator() {
-		return this.appBenefitCalculator;
+		return appBenefitCalculator;
 	}
 
 	public Int2D getLocation() {
-		return this.location;
+		return location;
 	}
 
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
 	/**
@@ -200,7 +207,7 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 *         locations.
 	 */
 	public Double getPopulation() {
-		return this.population.get();
+		return population.get();
 	}
 
 	/**
@@ -210,9 +217,9 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 *         returns its population, and zero otherwise.
 	 */
 	public Double getSubscribers(EdgeNetwork aen) {
-		if (this.usesNetwork(aen))
+		if (usesNetwork(aen))
 			// per agent subscription is all or nothing.
-			return this.getPopulation();
+			return getPopulation();
 		else
 			return 0.0;
 	}
@@ -223,7 +230,7 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 */
 	public boolean isSubscriber(ApplicationProvider asp) {
 		AppCategory category = asp.getAppCategory();
-		List<ApplicationProvider> categoryList = this.appsUsed.get(category);
+		List<ApplicationProvider> categoryList = appsUsed.get(category);
 		if (categoryList == null)
 			return false;
 		else
@@ -238,12 +245,13 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 */
 	public void receiveFlow(NetFlow flow) {
 
-		if (TraceConfig.consumerFlowReceived && Logger.getRootLogger().isTraceEnabled())
+		if (TraceConfig.consumerFlowReceived && Logger.getRootLogger().isTraceEnabled()) {
 			Logger.getRootLogger().log(Level.TRACE,
 					this + " received " + flow + ", congestion = " + flow.describeCongestion());
+		}
 
-		this.transferRequested += flow.getTransferRequested();
-		this.transferActual += flow.getTransferActual();
+		transferRequested += flow.getTransferRequested();
+		transferActual += flow.getTransferActual();
 	}
 
 	public void setName(String name) {
@@ -252,35 +260,38 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 
 	@Override
 	public void step(SimState state) {
-		if (TraceConfig.steppingConsumer && Logger.getRootLogger().isTraceEnabled())
-			Logger.getRootLogger().trace("Stepping" + this.toString());
+		if (TraceConfig.steppingConsumer && Logger.getRootLogger().isTraceEnabled()) {
+			Logger.getRootLogger().trace("Stepping" + toString());
+		}
 
 		// Make decisions about consumption
-		if (this.appManager != null)
-			this.appManager.manageApplications(this);
-		if (this.netManager != null)
-			this.netManager.manageNetworks(this);
+		if (appManager != null) {
+			appManager.manageApplications(this);
+		}
+		if (netManager != null) {
+			netManager.manageNetworks(this);
+		}
 
 		// Act on those decisions
-		this.consumeNetworks();
-		this.consumeApplications();
+		consumeNetworks();
+		consumeApplications();
 	}
 
 	@Override
 	public String toString() {
-		return this.name + "*" + this.population.get() + "@" + this.location;
+		return name + "*" + population.get() + "@" + location;
 	}
 
 	@Override
 	public void update() {
-		this.appBudgetConstraints.update();
-		this.appsUsed.update();
-		this.population.update();
-		this.edgeNetwork.update();
+		appBudgetConstraints.update();
+		appsUsed.update();
+		population.update();
+		edgeNetwork.update();
 	}
 
 	public Boolean usesNetwork(EdgeNetwork network) {
-		return network.equals(this.edgeNetwork.get());
+		return network.equals(edgeNetwork.get());
 	}
 
 }

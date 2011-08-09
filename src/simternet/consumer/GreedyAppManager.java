@@ -15,14 +15,14 @@ public class GreedyAppManager extends AppManager implements Serializable {
 	private static GreedyAppManager	singleton;
 
 	public static GreedyAppManager getSingleton() {
-		if (GreedyAppManager.singleton == null)
+		if (GreedyAppManager.singleton == null) {
 			GreedyAppManager.singleton = new GreedyAppManager();
+		}
 		return GreedyAppManager.singleton;
 	}
 
 	@Override
 	public void manageApplications(Consumer c) {
-
 		// do the "greedy" algorithm
 		for (AppCategory ac : AppCategory.values()) {
 			// calculate the expected benefit from each application in category
@@ -30,10 +30,12 @@ public class GreedyAppManager extends AppManager implements Serializable {
 
 			for (ApplicationProvider asp : c.s.getASPs(ac)) {
 
+				AppBenefitCalculator abc = c.getAppBenefitCalculator();
+				double congestionRatio = asp.getDatacenter().getCongestionRatio(c.edgeNetwork.get());
+
 				AppBenefit ab = new AppBenefit();
 				ab.app = asp;
-				ab.benefit = c.getAppBenefitCalculator().congestedBenefit(c, asp,
-						asp.getDatacenter().getCongestionRatio(c.edgeNetwork.get()));
+				ab.benefit = abc.congestedBenefit(c, asp, congestionRatio);
 				ab.cost = asp.getPriceSubscriptions();
 				appBenefits.add(ab);
 			}
