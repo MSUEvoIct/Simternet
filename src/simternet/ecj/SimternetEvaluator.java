@@ -13,7 +13,6 @@ import simternet.application.ApplicationProvider;
 import simternet.nsp.NetworkProvider;
 import simternet.reporters.ASPInterconnectionReporter;
 import simternet.reporters.ApplicationProviderFitnessReporter;
-import simternet.reporters.ConsumerDataReporter;
 import simternet.reporters.EdgeDataReporter;
 import simternet.reporters.EdgeMarketReporter;
 import simternet.reporters.NetworkProviderFitnessReporter;
@@ -98,10 +97,10 @@ public class SimternetEvaluator extends Evaluator {
 			edr.setChunk(i);
 			simternet[i].addReporter(edr);
 
-			ConsumerDataReporter cdr = new ConsumerDataReporter(29);
-			cdr.setGeneration(state.generation);
-			cdr.setChunk(i);
-			simternet[i].addReporter(cdr);
+			// ConsumerDataReporter cdr = new ConsumerDataReporter(29);
+			// cdr.setGeneration(state.generation);
+			// cdr.setChunk(i);
+			// simternet[i].addReporter(cdr);
 
 			ASPInterconnectionReporter air = new ASPInterconnectionReporter(29);
 			air.setGeneration(state.generation);
@@ -241,6 +240,7 @@ public class SimternetEvaluator extends Evaluator {
 		s.preCheckpoint();
 		String filePath = state.parameters.getString(new Parameter("simternet").push("checkpoint").push("directory"),
 				null);
+
 		String fileName = "ECJ-Simternet.gen-" + state.generation + ".chunk-" + instance + ".checkpoint";
 		File outputFile = new File(filePath + fileName);
 		s.writeToCheckpoint(outputFile);

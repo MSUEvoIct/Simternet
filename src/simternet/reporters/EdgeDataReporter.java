@@ -40,6 +40,13 @@ public class EdgeDataReporter extends Reporter {
 			for (Network edgeNet : edgeNets) {
 				EdgeNetwork en = (EdgeNetwork) edgeNet;
 				StringBuffer report = new StringBuffer();
+
+				// Hack for reporting odd prices as NA
+				double price = en.getPrice();
+				if (price > s.config.consumerMaxPriceNSP) {
+					price = Double.NaN;
+				}
+
 				report.append(location.x);
 				report.append(Reporter.separater);
 				report.append(location.y);
@@ -52,14 +59,14 @@ public class EdgeDataReporter extends Reporter {
 				report.append(Reporter.separater);
 				report.append(en.getUpstreamIngress().getCongestionAlgorithm().getCongestionRatio());
 				report.append(Reporter.separater);
-				report.append(en.getPrice());
+				report.append(price);
 				report.append(Reporter.separater);
 				report.append(en.getNumSubscribers());
 				report.append(Reporter.separater);
 				report.append(s.getNumNetworkProviders(location));
 				report.append(Reporter.separater);
 				report.append(en.getNumSubscribers() / s.getPopulation(location));
-				this.report(report.toString());
+				report(report.toString());
 			}
 		}
 

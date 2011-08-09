@@ -24,41 +24,41 @@ public class NetworkProvidersDisplay extends JFrame {
 
 		@Override
 		public int getColumnCount() {
-			return this.columnNames.length;
+			return columnNames.length;
 		}
 
 		@Override
 		public String getColumnName(int column) {
-			return this.columnNames[column];
+			return columnNames[column];
 		}
 
 		protected Double getLiquidAssets(int rowIndex) {
-			return this.getNSP(rowIndex).financials.getAssetsLiquid();
+			return getNSP(rowIndex).financials.getAssetsLiquid();
 		}
 
 		protected NetworkProvider getNSP(int rowIndex) {
-			Object[] anp = NetworkProvidersDisplay.this.networkServiceProviders.toArray();
+			Object[] anp = networkServiceProviders.toArray();
 			return (NetworkProvider) anp[rowIndex];
 		}
 
 		@Override
 		public int getRowCount() {
-			return NetworkProvidersDisplay.this.networkServiceProviders.size();
+			return networkServiceProviders.size();
 		}
 
 		protected Double getTotalCustomers(int rowIndex) {
-			return this.getNSP(rowIndex).getCustomers();
+			return getNSP(rowIndex).getCustomers();
 		}
 
 		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
 
 			if (columnIndex == 0)
-				return this.getNSP(rowIndex).toString();
+				return getNSP(rowIndex).getName();
 			if (columnIndex == 1)
-				return this.getLiquidAssets(rowIndex);
+				return getLiquidAssets(rowIndex);
 			if (columnIndex == 2)
-				return this.getTotalCustomers(rowIndex);
+				return getTotalCustomers(rowIndex);
 
 			return "Value at " + rowIndex + "," + columnIndex;
 		}
@@ -70,9 +70,9 @@ public class NetworkProvidersDisplay extends JFrame {
 	public NetworkProvidersDisplay(double width, double height, GUIState simulation, long interval) {
 
 		SimternetWithUI gui = (SimternetWithUI) simulation;
-		this.networkServiceProviders = ((Simternet) (gui.state)).getNetworkServiceProviders();
+		networkServiceProviders = ((Simternet) gui.state).getNetworkServiceProviders();
 
-		this.setTitle("Network Service Providers Console");
+		setTitle("Network Service Providers Console");
 
 		JPanel panel = new JPanel(new GridLayout(1, 0));
 
@@ -87,9 +87,9 @@ public class NetworkProvidersDisplay extends JFrame {
 
 		panel.setOpaque(true);
 
-		this.setContentPane(panel);
-		this.pack();
-		this.setVisible(true);
+		setContentPane(panel);
+		pack();
+		setVisible(true);
 
 	}
 
