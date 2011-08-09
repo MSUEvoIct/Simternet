@@ -1,213 +1,348 @@
-# Assumes R's working directory is where this script is
+############################################################
+# Simternet Analysis Script (in R)                         #
+############################################################
 
-## Load data from CSV Files
-AspFitness <- read.csv("../output/ApplicationProviderFitness.out.csv")
-AspInterconnection <- read.csv("../output/ASPInterconnection.out.csv")
-#ConsumerData <- read.csv("../output/ConsumerData.out.csv")
-EdgeData <- read.csv("../output/EdgeData.out.csv")
-EdgeDataAverages <- aggregate(EdgeData, by = list(Gen = EdgeData$Generation), FUN = mean)
-EdgeDataTotalCustomers <- aggregate(EdgeData$Customers, by = list(Gen = EdgeData$Generation), FUN = sum)
-NspFitness <- read.csv("../output/NetworkProviderFitness.out.csv")
-EdgeMarket <- read.csv("../output/EdgeMarket.out.csv")
-EdgeMarketAverages <- aggregate(EdgeMarket, by = list(Gen = EdgeMarket$Generation), FUN = mean)
+
+
+############################################################
+# Load required data and modules
 
 ## Load Required Libraries
 library(hexbin)
+library(sqldf)
+
+## Assumes R's working directory is where this script is
+## Load data from CSV Files
+AspFitness <- read.csv("../output/ApplicationProviderFitness.out.csv")
+NspFitness <- read.csv("../output/NetworkProviderFitness.out.csv")
+
+#Interconnection between ASPs and NSPs
+AspInterconnection <- read.csv("../output/ASPInterconnection.out.csv")
+
+#ConsumerData <- read.csv("../output/ConsumerData.out.csv")
+
+# EdgeData has one observation per edge network 
+EdgeData <- read.csv("../output/EdgeData.out.csv")
+# EdgeMarket has one observation for each X,Y grid coordinate
+EdgeMarket <- read.csv("../output/EdgeMarket.out.csv")
+
+# Variables useful for all sections
+numGenerations <- max(NspFitness$Generation)
+graphHeight <- 800
+graphWidth <- 800
+# separate standard width for graphs with generation on X axis
+genGraphWidth <- graphWidth
+graphMinGenerationWidth <- 10
+
+# A large part of the analysis below, analyzing relationships, does so
+# over subsets of generations; looking at the results overall would be 
+# biased toward behavior that has been competed away.  This allows us
+# to make inferences based on agents which have acquired some intelligence
+# numGenerationSplits creates X different graphs, e.g., for 100 generations,
+# one graph for gens 1-25, 26-49, 50-74, 75-100)
+numGenerationSplits <- 4
+
+if ( (graphMinGenerationWidth * numGenerations) > graphWidth) {
+  genGraphWidth <- graphMinGenerationWidth * numGenerations;
+}
 
 
-## Network Service Provider Information
-png("graphs/NspFitness-boxplot.png", width=800, height=800)
-boxplot(Fitness ~ Generation, data=NspFitness,
-    xlab="Generation", ylab="Fitness", main="NSP Fitness")
-dev.off()
-png("graphs/NspFitness-boxplot-log.png", width=800, height=800)
-boxplot(log(Fitness) ~ Generation, data=NspFitness,
-    xlab="Generation", ylab="log(fitness)", main="NSP Fitness")
+##############################################################
+# Analyze Evolutionary History (x axis is Generation)        #
+##############################################################
+
+## Compute Aggregate Statistics
+EdgeDataAverages <- aggregate(EdgeData, by = list(Gen = EdgeData$Generation), FUN = mean)
+EdgeMarketAverages <- aggregate(EdgeMarket, by = list(Gen = EdgeMarket$Generation), FUN = mean)
+EdgeDataTotalCustomers <- aggregate(EdgeData$Customers, by = list(Gen = EdgeData$Generation), FUN = sum)
+
+
+####### Finess Scores ####### 
+# Network Service Providers
+png("graphs/history/NetworkProvider.Fitness.png", width=genGraphWidth, height=graphHeight)
+boxplot(log(Fitness + 1) ~ Generation, data=NspFitness,
+    xlab="Generation", ylab="Fitness (log)", main="NSP Fitness")
 dev.off()
 
-png("graphs/NspCapitalAssets-boxplot.png", width=800, height=800)
-boxplot(CapitalAssets ~ Generation, data=NspFitness,
-    xlab="Generation", ylab="Capital Assets", main="NSP Capital Assets")
-dev.off()
-png("graphs/NspCapitalAssets-boxplot-log.png", width=800, height=800)
-boxplot(log(CapitalAssets) ~ Generation, data=NspFitness,
-    xlab="Generation", ylab="log(Capital Assets)", main="NSP Capital Assets")
+# Application Service Providers
+png("graphs/history/ApplicationProvider.Fitness.png", width=genGraphWidth, height=graphHeight)
+boxplot(log(Fitness + 1) ~ Generation, data=AspFitness,
+    xlab="Generation", ylab="Fitness (log)", main="ASP Fitness")
 dev.off()
 
-png("graphs/NspInvestment-boxplot.png", width=800, height=800)
-boxplot(TotalInvestment~ Generation, data=NspFitness,
-    xlab="Generation", ylab="Total Investment", main="NSP Investment")
-dev.off()
-png("graphs/NspInvestment-boxplot-log.png", width=800, height=800)
-boxplot(log(TotalInvestment) ~ Generation, data=NspFitness,
-    xlab="Generation", ylab="log(Total Investment)", main="NSP Investment")
+
+######## General Market Informaiton ########
+# Total # of Customers
+png("graphs/history/NetworkProvider.TotalCustomers.png", width=genGraphWidth, height=graphHeight)
+plot(x ~ Gen, data = EdgeDataTotalCustomers, xlab = "Generation", ylab="Total Customers", main = "Total # of Consumer Subs")
 dev.off()
 
-png("graphs/NspNumEdges-histogram.png", width=800, height=800)
-hist(NspFitness$NumEdges, main = "NSP # of Edge Networks", 
-xlab="# of Edge Networks", breaks=20)
+
+######## Network Provider Detail Histories #######
+
+### Market Results ###
+# Overall Market Share
+png("graphs/history/NetworkProvider.MarketShare.png", width=genGraphWidth, height=graphHeight)
+boxplot(MarketShare ~ Generation, data=NspFitness, main = "NSP Marketshare", 
+ylab="Share of Total Potential Market (all locations)", xlab="Generation")
 dev.off()
 
-png("graphs/NspMarketshare-histogram.png", width=800, height=800)
-hist(NspFitness$MarketShare, main = "NSP Marketshare", 
-xlab="Share of Total Market (all locations)")
+# Edge Market Share
+png("graphs/history/NetworkProvider.EdgeMarketShare.Average.png", 
+   width=genGraphWidth, 
+   height=graphHeight)
+boxplot(MarketShare ~ Generation, data = EdgeData, 
+    xlab = "Generation",
+    ylab = "Local Market Share (per edge network)",
+    main = "Network Provider Local Market Shares")
 dev.off()
+
+# Edge Prices
+png("graphs/history/NetworkProvider.EdgePrice.png", width=genGraphWidth, height=graphHeight)
+boxplot(Price ~ Generation, data = EdgeData, main = "Edge Network Prices")
+dev.off()
+
+### Investment ###
+# Total Investment
+png("graphs/history/NetworkProvider.Investment.png", width=genGraphWidth, height=graphHeight)
+boxplot(log(TotalInvestment + 1) ~ Generation, data=NspFitness,
+    xlab="Generation", ylab="Total Investment (log)", main="NSP Investment")
+dev.off()
+
+### Edge Network Details ###
+# Number of Edges per NSP (boxplot)
+png("graphs/history/NetworkProvider.EdgeCount.png", width=genGraphWidth, height=graphHeight)
+boxplot(NumEdges ~ Generation, 
+  data = NspFitness,
+  main = "NSP Total # of Edge Networks", 
+  ylab="# of Edge Networks",
+  xlab="Generation")
+dev.off()
+
+# Average transit bandwidth of Edge Network
+png("graphs/history/EdgeNetworks-TransitBandwidth.png", width=genGraphWidth, height=graphHeight)
+boxplot(log(TransitBandwidth+1) ~ Generation, data = EdgeData, 
+   xlab = "Generation", ylab = "Transit Bandwidth",
+   main = "Transit Bandwidth of Edge Networks")
+dev.off()
+
+# Number of Edges per NSP (plot of average)
+png("graphs/history/NetworkProvider.EdgeCountAverage.png", width=genGraphWidth, height=graphHeight)
+sqlString <- "select avg(NumEdges) as NumEdges, Generation from NspFitness group by Generation"
+tmp <- sqldf(sqlString)
+plot(NumEdges ~ Generation, 
+  data = tmp,
+  main = "Average Number of Edge Networks per NSP", 
+  ylab="Average # of Edge Networks",
+  xlab="Generation")
+rm(tmp)
+dev.off()
+
+# Congestion of Edge Networks
+png("graphs/history/EdgeNetworks.Congestion.png", width=genGraphWidth, height=graphHeight)
+boxplot(Congestion ~ Generation, data = EdgeData, main = "Congestion of Edge Networks",
+   xlab="Generation", ylab="Usage Demanded/Capacity")
+dev.off()
+
+
+######## Application Provider Details ########
+# Number of Customers
+png("graphs/history/ApplicationProvider.Customers.png", width=genGraphWidth, height=graphHeight)
+boxplot(log(NumCustomers+1) ~ Generation, data=AspFitness,
+    xlab="Generation", ylab="# of Customers (log)", main = "Customers per Application Provider")
+dev.off()
+
+# Quality
+png("graphs/history/ApplicationProvider.Quality.png", width=genGraphWidth, height=graphHeight)
+boxplot(Quality ~ Generation, data=AspFitness,
+    xlab="Generation", ylab="Quality", main = "ASP Quality")
+dev.off()
+
+# Investment
+png("graphs/history/ApplicationProvider.Investment.png", width=genGraphWidth, height=graphHeight)
+boxplot(log(TotalInvestment) ~ Generation, data=AspFitness,
+    xlab="Generation", ylab="log(Total Investment)", main="Investment per Application Provider")
+dev.off()
+
+
+
+
+## NSP/ASP Interconnection Data
+# Prices by Generation
+png("graphs/history/InterconnectionPrice-boxplot.png", width=genGraphWidth, height=graphHeight)
+boxplot(log10(Price) ~ Generation, data=AspInterconnection,
+    xlab="Generation", ylab="Price (log 10)", main="Price for NSP Interconnection")
+dev.off()
+
+
+
+## Clean Up
+rm(EdgeDataAverages)
+rm(EdgeMarketAverages)
+rm(EdgeDataTotalCustomers)
+
+
+
+#####################################################################
+# Relationships Section, Split into numGenerationSplits sections    #
+#####################################################################
+
+genWidth <- (numGenerations + 1) / numGenerationSplits
+curGen <- 0
+curGroup <- 0
+
+buildFN <- function(description,num) {
+  filename <- paste("graphs/relationships/", description, ".", num, ".png", sep="")
+  return(filename)
+}
+
+subsetFN <- function(frame,curGen,maxGen) {
+  sqlStatement <- paste("select * from", frame, "where Generation >=", curGen, "and Generation <=", maxGen)
+  return(sqldf(sqlStatement))
+}
+
+###### GENERATION SPLITTING WHILE LOOP #####
+while (curGen < numGenerations) {
+maxGen <- curGen + genWidth - 1;
+curGen
+maxGen
+
+# Subset of generations
+NspFitnessTemp <- subsetFN("NspFitness", curGen, maxGen)
+AspFitnessTemp <- subsetFN("AspFitness", curGen, maxGen)
+AspInterconnectionTemp <- subsetFN("AspInterconnection", curGen, maxGen)
+#ConsumerDataTemp <- subsetFN("ConsumerData", curGen, maxGen)
+EdgeDataTemp <- subsetFN("EdgeData", curGen, maxGen)
+EdgeMarketTemp <- subsetFN("EdgeMarket", curGen, maxGen)
+
+# convient descriptor for graphs
+genDescriptor <- paste("Generations", curGen, "through", maxGen)
+
+###### Detail Graphs ######
 
 # NSP Fitness(TotalInvestment)
-png("graphs/NspFitnessInvestment-hexbin.png", width=800, height=800)
-bin <- hexbin(NspFitness$TotalInvestment, NspFitness$Fitness^(1/3), xbins=50)
-plot(bin, main= "NSP Fitness v. Investment", xlab="Investment", ylab="Fitness^(1/3)")
+png(buildFN("NetworkProvider.Fitness-Investment", curGroup), width=graphWidth, height=graphHeight)
+bin <- hexbin(log(NspFitnessTemp$TotalInvestment+1), log(NspFitnessTemp$Fitness+1), xbins=50)
+plot(bin, 
+  main= paste("NSP Fitness v. Investment for", genDescriptor), 
+  xlab="Investment (log)", ylab="Fitness (log)")
 dev.off()
 rm(bin)
 
 # NSP Fitness(NumCustomers)
-png("graphs/NspFitnessCustomers-hexbin.png", width=800, height=800)
-bin <- hexbin(NspFitness$NumCustomers, NspFitness$Fitness^(1/3), xbins=50)
-plot(bin, main= "NSP Fitness v. Total # Customers", 
-xlab="Total Customers", ylab="Fitness^(1/3)", main="NSP Fitness v. Customers")
+png(buildFN("NetworkProvider.Fitness-Customers", curGroup), width=graphWidth, height=graphHeight)
+bin <- hexbin(NspFitnessTemp$NumCustomers, log(NspFitnessTemp$Fitness+1), xbins=50)
+plot(bin, 
+    main= paste("NSP Fitness v. Total # Customers", genDescriptor), 
+    xlab="Total Customers", ylab="Fitness (log)")
 dev.off()
 rm(bin)
 
 # NSP Fitness(NumEdges)
-png("graphs/NspFitnessNumEdges-hexbin.png", width=800, height=800)
-bin <- hexbin(NspFitness$NumEdges, NspFitness$Fitness^(1/3), xbins=50)
-plot(bin, main= "NSP Fitness v. # of Edge Networks", 
-xlab="Edge Networks", ylab="Fitness^(1/3)")
+png(buildFN("NetworkProvider.Fitness-NumEdges", curGroup), width=graphWidth, height=graphHeight)
+bin <- hexbin(NspFitnessTemp$NumEdges, log(NspFitnessTemp$Fitness+1), xbins=50)
+plot(bin, main= paste("NSP Fitness v. # of Edge Networks\n", genDescriptor), 
+xlab="Edge Networks", ylab="Fitness (log)")
 dev.off()
 rm(bin)
 
 
-## Edge Network Market Data
+# NSP Edge Market Share(Price)
+png(buildFN("NetworkProvider.Edge.MarketShare-Price", curGroup), width=graphWidth, height=graphHeight)
+bin <- hexbin(EdgeDataTemp$MarketShare, EdgeDataTemp$Price, xbins=50)
+plot(bin, 
+    main= paste("Edge Market Share v. Price", genDescriptor), 
+    xlab="Market Share", ylab="Price")
+dev.off()
+rm(bin)
+
+# NSP Edge Price(#Competitors)
+png(buildFN("NetworkProvider.Edge.Price-Competitors", curGroup), width=graphWidth, height=graphHeight)
+boxplot(Price ~ Competitors, data = EdgeDataTemp,
+   xlab = "Competitors",
+   ylab = "Price",
+   main = paste("Edge Network Prices v. Competitors\n", genDescriptor) )
+dev.off()
+
+
+# NSP Average Edge Price v. Total Market Share
+sqlString = paste("select NspFitnessTemp.Generation, NspFitnessTemp.Chunk, NspFitnessTemp.NSP, NspFitnessTemp.Fitness, ",
+   "NspFitnessTemp.MarketShare, NspFitnessTemp.Bankrupt, avg(EdgeDataTemp.Price) as AveragePrice ", 
+   "from NspFitnessTemp left join EdgeDataTemp on EdgeDataTemp.Generation = NspFitnessTemp.Generation", 
+   "and EdgeDataTemp.Chunk = NspFitnessTemp.Chunk and EdgeDataTemp.NSP = NspFitnessTemp.NSP ",
+   "where NspFitnessTemp.Bankrupt = 'false'", 
+   "group by NspFitnessTemp.Generation, NspFitnessTemp.Chunk, NspFitnessTemp.NSP, ", 
+   " NspFitnessTemp.Fitness, NspFitnessTemp.MarketShare",
+   "order by NspFitnessTemp.Generation, NspFitnessTemp.Chunk, NspFitnessTemp.NSP")
+tmp <- sqldf(sqlString)
+rm(sqlString)
+bin <- hexbin(tmp$MarketShare, as.numeric(tmp$AveragePrice), xbins=50)
+png(buildFN("NetworkProvider.Edge.AveragePrice-MarketShare", curGroup), width=graphWidth, height=graphHeight)
+plot(bin, 
+    main= paste("Average Edge Price v. NSP Total Market Share\n", genDescriptor), 
+    xlab="Market Share (All Locations)", ylab="Average Price of Edge Networks")
+dev.off()
+rm(tmp)
+
 # Networks per grid cell
-png("graphs/EdgeNetworks-density-histogram.png", width=800, height=800)
-hist(EdgeMarket$NumNetworks, main = "Edge Network Density", xlab="# of Edges at Location",breaks=5)
-dev.off()
-
-png("graphs/EdgeNetworks-density-average.png", width=800, height=800)
-plot(NumNetworks ~ Generation, data = EdgeMarketAverages, main = "Average Density of Edges", ylab = "# of Networks at a Location")
-dev.off()
-
-# Average # of competitors
-png("graphs/EdgeNetworks-competitors-average.png", width=800, height=800)
-plot(Competitors ~ Generation, data=EdgeDataAverages, main = "Average # of Edge Network Competitors")
-dev.off()
-
-# Average Edge's Market Share
-png("graphs/EdgeNetworks-marketshare-average.png", width=800, height=800)
-plot(MarketShare ~ Generation, data = EdgeDataAverages, main = "Average Edge's Market Share")
-dev.off()
-
-# Average Edge's Price
-png("graphs/EdgeNetworks-price-average.png", width=800, height=800)
-plot(Price ~ Generation, data = EdgeDataAverages, main = "Average Edge's Price")
-dev.off()
-
-# Total # of Customers
-png("graphs/EdgeNetworks-customers-total.png", width=800, height=800)
-plot(x ~ Gen, data = EdgeDataTotalCustomers, xlab = "Generation", ylab="Total Customers", main = "Total # of Consumer Subs")
-dev.off()
-
-# Average customers per Edge Network
-png("graphs/EdgeNetworks-subscription-average.png", width=800, height=800)
-plot(Customers ~ Generation, data = EdgeDataAverages, main = "Average Customers per Edge")
-dev.off()
-
-## Edge Network Operation Data
-# Average congestion of Edge Networks
-png("graphs/EdgeNetworks-congestion-average.png", width=800, height=800)
-plot(Congestion ~ Generation, data = EdgeDataAverages, main = "Average Congestion of Edges")
-dev.off()
-
-# Average transit bandwidth of Edge Network
-png("graphs/EdgeNetworks-transitbandwidth-average.png", width=800, height=800)
-plot(TransitBandwidth ~ Generation, data = EdgeDataAverages, main = "Average Edge's Transit Bandwidth")
-dev.off()
-
-# Average customers per Edge Network
-png("graphs/EdgeNetworks-subscription-average.png", width=800, height=800)
-plot(Customers ~ Generation, data = EdgeDataAverages, main = "Average Customers per Edge")
+png(buildFN("EdgeNetworkDensity", curGroup), width=graphWidth, height=graphHeight)
+hist(EdgeMarketTemp$NumNetworks, main = paste("Edge Network Density\n", genDescriptor), 
+  xlab="# of Edges at Location", breaks=5)
 dev.off()
 
 
+######## ASP/NSP Interconnection ########
+# Quantity(Price)
+png(buildFN("ASP-NSP-Interconnection.Market", curGroup), width=graphWidth, height=graphHeight)
+bin <- hexbin(log(AspInterconnectionTemp$Price), log(AspInterconnectionTemp$Quantity + 1), xbins=50)
+plot(bin, main=paste("ASP/NSP Interconnection Market\n", genDescriptor), 
+  xlab="Bandwidth Price (log)", ylab="Qty Purchased (log)")
+dev.off()
+rm(bin)
 
-## Application Provider Information
-png("graphs/AspFitness-boxplot.png", width=800, height=800)
-boxplot(Fitness ~ Generation, data=AspFitness,
-    xlab="Generation", ylab="Fitness", main="ASP Fitness")
-dev.off()
-png("graphs/AspFitness-boxplot-log.png", width=800, height=800)
-boxplot(log(Fitness) ~ Generation, data=AspFitness,
-    xlab="Generation", ylab="log(fitness)", main="ASP Fitness")
-dev.off()
 
-png("graphs/AspCapitalAssets-boxplot.png", width=800, height=800)
-boxplot(CapitalAssets ~ Generation, data=AspFitness,
-    xlab="Generation", ylab="Capital Assets", main="ASP Capital Assets")
-dev.off()
-png("graphs/AspCapitalAssets-boxplot-log.png", width=800, height=800)
-boxplot(log(CapitalAssets) ~ Generation, data=AspFitness,
-    xlab="Generation", ylab="log(Capital Assets", main="ASP Capital Assets")
-dev.off()
-
-# Number of Customers
-png("graphs/AspCustomers-boxplot-log.png", width=800, height=800)
-boxplot(NumCustomers ~ Generation, data=AspFitness,
-    xlab="Generation", ylab="# of Customers", main = "# of ASP Customers")
-dev.off()
+########### Application Service Provider Information ##############
 
 # Fitness(Investment)
-png("graphs/AspFitnessInvestmet-hexbin.png", width=800, height=800)
-bin <- hexbin(AspFitness$TotalInvestment, AspFitness$Fitness, xbins=50)
-plot(bin, main= "ASP Fitness v. Investment", xlab="Total Investment", ylab="")
+png(buildFN("ApplicationProvider.Fitness-Investment", curGroup), width=graphWidth, height=graphHeight)
+bin <- hexbin(AspFitnessTemp$TotalInvestment, AspFitnessTemp$Fitness, xbins=50)
+plot(bin, main= paste("ASP Fitness v. Investment", genDescriptor),
+  xlab="Total Investment", ylab="")
 dev.off()
 rm(bin)
 
 # Fitness(Quality)
-png("graphs/AspFitnessQuality-hexbin.png", width=800, height=800)
-bin <- hexbin(AspFitness$Quality, AspFitness$Fitness, xbins=50)
-plot(bin, main= "ASP Fitness v. Quality", xlab="ASP Quality", ylab="")
+png(buildFN("ApplicationProvider.Fitness-Quality", curGroup), width=graphWidth, height=graphHeight)
+bin <- hexbin(AspFitnessTemp$Quality, AspFitnessTemp$Fitness, xbins=50)
+plot(bin, main= paste("ASP Fitness v. Quality\n", genDescriptor), 
+  xlab="ASP Quality", ylab="ASP Fitnes")
 dev.off()
 rm(bin)
 
 # ASP Fitness(#Customers)
-png("graphs/AspFitnessNumCustomers-hexbin.png", width=800, height=800)
-bin <- hexbin(AspFitness$NumCustomers, AspFitness$Fitness, xbins=50)
-plot(bin, main= "ASP Fitness v. # of Customers", 
+png(buildFN("ApplicationProvider.Fitness-Customers", curGroup), width=graphWidth, height=graphHeight)
+bin <- hexbin(AspFitnessTemp$NumCustomers, AspFitnessTemp$Fitness, xbins=50)
+plot(bin, main= paste("ASP Fitness v. # of Customers\n", genDescriptor), 
 xlab="# of Customers", ylab="ASP Fitness")
 dev.off()
 rm(bin)
 
 
-png("graphs/AspInvestment-boxplot.png", width=800, height=800)
-boxplot(TotalInvestment~ Generation, data=AspFitness,
-    xlab="Generation", ylab="Total Investment", main="ASP Investment")
-dev.off()
-png("graphs/AspInvestment-boxplot-log.png", width=800, height=800)
-boxplot(log(TotalInvestment) ~ Generation, data=AspFitness,
-    xlab="Generation", ylab="log(Total Investment)", main="ASP Investment")
-dev.off()
-
-# ASP Operating
-png("graphs/AspQuality-boxplot-log.png", width=800, height=800)
-boxplot(Quality ~ Generation, data=AspFitness,
-    xlab="Generation", ylab="Quality", main = "ASP Quality")
-dev.off()
 
 
-## NSP/ASP Interconnection Data
-# Prices by Generation
-png("graphs/InterconnectionPrice-boxplot.png", width=800, height=800)
-boxplot(log10(Price) ~ Generation, data=AspInterconnection,
-    xlab="Generation", ylab="log10(Price)", main="Interconnection Prices by Generation")
-dev.off()
+### Loop Stuff ###
+rm(genDescriptor)
+rm(NspFitnessTemp)
+rm(AspFitnessTemp)
+rm(AspInterconnectionTemp)
+#rm(ConsumerDataTemp)
+rm(EdgeDataTemp)
+rm(EdgeMarketTemp)
+curGroup <- curGroup + 1
+curGen <- curGen + genWidth
 
-# Quality vs Price
-png("graphs/InterconnectionPriceQuantity-hexbin.png", width=800, height=800)
-bin <- hexbin(AspInterconnection$Quantity, AspInterconnection$Price, xbins=50)
-plot(bin, main= "ASP/NSP Interconnection Market", xlab="Bandwidth Price", ylab="Qty Purchased")
-dev.off()
-rm(bin)
-
+###### END GENERATION SPLITTING WHILE LOOP #####
+}
 
 
 
