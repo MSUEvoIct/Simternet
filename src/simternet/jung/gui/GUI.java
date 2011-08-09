@@ -30,6 +30,9 @@ import simternet.jung.filter.HighPassFilter;
 import simternet.jung.filter.SingleEdgeFilter;
 import simternet.jung.inspector.ApplicationProviderInspector;
 import simternet.jung.inspector.ConsumerNetworkInspector;
+import simternet.jung.inspector.GlobalASPInspector;
+import simternet.jung.inspector.GlobalEdgeInspector;
+import simternet.jung.inspector.GlobalNSPInspector;
 import simternet.jung.inspector.Inspector;
 import simternet.jung.inspector.NetworkProviderInspector;
 import simternet.jung.inspector.property.TrackableProperty;
@@ -82,6 +85,20 @@ public class GUI extends JPanel {
 		super();
 		GUI.simternet = simternet;
 		this.initComponents();
+	}
+
+	public void ASPInspectorButtonPressed() {
+		GlobalASPInspector inspector = new GlobalASPInspector(this);
+		this.inspectors.add(inspector);
+		inspector.pack();
+		inspector.setVisible(true);
+	}
+
+	public void EdgeInspectorButtonPressed() {
+		GlobalEdgeInspector inspector = new GlobalEdgeInspector(this);
+		this.inspectors.add(inspector);
+		inspector.pack();
+		inspector.setVisible(true);
 	}
 
 	/**
@@ -169,6 +186,13 @@ public class GUI extends JPanel {
 
 		this.viewer.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 
+	}
+
+	public void NSPInspectorButtonPressed() {
+		GlobalNSPInspector inspector = new GlobalNSPInspector(this);
+		this.inspectors.add(inspector);
+		inspector.pack();
+		inspector.setVisible(true);
 	}
 
 	public void printDataButtonPressed() {

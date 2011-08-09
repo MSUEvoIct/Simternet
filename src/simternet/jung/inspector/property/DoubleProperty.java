@@ -38,6 +38,10 @@ public class DoubleProperty extends TrackableProperty {
 		this.changes.put(this.getStep(), value);
 	}
 
+	public void setValue(double value) {
+		this.setValue(new Double(value));
+	}
+
 	public void setValue(Double value) {
 
 		if (this.tracking && (value != this.value))

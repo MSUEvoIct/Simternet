@@ -119,6 +119,33 @@ public class ControlPanel extends JPanel {
 
 		// We want empty space to be at the bottom of the panel
 		this.add(Box.createVerticalGlue());
+
+		JButton nspInspectorButton = new JButton("Inspect NSPs");
+		nspInspectorButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				ControlPanel.this.owner.NSPInspectorButtonPressed();
+			}
+		});
+		this.add(nspInspectorButton);
+
+		JButton aspInspectorButton = new JButton("Inspect ASPs");
+		aspInspectorButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				ControlPanel.this.owner.ASPInspectorButtonPressed();
+			}
+		});
+		this.add(aspInspectorButton);
+
+		JButton edgeInspectorButton = new JButton("Inspect Edges");
+		edgeInspectorButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				ControlPanel.this.owner.EdgeInspectorButtonPressed();
+			}
+		});
+		this.add(edgeInspectorButton);
 	}
 
 	/**

@@ -4,7 +4,6 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -17,28 +16,10 @@ import ec.util.ParameterDatabase;
 
 public class Launcher extends JPanel {
 
-	protected String[]							args				= null;
-	protected ParameterDatabase					params;
-	protected static HashMap<String, String>	descriptionMapping;
+	protected String[]			args				= null;
+	protected ParameterDatabase	params;
 
-	private static final long					serialVersionUID	= 1L;
-
-	static {
-		Launcher.descriptionMapping = new HashMap<String, String>();
-		Launcher.descriptionMapping.put("breedthreads", "# of Threads for Breeding");
-		Launcher.descriptionMapping.put("evalthreads", "# of Threads for Evaluation");
-		Launcher.descriptionMapping.put("checkpoint", "Use ECJ Checkpointing");
-		Launcher.descriptionMapping.put("generations", "# of Generations");
-		Launcher.descriptionMapping.put("prefix", "Prefix for ECH Checkpoint Files");
-		Launcher.descriptionMapping.put("checkpoint-modulo", "ECJ Checkpoint modulo");
-		Launcher.descriptionMapping.put("simternet.chunks", "# of Simternet Chunks per Generation");
-		Launcher.descriptionMapping.put("simternet.checkpoint", "Use Simternet Serialization Checkpointing");
-		Launcher.descriptionMapping.put("simternet.checkpoint-modulo", "Simternet Checkpoint Modulo");
-		Launcher.descriptionMapping.put("simternet.checkpoint.directory", "Directory for Simternet Checkpoint files");
-		Launcher.descriptionMapping.put("pop.subpop.0.size", "Number of NSPs per Generation");
-		Launcher.descriptionMapping.put("simternet.steps", "# of Steps to run each Simternet");
-		Launcher.descriptionMapping.put("pop.subpop.1.size", "Number of ASPs per Generation");
-	}
+	private static final long	serialVersionUID	= 1L;
 
 	public static void main(String[] args) {
 		JFrame frame = new JFrame("ECJ Simternet Launcher");
@@ -50,25 +31,25 @@ public class Launcher extends JPanel {
 	}
 
 	public Launcher(String[] arguments) {
-		this.setArgs(arguments);
+		setArgs(arguments);
 
-		this.params = Evolve.loadParameterDatabase(this.args);
+		params = Evolve.loadParameterDatabase(args);
 
-		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-		this.addIntParamPanel("breedthreads");
-		this.addIntParamPanel("evalthreads");
-		this.addIntParamPanel("generations");
-		this.addBoolParamPanel("checkpoint");
-		this.addStringParamPanel("prefix");
-		this.addIntParamPanel("checkpoint-modulo");
-		this.addIntParamPanel("simternet.chunks");
-		this.addBoolParamPanel("simternet.checkpoint");
-		this.addIntParamPanel("simternet.checkpoint-modulo");
-		this.addStringParamPanel("simternet.checkpoint.directory");
-		this.addIntParamPanel("pop.subpop.0.size");
-		this.addIntParamPanel("simternet.steps");
-		this.addIntParamPanel("pop.subpop.1.size");
+		addIntParamPanel("breedthreads", "# of Threads for Breeding");
+		addIntParamPanel("evalthreads", "# of Threads for Evaluation");
+		addIntParamPanel("generations", "# of Generations");
+		addBoolParamPanel("checkpoint", "Use ECJ Checkpointing");
+		addStringParamPanel("prefix", "Prefix for ECH Checkpoint Files");
+		addIntParamPanel("checkpoint-modulo", "ECJ Checkpoint modulo");
+		addIntParamPanel("simternet.chunks", "# of Simternet Chunks per Generation");
+		addBoolParamPanel("simternet.checkpoint", "Use Simternet Serialization Checkpointing");
+		addIntParamPanel("simternet.checkpoint-modulo", "Simternet Checkpoint Modulo");
+		addStringParamPanel("simternet.checkpoint.directory", "Directory for Simternet Checkpoint files");
+		addIntParamPanel("pop.subpop.0.size", "Number of NSPs per Generation");
+		addIntParamPanel("simternet.steps", "# of Steps to run each Simternet");
+		addIntParamPanel("pop.subpop.1.size", "Number of ASPs per Generation");
 
 		JButton launchButton = new JButton("Launch");
 		launchButton.addActionListener(new ActionListener() {
@@ -80,35 +61,34 @@ public class Launcher extends JPanel {
 		this.add(launchButton);
 	}
 
-	private void addBoolParamPanel(String string) {
+	private void addBoolParamPanel(String string, String description) {
 		Parameter p = new Parameter(string);
-		this.add(new BoolParameterPanel(p.toString(), this.params.getBoolean(p, null, false),
-				Launcher.descriptionMapping.get(p.toString())));
+		this.add(new BoolParameterPanel(p.toString(), params.getBoolean(p, null, false), description));
 	}
 
-	protected void addIntParamPanel(String s) {
+	protected void addIntParamPanel(String s, String description) {
 		Parameter p = new Parameter(s);
-		this.add(new IntParameterPanel(p.toString(), this.params.getInt(p, null), Launcher.descriptionMapping.get(p
-				.toString())));
+		this.add(new IntParameterPanel(p.toString(), params.getInt(p, null), description));
 	}
 
-	private void addStringParamPanel(String string) {
+	private void addStringParamPanel(String string, String description) {
 		Parameter p = new Parameter(string);
-		this.add(new StringParameterPanel(p.toString(), this.params.getString(p, null), Launcher.descriptionMapping
-				.get(p.toString())));
+		this.add(new StringParameterPanel(p.toString(), params.getString(p, null), description));
 	}
 
 	protected void launchButtonPressed(ActionEvent event) {
 
-		this.getTopLevelAncestor().setVisible(false);
+		getTopLevelAncestor().setVisible(false);
 
 		ArrayList<String> overwriteArgs = new ArrayList<String>();
 
-		if (this.args != null)
-			for (String arg : this.args)
+		if (args != null) {
+			for (String arg : args) {
 				overwriteArgs.add(arg);
+			}
+		}
 
-		for (Component c : this.getComponents())
+		for (Component c : getComponents())
 			if (c instanceof ParameterPanel) {
 				ParameterPanel pPanel = (ParameterPanel) c;
 				if (pPanel.hasChanged()) {
@@ -119,23 +99,25 @@ public class Launcher extends JPanel {
 			}
 
 		String[] newArgs = new String[overwriteArgs.size()];
-		for (int i = 0; i < overwriteArgs.size(); i++)
+		for (int i = 0; i < overwriteArgs.size(); i++) {
 			newArgs[i] = overwriteArgs.get(i);
+		}
 
-		System.out.println("New Arguments:");
-		for (String s : newArgs)
-			System.out.print(s + " ");
-		System.out.println();
-
+		/*
+		 * // Print new arguments for debug
+		 * System.out.println("New Arguments:"); for (String s : newArgs) {
+		 * System.out.print(s + " "); } System.out.println();
+		 */
 		Evolve.main(newArgs);
 	}
 
 	public void setArgs(String[] args) {
 		this.args = args;
-		System.out.println("Original Arguments:");
-		for (String s : this.args)
-			System.out.print(s + " ");
-		System.out.println();
+		/*
+		 * // Print original arguments for debug
+		 * System.out.println("Original Arguments:"); for (String s : this.args)
+		 * { System.out.print(s + " "); } System.out.println();
+		 */
 	}
 
 }
