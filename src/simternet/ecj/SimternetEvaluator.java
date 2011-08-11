@@ -2,6 +2,7 @@ package simternet.ecj;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
+import java.text.DecimalFormat;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -236,13 +237,23 @@ public class SimternetEvaluator extends Evaluator {
 
 	}
 
-	private void generateCheckpoint(EvolutionState state, Simternet s, int instance) {
+	private void generateCheckpoint(EvolutionState state, Simternet s, int chunk) {
 		s.preCheckpoint();
-		String filePath = state.parameters.getString(new Parameter("simternet").push("checkpoint").push("directory"),
-				null);
+		String checkpointRootName = state.parameters.getString(
+				new Parameter("simternet").push("checkpoint").push("directory"), null);
 
-		String fileName = "ECJ-Simternet.gen-" + state.generation + ".chunk-" + instance + ".checkpoint";
-		File outputFile = new File(filePath + fileName);
+		DecimalFormat df = new DecimalFormat();
+		df.setMinimumIntegerDigits(3);
+		String genNumberString = df.format(state.generation);
+
+		String genDirName = checkpointRootName.concat("gen-" + genNumberString + "/");
+		File checkpointGenDir = new File(genDirName);
+		if (!checkpointGenDir.exists()) {
+			checkpointGenDir.mkdirs();
+		}
+
+		String checkpointFileName = "chunk-" + chunk + ".checkpoint";
+		File outputFile = new File(genDirName + checkpointFileName);
 		s.writeToCheckpoint(outputFile);
 		s.postCheckpoint();
 
