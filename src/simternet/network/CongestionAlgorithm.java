@@ -3,9 +3,7 @@ package simternet.network;
 import java.util.List;
 
 public interface CongestionAlgorithm {
-	public Double getCongestionRatio();
-
-	public String getCongestionReport();
+	public Double getUsageRatio();
 
 	public BackboneLink getLink();
 

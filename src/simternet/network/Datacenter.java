@@ -30,10 +30,10 @@ public class Datacenter extends Network {
 		this.owner = owner;
 	}
 
-	public Double getCongestionRatio(EdgeNetwork en) {
-		Double observedBandwidth = this.getObservedBandwidth(en);
-		Double requestedBandwidth = this.owner.getBandwidth();
-		if ((observedBandwidth == null) || (requestedBandwidth == null))
+	public Double getFractionExpected(EdgeNetwork en) {
+		Double observedBandwidth = getObservedBandwidth(en);
+		Double requestedBandwidth = owner.getBandwidth();
+		if (observedBandwidth == null || requestedBandwidth == null)
 			return 1.0;
 		else
 			return observedBandwidth / requestedBandwidth;
@@ -45,11 +45,11 @@ public class Datacenter extends Network {
 	 *         network.
 	 */
 	public Double getObservedBandwidth(Network an) {
-		return this.observedBandwidth.get(an);
+		return observedBandwidth.get(an);
 	}
 
 	public ApplicationProvider getOwner() {
-		return this.owner;
+		return owner;
 	}
 
 	/*
@@ -63,9 +63,11 @@ public class Datacenter extends Network {
 	 */
 	@Override
 	public void noteCongestion(NetFlow flow) {
-		if (flow.destination == null)
-			throw new RuntimeException("A packet going nowhere is congested?!");
-		this.observedBandwidth.put(flow.destination, flow.bandwidth);
+		if (TraceConfig.sanityChecks) {
+			if (flow.destination == null)
+				throw new RuntimeException("A packet going nowhere is congested?!");
+		}
+		observedBandwidth.put(flow.destination, flow.bandwidth);
 	}
 
 	/**
@@ -78,23 +80,36 @@ public class Datacenter extends Network {
 	public void originate(NetFlow flow) {
 		// Check to see if this flow was congested in previous periods. If so,
 		// pre-congest it to just faster than last period.
-		Double congestedBandwidth = this.observedBandwidth.get(flow.destination);
-		if (congestedBandwidth != null)
-			flow.congest(congestedBandwidth * 1.1);
+		Double observedBandwidth = this.observedBandwidth.get(flow.destination);
 
-		this.inputQueue.add(flow);
+		if (observedBandwidth != null) {
+			double increasedBandwidth = observedBandwidth * (1 + owner.s.config.applicationFlowGrowthProportion);
+			double minimumBandwidth = owner.getBandwidth() * owner.s.config.applicationFlowMinimumProportion;
+			double bandwidth = 0D;
+
+			if (increasedBandwidth < minimumBandwidth) {
+				bandwidth = minimumBandwidth;
+			} else {
+				bandwidth = increasedBandwidth;
+			}
+
+			flow.congest(bandwidth);
+		}
+
+		inputQueue.add(flow);
 	}
 
 	public String printCongestion() {
 		StringBuffer sb = new StringBuffer();
 
 		sb.append("Congestion status of Egress Links\n");
-		for (BackboneLink bb : this.egressLinks.values())
-			sb.append(bb + " has congestion " + bb.congestionAlgorithm.getCongestionReport() + "\n");
+		for (BackboneLink bb : egressLinks.values()) {
+			sb.append(bb + " has usage factor of " + bb.congestionAlgorithm.getUsageRatio() + "\n");
+		}
 
 		sb.append("Congestion status of Edge Networks\n");
 
-		ArrayList<Network> nets = new ArrayList(this.observedBandwidth.keySet());
+		ArrayList<Network> nets = new ArrayList(observedBandwidth.keySet());
 		Collections.sort(nets, new Comparator<Network>() {
 
 			/**
@@ -110,8 +125,8 @@ public class Datacenter extends Network {
 		for (Network net : nets) {
 			if (net == null)
 				throw new RuntimeException("wtf?");
-			sb.append(net.toString() + ": ObservedBW=" + this.observedBandwidth.get(net));
-			sb.append(" (" + this.owner.getCongestionRatio(net) + ")");
+			sb.append(net.toString() + ": ObservedBW=" + observedBandwidth.get(net));
+			sb.append(" (" + owner.getCongestionRatio(net) + ")");
 			sb.append("\n");
 		}
 
@@ -120,29 +135,31 @@ public class Datacenter extends Network {
 
 	@Override
 	public void route() {
-		for (NetFlow flow : this.inputQueue)
+		for (NetFlow flow : inputQueue) {
 			this.route(flow);
-		this.inputQueue = new TemporalHashSet<NetFlow>();
+		}
+		inputQueue = new TemporalHashSet<NetFlow>();
 	}
 
 	@Override
 	public void step(SimState state) {
 		super.step(state);
 
-		if (TraceConfig.congestionASPSummary && Logger.getRootLogger().isTraceEnabled())
-			Logger.getRootLogger().log(Level.TRACE, this.toString() + ": Congestion\n" + this.printCongestion());
+		if (TraceConfig.congestionASPSummary && Logger.getRootLogger().isTraceEnabled()) {
+			Logger.getRootLogger().log(Level.TRACE, toString() + ": Congestion\n" + printCongestion());
+		}
 	}
 
 	@Override
 	public String toString() {
-		return "Datacenter of " + this.owner.getName();
+		return "Datacenter of " + owner.getName();
 	}
 
 	@Override
 	public void update() {
 		super.update();
-		this.inputQueue.update();
-		this.observedBandwidth.update();
+		inputQueue.update();
+		observedBandwidth.update();
 	}
 
 }

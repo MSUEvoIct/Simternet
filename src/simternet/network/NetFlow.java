@@ -2,6 +2,7 @@ package simternet.network;
 
 import java.util.Comparator;
 
+import simternet.TraceConfig;
 import simternet.consumer.Consumer;
 
 /**
@@ -12,6 +13,140 @@ import simternet.consumer.Consumer;
  * 
  */
 public abstract class NetFlow {
+
+	//
+	// FLOW ROUTING INFORMATION
+	//
+
+	public final Network		source;
+	public final Network		destination;
+
+	/**
+	 * The user this traffic is intended for, once we reach the destination
+	 * network. This is analagous to the host portion of a CIDR IPv4 address.
+	 */
+	protected final Consumer	user;
+
+	public Integer				TTL			= 20;
+
+	//
+	// FLOW PERFORMANCE INFORMATION
+	//
+
+	/**
+	 * The actual current bandwidth of this flow, which changes as it transits
+	 * the network.
+	 */
+	public double				bandwidth;
+	public final double			bandwidthRequested;
+
+	/**
+	 * Has this flow ever been congested?
+	 */
+	public boolean				congested	= false;
+
+	/**
+	 * The actual duration of this flow. For interactive flows, this should
+	 * always be equal to maxTime. For non-interactive flows, this may be less
+	 * because the flows will transfer as quickly as possible.
+	 */
+	public double				duration;
+	public double				durationRequested;
+
+	/**
+	 * The accumulated latency of this flow
+	 */
+	public double				latency		= 0D;
+
+	protected NetFlow(Network source, Network destination, Consumer user, double bandwidth, double duration) {
+
+		// These checks are important for debugging to make sure that EA's
+		// cannot exploit
+		// odd behavior here.
+		if (TraceConfig.sanityChecks) {
+			if (source == null)
+				throw new RuntimeException("Can't send a packet from nowhere");
+			if (destination == null)
+				throw new RuntimeException("Can't send a packet to nowhere");
+			if (Double.isInfinite(bandwidth) || Double.isNaN(bandwidth) || bandwidth <= 0)
+				throw new RuntimeException("Can't have nonsense bandwidth " + bandwidth);
+			if (Double.isInfinite(duration) || Double.isNaN(duration) || duration <= 0)
+				throw new RuntimeException("Can't have nonsense duration " + duration);
+		}
+
+		this.source = source;
+		this.destination = destination;
+		this.user = user;
+
+		this.bandwidth = bandwidth;
+		bandwidthRequested = bandwidth;
+		this.duration = duration;
+		durationRequested = duration;
+	}
+
+	/**
+	 * Limit this flow based on the available network resources. While
+	 * serialization latency is applied elsewhere, this function may
+	 * additionally increase latency for highly congested links.
+	 * 
+	 * @param bandwidth
+	 *            Restrict the flow to this maximum bandwidth
+	 */
+	public abstract void congest(double bandwidth);
+
+	/**
+	 * Non-interactive flows will not reduce their total usage unless the
+	 * bandwidth falls below the point where its maximum duration is exceeded.
+	 * Interactive flows will reduce their bandwidth consumption immediately. We
+	 * need to know what this level is for all types of flows before we can
+	 * execute a WFQ-like congestion algorithm.
+	 * 
+	 * @return The bandwidth at which this flow will reduce its usage.
+	 */
+	public abstract Double getCongestionBandwidth();
+
+	public abstract double getCongestionDuration();
+
+	public double getActualTransfer() {
+		double actualTransfer = bandwidth * duration;
+		return actualTransfer;
+	}
+
+	public double getRequestedTransfer() {
+		double requestedTransfer = bandwidthRequested * durationRequested;
+		return requestedTransfer;
+	}
+
+	public double getBlockedTransfer() {
+		double blockedTransfer = getRequestedTransfer() - getActualTransfer();
+		return blockedTransfer;
+	}
+
+	public boolean isCongested() {
+		return congested;
+	}
+
+	/**
+	 * @return A human-readable interpretation of how this flow is congested,
+	 *         e.g., 5/10Mbps.
+	 */
+	public String describeCongestionForHumans() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("BW=");
+		sb.append(bandwidth);
+		sb.append("/");
+		sb.append(bandwidthRequested);
+		sb.append(",DUR=");
+		sb.append(duration);
+		sb.append("/");
+		sb.append(durationRequested);
+		return sb.toString();
+	}
+
+	@Override
+	public String toString() {
+		return "Flow: " + source + " -> " + user + "@" + destination + ", " + describeCongestionForHumans();
+	}
 
 	/**
 	 * This comparator allows for sorting of NetFlow lists in increasing order
@@ -30,129 +165,6 @@ public abstract class NetFlow {
 				return -1;
 			return 0;
 		}
-	}
-
-	/**
-	 * The actual current bandwidth of this flow, which changes as it transits
-	 * the network.
-	 */
-	protected Double			bandwidth;
-
-	/**
-	 * Has this flow ever been congested?
-	 */
-	protected Boolean			congested	= false;
-
-	/**
-	 * The network this NetFlow object will be delivered to.
-	 */
-	protected final Network		destination;
-	/**
-	 * The actual duration of this flow. For interactive flows, this should
-	 * always be equal to maxTime. For non-interactive flows, this may be less
-	 * because the flows will transfer as quickly as possible.
-	 */
-	protected Double			duration;
-
-	/**
-	 * The accumulated latency of this flow
-	 */
-	protected Double			latency		= 0D;
-
-	/**
-	 * The source network, should be a RoutingPoint operated by an application
-	 * provider.
-	 */
-	protected final Network		source;
-
-	protected final Double		transferRequested;
-
-	/**
-	 * Exactly analogous to TTL in real networks. We should never have a network
-	 * larger than 20 hops. This has not been placed in an external parameter
-	 * because it's more of a debug/sanity check than anything else. We should
-	 * probably quit with an error if this ever reaches zero.
-	 */
-	protected Integer			TTL			= 20;
-
-	/**
-	 * The user this traffic is intended for, once we reach the destination
-	 * network. This is analagous to the host portion of a CIDR IPv4 address.
-	 */
-	protected final Consumer	user;
-
-	protected NetFlow(Network source, Network destination, Consumer user, Double transferRequested) {
-		if (destination == null)
-			throw new RuntimeException("Can't send a packet to nowhere");
-		this.source = source;
-		this.destination = destination;
-		this.user = user;
-		this.transferRequested = transferRequested;
-		// DEBUG
-		if (this.transferRequested.isInfinite() || this.transferRequested.isNaN())
-			throw new RuntimeException();
-	}
-
-	/**
-	 * Limit this flow based on the available network resources. While
-	 * serialization latency is applied elsewhere, this function may
-	 * additionally increase latency for highly congested links.
-	 * 
-	 * @param bandwidth
-	 *            Restrict the flow to this maximum bandwidth
-	 */
-	public abstract void congest(Double bandwidth);
-
-	/**
-	 * @return A human-readable interpretation of how this flow is congested,
-	 *         e.g., 5/10Mbps.
-	 */
-	public abstract String describeCongestion();
-
-	/**
-	 * Non-interactive flows will not reduce their total usage unless the
-	 * bandwidth falls below the point where its maximum duration is exceeded.
-	 * Interactive flows will reduce their bandwidth consumption immediately. We
-	 * need to know what this level is for all types of flows before we can
-	 * execute a WFQ-like congestion algorithm.
-	 * 
-	 * @return The bandwidth at which this flow will reduce its usage.
-	 */
-	public abstract Double getCongestionBandwidth();
-
-	/**
-	 * We need to be able to calculate total usage remaining if limiting to a
-	 * given bandwidth. For non-interactive flows, they won't last any longer
-	 * than this.
-	 * 
-	 * @return The maximum
-	 */
-	public abstract Double getCongestionDuration();
-
-	public Double getTransferActual() {
-		double transferActual = this.bandwidth * this.duration * this.user.getPopulation();
-		// DEBUG
-		if (transferActual < 0)
-			throw new RuntimeException();
-		return transferActual;
-	}
-
-	public Double getTransferBlocked() {
-		return this.getTransferRequested() - this.getTransferActual();
-	}
-
-	public Double getTransferRequested() {
-		return this.transferRequested;
-	}
-
-	public Boolean isCongested() {
-		return this.congested;
-	}
-
-	@Override
-	public String toString() {
-		return "Flow: " + this.source + " -> " + this.user + "@" + this.destination + ", " + this.duration + "s@"
-				+ this.bandwidth + "b/s";
 	}
 
 }

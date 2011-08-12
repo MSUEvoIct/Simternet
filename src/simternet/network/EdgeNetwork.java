@@ -80,12 +80,11 @@ public abstract class EdgeNetwork extends Network {
 		price = new Temporal<Double>(firstPrice);
 	}
 
-	public String getCongestionReport() {
-		BackboneLink bl = getUpstreamIngress();
-		if (bl == null)
-			return "Not Connected";
-
-		return bl.congestionAlgorithm.getCongestionReport();
+	public boolean isCongested() {
+		if (getUpstreamIngress().congestionAlgorithm.getUsageRatio() >= 1)
+			return true;
+		else
+			return false;
 	}
 
 	public Int2D getLocation() {
@@ -120,6 +119,11 @@ public abstract class EdgeNetwork extends Network {
 
 	public NetworkProvider getOwner() {
 		return owner;
+	}
+
+	public double getUsageRatio() {
+		double usageRatio = getUpstreamIngress().congestionAlgorithm.getUsageRatio();
+		return usageRatio;
 	}
 
 	public Double getPrice() {

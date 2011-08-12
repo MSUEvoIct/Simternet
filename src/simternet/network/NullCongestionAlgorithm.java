@@ -26,18 +26,13 @@ public class NullCongestionAlgorithm implements CongestionAlgorithm {
 	 * @see simternet.network.CongestionAlgorithm#getCongestionRatio()
 	 */
 	@Override
-	public Double getCongestionRatio() {
+	public Double getUsageRatio() {
 		return 0.0;
 	}
 
 	@Override
-	public String getCongestionReport() {
-		return "Ignored";
-	}
-
-	@Override
 	public BackboneLink getLink() {
-		return this.link;
+		return link;
 	}
 
 	@Override

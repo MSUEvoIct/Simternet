@@ -1,7 +1,6 @@
 package simternet.network;
 
 import java.io.Serializable;
-import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,29 +12,18 @@ import java.util.List;
  * 
  */
 public class WFQCongestionAlgorithm implements CongestionAlgorithm, Serializable {
-
-	protected Double			congestionRatio		= 0D;
-	protected String			congestionReport;
-	protected BackboneLink		link;
-
 	private static final long	serialVersionUID	= 1L;
+
+	public double				requestedUsage;
+	public BackboneLink			link;
 
 	public WFQCongestionAlgorithm(BackboneLink link) {
 		this.link = link;
 	}
 
 	@Override
-	public Double getCongestionRatio() {
-		return this.congestionRatio;
-	}
-
-	public String getCongestionReport() {
-		return this.congestionReport;
-	}
-
-	@Override
 	public BackboneLink getLink() {
-		return this.link;
+		return link;
 	}
 
 	/*
@@ -49,69 +37,66 @@ public class WFQCongestionAlgorithm implements CongestionAlgorithm, Serializable
 	 */
 	@Override
 	public List<NetFlow> limit(List<NetFlow> flows, BackboneLink bottleneck) {
-
-		Double remainingCapacity = bottleneck.getBandwidth();
+		double linkCapacity = bottleneck.getBandwidth();
 
 		// will contain the total bytes requested by all flows
-		Double remainingUsage = 0D;
+		requestedUsage = 0D;
+
 		// will contain the total # of flow seconds (non-interactive flows will
 		// extend time if congested)
-		Double congestedDurationRemaining = 0D;
+		double requestedDuration = 0D;
 
 		for (NetFlow flow : flows) {
-			remainingUsage += flow.getTransferActual();
-			congestedDurationRemaining += flow.getCongestionDuration();
+			requestedUsage += flow.getActualTransfer();
+			requestedDuration += flow.getCongestionDuration();
 		}
-
-		StringBuffer cr = new StringBuffer();
-		Double usageRatio = remainingUsage / bottleneck.getBandwidth();
-		String percent = new DecimalFormat("000.#").format(usageRatio * 100);
-		cr.append(percent + "%/" + bottleneck.getBandwidth());
-		this.congestionReport = cr.toString();
-
-		// Calculate the congestion ratio, store to be queried later.
-		this.congestionRatio = remainingUsage / remainingCapacity;
 
 		/*
 		 * If the link has enough capacity, there is no need to ration ANY flow.
 		 * Simply allow all flows to pass this link uncongested.
 		 */
-		if (remainingUsage < remainingCapacity)
+		if (requestedUsage <= linkCapacity)
 			return flows;
-		else {
-		}
 
 		/*
-		 * Otherwise, allocate bandwidth to the slowest flows first.
+		 * We'll start by allocating bandwidth to the slowest flows first. If
+		 * these flows are slower than our average, that surplus can be used by
+		 * other flows.
 		 */
-
-		Double maxBandwidth = 0D;
-
-		// should sort flows by slowest first, taking into account the amount to
-		// which background flows will slow down before reducing usage
 		Collections.sort(flows, new NetFlow.CongestionBandwidthComparator());
+
+		double remainingCapacity = linkCapacity;
+		double remainingDuration = requestedDuration;
+		double maxBandwidth = 0D;
 
 		// figure out what the maximum bandwidth is
 		for (NetFlow flow : flows) {
-			Double bandwidth = flow.getCongestionBandwidth();
-			if ((bandwidth * congestedDurationRemaining) < remainingCapacity) {
-				// then every flow can go at least this fast
-				maxBandwidth = bandwidth;
-				remainingCapacity -= flow.getTransferActual();
-				congestedDurationRemaining -= flow.getCongestionDuration();
+			double flowBandwidth = flow.getCongestionBandwidth();
+			if (flowBandwidth * remainingDuration < remainingCapacity) {
+				// then the rest of the flows will still fit at this bandwidth
+				// subtract our usage and see if the next flow will fit now
+				remainingCapacity -= flow.getActualTransfer();
+				requestedDuration -= flow.getCongestionDuration();
 				continue;
 			} else {
 				// must split remaining capacity between remaining flows evenly
-				maxBandwidth = remainingCapacity / congestedDurationRemaining;
+				maxBandwidth = remainingCapacity / remainingDuration;
 				break;
 			}
 		}
 
 		// congest all flows to that maximum bandwidth
-		for (NetFlow flow : flows)
+		for (NetFlow flow : flows) {
 			flow.congest(maxBandwidth);
+		}
 
 		return flows;
+	}
+
+	@Override
+	public Double getUsageRatio() {
+		double usageRatio = requestedUsage / link.getBandwidth();
+		return usageRatio;
 	}
 
 }
