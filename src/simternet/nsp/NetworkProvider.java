@@ -54,10 +54,10 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate, HasFina
 	protected String										name;
 	public PricingStrategy									pricingStrategy;
 
-	public Simternet										s				= null;
+	public Simternet										s						= null;
 
 	public NetworkProvider(Simternet simternet) {
-		this.s = simternet;
+		s = simternet;
 
 		// this.name = simternet.config.getNSPName();
 
@@ -93,7 +93,8 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate, HasFina
 			edgeNetworks.setObjectLocation(aen, location);
 
 			// for now, create a fixed bandwidth link to this network.
-			getBackboneNetwork().createEgressLinkTo(aen, 1.0E5, RoutingProtocolConfig.NONE);
+			getBackboneNetwork().createEgressLinkTo(aen, s.config.nspInitialEdgeNetworkBandwidth,
+					RoutingProtocolConfig.NONE);
 
 			if (TraceConfig.NSPBuiltNetwork && Logger.getRootLogger().isTraceEnabled()) {
 				Logger.getRootLogger().trace(this + " building " + type + " @ " + location);
@@ -104,13 +105,13 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate, HasFina
 		}
 	}
 
-	public String edgeCongestionReport() {
+	public String edgeUsageReport() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("Edge congestion for " + this + "\n");
+		sb.append("Edge usage for " + this + "\n");
 		for (Object o : edgeNetworks) {
 			EdgeNetwork aen = (EdgeNetwork) o;
 			sb.append(aen + ": ");
-			sb.append(aen.getCongestionReport());
+			sb.append(aen.getUsageRatio());
 			sb.append("\n");
 		}
 		return sb.toString();
@@ -428,11 +429,11 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate, HasFina
 			Logger.getRootLogger().log(Level.INFO, "Unified Network Map:\n" + printAllNetworkGrid());
 
 			// Log edge congestion
-			Logger.getRootLogger().log(Level.INFO, edgeCongestionReport());
+			Logger.getRootLogger().log(Level.INFO, edgeUsageReport());
 
 			// Log edge congestion
 			if (TraceConfig.congestionNSPSummary) {
-				Logger.getRootLogger().trace(edgeCongestionReport());
+				Logger.getRootLogger().trace(edgeUsageReport());
 			}
 
 		}
