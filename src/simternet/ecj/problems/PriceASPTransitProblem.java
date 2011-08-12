@@ -30,22 +30,22 @@ public class PriceASPTransitProblem extends Problem implements HasSimternet, Has
 
 	@Override
 	public ApplicationProvider getApplicationProvider() {
-		return this.customer;
+		return customer;
 	}
 
 	@Override
 	public BackboneLink getBackboneLink() {
-		return this.customer.getDataCenter().getEgressLink(this.isp.getBackboneNetwork());
+		return customer.getDatacenter().getEgressLink(isp.getBackboneNetwork());
 	}
 
 	@Override
 	public Financials getFinancials() {
-		return this.isp.financials;
+		return isp.financials;
 	}
 
 	@Override
 	public NetworkProvider getNetworkProvider() {
-		return this.isp;
+		return isp;
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public class PriceASPTransitProblem extends Problem implements HasSimternet, Has
 
 	@Override
 	public Simternet getSimternet() {
-		return this.isp.s;
+		return isp.s;
 	}
 
 }

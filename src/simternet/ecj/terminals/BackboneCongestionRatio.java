@@ -20,7 +20,7 @@ public class BackboneCongestionRatio extends GPNode {
 
 		DoubleGP dd = (DoubleGP) input;
 		if (link != null)
-			dd.value = link.getCongestionAlgorithm().getCongestionRatio();
+			dd.value = link.getCongestionAlgorithm().getUsageRatio();
 		else
 			dd.value = 0.0;
 	}

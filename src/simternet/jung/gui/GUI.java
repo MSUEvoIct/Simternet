@@ -84,19 +84,19 @@ public class GUI extends JPanel {
 	public GUI(Simternet simternet) {
 		super();
 		GUI.simternet = simternet;
-		this.initComponents();
+		initComponents();
 	}
 
 	public void ASPInspectorButtonPressed() {
 		GlobalASPInspector inspector = new GlobalASPInspector(this);
-		this.inspectors.add(inspector);
+		inspectors.add(inspector);
 		inspector.pack();
 		inspector.setVisible(true);
 	}
 
 	public void EdgeInspectorButtonPressed() {
 		GlobalEdgeInspector inspector = new GlobalEdgeInspector(this);
-		this.inspectors.add(inspector);
+		inspectors.add(inspector);
 		inspector.pack();
 		inspector.setVisible(true);
 	}
@@ -106,13 +106,14 @@ public class GUI extends JPanel {
 	 * that allows the user to pick filters to apply
 	 */
 	public void filterButtonPressed() {
-		if (this.filterGUI == null) {
-			this.filterGUI = new FilterGUI(this, this.filter);
-			this.filterGUI.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		if (filterGUI == null) {
+			filterGUI = new FilterGUI(this, filter);
+			filterGUI.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		}
 
-		if (!this.filterGUI.isVisible())
-			this.filterGUI.setVisible(true);
+		if (!filterGUI.isVisible()) {
+			filterGUI.setVisible(true);
+		}
 	}
 
 	/**
@@ -121,22 +122,22 @@ public class GUI extends JPanel {
 	protected void initComponents() {
 
 		TrackableProperty.setSimState(GUI.simternet);
-		this.inspectors = new HashSet<Inspector>();
+		inspectors = new HashSet<Inspector>();
 
-		this.setLayout(new BorderLayout());
+		setLayout(new BorderLayout());
 
-		this.controlPanel = new ControlPanel(this);
-		this.controlPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-		this.add(this.controlPanel, BorderLayout.EAST);
+		controlPanel = new ControlPanel(this);
+		controlPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+		this.add(controlPanel, BorderLayout.EAST);
 
-		this.infoPanel = new InfoPanel(GUI.simternet);
-		this.infoPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-		this.add(this.infoPanel, BorderLayout.SOUTH);
+		infoPanel = new InfoPanel(GUI.simternet);
+		infoPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+		this.add(infoPanel, BorderLayout.SOUTH);
 
-		this.initViewer();
-		this.add(this.viewer, BorderLayout.CENTER);
+		initViewer();
+		this.add(viewer, BorderLayout.CENTER);
 
-		this.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 	}
 
 	/**
@@ -145,63 +146,64 @@ public class GUI extends JPanel {
 	 */
 	protected void initViewer() {
 
-		this.graph = new DirectedSparseGraph<Network, BackboneLink>();
+		graph = new DirectedSparseGraph<Network, BackboneLink>();
 
 		// Define the layout, which will enable filtering, and use our
 		// LocationTransformer class to lay everything out.
-		this.layout = new EasyFilterLayout<Network, BackboneLink>(this.graph, new LocationTransformer(GUI.simternet));
+		layout = new EasyFilterLayout<Network, BackboneLink>(graph, new LocationTransformer(GUI.simternet));
 
 		Dimension frameDimension = new Dimension(800, 500);
-		this.viewer = new VisualizationViewer<Network, BackboneLink>(this.layout, frameDimension);
-		this.viewer.getModel().setGraphLayout(this.layout, frameDimension);
+		viewer = new VisualizationViewer<Network, BackboneLink>(layout, frameDimension);
+		viewer.getModel().setGraphLayout(layout, frameDimension);
 
 		// Set up transformers to label and color the vertices and edges.
 
 		// Adjust vertex shape/size:
-		this.viewer.getRenderContext().setVertexShapeTransformer(new NetworkShapeTransformer(GUI.simternet));
+		viewer.getRenderContext().setVertexShapeTransformer(new NetworkShapeTransformer(GUI.simternet));
 
 		// Adjust vertex color:
-		this.viewer.getRenderContext().setVertexFillPaintTransformer(new NetworkPaintTransformer(GUI.simternet));
+		viewer.getRenderContext().setVertexFillPaintTransformer(new NetworkPaintTransformer(GUI.simternet));
 
 		// Label vertices:
-		this.viewer.getRenderContext().setVertexLabelTransformer(new NetworkLabeller());
+		viewer.getRenderContext().setVertexLabelTransformer(new NetworkLabeller());
 
 		// Label edges:
 		// viewer.getRenderContext().setEdgeLabelTransformer(new
 		// ToStringLabeller<BackboneLink>());
 
 		// Set BackboneLink thickness:
-		this.viewer.getRenderContext().setEdgeStrokeTransformer(new LinkStrokeTransformer());
+		viewer.getRenderContext().setEdgeStrokeTransformer(new LinkStrokeTransformer());
 		// Set BackboneLink color:
-		this.viewer.getRenderContext().setEdgeDrawPaintTransformer(new LinkPaintTransformer());
+		viewer.getRenderContext().setEdgeDrawPaintTransformer(new LinkPaintTransformer());
 
 		// Allow the mouse to pick and move vertices and edges.
 		AbstractModalGraphMouse graphMouse = new DefaultModalGraphMouse<Network, BackboneLink>();
 		// Use a special PickPlugin to notify this GUI class when a vertex is
 		// picked.
 		graphMouse.add(new VertexPickPlugin(this));
-		this.viewer.setGraphMouse(graphMouse);
-		this.viewer.addKeyListener(graphMouse.getModeKeyListener());
-		this.viewer.setToolTipText("<html><center>Drag and scroll to translate and zoom<p>Control-click to inspect");
+		viewer.setGraphMouse(graphMouse);
+		viewer.addKeyListener(graphMouse.getModeKeyListener());
+		viewer.setToolTipText("<html><center>Drag and scroll to translate and zoom<p>Control-click to inspect");
 
-		this.viewer.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+		viewer.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 
 	}
 
 	public void NSPInspectorButtonPressed() {
 		GlobalNSPInspector inspector = new GlobalNSPInspector(this);
-		this.inspectors.add(inspector);
+		inspectors.add(inspector);
 		inspector.pack();
 		inspector.setVisible(true);
 	}
 
 	public void printDataButtonPressed() {
-		for (Inspector i : this.inspectors)
+		for (Inspector i : inspectors) {
 			i.printData();
+		}
 	}
 
 	public void removeInspector(Inspector closedInspector) {
-		this.inspectors.remove(closedInspector);
+		inspectors.remove(closedInspector);
 	}
 
 	/**
@@ -214,17 +216,18 @@ public class GUI extends JPanel {
 	 */
 	public void setSimternet(Simternet sim) {
 		// clean up from last checkpoint
-		for (Inspector i : this.inspectors)
+		for (Inspector i : inspectors) {
 			i.dispose();
-		this.inspectors.clear();
+		}
+		inspectors.clear();
 
 		GUI.simternet = sim;
-		this.remove(this.viewer);
-		this.initViewer();
-		this.add(this.viewer, BorderLayout.CENTER);
+		this.remove(viewer);
+		initViewer();
+		this.add(viewer, BorderLayout.CENTER);
 
-		this.infoPanel.setSimternet(sim);
-		this.updateAll();
+		infoPanel.setSimternet(sim);
+		updateAll();
 
 	}
 
@@ -234,10 +237,10 @@ public class GUI extends JPanel {
 	 */
 	protected void setUpFilters() {
 		// TODO: user-generated filters, not hard-coded ones.
-		this.filter = new CompositeFilter<Network, BackboneLink>();
-		((CompositeFilter<Network, BackboneLink>) this.filter).add(new SingleEdgeFilter(new Int2D(3, 1)));
-		((CompositeFilter<Network, BackboneLink>) this.filter).add(new DatacenterNameFilter("Datacenter of ASP-2"));
-		((CompositeFilter<Network, BackboneLink>) this.filter).add(new HighPassFilter(1000000.0));
+		filter = new CompositeFilter<Network, BackboneLink>();
+		((CompositeFilter<Network, BackboneLink>) filter).add(new SingleEdgeFilter(new Int2D(3, 1)));
+		((CompositeFilter<Network, BackboneLink>) filter).add(new DatacenterNameFilter("Datacenter of ASP-2"));
+		((CompositeFilter<Network, BackboneLink>) filter).add(new HighPassFilter(1000000.0));
 	}
 
 	/**
@@ -247,7 +250,7 @@ public class GUI extends JPanel {
 	protected void start() {
 		// start simulation
 		GUI.simternet.start();
-		this.updateAll();
+		updateAll();
 	}
 
 	/**
@@ -260,11 +263,12 @@ public class GUI extends JPanel {
 	public void step(int n) {
 		for (int i = 0; i < n; i++) {
 			GUI.simternet.schedule.step(GUI.simternet);
-			for (Inspector inspector : this.inspectors)
+			for (Inspector inspector : inspectors) {
 				inspector.update();
+			}
 		}
 
-		this.updateAll();
+		updateAll();
 	}
 
 	/**
@@ -272,14 +276,15 @@ public class GUI extends JPanel {
 	 */
 	protected void updateAll() {
 		// Update the graph visualization
-		this.updateGraph();
+		updateGraph();
 
 		// refresh the labels in our InfoPanel
-		this.infoPanel.update();
+		infoPanel.update();
 
 		// Update each of the inspectors
-		for (Inspector i : this.inspectors)
+		for (Inspector i : inspectors) {
 			i.update();
+		}
 	}
 
 	/**
@@ -294,30 +299,32 @@ public class GUI extends JPanel {
 	public void updateFilters(TreePath[] paths) {
 		// deactivate the root filter, which will deactivate all of its
 		// sub-filters.
-		this.filter.deactivate();
+		filter.deactivate();
 
 		// Then, re-activate all checked filters
-		if (paths != null)
+		if (paths != null) {
 			for (TreePath tp : paths)
 				if (tp.getLastPathComponent() instanceof EasyFilter<?, ?>) {
 
-					EasyFilter<?, ?> filter = ((EasyFilter<?, ?>) tp.getLastPathComponent());
+					EasyFilter<?, ?> filter = (EasyFilter<?, ?>) tp.getLastPathComponent();
 					filter.setActive(true);
 				}
+		}
 
-		this.updateAll();
+		updateAll();
 	}
 
 	public void updateGraph() {
 
-		if (this.filter == null)
-			this.setUpFilters();
+		if (filter == null) {
+			setUpFilters();
+		}
 
 		for (ApplicationProvider asp : GUI.simternet.getASPs()) {
-			this.graph.addVertex(asp.getDataCenter());
+			graph.addVertex(asp.getDatacenter());
 			for (Network net : asp.getConnectedNetworks()) {
-				this.graph.addVertex(net);
-				this.graph.addEdge(asp.getDataCenter().getEgressLink(net), asp.getDataCenter(), net);
+				graph.addVertex(net);
+				graph.addEdge(asp.getDatacenter().getEgressLink(net), asp.getDatacenter(), net);
 			}
 		}
 
@@ -328,20 +335,20 @@ public class GUI extends JPanel {
 			 * multiple times.
 			 */
 			Backbone backbone = nsp.getBackboneNetwork();
-			this.graph.addVertex(backbone);
+			graph.addVertex(backbone);
 
 			for (EdgeNetwork edge : nsp.getEdgeNetworks()) {
-				this.graph.addVertex(ConsumerNetwork.get(edge));
+				graph.addVertex(ConsumerNetwork.get(edge));
 				// System.err.println("Adding Vertex " + edge);
-				this.graph.addEdge(backbone.getEgressLink(edge), backbone, ConsumerNetwork.get(edge));
+				graph.addEdge(backbone.getEgressLink(edge), backbone, ConsumerNetwork.get(edge));
 			}
 		}
 
 		// this.graph = (DirectedSparseGraph<Network, BackboneLink>)
 		// this.filter.transform(this.graph);
-		this.layout.setFilter(this.filter);
+		layout.setFilter(filter);
 
-		this.layout.setGraph(this.graph);
+		layout.setGraph(graph);
 
 		// this.viewer.repaint();
 		this.repaint();
@@ -357,15 +364,16 @@ public class GUI extends JPanel {
 
 		Inspector inspector = null;
 
-		if (vertex instanceof ConsumerNetwork)
+		if (vertex instanceof ConsumerNetwork) {
 			inspector = new ConsumerNetworkInspector((ConsumerNetwork) vertex, this);
-		else if (vertex instanceof Backbone)
+		} else if (vertex instanceof Backbone) {
 			inspector = new NetworkProviderInspector(((Backbone) vertex).getOwner(), this);
-		else if (vertex instanceof Datacenter)
+		} else if (vertex instanceof Datacenter) {
 			inspector = new ApplicationProviderInspector(((Datacenter) vertex).getOwner(), this);
+		}
 
 		if (inspector != null) {
-			this.inspectors.add(inspector);
+			inspectors.add(inspector);
 			inspector.pack();
 			inspector.setVisible(true);
 		}
