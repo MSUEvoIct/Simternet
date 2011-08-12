@@ -10,6 +10,8 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import sim.util.Int2D;
+import simternet.application.ApplicationProvider;
+import simternet.consumer.Consumer;
 
 /**
  * This class contains all the exogenous variables used as inputs to the model.
@@ -38,6 +40,22 @@ public class SimternetConfig extends Properties implements Serializable {
 	 */
 	private static final long	serialVersionUID	= 1L;
 
+	/**
+	 * If an application was congested on an edge application, try at the
+	 * observed bandwidth * (1 + networkFlowGrowthProportion).
+	 * 
+	 * See Datacenter.originate
+	 */
+	public final double			applicationFlowGrowthProportion;
+
+	/**
+	 * Flows may be reduced to 0; if so they will never recover from using
+	 * applicationFlowGrowthProportion alone. Alternatively, the minimum
+	 * bandwidth to try is the applications's bandwidth *
+	 * applicationFlowMinimumProportion
+	 */
+	public final double			applicationFlowMinimumProportion;
+
 	public final double			aspEndowment;
 
 	public final double			consumerIndifferencePrice;
@@ -56,6 +74,8 @@ public class SimternetConfig extends Properties implements Serializable {
 	public final double			networkSimpleOpCostPerUser;
 
 	public final double			nspEndowment;
+
+	public final double			nspInitialEdgeNetworkBandwidth;
 
 	public final String			prefixASP;
 	public final String			prefixConsumer;
@@ -95,6 +115,9 @@ public class SimternetConfig extends Properties implements Serializable {
 		}
 
 		// Parse variables from config file here.
+		applicationFlowGrowthProportion = d("applicationFlowGrowthProportion");
+		applicationFlowMinimumProportion = d("applicationFlowMinimumProportion");
+
 		aspEndowment = d("aspEndowment");
 		consumerIndifferencePrice = d("consumerIndifferencePrice");
 		consumerMaxPriceNSP = d("consumerMaxPriceNSP");
@@ -107,13 +130,38 @@ public class SimternetConfig extends Properties implements Serializable {
 		networkSimpleBuildCostPerUser = d("networkSimpleBuildCostPerUser");
 		networkSimpleOpCostFixed = d("networkSimpleOpCostFixed");
 		networkSimpleOpCostPerUser = d("networkSimpleOpCostPerUser");
+
 		nspEndowment = d("nspEndowment");
+
+		nspInitialEdgeNetworkBandwidth = d("nspInitialEdgeNetworkBandwidth");
+
 		prefixASP = s("prefixASP");
 		prefixConsumer = s("prefixConsumer");
 		prefixNSP = s("prefixNSP");
 		simternetOutputDir = s("simternetOutputDir");
 
 	}
+
+	//
+	// DEFINED EQUATIONS
+	//
+	/**
+	 * @param c
+	 * @param asp
+	 * @param expectedFraction
+	 *            The portion of requested usage the consumer expects will make
+	 *            it through the network accounting for congestion
+	 * @return
+	 */
+	public static double defaultApplicationBenefit(Consumer c, ApplicationProvider asp, Double expectedFraction) {
+		// benefit = sqrt(quality) * congestionRatio;
+		double benefit = Math.pow(asp.getQuality(), 0.5) * expectedFraction;
+		return benefit;
+	}
+
+	//
+	// CONVIENENCE FUNCTIONS
+	//
 
 	private final double d(String param) {
 		return Double.parseDouble(this.getProperty(param));
