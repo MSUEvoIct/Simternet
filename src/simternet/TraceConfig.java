@@ -18,4 +18,5 @@ public class TraceConfig {
 	public static boolean	steppingASP				= false;
 	public static boolean	steppingConsumer		= false;
 	public static boolean	steppingNSP				= false;
+	public static boolean	sanityChecks			= true;
 }
