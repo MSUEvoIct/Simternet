@@ -38,7 +38,7 @@ public class ConsumerDataReporter extends Reporter {
 			report.append(Reporter.separater);
 			report.append(c.transferRequested);
 			report.append(Reporter.separater);
-			report.append(c.transferActual);
+			report.append(c.transferReceived);
 			this.report(report.toString());
 		}
 
