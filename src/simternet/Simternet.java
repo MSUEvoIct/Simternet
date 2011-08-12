@@ -183,6 +183,22 @@ public class Simternet extends SimState implements Serializable {
 		return applicationProviders;
 	}
 
+	public ApplicationProvider getASP(String name) {
+		for (ApplicationProvider asp : applicationProviders) {
+			if (asp.getName().equals(name))
+				return asp;
+		}
+		return null;
+	}
+
+	public NetworkProvider getNSP(String name) {
+		for (NetworkProvider nsp : networkServiceProviders) {
+			if (nsp.getName().equals(name))
+				return nsp;
+		}
+		return null;
+	}
+
 	public Collection<ApplicationProvider> getASPs(AppCategory c) {
 		Collection<ApplicationProvider> asps = applicationProvidersByCategory.get(c);
 		if (asps == null) {
