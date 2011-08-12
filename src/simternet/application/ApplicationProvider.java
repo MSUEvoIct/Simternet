@@ -16,10 +16,10 @@ import simternet.ecj.problems.HasFinancials;
 import simternet.network.Backbone;
 import simternet.network.Datacenter;
 import simternet.network.EdgeNetwork;
-import simternet.network.InteractiveFlow;
 import simternet.network.NetFlow;
 import simternet.network.Network;
 import simternet.network.RoutingProtocolConfig;
+import simternet.network.UserInteractiveFlow;
 import simternet.nsp.NetworkProvider;
 import simternet.temporal.AsyncUpdate;
 import simternet.temporal.Temporal;
@@ -76,14 +76,11 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 	}
 
 	protected NetFlow createNetFlow(Consumer consumer, EdgeNetwork network) {
-		NetFlow flow = new InteractiveFlow( // TODO: Vary interactivity
-				datacenter, // Flow comes from us
+		NetFlow flow = new UserInteractiveFlow(datacenter, // Flow comes from us
 				network, // Flow goes to this network
 				consumer, // And this consumer
-				duration.get(), // Flow lasts for this long
-				bandwidth.get(), // Wants BW, ideally
-				// But uses edge flow-control
-				flowControl(getCongestedBandwidth(network)));
+				bandwidth.get(), duration.get() // Flow lasts for this long
+		);
 		return flow;
 	}
 
@@ -193,13 +190,6 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 	}
 
 	public Datacenter getDatacenter() {
-		return datacenter;
-	}
-
-	/*
-	 * Utility function used by the user interface. May be some privacy issues.
-	 */
-	public Datacenter getDataCenter() {
 		return datacenter;
 	}
 

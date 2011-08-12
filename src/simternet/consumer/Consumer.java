@@ -65,7 +65,7 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	/**
 	 * A human-readable name to distinguish this consumer agent
 	 */
-	protected String													name;
+	public String														name;
 
 	/**
 	 * Controls the consumer's network consumption behavior; it controlls which
@@ -96,7 +96,7 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 */
 	protected final Simternet											s;
 
-	public Double														transferActual			= 0.0;
+	public Double														transferReceived		= 0.0;
 
 	public Double														transferRequested		= 0.0;
 
@@ -247,11 +247,11 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 
 		if (TraceConfig.consumerFlowReceived && Logger.getRootLogger().isTraceEnabled()) {
 			Logger.getRootLogger().log(Level.TRACE,
-					this + " received " + flow + ", congestion = " + flow.describeCongestion());
+					this + " received " + flow + ", congestion = " + flow.describeCongestionForHumans());
 		}
 
-		transferRequested += flow.getTransferRequested();
-		transferActual += flow.getTransferActual();
+		transferRequested += flow.getRequestedTransfer();
+		transferReceived += flow.getActualTransfer();
 	}
 
 	public void setName(String name) {

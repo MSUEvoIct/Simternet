@@ -36,16 +36,18 @@ public class GPTransitPurchaseStrategy implements TransitPurchaseStrategy, Seria
 		DoubleGP d = new DoubleGP();
 		d.value = 0.0;
 
-		BackboneLink existing = this.asp.getDataCenter().getEgressLink(destination.getBackboneNetwork());
+		BackboneLink existing = asp.getDatacenter().getEgressLink(destination.getBackboneNetwork());
 
-		ASPPurchaseTransitProblem aptp = new ASPPurchaseTransitProblem(this.asp, destination, existing);
-		this.tree.child.eval(null, 0, d, null, this.ind, aptp);
+		ASPPurchaseTransitProblem aptp = new ASPPurchaseTransitProblem(asp, destination, existing);
+		tree.child.eval(null, 0, d, null, ind, aptp);
 
-		if (d.value > GPTransitPurchaseStrategy.MAX_AMOUNT)
+		if (d.value > GPTransitPurchaseStrategy.MAX_AMOUNT) {
 			d.value = GPTransitPurchaseStrategy.MAX_AMOUNT;
+		}
 
-		if (d.value < GPTransitPurchaseStrategy.MIN_AMOUNT)
+		if (d.value < GPTransitPurchaseStrategy.MIN_AMOUNT) {
 			d.value = GPTransitPurchaseStrategy.MIN_AMOUNT;
+		}
 
 		if (new Double(d.value).isNaN())
 			// Printing out the full exception takes up too much console space.

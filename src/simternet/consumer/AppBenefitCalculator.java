@@ -2,20 +2,22 @@ package simternet.consumer;
 
 import java.io.Serializable;
 
+import simternet.SimternetConfig;
 import simternet.application.ApplicationProvider;
 
 /**
  * Given a specified consumer, edge network, and application, calculate the
  * benefit received by the customer.
  * 
- * Default is (quality^0.5)*(bandiwidthUsed^0.5)*congestionRatio
+ * Default is (quality^0.5)*congestionRatio
  * 
  * @author kkoning
  * 
  */
 public class AppBenefitCalculator implements Serializable {
-
 	private static final long			serialVersionUID	= 1L;
+
+	// Default, singleton factory
 	private static AppBenefitCalculator	singleton;
 
 	public static AppBenefitCalculator getSingleton() {
@@ -25,16 +27,8 @@ public class AppBenefitCalculator implements Serializable {
 		return AppBenefitCalculator.singleton;
 	}
 
-	public Double congestedBenefit(Consumer c, ApplicationProvider app, Double congestionRatio) {
-
-		Double uncongestedBenefit = uncongestedBenefit(c, app);
-		return uncongestedBenefit * congestionRatio;
-	}
-
-	public Double uncongestedBenefit(Consumer c, ApplicationProvider asp) {
-		Double benefit = 0.0;
-		benefit = Math.pow(asp.getQuality(), 0.5);
-		return benefit;
+	public double calculateBenefit(Consumer c, ApplicationProvider asp, Double expectedFraction) {
+		return SimternetConfig.defaultApplicationBenefit(c, asp, expectedFraction);
 	}
 
 }

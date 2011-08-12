@@ -29,13 +29,16 @@ public class GreedyAppManager extends AppManager implements Serializable {
 			List<AppBenefit> appBenefits = new ArrayList<AppBenefit>();
 
 			for (ApplicationProvider asp : c.s.getASPs(ac)) {
-
 				AppBenefitCalculator abc = c.getAppBenefitCalculator();
-				double congestionRatio = asp.getDatacenter().getCongestionRatio(c.edgeNetwork.get());
 
+				// Will describe our benefit
 				AppBenefit ab = new AppBenefit();
-				ab.app = asp;
-				ab.benefit = abc.congestedBenefit(c, asp, congestionRatio);
+
+				ab.asp = asp;
+
+				// looks at congestion of ASP on the Edge Network we're on
+				double expectedFraction = asp.getDatacenter().getFractionExpected(c.edgeNetwork.get());
+				ab.benefit = abc.calculateBenefit(c, asp, expectedFraction);
 				ab.cost = asp.getPriceSubscriptions();
 				appBenefits.add(ab);
 			}
@@ -64,7 +67,7 @@ public class GreedyAppManager extends AppManager implements Serializable {
 			Double budget = c.profile.getAppCategoryBudget(ac);
 			for (AppBenefit ab : appBenefits)
 				if (ab.cost <= budget) {
-					newASPs.add(ab.app);
+					newASPs.add(ab.asp);
 					budget -= ab.cost;
 				}
 		}
