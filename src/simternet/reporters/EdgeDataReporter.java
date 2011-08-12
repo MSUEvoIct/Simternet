@@ -13,7 +13,7 @@ public class EdgeDataReporter extends Reporter {
 
 	protected static HashMap<String, String>	netTypeAbbreviations;
 	private static final long					serialVersionUID	= 1L;
-	public static final String					specificHeaders		= "LocactionX,LocationY,NSP,NetworkType,TransitBandwidth,Congestion,Price,Customers,Competitors,MarketShare";
+	public static final String					specificHeaders		= "LocationX,LocationY,NSP,NetworkType,TransitBandwidth,Congestion,Price,Customers,Competitors,MarketShare";
 
 	static {
 		new EdgeDataReporter().logHeaders();
@@ -57,7 +57,7 @@ public class EdgeDataReporter extends Reporter {
 				report.append(Reporter.separater);
 				report.append(en.getUpstreamIngress().getBandwidth());
 				report.append(Reporter.separater);
-				report.append(en.getUpstreamIngress().getCongestionAlgorithm().getCongestionRatio());
+				report.append(en.getUpstreamIngress().getCongestionAlgorithm().getUsageRatio());
 				report.append(Reporter.separater);
 				report.append(price);
 				report.append(Reporter.separater);
