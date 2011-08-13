@@ -23,7 +23,7 @@ import simternet.application.ApplicationProvider;
 import simternet.consumer.Consumer;
 import simternet.consumer.DefaultConsumerProfile;
 import simternet.consumer.GreedyAppManager;
-import simternet.consumer.NetworkMiser;
+import simternet.consumer.RationalNetManager;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 import simternet.nsp.NetworkProvider;
@@ -392,7 +392,10 @@ public class Simternet extends SimState implements Serializable {
 			// Populate the landscape with a simpleconsumer class.
 			for (Int2D location : allLocations()) {
 				Double pop = random.nextDouble() * config.consumerPopulationMax;
-				Consumer acc = new Consumer(this, location, pop, defaultProfile, NetworkMiser.getSingleton(),
+				// Consumer acc = new Consumer(this, location, pop,
+				// defaultProfile, NetworkMiser.getSingleton(),
+				// GreedyAppManager.getSingleton(), null);
+				Consumer acc = new Consumer(this, location, pop, defaultProfile, RationalNetManager.getSingleton(),
 						GreedyAppManager.getSingleton(), null);
 				enterMarket(acc);
 			}

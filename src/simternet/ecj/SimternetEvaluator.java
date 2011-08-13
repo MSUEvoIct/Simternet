@@ -14,6 +14,7 @@ import simternet.application.ApplicationProvider;
 import simternet.nsp.NetworkProvider;
 import simternet.reporters.ASPInterconnectionReporter;
 import simternet.reporters.ApplicationProviderFitnessReporter;
+import simternet.reporters.ConsumerDataReporter;
 import simternet.reporters.EdgeDataReporter;
 import simternet.reporters.EdgeMarketReporter;
 import simternet.reporters.NetworkProviderFitnessReporter;
@@ -82,36 +83,54 @@ public class SimternetEvaluator extends Evaluator {
 		// Add reporters for data output
 
 		for (int i = 0; i < simternet.length; i++) {
+
+			int interval = 49;
+
 			// add reporters
-			NetworkProviderFitnessReporter npfr = new NetworkProviderFitnessReporter(29);
+			NetworkProviderFitnessReporter npfr = new NetworkProviderFitnessReporter(interval);
 			npfr.setGeneration(state.generation);
 			npfr.setChunk(i);
 			simternet[i].addReporter(npfr);
 
-			ApplicationProviderFitnessReporter apfr = new ApplicationProviderFitnessReporter(29);
+			ApplicationProviderFitnessReporter apfr = new ApplicationProviderFitnessReporter(interval);
 			apfr.setGeneration(state.generation);
 			apfr.setChunk(i);
 			simternet[i].addReporter(apfr);
 
-			EdgeDataReporter edr = new EdgeDataReporter(29);
+			EdgeDataReporter edr = new EdgeDataReporter(interval);
 			edr.setGeneration(state.generation);
 			edr.setChunk(i);
 			simternet[i].addReporter(edr);
 
-			// ConsumerDataReporter cdr = new ConsumerDataReporter(29);
-			// cdr.setGeneration(state.generation);
-			// cdr.setChunk(i);
-			// simternet[i].addReporter(cdr);
+			ConsumerDataReporter cdr = new ConsumerDataReporter(interval);
+			cdr.setGeneration(state.generation);
+			cdr.setChunk(i);
+			simternet[i].addReporter(cdr);
 
-			ASPInterconnectionReporter air = new ASPInterconnectionReporter(29);
+			ASPInterconnectionReporter air = new ASPInterconnectionReporter(interval);
 			air.setGeneration(state.generation);
 			air.setChunk(i);
 			simternet[i].addReporter(air);
 
-			EdgeMarketReporter emr = new EdgeMarketReporter(29);
+			EdgeMarketReporter emr = new EdgeMarketReporter(interval);
 			emr.setGeneration(state.generation);
 			emr.setChunk(i);
 			simternet[i].addReporter(emr);
+
+			// PrintStream testPS = null;
+			// try {
+			// FileOutputStream fos = new FileOutputStream("test");
+			// BufferedOutputStream bos = new BufferedOutputStream(fos, 100000);
+			// testPS = new PrintStream(bos);
+			// } catch (IOException e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
+			//
+			// TestReporter tr = new TestReporter(testPS, interval);
+			// tr.setGeneration(state.generation);
+			// tr.setChunk(i);
+			// simternet[i].addReporter(tr);
 
 		}
 

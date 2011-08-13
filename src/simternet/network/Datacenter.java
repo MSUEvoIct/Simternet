@@ -126,7 +126,7 @@ public class Datacenter extends Network {
 			if (net == null)
 				throw new RuntimeException("wtf?");
 			sb.append(net.toString() + ": ObservedBW=" + observedBandwidth.get(net));
-			sb.append(" (" + owner.getCongestionRatio(net) + ")");
+			sb.append(" (" + owner.getExpectedFraction(net) + ")");
 			sb.append("\n");
 		}
 

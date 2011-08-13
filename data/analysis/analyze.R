@@ -294,11 +294,11 @@ dev.off()
 ######## ASP/NSP Interconnection ########
 # Quantity(Price)
 png(buildFN("ASP-NSP-Interconnection.Market", curGroup), width=graphWidth, height=graphHeight)
-bin <- hexbin(log(AspInterconnectionTemp$Price), log(AspInterconnectionTemp$Quantity + 1), xbins=50)
-plot(bin, main=paste("ASP/NSP Interconnection Market\n", genDescriptor), 
+#bin <- hexbin(log(AspInterconnectionTemp$Price), log(AspInterconnectionTemp$Quantity + 1), xbins=50)
+plot(log(AspInterconnectionTemp$Quantity + 1), log(AspInterconnectionTemp$Price), main=paste("ASP/NSP Interconnection Market\n", genDescriptor), 
   xlab="Bandwidth Price (log)", ylab="Qty Purchased (log)")
 dev.off()
-rm(bin)
+#rm(bin)
 
 
 ########### Application Service Provider Information ##############

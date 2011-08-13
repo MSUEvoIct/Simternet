@@ -144,7 +144,7 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 	 * @param an
 	 * @return the congestion ratio
 	 */
-	public Double getCongestionRatio(Network an) {
+	public Double getExpectedFraction(Network an) {
 		Double congestionRatio;
 
 		Double observedBandwidth = getCongestedBandwidth(an);
