@@ -17,7 +17,10 @@ import simternet.temporal.Temporal;
 
 public abstract class EdgeNetwork extends Network {
 
-	private static final long	serialVersionUID	= 1L;
+	private static final long	serialVersionUID		= 1L;
+
+	public double				revenueFromConsumers	= 0D;
+	public double				operatingCost			= 0D;
 
 	/**
 	 * Utility function used to determine the cost of building a network. AFAIK,
@@ -156,6 +159,7 @@ public abstract class EdgeNetwork extends Network {
 		double price = owner.pricingStrategy.getEdgePrice(this);
 		double revenue = acc.getPopulation() * price;
 		owner.financials.earn(revenue);
+		revenueFromConsumers += revenue;
 
 		if (TraceConfig.consumerPaidNSP && Logger.getRootLogger().isTraceEnabled()) {
 			Logger.getRootLogger().trace(acc + " paid " + price + " for " + this);
@@ -167,7 +171,7 @@ public abstract class EdgeNetwork extends Network {
 		/*
 		 * We need to iterate over every flow, received on every ingress link.
 		 * (Actually, there should be only one, since this is an edge network,
-		 * but other networks can have many ingress links.
+		 * but other networks can have many ingress links.)
 		 */
 		for (BackboneLink link : ingressLinks.values()) {
 			List<NetFlow> flows = link.receiveFlows();

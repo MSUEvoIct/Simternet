@@ -69,10 +69,21 @@ public class RationalNetManager extends NetManager implements Serializable {
 		// Find the edge with the highest density that isn't more than our price
 		// limit
 		EdgeNetwork edgeToSelect = null;
-		double higestBenefitDensity = 0D;
+		double highestPreferenceFactor = 0D;
 		for (EdgeNetworkBenefit enb : edgeBenefits) {
-			if (enb.density() > higestBenefitDensity && enb.network.getPriceFuture() <= c.profile.getMaxNetworkPrice()) {
-				higestBenefitDensity = enb.density();
+			double alpha = c.s.config.alpha;
+			double gamma = c.s.config.gamma;
+			double adjustedBenefit = Math.pow(enb.sumAppBenefits, alpha);
+			double adjustedCost = Math.pow(enb.network.getPriceFuture(), gamma);
+
+			double preferenceFactor = adjustedBenefit / adjustedCost;
+
+			// TODO: Add a benefit scaled switching probability?
+			// Compare to benefit on network the user is currently subscribed
+			// to, if any.
+			if (preferenceFactor > highestPreferenceFactor
+					&& enb.network.getPriceFuture() <= c.profile.getMaxNetworkPrice()) {
+				highestPreferenceFactor = preferenceFactor;
 				edgeToSelect = enb.network;
 			}
 		}
