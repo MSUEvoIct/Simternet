@@ -36,25 +36,26 @@ import simternet.temporal.TemporalSparseGrid2D;
  */
 public abstract class NetworkProvider implements Steppable, AsyncUpdate, HasFinancials {
 
-	protected static DecimalFormat							numCustFormat			= new DecimalFormat("0000000");
-	protected static DecimalFormat							positionFormat			= new DecimalFormat("00");
-	protected static DecimalFormat							priceFormat				= new DecimalFormat("000.00");
-	private static final long								serialVersionUID		= 1L;
+	protected static DecimalFormat							numCustFormat				= new DecimalFormat("0000000");
+	protected static DecimalFormat							positionFormat				= new DecimalFormat("00");
+	protected static DecimalFormat							priceFormat					= new DecimalFormat("000.00");
+	private static final long								serialVersionUID			= 1L;
 
-	protected TemporalHashMap<ApplicationProvider, Double>	aspTransitPrice			= new TemporalHashMap<ApplicationProvider, Double>();
+	protected TemporalHashMap<ApplicationProvider, Double>	aspTransitPrice				= new TemporalHashMap<ApplicationProvider, Double>();
 	protected Backbone										backboneNetwork;
-	public boolean											bankrupt				= false;
+	public boolean											bankrupt					= false;
 
-	public Double											deltaRevenue			= 0.0;
+	public Double											deltaRevenue				= 0.0;
 	protected TemporalSparseGrid2D							edgeNetworks;
 	public Financials										financials;
 	protected Int2D											homeBase;
-	protected ASPInterconnectPricingStrategy				interconnectStrategy	= null;
+	protected ASPInterconnectPricingStrategy				interconnectStrategy		= null;
 	protected InvestmentStrategy							investmentStrategy;
 	protected String										name;
 	public PricingStrategy									pricingStrategy;
+	protected EdgeBackboneUpgradeStrategy					edgeBackboneUpgradeStrategy	= null;
 
-	public Simternet										s						= null;
+	public Simternet										s							= null;
 
 	public NetworkProvider(Simternet simternet) {
 		s = simternet;
@@ -71,6 +72,8 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate, HasFina
 		edgeNetworks = new TemporalSparseGrid2D(simternet.config.gridSize.x, simternet.config.gridSize.y);
 
 		backboneNetwork = new Backbone(this);
+
+		edgeBackboneUpgradeStrategy = new EdgeBackboneUpgradeStrategy(this);
 
 	}
 
@@ -396,7 +399,10 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate, HasFina
 
 		makeNetworkInvestment();
 
-		pricingStrategy.priceEdges(); // Set prices for the next period.
+		pricingStrategy.priceEdges(); // Set edge prices for the next period.
+
+		// upgrade bandwidth of links between edge networks and backbone
+		edgeBackboneUpgradeStrategy.execute();
 
 		// operate our backbone network
 		backboneNetwork.step(state);

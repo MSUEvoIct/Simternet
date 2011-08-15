@@ -43,11 +43,12 @@ public class GPNetworkProvider extends NetworkProvider implements EvolvableAgent
 	public void setIndividual(Individual i) {
 		ind = (SimternetGPIndividual) i;
 		ind.setAgent(this);
-		pricingStrategy = new GPPricingStrategy(this, ind, ind.trees[0]);
+		pricingStrategy = new GPEdgePricingStrategy(this, ind, ind.trees[0]);
 		List<Class<? extends EdgeNetwork>> edgeTypes = new ArrayList<Class<? extends EdgeNetwork>>();
 		edgeTypes.add(SimpleEdgeNetwork.class);
 		investmentStrategy = new GPScoringInvestmentStrategy(this, edgeTypes, ind, ind.trees[1]);
 		interconnectStrategy = new GPInterconnectPricingStrategy(this, ind, ind.trees[2]);
+		edgeBackboneUpgradeStrategy = new GPEdgeBackboneUpgradeStrategy(this, ind, ind.trees[3]);
 	}
 
 	@Override

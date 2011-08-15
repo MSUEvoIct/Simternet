@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import sim.util.Int2D;
 import simternet.application.ApplicationProvider;
 import simternet.consumer.Consumer;
+import simternet.network.EdgeNetwork;
 
 /**
  * This class contains all the exogenous variables used as inputs to the model.
@@ -157,6 +158,13 @@ public class SimternetConfig extends Properties implements Serializable {
 		// benefit = sqrt(quality) * congestionRatio;
 		double benefit = Math.pow(asp.getQuality(), 0.5) * expectedFraction;
 		return benefit;
+	}
+
+	public static double edgeBackboneUpgradeCost(EdgeNetwork en, double capacityToAdd) {
+		// double currentBandwidth = en.getUpstreamIngress().getBandwidth();
+		// Quick-and-dirty scale
+		double cost = Math.pow(capacityToAdd / 10E6, 1.5);
+		return cost;
 	}
 
 	//

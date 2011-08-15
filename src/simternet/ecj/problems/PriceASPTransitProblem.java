@@ -5,7 +5,6 @@ import simternet.Simternet;
 import simternet.application.ApplicationProvider;
 import simternet.network.BackboneLink;
 import simternet.nsp.NetworkProvider;
-import simternet.nsp.PotentialNetwork;
 import ec.Problem;
 
 /**
@@ -46,12 +45,6 @@ public class PriceASPTransitProblem extends Problem implements HasSimternet, Has
 	@Override
 	public NetworkProvider getNetworkProvider() {
 		return isp;
-	}
-
-	@Override
-	public PotentialNetwork getPotentialNetwork() {
-		// TODO: Why is this here?
-		return null;
 	}
 
 	@Override
