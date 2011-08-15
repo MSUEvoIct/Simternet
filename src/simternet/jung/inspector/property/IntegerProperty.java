@@ -4,6 +4,8 @@ import java.util.HashMap;
 
 import javax.swing.JLabel;
 
+import simternet.Simternet;
+
 public class IntegerProperty extends TrackableProperty {
 
 	protected HashMap<Integer, Integer>	changes;
@@ -11,20 +13,20 @@ public class IntegerProperty extends TrackableProperty {
 	protected JLabel					valueLabel;
 	private static final long			serialVersionUID	= 1L;
 
-	public IntegerProperty(String propertyName) {
-		this(propertyName, new Integer(0));
+	public IntegerProperty(String propertyName, Simternet sim) {
+		this(propertyName, new Integer(0), sim);
 	}
 
-	public IntegerProperty(String propertyName, Integer value) {
-		super(propertyName);
+	public IntegerProperty(String propertyName, Integer value, Simternet sim) {
+		super(propertyName, sim);
 
 		this.value = value;
-		this.valueLabel = new JLabel(this.value.toString());
-		this.add(this.valueLabel);
+		valueLabel = new JLabel(this.value.toString());
+		this.add(valueLabel);
 	}
 
 	public Integer getValue() {
-		return this.value;
+		return value;
 	}
 
 	@Override
@@ -34,22 +36,23 @@ public class IntegerProperty extends TrackableProperty {
 	}
 
 	private void recordChange(Integer value) {
-		this.changes.put(this.getStep(), value);
+		changes.put(getStep(), value);
 	}
 
 	public void setValue(Integer value) {
-		if (this.tracking && (value != this.value))
-			this.recordChange(value);
+		if (tracking && value != this.value) {
+			recordChange(value);
+		}
 
 		this.value = value;
-		this.valueLabel.setText(this.value.toString());
+		valueLabel.setText(this.value.toString());
 	}
 
 	@Override
-	protected void trackingStateChanged() {
-		if (this.tracking) {
-			this.changes = new HashMap<Integer, Integer>();
-			this.recordChange(this.value);
+	protected void trackingTurnedOn() {
+		if (tracking) {
+			changes = new HashMap<Integer, Integer>();
+			recordChange(value);
 		}
 	}
 }

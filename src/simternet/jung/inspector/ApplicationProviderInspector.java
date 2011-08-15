@@ -34,18 +34,18 @@ public class ApplicationProviderInspector extends Inspector {
 		super(asp.toString(), owner);
 		this.asp = asp;
 
-		this.category = new StringProperty("Category", asp.getAppCategoryString());
-		this.add(this.category);
+		category = new StringProperty("Category", asp.getAppCategoryString(), sim);
+		this.add(category);
 
-		this.quality = new DoubleProperty("Quality", asp.getQuality());
-		this.add(this.quality);
+		quality = new DoubleProperty("Quality", asp.getQuality(), sim);
+		this.add(quality);
 
-		this.price = new DoubleProperty("Subscription Price", asp.getPriceSubscriptions());
-		this.add(this.price);
+		price = new DoubleProperty("Subscription Price", asp.getPriceSubscriptions(), sim);
+		this.add(price);
 
 		if (this.asp instanceof EvolvableAgent) {
-			this.trees = new TreeProperty("ECJ Trees", (EvolvableAgent) this.asp);
-			this.add(this.trees);
+			trees = new TreeProperty("ECJ Trees", (EvolvableAgent) this.asp);
+			this.add(trees);
 		}
 
 		this.update();
@@ -57,9 +57,9 @@ public class ApplicationProviderInspector extends Inspector {
 	 */
 	@Override
 	public void update() {
-		this.category.setValue(this.asp.getAppCategoryString());
-		this.quality.setValue(this.asp.getQuality());
-		this.price.setValue(this.asp.getPriceSubscriptions());
+		category.setValue(asp.getAppCategoryString());
+		quality.setValue(asp.getQuality());
+		price.setValue(asp.getPriceSubscriptions());
 	}
 
 }

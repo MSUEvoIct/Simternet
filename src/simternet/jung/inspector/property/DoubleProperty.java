@@ -4,6 +4,8 @@ import java.util.HashMap;
 
 import javax.swing.JLabel;
 
+import simternet.Simternet;
+
 public class DoubleProperty extends TrackableProperty {
 
 	protected HashMap<Integer, Double>	changes;
@@ -11,31 +13,32 @@ public class DoubleProperty extends TrackableProperty {
 	protected JLabel					valueLabel;
 	private static final long			serialVersionUID	= 1L;
 
-	public DoubleProperty(String propertyName) {
-		this(propertyName, new Double(0));
+	public DoubleProperty(String propertyName, Simternet sim) {
+		this(propertyName, new Double(0), sim);
 	}
 
-	public DoubleProperty(String propertyName, Double value) {
-		super(propertyName);
+	public DoubleProperty(String propertyName, Double value, Simternet sim) {
+		super(propertyName, sim);
 
 		this.value = value;
-		this.valueLabel = new JLabel(this.value.toString());
-		this.add(this.valueLabel);
+		valueLabel = new JLabel(this.value.toString());
+		this.add(valueLabel);
 	}
 
 	public Double getValue() {
-		return this.value;
+		return value;
 	}
 
 	@Override
 	public void printTrackedData() {
 		// TODO Auto-generated method stub
-		if (this.changes != null)
-			System.out.println(this.changes.toString());
+		if (changes != null) {
+			System.out.println(changes.toString());
+		}
 	}
 
 	private void recordValue(Double value) {
-		this.changes.put(this.getStep(), value);
+		changes.put(getStep(), value);
 	}
 
 	public void setValue(double value) {
@@ -44,18 +47,19 @@ public class DoubleProperty extends TrackableProperty {
 
 	public void setValue(Double value) {
 
-		if (this.tracking && (value != this.value))
-			this.recordValue(value);
+		if (tracking && value != this.value) {
+			recordValue(value);
+		}
 
 		this.value = value;
-		this.valueLabel.setText(this.value.toString());
+		valueLabel.setText(this.value.toString());
 	}
 
 	@Override
-	protected void trackingStateChanged() {
-		if (this.tracking) {
-			this.changes = new HashMap<Integer, Double>();
-			this.recordValue(this.value);
+	protected void trackingTurnedOn() {
+		if (tracking) {
+			changes = new HashMap<Integer, Double>();
+			recordValue(value);
 		}
 	}
 }

@@ -20,8 +20,8 @@ public class GlobalEdgeInspector extends Inspector {
 	public GlobalEdgeInspector(String title, GUI owner) {
 		super(title, owner);
 
-		this.averageTransitBandwidth = new DoubleProperty("Average Transit Bandwidth");
-		this.add(this.averageTransitBandwidth);
+		averageTransitBandwidth = new DoubleProperty("Average Transit Bandwidth", sim);
+		this.add(averageTransitBandwidth);
 
 		this.update();
 	}
@@ -31,13 +31,14 @@ public class GlobalEdgeInspector extends Inspector {
 		// TODO Auto-generated method stub
 		double bandwidthTotal = 0;
 
-		Collection<Network> edges = GUI.getSimternet().getNetworks(null, EdgeNetwork.class, null);
+		Collection<Network> edges = sim.getNetworks(null, EdgeNetwork.class, null);
 
 		for (Network net : edges)
-			if (net instanceof EdgeNetwork)
+			if (net instanceof EdgeNetwork) {
 				bandwidthTotal += ((EdgeNetwork) net).getUpstreamIngress().getBandwidth();
+			}
 
-		this.averageTransitBandwidth.setValue(bandwidthTotal / edges.size());
+		averageTransitBandwidth.setValue(bandwidthTotal / edges.size());
 	}
 
 }

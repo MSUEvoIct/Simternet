@@ -35,7 +35,6 @@ import simternet.jung.inspector.GlobalEdgeInspector;
 import simternet.jung.inspector.GlobalNSPInspector;
 import simternet.jung.inspector.Inspector;
 import simternet.jung.inspector.NetworkProviderInspector;
-import simternet.jung.inspector.property.TrackableProperty;
 import simternet.network.Backbone;
 import simternet.network.BackboneLink;
 import simternet.network.Datacenter;
@@ -59,11 +58,7 @@ public class GUI extends JPanel {
 	protected VisualizationViewer<Network, BackboneLink>	viewer;
 	private static final long								serialVersionUID	= 1L;
 
-	protected static Simternet								simternet;
-
-	public static Simternet getSimternet() {
-		return GUI.simternet;
-	}
+	protected Simternet										simternet;
 
 	public static void main(String[] args) {
 		JFrame jFrame = new JFrame("Simternet Checkpoint Reader");
@@ -83,7 +78,7 @@ public class GUI extends JPanel {
 	 */
 	public GUI(Simternet simternet) {
 		super();
-		GUI.simternet = simternet;
+		this.simternet = simternet;
 		initComponents();
 	}
 
@@ -121,7 +116,6 @@ public class GUI extends JPanel {
 	 */
 	protected void initComponents() {
 
-		TrackableProperty.setSimState(GUI.simternet);
 		inspectors = new HashSet<Inspector>();
 
 		setLayout(new BorderLayout());
@@ -130,7 +124,7 @@ public class GUI extends JPanel {
 		controlPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 		this.add(controlPanel, BorderLayout.EAST);
 
-		infoPanel = new InfoPanel(GUI.simternet);
+		infoPanel = new InfoPanel(simternet);
 		infoPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 		this.add(infoPanel, BorderLayout.SOUTH);
 
@@ -150,7 +144,7 @@ public class GUI extends JPanel {
 
 		// Define the layout, which will enable filtering, and use our
 		// LocationTransformer class to lay everything out.
-		layout = new EasyFilterLayout<Network, BackboneLink>(graph, new LocationTransformer(GUI.simternet));
+		layout = new EasyFilterLayout<Network, BackboneLink>(graph, new LocationTransformer(simternet));
 
 		Dimension frameDimension = new Dimension(800, 500);
 		viewer = new VisualizationViewer<Network, BackboneLink>(layout, frameDimension);
@@ -159,10 +153,10 @@ public class GUI extends JPanel {
 		// Set up transformers to label and color the vertices and edges.
 
 		// Adjust vertex shape/size:
-		viewer.getRenderContext().setVertexShapeTransformer(new NetworkShapeTransformer(GUI.simternet));
+		viewer.getRenderContext().setVertexShapeTransformer(new NetworkShapeTransformer(simternet));
 
 		// Adjust vertex color:
-		viewer.getRenderContext().setVertexFillPaintTransformer(new NetworkPaintTransformer(GUI.simternet));
+		viewer.getRenderContext().setVertexFillPaintTransformer(new NetworkPaintTransformer(simternet));
 
 		// Label vertices:
 		viewer.getRenderContext().setVertexLabelTransformer(new NetworkLabeller());
@@ -221,7 +215,7 @@ public class GUI extends JPanel {
 		}
 		inspectors.clear();
 
-		GUI.simternet = sim;
+		simternet = sim;
 		this.remove(viewer);
 		initViewer();
 		this.add(viewer, BorderLayout.CENTER);
@@ -249,7 +243,7 @@ public class GUI extends JPanel {
 	 */
 	protected void start() {
 		// start simulation
-		GUI.simternet.start();
+		simternet.start();
 		updateAll();
 	}
 
@@ -262,7 +256,7 @@ public class GUI extends JPanel {
 	 */
 	public void step(int n) {
 		for (int i = 0; i < n; i++) {
-			GUI.simternet.schedule.step(GUI.simternet);
+			simternet.schedule.step(simternet);
 			for (Inspector inspector : inspectors) {
 				inspector.update();
 			}
@@ -320,7 +314,7 @@ public class GUI extends JPanel {
 			setUpFilters();
 		}
 
-		for (ApplicationProvider asp : GUI.simternet.getASPs()) {
+		for (ApplicationProvider asp : simternet.getASPs()) {
 			graph.addVertex(asp.getDatacenter());
 			for (Network net : asp.getConnectedNetworks()) {
 				graph.addVertex(net);
@@ -328,7 +322,7 @@ public class GUI extends JPanel {
 			}
 		}
 
-		for (NetworkProvider nsp : GUI.simternet.getNetworkServiceProviders()) {
+		for (NetworkProvider nsp : simternet.getNetworkServiceProviders()) {
 			/*
 			 * If a vertex or edge is already represented in the graph, it will
 			 * not be duplicated by this function. It is safe to add an object

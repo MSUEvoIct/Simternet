@@ -19,17 +19,17 @@ public class GlobalNSPInspector extends Inspector {
 	public GlobalNSPInspector(String title, GUI owner) {
 		super(title, owner);
 
-		this.numNSPs = new IntegerProperty("Number of NSPs");
-		this.add(this.numNSPs);
+		numNSPs = new IntegerProperty("Number of NSPs", sim);
+		this.add(numNSPs);
 
 		this.update();
 	}
 
 	@Override
 	public void update() {
-		NetworkProvider[] nsps = (NetworkProvider[]) GUI.getSimternet().getNetworkServiceProviders().toArray();
+		NetworkProvider[] nsps = (NetworkProvider[]) sim.getNetworkServiceProviders().toArray();
 
-		this.numNSPs.setValue(nsps.length);
+		numNSPs.setValue(nsps.length);
 
 	}
 }

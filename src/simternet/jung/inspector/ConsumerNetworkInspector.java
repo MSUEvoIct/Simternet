@@ -35,19 +35,19 @@ public class ConsumerNetworkInspector extends Inspector {
 	 */
 	public ConsumerNetworkInspector(ConsumerNetwork network, GUI owner) {
 		super(network.toString(), owner);
-		this.net = network;
+		net = network;
 
-		this.location = new StringProperty("Location");
-		this.add(this.location);
+		location = new StringProperty("Location", sim);
+		this.add(location);
 
-		this.population = new IntegerProperty("Population");
-		this.add(this.population);
+		population = new IntegerProperty("Population", sim);
+		this.add(population);
 
-		this.percentage = new DoubleProperty("Percentage Subscribing");
-		this.add(this.percentage);
+		percentage = new DoubleProperty("Percentage Subscribing", sim);
+		this.add(percentage);
 
-		this.numNSPs = new IntegerProperty("Connected NSPs");
-		this.add(this.numNSPs);
+		numNSPs = new IntegerProperty("Connected NSPs", sim);
+		this.add(numNSPs);
 
 		this.update();
 	}
@@ -57,10 +57,10 @@ public class ConsumerNetworkInspector extends Inspector {
 	 */
 	@Override
 	public void update() {
-		this.location.setValue(this.net.getLocation().toCoordinates());
-		this.population.setValue(new Integer(this.net.getPopulation().intValue()));
-		this.percentage.setValue(this.net.getPercentageSubscribing());
-		this.numNSPs.setValue(this.net.getNumNetworkProviders());
+		location.setValue(net.getLocation().toCoordinates());
+		population.setValue(new Integer(net.getPopulation().intValue()));
+		percentage.setValue(net.getPercentageSubscribing());
+		numNSPs.setValue(net.getNumNetworkProviders());
 
 	}
 }

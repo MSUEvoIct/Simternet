@@ -21,17 +21,17 @@ public class GlobalASPInspector extends Inspector {
 	public GlobalASPInspector(String title, GUI owner) {
 		super(title, owner);
 
-		this.maxPrice = new DoubleProperty("Maximum Price");
-		this.add(this.maxPrice);
+		maxPrice = new DoubleProperty("Maximum Price", sim);
+		this.add(maxPrice);
 
-		this.minPrice = new DoubleProperty("Minimum Price");
-		this.add(this.minPrice);
+		minPrice = new DoubleProperty("Minimum Price", sim);
+		this.add(minPrice);
 
-		this.averagePrice = new DoubleProperty("Average Price");
-		this.add(this.averagePrice);
+		averagePrice = new DoubleProperty("Average Price", sim);
+		this.add(averagePrice);
 
-		this.averageNumCustomers = new DoubleProperty("Average Number of Customers");
-		this.add(this.averageNumCustomers);
+		averageNumCustomers = new DoubleProperty("Average Number of Customers", sim);
+		this.add(averageNumCustomers);
 
 		this.update();
 	}
@@ -39,12 +39,12 @@ public class GlobalASPInspector extends Inspector {
 	@Override
 	public void update() {
 
-		Collection<ApplicationProvider> asps = GUI.getSimternet().getASPs();
+		Collection<ApplicationProvider> asps = sim.getASPs();
 
 		if (asps.size() == 0) {
-			this.maxPrice.setValue(0);
-			this.averagePrice.setValue(0);
-			this.minPrice.setValue(0);
+			maxPrice.setValue(0);
+			averagePrice.setValue(0);
+			minPrice.setValue(0);
 		} else {
 			double minPrice = Double.MAX_VALUE;
 			double maxPrice = -Double.MAX_VALUE;
@@ -52,19 +52,21 @@ public class GlobalASPInspector extends Inspector {
 			double totalNumCustomers = 0;
 
 			for (ApplicationProvider asp : asps) {
-				if (asp.getPriceSubscriptions() < minPrice)
+				if (asp.getPriceSubscriptions() < minPrice) {
 					minPrice = asp.getPriceSubscriptions();
-				if (asp.getPriceSubscriptions() > maxPrice)
+				}
+				if (asp.getPriceSubscriptions() > maxPrice) {
 					maxPrice = asp.getPriceSubscriptions();
+				}
 				totalPrice += asp.getPriceSubscriptions();
 				totalNumCustomers += asp.getCustomers();
 			}
 
 			this.maxPrice.setValue(maxPrice);
 			this.minPrice.setValue(minPrice);
-			this.averagePrice.setValue(totalPrice / asps.size());
+			averagePrice.setValue(totalPrice / asps.size());
 
-			this.averageNumCustomers.setValue(totalNumCustomers / asps.size());
+			averageNumCustomers.setValue(totalNumCustomers / asps.size());
 		}
 	}
 }

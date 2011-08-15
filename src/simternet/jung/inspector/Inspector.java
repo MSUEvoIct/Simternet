@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
+import simternet.Simternet;
 import simternet.jung.gui.GUI;
 import simternet.jung.inspector.property.Property;
 import simternet.jung.inspector.property.TrackableProperty;
@@ -27,7 +28,13 @@ public abstract class Inspector extends JFrame {
 	protected JPanel				contentPanel;
 	protected GUI					owner;
 	protected ArrayList<Property>	properties;
+	protected Simternet				sim;
 	private static final long		serialVersionUID	= 1L;
+
+	public Inspector(String title, GUI owner, Simternet sim) {
+		this(title, owner);
+		this.sim = sim;
+	}
 
 	/**
 	 * Initializes the JFrame and defines behavior to notify the owner when the
@@ -40,22 +47,22 @@ public abstract class Inspector extends JFrame {
 	 */
 	public Inspector(String title, GUI owner) {
 		super(title);
-		this.contentPanel = new JPanel();
-		this.setContentPane(this.contentPanel);
+		contentPanel = new JPanel();
+		setContentPane(contentPanel);
 
 		this.owner = owner;
 
-		this.addWindowListener(new WindowAdapter() {
+		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				Inspector.this.frameClosed();
 			}
 		});
 
-		this.setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
-		this.properties = new ArrayList<Property>();
+		setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+		properties = new ArrayList<Property>();
 
-		this.contentPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+		contentPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 	}
 
 	/**
@@ -63,22 +70,25 @@ public abstract class Inspector extends JFrame {
 	 */
 	@Override
 	public Component add(Component component) {
-		if (component instanceof Property)
-			this.properties.add((Property) component);
+		if (component instanceof Property) {
+			properties.add((Property) component);
+		}
 		return super.add(component);
 	}
 
 	protected void frameClosed() {
-		if (this.owner != null)
-			this.owner.removeInspector(this);
-		this.dispose();
+		if (owner != null) {
+			owner.removeInspector(this);
+		}
+		dispose();
 	}
 
 	public void printData() {
-		System.out.println(this.getTitle());
-		for (Property p : this.properties)
-			if (p instanceof TrackableProperty)
+		System.out.println(getTitle());
+		for (Property p : properties)
+			if (p instanceof TrackableProperty) {
 				((TrackableProperty) p).printTrackedData();
+			}
 	}
 
 	/**

@@ -24,7 +24,7 @@ public class NetworkProviderInspector extends Inspector {
 	/**
 	 * Initializes the object and defines the layout
 	 * 
-	 * @param numNSPs
+	 * @param nsp
 	 *            object to inspect
 	 * @param owner
 	 *            the GUI in charge of this inspector
@@ -33,12 +33,12 @@ public class NetworkProviderInspector extends Inspector {
 		super(nsp.toString(), owner);
 		this.nsp = nsp;
 
-		this.name = new StringProperty("Name", nsp.getName());
-		this.add(this.name);
+		name = new StringProperty("Name", nsp.getName(), sim);
+		this.add(name);
 
 		if (this.nsp instanceof EvolvableAgent) {
-			this.trees = new TreeProperty("ECJ Trees", (EvolvableAgent) nsp);
-			this.add(this.trees);
+			trees = new TreeProperty("ECJ Trees", (EvolvableAgent) nsp);
+			this.add(trees);
 		}
 		this.update();
 	}
@@ -49,6 +49,6 @@ public class NetworkProviderInspector extends Inspector {
 	 */
 	@Override
 	public void update() {
-		this.name.setValue(this.nsp.getName());
+		name.setValue(nsp.getName());
 	}
 }
