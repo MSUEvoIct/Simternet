@@ -287,7 +287,7 @@ rm(tmp)
 # Networks per grid cell
 bitmap(buildFN("EdgeNetworkDensity", curGroup), width=graphWidth, units="px", height=graphHeight)
 hist(EdgeMarketTemp$NumNetworks, main = paste("Edge Network Density\n", genDescriptor), 
-  xlab="# of Edges at Location", breaks=5)
+  xlab="# of Edges at Location", breaks=6)
 dev.off()
 
 
