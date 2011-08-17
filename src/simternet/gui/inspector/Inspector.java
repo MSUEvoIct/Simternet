@@ -1,4 +1,4 @@
-package simternet.jung.inspector;
+package simternet.gui.inspector;
 
 import java.awt.Component;
 import java.awt.event.WindowAdapter;
@@ -12,9 +12,9 @@ import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
 import simternet.Simternet;
-import simternet.jung.gui.GUI;
-import simternet.jung.inspector.property.Property;
-import simternet.jung.inspector.property.TrackableProperty;
+import simternet.gui.GUI;
+import simternet.gui.inspector.property.Property;
+import simternet.gui.inspector.property.TrackableProperty;
 
 /**
  * A gui that, given an object from a Simternet simulation, displays information

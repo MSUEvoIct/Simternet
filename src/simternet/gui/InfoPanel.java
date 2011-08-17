@@ -1,4 +1,4 @@
-package simternet.jung.gui;
+package simternet.gui;
 
 import java.awt.GridLayout;
 

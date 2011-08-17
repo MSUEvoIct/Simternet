@@ -1,8 +1,8 @@
-package simternet.jung.inspector;
+package simternet.gui.inspector;
 
-import simternet.jung.gui.GUI;
-import simternet.jung.inspector.property.DoubleProperty;
-import simternet.jung.inspector.property.IntegerProperty;
+import simternet.gui.GUI;
+import simternet.gui.inspector.property.DoubleProperty;
+import simternet.gui.inspector.property.IntegerProperty;
 import simternet.nsp.NetworkProvider;
 
 public class GlobalNSPInspector extends Inspector {

@@ -1,10 +1,10 @@
-package simternet.jung.inspector;
+package simternet.gui.inspector;
 
+import simternet.gui.GUI;
+import simternet.gui.inspector.property.DoubleProperty;
+import simternet.gui.inspector.property.IntegerProperty;
+import simternet.gui.inspector.property.StringProperty;
 import simternet.jung.ConsumerNetwork;
-import simternet.jung.gui.GUI;
-import simternet.jung.inspector.property.DoubleProperty;
-import simternet.jung.inspector.property.IntegerProperty;
-import simternet.jung.inspector.property.StringProperty;
 
 /**
  * Inspects a location (Int2D) of a Simternet run

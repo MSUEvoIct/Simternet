@@ -1,9 +1,9 @@
-package simternet.jung.inspector;
+package simternet.gui.inspector;
 
 import java.util.Collection;
 
-import simternet.jung.gui.GUI;
-import simternet.jung.inspector.property.DoubleProperty;
+import simternet.gui.GUI;
+import simternet.gui.inspector.property.DoubleProperty;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 

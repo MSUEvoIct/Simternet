@@ -1,4 +1,4 @@
-package simternet.jung.inspector.property;
+package simternet.gui.inspector.property;
 
 import java.util.HashMap;
 

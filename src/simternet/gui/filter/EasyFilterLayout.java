@@ -1,4 +1,4 @@
-package simternet.jung.filter;
+package simternet.gui.filter;
 
 import java.awt.geom.Point2D;
 

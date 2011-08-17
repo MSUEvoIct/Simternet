@@ -1,4 +1,4 @@
-package simternet.jung.filter;
+package simternet.gui.filter;
 
 import sim.util.Int2D;
 import simternet.network.BackboneLink;

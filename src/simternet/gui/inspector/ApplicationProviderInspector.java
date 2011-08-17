@@ -1,11 +1,11 @@
-package simternet.jung.inspector;
+package simternet.gui.inspector;
 
 import simternet.application.ApplicationProvider;
 import simternet.ecj.EvolvableAgent;
-import simternet.jung.gui.GUI;
-import simternet.jung.inspector.property.DoubleProperty;
-import simternet.jung.inspector.property.StringProperty;
-import simternet.jung.inspector.property.TreeProperty;
+import simternet.gui.GUI;
+import simternet.gui.inspector.property.DoubleProperty;
+import simternet.gui.inspector.property.StringProperty;
+import simternet.gui.inspector.property.TreeProperty;
 
 /**
  * Inspects ApplicationProvider objects

@@ -14,7 +14,7 @@ package simternet.jung;
 
 import java.awt.event.MouseEvent;
 
-import simternet.jung.gui.GUI;
+import simternet.gui.GUI;
 import simternet.network.BackboneLink;
 import simternet.network.Network;
 import edu.uci.ics.jung.visualization.control.AnimatedPickingGraphMousePlugin;

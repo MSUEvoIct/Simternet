@@ -1,4 +1,4 @@
-package simternet.jung.gui;
+package simternet.gui;
 
 import it.cnr.imaa.essi.lablib.gui.checkboxtree.CheckboxTree;
 import it.cnr.imaa.essi.lablib.gui.checkboxtree.TreeCheckingEvent;
