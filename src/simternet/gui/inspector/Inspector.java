@@ -1,8 +1,6 @@
 package simternet.gui.inspector;
 
 import java.awt.Component;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -12,7 +10,6 @@ import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
 import simternet.Simternet;
-import simternet.gui.GUI;
 import simternet.gui.inspector.property.Property;
 import simternet.gui.inspector.property.TrackableProperty;
 
@@ -26,38 +23,26 @@ import simternet.gui.inspector.property.TrackableProperty;
 public abstract class Inspector extends JFrame {
 
 	protected JPanel				contentPanel;
-	protected GUI					owner;
 	protected ArrayList<Property>	properties;
 	protected Simternet				sim;
 	private static final long		serialVersionUID	= 1L;
-
-	public Inspector(String title, GUI owner, Simternet sim) {
-		this(title, owner);
-		this.sim = sim;
-	}
 
 	/**
 	 * Initializes the JFrame and defines behavior to notify the owner when the
 	 * inspector is closed
 	 * 
+	 * @param sim
+	 *            the Simternet instance that this inspector is inspecting
 	 * @param title
 	 *            the title of the JFrame
-	 * @param owner
-	 *            the GUI that this inspector reports to, if any
 	 */
-	public Inspector(String title, GUI owner) {
+	public Inspector(Simternet sim, String title) {
 		super(title);
+
+		this.sim = sim;
+
 		contentPanel = new JPanel();
 		setContentPane(contentPanel);
-
-		this.owner = owner;
-
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				Inspector.this.frameClosed();
-			}
-		});
 
 		setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 		properties = new ArrayList<Property>();
@@ -74,13 +59,6 @@ public abstract class Inspector extends JFrame {
 			properties.add((Property) component);
 		}
 		return super.add(component);
-	}
-
-	protected void frameClosed() {
-		if (owner != null) {
-			owner.removeInspector(this);
-		}
-		dispose();
 	}
 
 	public void printData() {

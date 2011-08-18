@@ -2,8 +2,8 @@ package simternet.gui.inspector;
 
 import java.util.Collection;
 
+import simternet.Simternet;
 import simternet.application.ApplicationProvider;
-import simternet.gui.GUI;
 import simternet.gui.inspector.property.DoubleProperty;
 
 public class GlobalASPInspector extends Inspector {
@@ -14,12 +14,12 @@ public class GlobalASPInspector extends Inspector {
 
 	private static final long	serialVersionUID	= 1L;
 
-	public GlobalASPInspector(GUI gui) {
-		this("Global ASP Inspector", gui);
+	public GlobalASPInspector(Simternet sim) {
+		this(sim, "Global ASP Inspector");
 	}
 
-	public GlobalASPInspector(String title, GUI owner) {
-		super(title, owner);
+	public GlobalASPInspector(Simternet sim, String title) {
+		super(sim, title);
 
 		maxPrice = new DoubleProperty("Maximum Price", sim);
 		this.add(maxPrice);

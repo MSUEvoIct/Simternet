@@ -1,7 +1,6 @@
 package simternet.gui.inspector;
 
 import simternet.ecj.EvolvableAgent;
-import simternet.gui.GUI;
 import simternet.gui.inspector.property.StringProperty;
 import simternet.gui.inspector.property.TreeProperty;
 import simternet.nsp.NetworkProvider;
@@ -26,11 +25,9 @@ public class NetworkProviderInspector extends Inspector {
 	 * 
 	 * @param nsp
 	 *            object to inspect
-	 * @param owner
-	 *            the GUI in charge of this inspector
 	 */
-	public NetworkProviderInspector(NetworkProvider nsp, GUI owner) {
-		super(nsp.toString(), owner);
+	public NetworkProviderInspector(NetworkProvider nsp) {
+		super(nsp.s, nsp.toString());
 		this.nsp = nsp;
 
 		name = new StringProperty("Name", nsp.getName(), sim);

@@ -46,6 +46,15 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.AbstractModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 
+/**
+ * A GUI that displays a serialized Simternet object and allows the user to step
+ * through the simulation and see how the network changes. Relies on the
+ * simternet.jung packages to display the representation of the network, and the
+ * simternet.gui packages to display additional information.
+ * 
+ * @author graysonwright
+ * 
+ */
 public class GUI extends JPanel {
 
 	protected ControlPanel									controlPanel;
@@ -62,7 +71,7 @@ public class GUI extends JPanel {
 
 	public static void main(String[] args) {
 		JFrame jFrame = new JFrame("Simternet Checkpoint Reader");
-		GUI gui = new GUI(new Simternet(System.currentTimeMillis()));
+		GUI gui = new GUI(null);
 
 		jFrame.setContentPane(gui);
 		gui.start();
@@ -82,18 +91,30 @@ public class GUI extends JPanel {
 		initComponents();
 	}
 
+	public boolean hasValidSimternetInstance() {
+		return simternet != null;
+	}
+
 	public void ASPInspectorButtonPressed() {
-		GlobalASPInspector inspector = new GlobalASPInspector(this);
-		inspectors.add(inspector);
-		inspector.pack();
-		inspector.setVisible(true);
+		if (hasValidSimternetInstance()) {
+			GlobalASPInspector inspector = new GlobalASPInspector(simternet);
+			inspectors.add(inspector);
+			inspector.pack();
+			inspector.setVisible(true);
+		} else {
+			System.err.println("Cannot load inspector because no serialized instance is currently loaded.");
+		}
 	}
 
 	public void EdgeInspectorButtonPressed() {
-		GlobalEdgeInspector inspector = new GlobalEdgeInspector(this);
-		inspectors.add(inspector);
-		inspector.pack();
-		inspector.setVisible(true);
+		if (hasValidSimternetInstance()) {
+			GlobalEdgeInspector inspector = new GlobalEdgeInspector(simternet);
+			inspectors.add(inspector);
+			inspector.pack();
+			inspector.setVisible(true);
+		} else {
+			System.err.println("Cannot load inspector because no serialized instance is currently loaded.");
+		}
 	}
 
 	/**
@@ -184,10 +205,14 @@ public class GUI extends JPanel {
 	}
 
 	public void NSPInspectorButtonPressed() {
-		GlobalNSPInspector inspector = new GlobalNSPInspector(this);
-		inspectors.add(inspector);
-		inspector.pack();
-		inspector.setVisible(true);
+		if (hasValidSimternetInstance()) {
+			GlobalNSPInspector inspector = new GlobalNSPInspector(simternet);
+			inspectors.add(inspector);
+			inspector.pack();
+			inspector.setVisible(true);
+		} else {
+			System.err.println("Cannot load inspector because no serialized instance is currently loaded.");
+		}
 	}
 
 	public void printDataButtonPressed() {
@@ -243,8 +268,10 @@ public class GUI extends JPanel {
 	 */
 	protected void start() {
 		// start simulation
-		simternet.start();
-		updateAll();
+		if (hasValidSimternetInstance()) {
+			simternet.start();
+			updateAll();
+		}
 	}
 
 	/**
@@ -359,11 +386,11 @@ public class GUI extends JPanel {
 		Inspector inspector = null;
 
 		if (vertex instanceof ConsumerNetwork) {
-			inspector = new ConsumerNetworkInspector((ConsumerNetwork) vertex, this);
+			inspector = new ConsumerNetworkInspector((ConsumerNetwork) vertex);
 		} else if (vertex instanceof Backbone) {
-			inspector = new NetworkProviderInspector(((Backbone) vertex).getOwner(), this);
+			inspector = new NetworkProviderInspector(((Backbone) vertex).getOwner());
 		} else if (vertex instanceof Datacenter) {
-			inspector = new ApplicationProviderInspector(((Datacenter) vertex).getOwner(), this);
+			inspector = new ApplicationProviderInspector(((Datacenter) vertex).getOwner());
 		}
 
 		if (inspector != null) {

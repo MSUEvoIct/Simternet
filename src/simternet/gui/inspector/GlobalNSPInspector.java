@@ -1,9 +1,8 @@
 package simternet.gui.inspector;
 
-import simternet.gui.GUI;
+import simternet.Simternet;
 import simternet.gui.inspector.property.DoubleProperty;
 import simternet.gui.inspector.property.IntegerProperty;
-import simternet.nsp.NetworkProvider;
 
 public class GlobalNSPInspector extends Inspector {
 
@@ -12,12 +11,12 @@ public class GlobalNSPInspector extends Inspector {
 
 	private static final long	serialVersionUID	= 1L;
 
-	public GlobalNSPInspector(GUI owner) {
-		this("Global NSP Inspector", owner);
+	public GlobalNSPInspector(Simternet sim) {
+		this(sim, "Global NSP Inspector");
 	}
 
-	public GlobalNSPInspector(String title, GUI owner) {
-		super(title, owner);
+	public GlobalNSPInspector(Simternet sim, String title) {
+		super(sim, title);
 
 		numNSPs = new IntegerProperty("Number of NSPs", sim);
 		this.add(numNSPs);
@@ -27,7 +26,7 @@ public class GlobalNSPInspector extends Inspector {
 
 	@Override
 	public void update() {
-		NetworkProvider[] nsps = (NetworkProvider[]) sim.getNetworkServiceProviders().toArray();
+		Object[] nsps = sim.getNetworkServiceProviders().toArray();
 
 		numNSPs.setValue(nsps.length);
 

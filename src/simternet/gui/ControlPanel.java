@@ -38,7 +38,7 @@ public class ControlPanel extends JPanel {
 	public ControlPanel(GUI owner) {
 		super();
 		this.owner = owner;
-		this.initComponents();
+		initComponents();
 	}
 
 	protected void chooseFile() {
@@ -48,8 +48,8 @@ public class ControlPanel extends JPanel {
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fileChooser.getSelectedFile();
-			this.loadFile(file);
-			this.checkpointFile = file;
+			loadFile(file);
+			checkpointFile = file;
 		}
 	}
 
@@ -59,7 +59,7 @@ public class ControlPanel extends JPanel {
 	protected void initComponents() {
 
 		// Place controls vertically in a single column
-		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
 		// Add a button to load a new Simternet checkpoint
 		JButton loadButton = new JButton("Load From Checkpoint");
@@ -93,17 +93,17 @@ public class ControlPanel extends JPanel {
 		this.add(stepButton);
 
 		// set spinner's initial value:1, minimum=0, maximum=100, step:1
-		this.stepSelector = new JSpinner(new SpinnerNumberModel(1, 0, 100, 1));
-		this.stepSelector.setMaximumSize(this.stepSelector.getPreferredSize());
-		this.stepSelector.setAlignmentX(Component.LEFT_ALIGNMENT);
-		this.add(this.stepSelector);
+		stepSelector = new JSpinner(new SpinnerNumberModel(1, 0, 100, 1));
+		stepSelector.setMaximumSize(stepSelector.getPreferredSize());
+		stepSelector.setAlignmentX(Component.LEFT_ALIGNMENT);
+		this.add(stepSelector);
 
 		// A button to open the filter gui
 		JButton filterButton = new JButton("Modify Filters");
 		filterButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				ControlPanel.this.owner.filterButtonPressed();
+				owner.filterButtonPressed();
 			}
 		});
 		this.add(filterButton);
@@ -112,7 +112,7 @@ public class ControlPanel extends JPanel {
 		printDataButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				ControlPanel.this.owner.printDataButtonPressed();
+				owner.printDataButtonPressed();
 			}
 		});
 		this.add(printDataButton);
@@ -124,7 +124,7 @@ public class ControlPanel extends JPanel {
 		nspInspectorButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				ControlPanel.this.owner.NSPInspectorButtonPressed();
+				owner.NSPInspectorButtonPressed();
 			}
 		});
 		this.add(nspInspectorButton);
@@ -133,7 +133,7 @@ public class ControlPanel extends JPanel {
 		aspInspectorButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				ControlPanel.this.owner.ASPInspectorButtonPressed();
+				owner.ASPInspectorButtonPressed();
 			}
 		});
 		this.add(aspInspectorButton);
@@ -142,7 +142,7 @@ public class ControlPanel extends JPanel {
 		edgeInspectorButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				ControlPanel.this.owner.EdgeInspectorButtonPressed();
+				owner.EdgeInspectorButtonPressed();
 			}
 		});
 		this.add(edgeInspectorButton);
@@ -160,7 +160,7 @@ public class ControlPanel extends JPanel {
 			GZIPInputStream gStream = new GZIPInputStream(fileStream);
 
 			ObjectInputStream objectStream = new ObjectInputStream(gStream);
-			this.owner.setSimternet((Simternet) objectStream.readObject());
+			owner.setSimternet((Simternet) objectStream.readObject());
 			objectStream.close();
 		} catch (Exception exception) {
 			System.err.println("Unable to read from file");
@@ -176,7 +176,11 @@ public class ControlPanel extends JPanel {
 	 * Result: the current simulation gets set back to step = 0
 	 */
 	protected void restart() {
-		this.loadFile(this.checkpointFile);
+		if (owner.hasValidSimternetInstance()) {
+			loadFile(checkpointFile);
+		} else {
+			System.err.println("Cannot restart Simternet because no serialized instance is currently loaded.");
+		}
 	}
 
 	/**
@@ -186,7 +190,11 @@ public class ControlPanel extends JPanel {
 	 * number of times
 	 */
 	protected void step() {
-		int n = ((Integer) this.stepSelector.getValue()).intValue();
-		this.owner.step(n);
+		if (owner.hasValidSimternetInstance()) {
+			int n = ((Integer) stepSelector.getValue()).intValue();
+			owner.step(n);
+		} else {
+			System.err.println("Cannot step Simternet because no serialized instance is currently loaded.");
+		}
 	}
 }

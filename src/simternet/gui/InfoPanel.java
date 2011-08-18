@@ -28,11 +28,11 @@ public class InfoPanel extends JPanel {
 	public InfoPanel(Simternet sim) {
 		super();
 		this.sim = sim;
-		this.initComponents();
+		initComponents();
 	}
 
 	public Simternet getSim() {
-		return this.sim;
+		return sim;
 	}
 
 	/**
@@ -40,7 +40,7 @@ public class InfoPanel extends JPanel {
 	 * to the Panel.
 	 */
 	protected void initComponents() {
-		this.setLayout(new GridLayout(2, InfoPanel.numCols));
+		setLayout(new GridLayout(2, InfoPanel.numCols));
 
 		// Display the key labels
 		this.add(new JLabel("Generation:"));
@@ -48,14 +48,14 @@ public class InfoPanel extends JPanel {
 		this.add(new JLabel("Step:"));
 
 		// Display the value labels
-		this.generationLabel = new JLabel("0");
-		this.add(this.generationLabel);
+		generationLabel = new JLabel("0");
+		this.add(generationLabel);
 
-		this.chunkLabel = new JLabel("0");
-		this.add(this.chunkLabel);
+		chunkLabel = new JLabel("0");
+		this.add(chunkLabel);
 
-		this.stepLabel = new JLabel("0");
-		this.add(this.stepLabel);
+		stepLabel = new JLabel("0");
+		this.add(stepLabel);
 
 		this.update();
 
@@ -67,8 +67,10 @@ public class InfoPanel extends JPanel {
 	}
 
 	public void update() {
-		this.generationLabel.setText(Integer.toString(this.sim.generation));
-		this.chunkLabel.setText(Integer.toString(this.sim.chunk));
-		this.stepLabel.setText(Long.toString(this.sim.schedule.getSteps()));
+		if (sim != null) {
+			generationLabel.setText(Integer.toString(sim.generation));
+			chunkLabel.setText(Integer.toString(sim.chunk));
+			stepLabel.setText(Long.toString(sim.schedule.getSteps()));
+		}
 	}
 }

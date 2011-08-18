@@ -2,7 +2,7 @@ package simternet.gui.inspector;
 
 import java.util.Collection;
 
-import simternet.gui.GUI;
+import simternet.Simternet;
 import simternet.gui.inspector.property.DoubleProperty;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
@@ -13,12 +13,12 @@ public class GlobalEdgeInspector extends Inspector {
 
 	private static final long	serialVersionUID	= 1L;
 
-	public GlobalEdgeInspector(GUI gui) {
-		this("Global Edge Inspector", gui);
+	public GlobalEdgeInspector(Simternet sim) {
+		this(sim, "Global Edge Inspector");
 	}
 
-	public GlobalEdgeInspector(String title, GUI owner) {
-		super(title, owner);
+	public GlobalEdgeInspector(Simternet sim, String title) {
+		super(sim, title);
 
 		averageTransitBandwidth = new DoubleProperty("Average Transit Bandwidth", sim);
 		this.add(averageTransitBandwidth);

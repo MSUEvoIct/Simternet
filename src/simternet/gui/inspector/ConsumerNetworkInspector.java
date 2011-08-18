@@ -1,6 +1,5 @@
 package simternet.gui.inspector;
 
-import simternet.gui.GUI;
 import simternet.gui.inspector.property.DoubleProperty;
 import simternet.gui.inspector.property.IntegerProperty;
 import simternet.gui.inspector.property.StringProperty;
@@ -33,8 +32,8 @@ public class ConsumerNetworkInspector extends Inspector {
 	 * @param owner
 	 *            the GUI in charge of this inspector
 	 */
-	public ConsumerNetworkInspector(ConsumerNetwork network, GUI owner) {
-		super(network.toString(), owner);
+	public ConsumerNetworkInspector(ConsumerNetwork network) {
+		super(network.s, network.toString());
 		net = network;
 
 		location = new StringProperty("Location", sim);

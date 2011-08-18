@@ -2,7 +2,6 @@ package simternet.gui.inspector;
 
 import simternet.application.ApplicationProvider;
 import simternet.ecj.EvolvableAgent;
-import simternet.gui.GUI;
 import simternet.gui.inspector.property.DoubleProperty;
 import simternet.gui.inspector.property.StringProperty;
 import simternet.gui.inspector.property.TreeProperty;
@@ -27,11 +26,9 @@ public class ApplicationProviderInspector extends Inspector {
 	 * 
 	 * @param asp
 	 *            the object to be inspected
-	 * @param owner
-	 *            the GUI to which this inspector reports
 	 */
-	public ApplicationProviderInspector(ApplicationProvider asp, GUI owner) {
-		super(asp.toString(), owner);
+	public ApplicationProviderInspector(ApplicationProvider asp) {
+		super(asp.s, asp.toString());
 		this.asp = asp;
 
 		category = new StringProperty("Category", asp.getAppCategoryString(), sim);
