@@ -13,7 +13,15 @@ public class EdgeDataReporter extends Reporter {
 
 	protected static HashMap<String, String>	netTypeAbbreviations;
 	private static final long					serialVersionUID	= 1L;
-	public static final String					specificHeaders		= "LocationX,LocationY,NSP,NetworkType,TransitBandwidth,Congestion,Price,Customers,Competitors,MarketShare";
+	public static final String					specificHeaders		= "LocationX" + Reporter.separater + "LocationY"
+																			+ Reporter.separater + "NSP"
+																			+ Reporter.separater + "NetworkType"
+																			+ Reporter.separater + "TransitBandwidth"
+																			+ Reporter.separater + "Congestion"
+																			+ Reporter.separater + "Price"
+																			+ Reporter.separater + "Customers"
+																			+ Reporter.separater + "Competitors"
+																			+ Reporter.separater + "MarketShare";
 
 	static {
 		new EdgeDataReporter().logHeaders();

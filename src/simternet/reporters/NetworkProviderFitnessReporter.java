@@ -7,7 +7,18 @@ import simternet.nsp.NetworkProvider;
 public class NetworkProviderFitnessReporter extends Reporter {
 
 	private static final long	serialVersionUID	= 1L;
-	public static final String	specificHeaders		= "NSP,Fitness,CapitalAssets,LiquidAssets,TotalInvestment,TotalFinancing,TotalOperating,TotalRevenue,NumEdges,Bankrupt,NumCustomers,MarketShare";
+	public static final String	specificHeaders		= 	"NSP" + Reporter.separater + 
+														"Fitness" + Reporter.separater + 
+														"CapitalAssets" + Reporter.separater + 
+														"LiquidAssets" + Reporter.separater + 
+														"TotalInvestment" + Reporter.separater + 
+														"TotalFinancing" + Reporter.separater + 
+														"TotalOperating" + Reporter.separater + 
+														"TotalRevenue" + Reporter.separater + 
+														"NumEdges" + Reporter.separater + 
+														"Bankrupt" + Reporter.separater + 
+														"NumCustomers" + Reporter.separater + 
+														"MarketShare";
 
 	static {
 		new NetworkProviderFitnessReporter().logHeaders();

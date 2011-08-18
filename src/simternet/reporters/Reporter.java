@@ -13,7 +13,8 @@ public abstract class Reporter implements Steppable {
 
 	protected int				interval			= 1;
 	public Long					step				= null;
-	public static final String	commonFields		= "Generation,Chunk,Step,";
+	public static final String	commonFields		= "Generation" + Reporter.separater + "Chunk" + Reporter.separater
+															+ "Step,";
 	public static final String	dataFileSuffix		= ".out.csv";
 	public static final String	separater			= ",";
 	private static final long	serialVersionUID	= 1L;
@@ -24,21 +25,21 @@ public abstract class Reporter implements Steppable {
 
 	public Reporter(int i) {
 		super();
-		this.interval = i;
+		interval = i;
 	}
 
 	public abstract void collectData(SimState state);
 
 	public Integer getChunk() {
-		return this.chunk;
+		return chunk;
 	}
 
 	public String getFullHeader() {
-		return Reporter.commonFields + this.getSpecificHeaders();
+		return Reporter.commonFields + getSpecificHeaders();
 	}
 
 	public Integer getGeneration() {
-		return this.generation;
+		return generation;
 	}
 
 	public abstract String getLogger();
@@ -46,12 +47,12 @@ public abstract class Reporter implements Steppable {
 	public abstract String getSpecificHeaders();
 
 	public Long getStep() {
-		return this.step;
+		return step;
 	}
 
 	public void logHeaders() {
-		Logger l = Logger.getLogger(this.getLogger());
-		l.info(this.getFullHeader());
+		Logger l = Logger.getLogger(getLogger());
+		l.info(getFullHeader());
 	}
 
 	/**
@@ -61,9 +62,9 @@ public abstract class Reporter implements Steppable {
 	 * @param line
 	 */
 	public void report(String line) {
-		Logger l = Logger.getLogger(this.getLogger());
-		l.trace(this.getGeneration() + Reporter.separater + this.getChunk().toString() + Reporter.separater
-				+ this.getStep().toString() + Reporter.separater + line);
+		Logger l = Logger.getLogger(getLogger());
+		l.trace(getGeneration() + Reporter.separater + getChunk().toString() + Reporter.separater
+				+ getStep().toString() + Reporter.separater + line);
 	}
 
 	public void setChunk(Integer chunk) {
@@ -75,15 +76,16 @@ public abstract class Reporter implements Steppable {
 	}
 
 	public void setInterval(int i) {
-		this.interval = i;
+		interval = i;
 	}
 
 	@Override
 	public void step(SimState state) {
-		this.step = state.schedule.getSteps();
-		if (this.step > 0)
-			if (this.step % this.interval == 0)
-				this.collectData(state);
+		step = state.schedule.getSteps();
+		if (step > 0)
+			if (step % interval == 0) {
+				collectData(state);
+			}
 	}
 
 }

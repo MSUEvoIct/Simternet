@@ -7,8 +7,17 @@ import simternet.application.ApplicationProvider;
 public class ApplicationProviderFitnessReporter extends Reporter {
 
 	private static final long	serialVersionUID	= 1L;
-	public static final String	specificHeaders		= "ASP,Fitness,Bandwidth,Quality,NumCustomers,CapitalAssets,"
-															+ "LiquidAssets,TotalInvestment,TotalFinancing,TotalOperating,TotalRevenue";
+	public static final String	specificHeaders		= "ASP" + Reporter.separater + 
+														"Fitness" + Reporter.separater + 
+														"Bandwidth" + Reporter.separater + 
+														"Quality" + Reporter.separater + 
+														"NumCustomers" + Reporter.separater + 
+														"CapitalAssets" + Reporter.separater + 
+														"LiquidAssets" + Reporter.separater + 
+														"TotalInvestment" + Reporter.separater + 
+														"TotalFinancing" + Reporter.separater + 
+														"TotalOperating" + Reporter.separater + 
+														"TotalRevenue";
 
 	static {
 		new ApplicationProviderFitnessReporter().logHeaders();

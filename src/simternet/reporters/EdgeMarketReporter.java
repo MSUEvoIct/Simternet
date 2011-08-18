@@ -7,7 +7,10 @@ import simternet.Simternet;
 public class EdgeMarketReporter extends Reporter {
 
 	private static final long	serialVersionUID	= 1L;
-	public static final String	specificHeaders		= "LocactionX,LocationY,NumConsumers,NumNetworks";
+	public static final String	specificHeaders		= 	"LocactionX" + Reporter.separater + 
+														"LocationY" + Reporter.separater + 
+														"NumConsumers" + Reporter.separater + 
+														"NumNetworks";
 
 	static {
 		new EdgeMarketReporter().logHeaders();

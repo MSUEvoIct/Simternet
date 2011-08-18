@@ -7,7 +7,10 @@ import simternet.consumer.Consumer;
 
 public class ConsumerDataReporter extends Reporter {
 
-	public static final String	specificHeaders	= "Consumer,Population,TransferRequested,TransferActual";
+	public static final String	specificHeaders	= "Consumer" + Reporter.separater + 
+														"Population" + Reporter.separater + 
+														"TransferRequested" + Reporter.separater + 
+														"TransferActual";
 
 	static {
 		new ConsumerDataReporter().logHeaders();

@@ -9,7 +9,10 @@ import simternet.nsp.NetworkProvider;
 public class ASPInterconnectionReporter extends Reporter {
 
 	private static final long	serialVersionUID	= 1L;
-	public static final String	specificHeaders		= "NSP,Price,ASP,Quantity";
+	public static final String	specificHeaders		= "NSP" + Reporter.separater + 
+														"Price" + Reporter.separater + 
+														"ASP" + Reporter.separater + 
+														"Quantity";
 
 	static {
 		new ASPInterconnectionReporter().logHeaders();
