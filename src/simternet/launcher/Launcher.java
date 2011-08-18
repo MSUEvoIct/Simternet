@@ -44,6 +44,12 @@ public class Launcher extends JPanel {
 		addIntParamPanel("pop.subpop.0.size", "# of NSPs per Generation");
 		addIntParamPanel("pop.subpop.1.size", "# of ASPs per Generation");
 
+		add(new BoolParameterPanel("checkpoint", false, "Turn on ECJ checkpointing"));
+		add(new IntParameterPanel("checkpoint-modulo", 1, "# of generations between ECJ checkpoints"));
+
+		add(new BoolParameterPanel("simternet.checkpoint", false, "Turn on Simternet serialization"));
+		add(new IntParameterPanel("simterent.checkpoint-modulo", 1, "# of generations between simternet checkpoints"));
+
 		JButton launchButton = new JButton("Launch");
 		launchButton.addActionListener(new ActionListener() {
 			@Override
@@ -62,7 +68,13 @@ public class Launcher extends JPanel {
 
 	protected void addIntParamPanel(String s, String description) {
 		Parameter p = new Parameter(s);
-		this.add(new IntParameterPanel(p.toString(), params.getInt(p, null), description));
+		int value;
+		try {
+			value = params.getInt(p, null);
+		} catch (NumberFormatException e) {
+			value = 1;
+		}
+		this.add(new IntParameterPanel(p.toString(), value, description));
 	}
 
 	@SuppressWarnings("unused")

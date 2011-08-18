@@ -6,26 +6,27 @@ import javax.swing.JLabel;
 
 import simternet.Simternet;
 
-public class IntegerProperty extends TrackableProperty {
+public class BooleanProperty extends TrackableProperty {
 
-	protected HashMap<Integer, Integer>	changes;
-	protected Integer					value;
+	protected HashMap<Integer, Boolean>	changes;
+	protected Boolean					value;
 	protected JLabel					valueLabel;
-	private static final long			serialVersionUID	= 1L;
 
-	public IntegerProperty(String propertyName, Simternet sim) {
-		this(propertyName, new Integer(0), sim);
+	public BooleanProperty(String propertyName, Simternet sim) {
+		this(propertyName, new Boolean(false), sim);
 	}
 
-	public IntegerProperty(String propertyName, Integer value, Simternet sim) {
+	public BooleanProperty(String propertyName, Boolean value, Simternet sim) {
 		super(propertyName, sim);
 
 		this.value = value;
-		valueLabel = new JLabel(this.value.toString());
+		valueLabel = new JLabel(value.toString());
 		this.add(valueLabel);
 	}
 
-	public Integer getValue() {
+	private static final long	serialVersionUID	= 1L;
+
+	public Boolean getValue() {
 		return value;
 	}
 
@@ -37,11 +38,15 @@ public class IntegerProperty extends TrackableProperty {
 		}
 	}
 
-	private void recordChange(Integer value) {
+	private void recordChange(Boolean value) {
 		changes.put(getStep(), value);
 	}
 
-	public void setValue(Integer value) {
+	public void setValue(boolean newValue) {
+		this.setValue(new Boolean(newValue));
+	}
+
+	public void setValue(Boolean value) {
 		if (tracking && value != this.value) {
 			recordChange(value);
 		}
@@ -53,7 +58,7 @@ public class IntegerProperty extends TrackableProperty {
 	@Override
 	protected void trackingTurnedOn() {
 		if (tracking) {
-			changes = new HashMap<Integer, Integer>();
+			changes = new HashMap<Integer, Boolean>();
 			recordChange(value);
 		}
 	}

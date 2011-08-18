@@ -36,8 +36,10 @@ public class StringProperty extends TrackableProperty {
 
 	@Override
 	public void printTrackedData() {
-		// TODO Auto-generated method stub
-
+		if (changes != null) {
+			System.out.println(propertyName);
+			System.out.println(changes.toString());
+		}
 	}
 
 	private void recordValue(String value) {

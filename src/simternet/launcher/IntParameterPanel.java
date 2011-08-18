@@ -19,14 +19,14 @@ public class IntParameterPanel extends ParameterPanel implements ChangeListener 
 
 	@Override
 	public String getValue() {
-		Integer value = (Integer) ((JSpinner) this.valueComponent).getValue();
+		Integer value = (Integer) ((JSpinner) valueComponent).getValue();
 		return value.toString();
 	}
 
 	@Override
 	protected void initValueComponent() {
-		this.valueComponent = new JSpinner(new SpinnerNumberModel(Integer.parseInt(this.defaultValue), 1, 400, 1));
-		((JSpinner) this.valueComponent).addChangeListener(this);
+		valueComponent = new JSpinner(new SpinnerNumberModel(Integer.parseInt(defaultValue), 1, 400, 1));
+		((JSpinner) valueComponent).addChangeListener(this);
 	}
 
 	@Override
