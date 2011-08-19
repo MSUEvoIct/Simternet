@@ -17,8 +17,12 @@ public class SingleEdgeFilter extends SingleFilter<Network, BackboneLink> {
 	// Location to accept
 	private Int2D	location;
 
+	/**
+	 * @param loc
+	 *            the location that we're filtering for
+	 */
 	public SingleEdgeFilter(Int2D loc) {
-		this.location = loc;
+		location = loc;
 	}
 
 	@Override
@@ -29,14 +33,10 @@ public class SingleEdgeFilter extends SingleFilter<Network, BackboneLink> {
 
 	@Override
 	public boolean acceptVertex(Network vertex) {
-		if (vertex instanceof EdgeNetwork) {
-			if (((EdgeNetwork) vertex).getLocation().equals(this.location))
-				return true;
-			else
-				return false;
-		}
-
-		// We don't care about Networks that aren't EdgeNetworks.
+		// If it's an edgenetwork, then we only want the one.
+		// if it's not an edgenetwork, we don't care. so we'll take it.
+		if (vertex instanceof EdgeNetwork)
+			return ((EdgeNetwork) vertex).getLocation().equals(location);
 		else
 			return true;
 	}

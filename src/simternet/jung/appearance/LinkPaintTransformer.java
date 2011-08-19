@@ -12,8 +12,7 @@ import simternet.network.BackboneLink;
  * 
  * Works with JUNG's RenderContext to define the graphical representation of
  * Backbone Links. Each link is given a color dependent on its congestion ratio.
- * Line pattern and width is defined in a separate class,
- * LinkStrokeTransformer
+ * Line pattern and width is defined in a separate class, LinkStrokeTransformer
  * 
  * @author graysonwright
  */
@@ -23,17 +22,18 @@ public class LinkPaintTransformer implements Transformer<BackboneLink, Paint> {
 	public Paint transform(BackboneLink link) {
 
 		double congestion = link.getCongestionAlgorithm().getUsageRatio();
-		// System.out.println(link.toString() + "\tCongestion = " + congestion);
 
+		// ideally, congestion shouldn't ever go out of this range.
 		double min = 0;
 		double max = 1.3;
 
+		// create a gradient between GREEN and RED, min and max
 		Color edgePaint;
-		if (congestion <= min)
+		if (congestion <= min) {
 			edgePaint = Color.GREEN;
-		else if (congestion >= max)
+		} else if (congestion >= max) {
 			edgePaint = Color.RED;
-		else {
+		} else {
 			double percent = (congestion - min) / (max - min);
 			edgePaint = new Color((float) percent, (float) (1 - percent), 0);
 		}

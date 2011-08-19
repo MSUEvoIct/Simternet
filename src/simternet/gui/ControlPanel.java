@@ -41,8 +41,11 @@ public class ControlPanel extends JPanel {
 		initComponents();
 	}
 
+	/**
+	 * Called when the user clicks the "Load From Checkpoint" button. Opens a
+	 * file chooser dialog box and lets the user pick a file, then loads it.
+	 */
 	protected void chooseFile() {
-
 		JFileChooser fileChooser = new JFileChooser();
 		int returnVal = fileChooser.showOpenDialog(new JFrame("Open"));
 
@@ -54,7 +57,7 @@ public class ControlPanel extends JPanel {
 	}
 
 	/**
-	 * Sets up the buttons and controls, and adds them to the panel
+	 * Sets up buttons and controls, and adds them to the panel
 	 */
 	protected void initComponents() {
 
@@ -62,6 +65,7 @@ public class ControlPanel extends JPanel {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
 		// Add a button to load a new Simternet checkpoint
+		// calls function chooseFile()
 		JButton loadButton = new JButton("Load From Checkpoint");
 		loadButton.addActionListener(new ActionListener() {
 			@Override
@@ -72,6 +76,7 @@ public class ControlPanel extends JPanel {
 		this.add(loadButton);
 
 		// Add a button to restart the current Simternet checkpoint
+		// calls function restart()
 		JButton restartButton = new JButton("Restart Current Checkpoint");
 		restartButton.addActionListener(new ActionListener() {
 			@Override
@@ -81,8 +86,9 @@ public class ControlPanel extends JPanel {
 		});
 		this.add(restartButton);
 
-		// Add a button to step the current Simternet
-		// Along with a JSpinner that selects how many steps.
+		// Add a button to step the current Simternet, along with a JSpinner
+		// that selects how many steps.
+		// calls function step()
 		JButton stepButton = new JButton("Step:");
 		stepButton.addActionListener(new ActionListener() {
 			@Override
@@ -99,6 +105,7 @@ public class ControlPanel extends JPanel {
 		this.add(stepSelector);
 
 		// A button to open the filter gui
+		// calls function filterButtonPressed() in class GUI
 		JButton filterButton = new JButton("Modify Filters");
 		filterButton.addActionListener(new ActionListener() {
 			@Override
@@ -108,6 +115,8 @@ public class ControlPanel extends JPanel {
 		});
 		this.add(filterButton);
 
+		// A button to print any data recorded by inspectors.
+		// calls function printDataButtonPressed() in class GUI
 		JButton printDataButton = new JButton("View Data");
 		printDataButton.addActionListener(new ActionListener() {
 			@Override
@@ -117,46 +126,53 @@ public class ControlPanel extends JPanel {
 		});
 		this.add(printDataButton);
 
-		// We want empty space to be at the bottom of the panel
+		// Create separation for esthetic purposes
 		this.add(Box.createVerticalGlue());
 
+		// Add button that triggers a global NSP inspector
+		// calls function nspInspectorButtonPressed() in class GUI
 		JButton nspInspectorButton = new JButton("Inspect NSPs");
 		nspInspectorButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				owner.NSPInspectorButtonPressed();
+				owner.nspInspectorButtonPressed();
 			}
 		});
 		this.add(nspInspectorButton);
 
+		// Add button that triggers a global ASP inspector
+		// calls function aspInspectorButtonPressed() in class GUI
 		JButton aspInspectorButton = new JButton("Inspect ASPs");
 		aspInspectorButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				owner.ASPInspectorButtonPressed();
+				owner.aspInspectorButtonPressed();
 			}
 		});
 		this.add(aspInspectorButton);
 
+		// Add button that triggers a global edge inspector
+		// calls function edgeInspectorButtonPressed() in class GUI
 		JButton edgeInspectorButton = new JButton("Inspect Edges");
 		edgeInspectorButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				owner.EdgeInspectorButtonPressed();
+				owner.edgeInspectorButtonPressed();
 			}
 		});
 		this.add(edgeInspectorButton);
 	}
 
 	/**
-	 * Tries to read a file, in search of a serialized Simternet object. Sends
-	 * the result to its GUI owner.
+	 * Utility method. Tries to read a file, in search of a serialized Simternet
+	 * object. Sends the result to its GUI owner.
 	 * 
 	 * @param file
 	 */
 	protected void loadFile(File file) {
 		try {
 			FileInputStream fileStream = new FileInputStream(file);
+			// serialized simternet objects are gzipped.
 			GZIPInputStream gStream = new GZIPInputStream(fileStream);
 
 			ObjectInputStream objectStream = new ObjectInputStream(gStream);
@@ -169,9 +185,8 @@ public class ControlPanel extends JPanel {
 	}
 
 	/**
-	 * Called on a button press event
-	 * 
-	 * Re-loads the file that the current simulation was stored in.
+	 * Called when user presses "Restart Current Checkpoint" button. Re-loads
+	 * the file that the current simulation was stored in.
 	 * 
 	 * Result: the current simulation gets set back to step = 0
 	 */
@@ -184,10 +199,10 @@ public class ControlPanel extends JPanel {
 	}
 
 	/**
-	 * Called on a button press event
+	 * Called when user pressed "Step:" button.
 	 * 
 	 * Tells the GUI owner of this panel to step the current simulation a given
-	 * number of times
+	 * number of times, based on the value of the slider.
 	 */
 	protected void step() {
 		if (owner.hasValidSimternetInstance()) {

@@ -20,7 +20,7 @@ import simternet.network.Network;
 import edu.uci.ics.jung.visualization.control.AnimatedPickingGraphMousePlugin;
 
 /**
- * Calls GUI.vertexPicked(Network) when a single vertex is selected.
+ * Calls GUI.vertexPicked() when a single vertex is selected.
  * 
  * @author graysonwright
  */
@@ -30,9 +30,9 @@ import edu.uci.ics.jung.visualization.control.AnimatedPickingGraphMousePlugin;
  * should not technically be a subclass. However, it was a LOT easier to write
  * it this way, because I only had to overwrite one method and the constructors.
  * 
- * Also, I had run into difficulty when I tried to write it on my own
+ * Also, I ran into difficulty when I tried to write it on my own
  * 
- * TODO: Fix this Object-Oriented abuse case.
+ * TODO: Fix this Object-Oriented abuse
  */
 public class VertexPickPlugin extends AnimatedPickingGraphMousePlugin<Network, BackboneLink> {
 
@@ -63,8 +63,9 @@ public class VertexPickPlugin extends AnimatedPickingGraphMousePlugin<Network, B
 	 */
 	@Override
 	public void mouseReleased(MouseEvent event) {
-		if (event.getModifiers() == this.modifiers)
-			if (this.vertex != null)
-				this.owner.vertexPicked(this.vertex);
+		if (event.getModifiers() == modifiers)
+			if (vertex != null) {
+				owner.vertexPicked(vertex);
+			}
 	}
 }

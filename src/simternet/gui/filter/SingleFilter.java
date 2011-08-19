@@ -8,6 +8,9 @@ import javax.swing.tree.TreeNode;
  * A single EasyFilter (non-composite). Compatible with JTreeChart, which is
  * used to turn filters on and off in the graphical interface.
  * 
+ * This class is just implemented so that subclasses don't need to override
+ * these 6 functions every time.
+ * 
  * @author graysonwright
  * 
  * @param <V>

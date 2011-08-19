@@ -21,6 +21,9 @@ public class InfoPanel extends JPanel {
 	protected Simternet			sim;
 	protected JLabel			stepLabel;
 
+	// the number of columns is just the number of information pieces we're
+	// displaying. if you add/remove a piece of information, update this as
+	// well.
 	protected static final int	numCols				= 3;
 
 	private static final long	serialVersionUID	= 1L;
@@ -29,10 +32,6 @@ public class InfoPanel extends JPanel {
 		super();
 		this.sim = sim;
 		initComponents();
-	}
-
-	public Simternet getSim() {
-		return sim;
 	}
 
 	/**
@@ -61,11 +60,20 @@ public class InfoPanel extends JPanel {
 
 	}
 
+	/**
+	 * changes the simternet object that this infoPanel is displaying
+	 * 
+	 * @param sim
+	 *            the new simternet object
+	 */
 	public void setSimternet(Simternet sim) {
 		this.sim = sim;
 		this.update();
 	}
 
+	/**
+	 * Update each of the labels displaying information
+	 */
 	public void update() {
 		if (sim != null) {
 			generationLabel.setText(Integer.toString(sim.generation));

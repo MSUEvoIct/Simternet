@@ -21,17 +21,20 @@ public class LinkStrokeTransformer implements Transformer<BackboneLink, Stroke> 
 
 	@Override
 	public Stroke transform(BackboneLink link) {
-
+		// width of line depends on bandwidth
 		double bw = link.getBandwidth().doubleValue();
 
-		float width = (float) (Math.log(bw));
+		float width = (float) (Math.log(bw) / 5);
 		if (bw <= 0) {
+			// if we get an illegal (or 0) bandwidth, report it and make it a
+			// dashed line.
 			System.err.println("Illegal bandwidth: " + link.toString());
 			float[] dash = { 5.0f, 5.0f };
 			return new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0);
 		}
-		if (width < 1)
+		if (width < 1) {
 			width = 1;
+		}
 		return new BasicStroke(width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
 	}
 }

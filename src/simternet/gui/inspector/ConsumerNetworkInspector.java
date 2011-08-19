@@ -6,7 +6,7 @@ import simternet.gui.inspector.property.StringProperty;
 import simternet.jung.ConsumerNetwork;
 
 /**
- * Inspects a location (Int2D) of a Simternet run
+ * Inspects a location (represented by a ConsumerNetwork) within a Simternet run
  * 
  * Currently displays the location, population, percentage of the population
  * subscribing to Internet, and the number of Network Providers who provide
@@ -29,8 +29,6 @@ public class ConsumerNetworkInspector extends Inspector {
 	 * 
 	 * @param network
 	 *            the ConsumerNetwork to be inspected
-	 * @param owner
-	 *            the GUI in charge of this inspector
 	 */
 	public ConsumerNetworkInspector(ConsumerNetwork network) {
 		super(network.s, network.toString());

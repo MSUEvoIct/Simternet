@@ -7,6 +7,14 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+/**
+ * An interface component that displays the value of a variable. This component
+ * has no knowledge of what it's displaying, but is set by other classes.
+ * Subclasses are used to display properties of specific data types
+ * 
+ * @author graysonwright
+ * 
+ */
 public abstract class Property extends JPanel {
 
 	protected String			propertyName;
@@ -20,12 +28,16 @@ public abstract class Property extends JPanel {
 	public Property(String propertyName) {
 		super();
 
-		this.initComponents(propertyName);
-		this.addComponentsToFrame();
+		initComponents(propertyName);
+		addComponentsToFrame();
 	}
 
+	/**
+	 * Adds components to the property's display and sets the property's
+	 * dimensions
+	 */
 	private void addComponentsToFrame() {
-		this.add(this.propertyNameLabel);
+		this.add(propertyNameLabel);
 
 		Dimension minSize = new Dimension(50, 20);
 		Dimension prefSize = new Dimension(50, 20);
@@ -35,19 +47,24 @@ public abstract class Property extends JPanel {
 	}
 
 	public String getPropertyName() {
-		return this.propertyName;
+		return propertyName;
 	}
 
+	/**
+	 * Initializes the property's name and namelabel
+	 * 
+	 * @param propertyName
+	 */
 	protected void initComponents(String propertyName) {
 		this.propertyName = propertyName;
-		this.propertyNameLabel = new JLabel(this.propertyName);
+		propertyNameLabel = new JLabel(this.propertyName);
 
-		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 	}
 
 	public void setPropertyName(String propertyName) {
 		this.propertyName = propertyName;
-		this.propertyNameLabel.setText(this.propertyName);
+		propertyNameLabel.setText(this.propertyName);
 	}
 
 }

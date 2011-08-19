@@ -14,13 +14,17 @@ public class HighPassFilter extends SingleFilter<Network, BackboneLink> {
 
 	private double	cutoff;
 
+	/**
+	 * @param cutoff
+	 *            A cutoff value under which we won't display the links
+	 */
 	public HighPassFilter(double cutoff) {
 		this.cutoff = cutoff;
 	}
 
 	@Override
 	public boolean acceptEdge(BackboneLink edge) {
-		if (edge.getBandwidth() >= this.cutoff)
+		if (edge.getBandwidth() >= cutoff)
 			return true;
 		return false;
 	}

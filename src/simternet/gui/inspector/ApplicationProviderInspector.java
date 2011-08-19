@@ -9,7 +9,7 @@ import simternet.gui.inspector.property.TreeProperty;
 /**
  * Inspects ApplicationProvider objects
  * 
- * Currently displays the category, quality, and price of an ApplicationProvider
+ * displays selected information about an individual ApplicationProvider
  * 
  * @author graysonwright
  */

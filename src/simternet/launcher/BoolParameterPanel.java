@@ -5,6 +5,12 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
 
+/**
+ * A parameter panel that displays and accepts input for a boolean paramter
+ * 
+ * @author graysonwright
+ * 
+ */
 public class BoolParameterPanel extends ParameterPanel implements ActionListener {
 
 	private static final long	serialVersionUID	= 1L;
@@ -17,6 +23,9 @@ public class BoolParameterPanel extends ParameterPanel implements ActionListener
 		super(parameter, defaultValue ? "true" : "false", description);
 	}
 
+	/**
+	 * Called when the user checks the checkbox.
+	 */
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		BoolParameterPanel.this.modifiedCheckBox.setSelected(true);
@@ -24,20 +33,24 @@ public class BoolParameterPanel extends ParameterPanel implements ActionListener
 
 	@Override
 	public String getValue() {
-		if (((JCheckBox) this.valueComponent).isSelected())
+		if (((JCheckBox) valueComponent).isSelected())
 			return "true";
 		else
 			return "false";
 	}
 
+	/**
+	 * Our valueComponent is a checkbox, representing a boolean value
+	 */
 	@Override
 	protected void initValueComponent() {
-		this.valueComponent = new JCheckBox();
-		if (this.defaultValue == "true")
-			((JCheckBox) this.valueComponent).setSelected(true);
-		else
-			((JCheckBox) this.valueComponent).setSelected(false);
-		((JCheckBox) this.valueComponent).addActionListener(this);
+		valueComponent = new JCheckBox();
+		if (defaultValue == "true") {
+			((JCheckBox) valueComponent).setSelected(true);
+		} else {
+			((JCheckBox) valueComponent).setSelected(false);
+		}
+		((JCheckBox) valueComponent).addActionListener(this);
 	}
 
 }

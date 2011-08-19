@@ -69,6 +69,12 @@ public class GUI extends JPanel {
 
 	protected Simternet										simternet;
 
+	/**
+	 * Creates a JFrame to contain a GUI object.
+	 * 
+	 * @param args
+	 *            runtime arguments
+	 */
 	public static void main(String[] args) {
 		JFrame jFrame = new JFrame("Simternet Checkpoint Reader");
 		GUI gui = new GUI(null);
@@ -91,11 +97,22 @@ public class GUI extends JPanel {
 		initComponents();
 	}
 
+	/**
+	 * Used by related classes (most notably, ControlPanel) so they can change
+	 * their behavior if there is not a Simternet instance loaded.
+	 * 
+	 * @return true if there is a simternet instance, false otherwise
+	 */
 	public boolean hasValidSimternetInstance() {
 		return simternet != null;
 	}
 
-	public void ASPInspectorButtonPressed() {
+	/**
+	 * 
+	 * Called by ControlPanel when the "Inspect ASPs" button is pressed. Creates
+	 * an instance of GlobalASPInspector and displays it onscreen.
+	 */
+	public void aspInspectorButtonPressed() {
 		if (hasValidSimternetInstance()) {
 			GlobalASPInspector inspector = new GlobalASPInspector(simternet);
 			inspectors.add(inspector);
@@ -106,7 +123,11 @@ public class GUI extends JPanel {
 		}
 	}
 
-	public void EdgeInspectorButtonPressed() {
+	/**
+	 * Called by ControlPanel when the "Inspect Edges" button is pressed.
+	 * Creates an instance of GlobalEdgeInspector and displays it onscreen.
+	 */
+	public void edgeInspectorButtonPressed() {
 		if (hasValidSimternetInstance()) {
 			GlobalEdgeInspector inspector = new GlobalEdgeInspector(simternet);
 			inspectors.add(inspector);
@@ -118,8 +139,8 @@ public class GUI extends JPanel {
 	}
 
 	/**
-	 * Called by ControlPanel when the filter button is pressed. Opens a JFrame
-	 * that allows the user to pick filters to apply
+	 * Called by ControlPanel when the filter button is pressed. Creates a
+	 * FilterGUI instance that allows the user to apply filters
 	 */
 	public void filterButtonPressed() {
 		if (filterGUI == null) {
@@ -133,7 +154,7 @@ public class GUI extends JPanel {
 	}
 
 	/**
-	 * Defines the layout of the GUI
+	 * Initializes some variables and defines the layout of the GUI
 	 */
 	protected void initComponents() {
 
@@ -141,14 +162,17 @@ public class GUI extends JPanel {
 
 		setLayout(new BorderLayout());
 
+		// Put a control panel on the right side
 		controlPanel = new ControlPanel(this);
 		controlPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 		this.add(controlPanel, BorderLayout.EAST);
 
+		// Information goes on bottom
 		infoPanel = new InfoPanel(simternet);
 		infoPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 		this.add(infoPanel, BorderLayout.SOUTH);
 
+		// And the graph gets center stage
 		initViewer();
 		this.add(viewer, BorderLayout.CENTER);
 
@@ -157,13 +181,13 @@ public class GUI extends JPanel {
 
 	/**
 	 * Initializes the VisualizationViewer used for displaying the Simternet
-	 * graph. Initializes transformers to modify the portrayal of the graph
+	 * graph. Initializes transformers to modify the appearance of the graph
 	 */
 	protected void initViewer() {
 
 		graph = new DirectedSparseGraph<Network, BackboneLink>();
 
-		// Define the layout, which will enable filtering, and use our
+		// Plug in our own special layout that enables filtering, and use our
 		// LocationTransformer class to lay everything out.
 		layout = new EasyFilterLayout<Network, BackboneLink>(graph, new LocationTransformer(simternet));
 
@@ -174,15 +198,15 @@ public class GUI extends JPanel {
 		// Set up transformers to label and color the vertices and edges.
 
 		// Adjust vertex shape/size:
-		viewer.getRenderContext().setVertexShapeTransformer(new NetworkShapeTransformer(simternet));
+		viewer.getRenderContext().setVertexShapeTransformer(new NetworkShapeTransformer());
 
 		// Adjust vertex color:
-		viewer.getRenderContext().setVertexFillPaintTransformer(new NetworkPaintTransformer(simternet));
+		viewer.getRenderContext().setVertexFillPaintTransformer(new NetworkPaintTransformer());
 
 		// Label vertices:
 		viewer.getRenderContext().setVertexLabelTransformer(new NetworkLabeller());
 
-		// Label edges:
+		// Label edges: (commented because they cluttered the display)
 		// viewer.getRenderContext().setEdgeLabelTransformer(new
 		// ToStringLabeller<BackboneLink>());
 
@@ -204,7 +228,10 @@ public class GUI extends JPanel {
 
 	}
 
-	public void NSPInspectorButtonPressed() {
+	/**
+	 * Creates an instance of GlobalNSPInspector and displays it onscreen.
+	 */
+	public void nspInspectorButtonPressed() {
 		if (hasValidSimternetInstance()) {
 			GlobalNSPInspector inspector = new GlobalNSPInspector(simternet);
 			inspectors.add(inspector);
@@ -215,14 +242,14 @@ public class GUI extends JPanel {
 		}
 	}
 
+	/**
+	 * Called by ControlPanel when the user clicks the "View Data" button. Tells
+	 * each inspector to print their data.
+	 */
 	public void printDataButtonPressed() {
 		for (Inspector i : inspectors) {
 			i.printData();
 		}
-	}
-
-	public void removeInspector(Inspector closedInspector) {
-		inspectors.remove(closedInspector);
 	}
 
 	/**
@@ -239,9 +266,10 @@ public class GUI extends JPanel {
 			i.dispose();
 		}
 		inspectors.clear();
-
-		simternet = sim;
 		this.remove(viewer);
+
+		// load up the new one
+		simternet = sim;
 		initViewer();
 		this.add(viewer, BorderLayout.CENTER);
 
@@ -255,7 +283,8 @@ public class GUI extends JPanel {
 	 * to the simulation
 	 */
 	protected void setUpFilters() {
-		// TODO: user-generated filters, not hard-coded ones.
+		// TODO: allow the user to generate filters, in place of these
+		// hard-coded ones.
 		filter = new CompositeFilter<Network, BackboneLink>();
 		((CompositeFilter<Network, BackboneLink>) filter).add(new SingleEdgeFilter(new Int2D(3, 1)));
 		((CompositeFilter<Network, BackboneLink>) filter).add(new DatacenterNameFilter("Datacenter of ASP-2"));
@@ -284,9 +313,6 @@ public class GUI extends JPanel {
 	public void step(int n) {
 		for (int i = 0; i < n; i++) {
 			simternet.schedule.step(simternet);
-			for (Inspector inspector : inspectors) {
-				inspector.update();
-			}
 		}
 
 		updateAll();
@@ -311,7 +337,8 @@ public class GUI extends JPanel {
 	/**
 	 * updateFilters
 	 * 
-	 * action method, called by FilterGUI.
+	 * action method, called by FilterGUI after the user has (de)activated some
+	 * filters
 	 * 
 	 * @param paths
 	 *            an array of TreePaths representing all checked Filters in the
@@ -335,12 +362,22 @@ public class GUI extends JPanel {
 		updateAll();
 	}
 
+	/**
+	 * Updates the JUNG visualization of the Simternet network.
+	 */
 	public void updateGraph() {
 
 		if (filter == null) {
 			setUpFilters();
 		}
 
+		/*
+		 * If a vertex or edge is already represented in the graph, it will not
+		 * be duplicated by adding it again. It is safe to add an object
+		 * multiple times. So that's what we'll do.
+		 */
+
+		// add ASPs
 		for (ApplicationProvider asp : simternet.getASPs()) {
 			graph.addVertex(asp.getDatacenter());
 			for (Network net : asp.getConnectedNetworks()) {
@@ -349,29 +386,21 @@ public class GUI extends JPanel {
 			}
 		}
 
+		// add NSPs
 		for (NetworkProvider nsp : simternet.getNetworkServiceProviders()) {
-			/*
-			 * If a vertex or edge is already represented in the graph, it will
-			 * not be duplicated by this function. It is safe to add an object
-			 * multiple times.
-			 */
 			Backbone backbone = nsp.getBackboneNetwork();
 			graph.addVertex(backbone);
 
+			// for each NSP, add all of its edge networks
 			for (EdgeNetwork edge : nsp.getEdgeNetworks()) {
 				graph.addVertex(ConsumerNetwork.get(edge));
-				// System.err.println("Adding Vertex " + edge);
 				graph.addEdge(backbone.getEgressLink(edge), backbone, ConsumerNetwork.get(edge));
 			}
 		}
 
-		// this.graph = (DirectedSparseGraph<Network, BackboneLink>)
-		// this.filter.transform(this.graph);
 		layout.setFilter(filter);
-
 		layout.setGraph(graph);
 
-		// this.viewer.repaint();
 		this.repaint();
 	}
 

@@ -11,7 +11,7 @@ import simternet.nsp.NetworkProvider;
 /**
  * Inspects NetworkProvider objects
  * 
- * Currently displays no information. TODO: Add information to display
+ * Displays the agent's stats: fitness, capital assets, etc.
  * 
  * @author graysonwright
  * 
@@ -28,7 +28,8 @@ public class NetworkProviderInspector extends Inspector {
 	private static final long	serialVersionUID	= 1L;
 
 	/**
-	 * Initializes the object and defines the layout
+	 * Creates the interface and initializes labels for each piece of
+	 * information we're displaying.
 	 * 
 	 * @param nsp
 	 *            object to inspect

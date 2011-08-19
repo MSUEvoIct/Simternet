@@ -12,8 +12,8 @@ import simternet.nsp.NetworkProvider;
 /**
  * A network object that represents the consumers at a given geographic
  * location, from which consumers can connect to edge networks at that location.
- * Only one instance per location per simternet. Introduced for visualization
- * purposes.
+ * There is only one instance per location per simternet. Introduced for
+ * visualization purposes.
  * 
  * @author graysonwright
  */
@@ -32,7 +32,7 @@ public class ConsumerNetwork extends Network {
 
 	/**
 	 * Returns a reference to the shared ConsumerNetwork instance for a given
-	 * Simternet and location
+	 * Simternet and location.
 	 * 
 	 * @param simternet
 	 * @param location
@@ -54,6 +54,13 @@ public class ConsumerNetwork extends Network {
 		return locationMap.get(location);
 	}
 
+	/**
+	 * Creates a ConsumerNetwork object that represents the given location in
+	 * the given simternet
+	 * 
+	 * @param sim
+	 * @param location
+	 */
 	protected ConsumerNetwork(Simternet sim, Int2D location) {
 		s = sim;
 		this.location = location;

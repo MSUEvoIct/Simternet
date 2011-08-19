@@ -7,7 +7,6 @@ import java.awt.geom.Rectangle2D;
 
 import org.apache.commons.collections15.Transformer;
 
-import simternet.Simternet;
 import simternet.jung.ConsumerNetwork;
 import simternet.network.Datacenter;
 import simternet.network.Network;
@@ -19,36 +18,36 @@ import simternet.network.Network;
  */
 public class NetworkShapeTransformer implements Transformer<Network, Shape> {
 
-	protected Simternet	s;
-	protected double	scale	= .002;
+	protected double	scale;
 
-	public NetworkShapeTransformer(Simternet s) {
-		super();
-		this.s = s;
+	public NetworkShapeTransformer() {
+		this(.002);
 	}
 
-	public NetworkShapeTransformer(Simternet s, double scale) {
+	public NetworkShapeTransformer(double scale) {
 		super();
-		this.s = s;
-		if (scale > 0)
+		if (scale > 0) {
 			this.scale = scale;
+		}
 	}
 
 	@Override
 	public Shape transform(Network net) {
 		if (net instanceof ConsumerNetwork) {
-
+			// ConsumerNetworks are circles, with size dependent on their
+			// population
 			Double pop = ((ConsumerNetwork) net).getPopulation();
-
-			Shape shape = new Ellipse2D.Double(-pop * this.scale / 2, -pop * this.scale / 2, pop * this.scale, pop
-					* this.scale);
+			Shape shape = new Ellipse2D.Double(-pop * scale / 2, -pop * scale / 2, pop * scale, pop * scale);
 			return shape;
 
 		} else if (net instanceof Datacenter) {
+			// DataCenters are triangles
 			int x[] = { 0, 10, -10 };
 			int y[] = { -10, 10, 10 };
 			return new Polygon(x, y, 3);
+
 		} else
+			// everything else is a rectangle
 			// if (net instanceof Backbone)
 			return new Rectangle2D.Double(-10, -10, 20, 20);
 	}

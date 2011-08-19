@@ -5,6 +5,12 @@ import java.awt.event.KeyListener;
 
 import javax.swing.JTextField;
 
+/**
+ * A parameter panel that displays and accepts input for a String parameter
+ * 
+ * @author graysonwright
+ * 
+ */
 public class StringParameterPanel extends ParameterPanel implements KeyListener {
 
 	private static final long	serialVersionUID	= 1L;
@@ -19,27 +25,30 @@ public class StringParameterPanel extends ParameterPanel implements KeyListener 
 
 	@Override
 	public String getValue() {
-		return ((JTextField) this.valueComponent).getText();
+		return ((JTextField) valueComponent).getText();
 	}
 
+	/**
+	 * valueComponent is a JTextField, allowing the user to input a string.
+	 */
 	@Override
 	protected void initValueComponent() {
-		this.valueComponent = new JTextField(this.defaultValue);
-		((JTextField) this.valueComponent).addKeyListener(this);
+		valueComponent = new JTextField(defaultValue);
+		((JTextField) valueComponent).addKeyListener(this);
 	}
 
 	@Override
 	public void keyPressed(KeyEvent arg0) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void keyReleased(KeyEvent arg0) {
-		// TODO Auto-generated method stub
-
 	}
 
+	/**
+	 * When the user types something, we check the modified box, so the change
+	 * gets included in the runtime arguments
+	 */
 	@Override
 	public void keyTyped(KeyEvent arg0) {
 		StringParameterPanel.this.modifiedCheckBox.setSelected(true);

@@ -10,6 +10,13 @@ import ec.EvolutionState;
 import ec.util.Log;
 import ec.util.Output;
 
+/**
+ * Represents an EvolvableAgent's decision trees. Provides a button that allows
+ * the user to print out a copy of the agent's tree
+ * 
+ * @author graysonwright
+ * 
+ */
 public class TreeProperty extends Property implements ActionListener {
 
 	protected EvolvableAgent		agent;
@@ -18,16 +25,28 @@ public class TreeProperty extends Property implements ActionListener {
 	private static final long		serialVersionUID	= 1L;
 	protected static EvolutionState	state;
 
+	/**
+	 * Creates a TreeProperty with a given name representing a given agent
+	 * 
+	 * @param propertyName
+	 *            the name to display for this property
+	 * @param agent
+	 *            the agent whose trees we'll be printing
+	 */
 	public TreeProperty(String propertyName, EvolvableAgent agent) {
 		super(propertyName);
 
 		this.agent = agent;
 
-		this.printButton = new JButton("Print Tree");
-		this.printButton.addActionListener(this);
-		this.add(this.printButton);
+		printButton = new JButton("Print Tree");
+		printButton.addActionListener(this);
+		this.add(printButton);
 	}
 
+	/**
+	 * Called when the user presses the printButton. Prints out a copy of the
+	 * agent's decision trees.
+	 */
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		// Print agent's network tree
@@ -38,7 +57,7 @@ public class TreeProperty extends Property implements ActionListener {
 			TreeProperty.logNumber = TreeProperty.state.output.addLog(Log.D_STDOUT, false);
 		}
 
-		this.agent.getIndividual().printIndividualForHumans(TreeProperty.state, TreeProperty.logNumber);
+		agent.getIndividual().printIndividualForHumans(TreeProperty.state, TreeProperty.logNumber);
 	}
 
 }

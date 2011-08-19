@@ -14,6 +14,13 @@ import ec.Evolve;
 import ec.util.Parameter;
 import ec.util.ParameterDatabase;
 
+/**
+ * A graphical interface that lets the user customize and fine-tune some
+ * parameters from the config files, before starting a run
+ * 
+ * @author graysonwright
+ * 
+ */
 public class Launcher extends JPanel {
 
 	protected String[]			args				= null;
@@ -30,6 +37,12 @@ public class Launcher extends JPanel {
 		frame.setVisible(true);
 	}
 
+	/**
+	 * Creates a Launcher, using a file specified in arguments[]
+	 * 
+	 * @param arguments
+	 *            the runtime arguments to pass to the simulation
+	 */
 	public Launcher(String[] arguments) {
 		setArgs(arguments);
 
@@ -60,12 +73,28 @@ public class Launcher extends JPanel {
 		this.add(launchButton);
 	}
 
+	/**
+	 * Adds a BoolParameterPanel to the interface
+	 * 
+	 * @param string
+	 *            the name of the parameter
+	 * @param description
+	 *            the user-friendly description to display
+	 */
 	@SuppressWarnings("unused")
 	private void addBoolParamPanel(String string, String description) {
 		Parameter p = new Parameter(string);
 		this.add(new BoolParameterPanel(p.toString(), params.getBoolean(p, null, false), description));
 	}
 
+	/**
+	 * Adds an integer parameter panel to the interface
+	 * 
+	 * @param s
+	 *            the name of the parameter
+	 * @param description
+	 *            the user-friendly description to display
+	 */
 	protected void addIntParamPanel(String s, String description) {
 		Parameter p = new Parameter(s);
 		int value;
@@ -77,24 +106,44 @@ public class Launcher extends JPanel {
 		this.add(new IntParameterPanel(p.toString(), value, description));
 	}
 
+	/**
+	 * Adds a string paramter panel to the interface
+	 * 
+	 * @param string
+	 *            the name of the parameter
+	 * @param description
+	 *            the user-friendly description to display
+	 */
 	@SuppressWarnings("unused")
 	private void addStringParamPanel(String string, String description) {
 		Parameter p = new Parameter(string);
 		this.add(new StringParameterPanel(p.toString(), params.getString(p, null), description));
 	}
 
+	/**
+	 * Called when the user clicks the "Launch" button.
+	 * 
+	 * launches the application, providing all of the original command-line
+	 * arguments, as well as overriding arguments based on values the user
+	 * changed
+	 * 
+	 * @param event
+	 */
 	protected void launchButtonPressed(ActionEvent event) {
 
 		getTopLevelAncestor().setVisible(false);
 
+		// the new list of arguments that we'll be running with
 		ArrayList<String> overwriteArgs = new ArrayList<String>();
 
+		// get all of the original arguments first...
 		if (args != null) {
 			for (String arg : args) {
 				overwriteArgs.add(arg);
 			}
 		}
 
+		// then add arguments for all of the parameters the user changed
 		for (Component c : getComponents())
 			if (c instanceof ParameterPanel) {
 				ParameterPanel pPanel = (ParameterPanel) c;

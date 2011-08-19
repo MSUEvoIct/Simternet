@@ -15,8 +15,12 @@ public class DatacenterNameFilter extends SingleFilter<Network, BackboneLink> {
 
 	private String	name;
 
+	/**
+	 * @param n
+	 *            the name on which to filter Datacenters
+	 */
 	public DatacenterNameFilter(String n) {
-		this.name = n;
+		name = n;
 	}
 
 	@Override
@@ -27,7 +31,7 @@ public class DatacenterNameFilter extends SingleFilter<Network, BackboneLink> {
 	@Override
 	public boolean acceptVertex(Network vertex) {
 		if (vertex instanceof Datacenter)
-			if (!((Datacenter) vertex).toString().equals(this.name))
+			if (!((Datacenter) vertex).toString().equals(name))
 				return false;
 		return true;
 	}

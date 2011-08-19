@@ -28,8 +28,7 @@ public abstract class Inspector extends JFrame {
 	private static final long		serialVersionUID	= 1L;
 
 	/**
-	 * Initializes the JFrame and defines behavior to notify the owner when the
-	 * inspector is closed
+	 * Initializes the JFrame and defines the layout
 	 * 
 	 * @param sim
 	 *            the Simternet instance that this inspector is inspecting
@@ -61,6 +60,10 @@ public abstract class Inspector extends JFrame {
 		return super.add(component);
 	}
 
+	/**
+	 * Cycles through all Properties, asking them to print their data if they
+	 * are a TrackableProperty
+	 */
 	public void printData() {
 		System.out.println(getTitle());
 		for (Property p : properties)

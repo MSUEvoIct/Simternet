@@ -12,7 +12,7 @@ import simternet.network.Datacenter;
 import simternet.network.Network;
 
 /**
- * a transformer that will lay out the contents of the graph onscreen. Handles
+ * A transformer that will lay out the contents of the graph onscreen. Handles
  * ConsumerNetworks, Backbones, and Datacenters.
  * 
  * @author graysonwright
@@ -33,7 +33,8 @@ public class LocationTransformer implements Transformer<Network, Point2D> {
 	 * ConsumerNetwork objects.
 	 * 
 	 * @param net
-	 * @return
+	 *            a backbone network to place
+	 * @return the point in the JUNG display that net should be placed
 	 */
 	protected Point2D transform(Backbone net) {
 		int x = 0, y = 0;
@@ -54,7 +55,8 @@ public class LocationTransformer implements Transformer<Network, Point2D> {
 	 * side of the visualization.
 	 * 
 	 * @param net
-	 * @return
+	 *            a consumer network to place
+	 * @return the point in the JUNG display that net should be placed
 	 */
 	protected Point2D transform(ConsumerNetwork net) {
 		int x = 0, y = 0;
@@ -73,7 +75,8 @@ public class LocationTransformer implements Transformer<Network, Point2D> {
 	 * ConsumerNetworks and Backbones.
 	 * 
 	 * @param net
-	 * @return
+	 *            a datacenter network to place
+	 * @return the point in the JUNG display that net should be placed
 	 */
 	protected Point2D transform(Datacenter net) {
 		int x = 0, y = 0;
@@ -92,6 +95,10 @@ public class LocationTransformer implements Transformer<Network, Point2D> {
 		return new Point(x, y);
 	}
 
+	/**
+	 * Checks the type of the network to transform, and sends it to the
+	 * appropriate helper method
+	 */
 	@Override
 	public Point2D transform(Network net) {
 		if (net instanceof ConsumerNetwork)
@@ -100,7 +107,7 @@ public class LocationTransformer implements Transformer<Network, Point2D> {
 			return this.transform((Backbone) net);
 		if (net instanceof Datacenter)
 			return this.transform((Datacenter) net);
-		// If we see a point at (-50,-50) we know it's an error.
+		// If we see a point at (-50,-50) -- top left -- we know it's an error.
 		System.err.println("Trying to place an object in the visualization that shouldn't be there.");
 		return new Point(-50, -50);
 	}

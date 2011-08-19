@@ -6,6 +6,13 @@ import simternet.Simternet;
 import simternet.application.ApplicationProvider;
 import simternet.gui.inspector.property.DoubleProperty;
 
+/**
+ * An inspector that does not represent a single agent, but rather all
+ * Application Providers in a given simulation
+ * 
+ * @author graysonwright
+ * 
+ */
 public class GlobalASPInspector extends Inspector {
 
 	protected DoubleProperty	averageNumCustomers;
@@ -14,10 +21,26 @@ public class GlobalASPInspector extends Inspector {
 
 	private static final long	serialVersionUID	= 1L;
 
+	/**
+	 * Initializes an inspector for all Application Providers in a given
+	 * simulation
+	 * 
+	 * @param sim
+	 *            the simulation from which to pull the Application Providers
+	 */
 	public GlobalASPInspector(Simternet sim) {
 		this(sim, "Global ASP Inspector");
 	}
 
+	/**
+	 * Initializes an inspector for all Application Providers in a given
+	 * simulation
+	 * 
+	 * @param sim
+	 *            the simulation from which to pull the Application Providers
+	 * @param title
+	 *            the title to place on the inspector's window
+	 */
 	public GlobalASPInspector(Simternet sim, String title) {
 		super(sim, title);
 
@@ -45,28 +68,31 @@ public class GlobalASPInspector extends Inspector {
 			maxPrice.setValue(0);
 			averagePrice.setValue(0);
 			minPrice.setValue(0);
-		} else {
-			double minPrice = Double.MAX_VALUE;
-			double maxPrice = -Double.MAX_VALUE;
-			double totalPrice = 0;
-			double totalNumCustomers = 0;
-
-			for (ApplicationProvider asp : asps) {
-				if (asp.getPriceSubscriptions() < minPrice) {
-					minPrice = asp.getPriceSubscriptions();
-				}
-				if (asp.getPriceSubscriptions() > maxPrice) {
-					maxPrice = asp.getPriceSubscriptions();
-				}
-				totalPrice += asp.getPriceSubscriptions();
-				totalNumCustomers += asp.getCustomers();
-			}
-
-			this.maxPrice.setValue(maxPrice);
-			this.minPrice.setValue(minPrice);
-			averagePrice.setValue(totalPrice / asps.size());
-
-			averageNumCustomers.setValue(totalNumCustomers / asps.size());
+			return;
 		}
+
+		double minPrice = Double.MAX_VALUE;
+		double maxPrice = -Double.MAX_VALUE;
+		double totalPrice = 0;
+		double totalNumCustomers = 0;
+
+		// sweep through list, calculating averages and totals
+		for (ApplicationProvider asp : asps) {
+			if (asp.getPriceSubscriptions() < minPrice) {
+				minPrice = asp.getPriceSubscriptions();
+			}
+			if (asp.getPriceSubscriptions() > maxPrice) {
+				maxPrice = asp.getPriceSubscriptions();
+			}
+			totalPrice += asp.getPriceSubscriptions();
+			totalNumCustomers += asp.getCustomers();
+		}
+
+		this.maxPrice.setValue(maxPrice);
+		this.minPrice.setValue(minPrice);
+		averagePrice.setValue(totalPrice / asps.size());
+
+		averageNumCustomers.setValue(totalNumCustomers / asps.size());
 	}
+
 }

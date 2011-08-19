@@ -49,15 +49,20 @@ public abstract class EasyFilter<V, E> implements Filter<V, E>, TreeNode {
 	public abstract boolean acceptVertex(V vertex);
 
 	/**
-	 * Sets this filter and all ancestors to active As opposed to
-	 * setActive(true), which only applies to this filter.
+	 * Sets this filter and all ancestors to active. note difference from
+	 * setActive(true), which only applies to this filter and not ancestors.
 	 */
 	public void activate() {
-		if (this.parent != null)
+		if (this.parent != null) {
 			this.parent.activate();
+		}
 		this.active = true;
 	}
 
+	/**
+	 * Sets only this filter inactive. If this is a composite filter, then none
+	 * of its children will be able to execute
+	 */
 	public void deactivate() {
 		this.active = false;
 	}
@@ -106,13 +111,15 @@ public abstract class EasyFilter<V, E> implements Filter<V, E>, TreeNode {
 		Collection<E> edges = inGraph.getEdges();
 
 		for (V n : vertices)
-			if (this.acceptVertex(n))
+			if (this.acceptVertex(n)) {
 				outGraph.addVertex(n);
+			}
 
 		for (E edge : edges)
 			if (this.acceptEdge(edge))
-				if (outGraph.containsVertex(inGraph.getSource(edge)) && outGraph.containsVertex(inGraph.getDest(edge)))
+				if (outGraph.containsVertex(inGraph.getSource(edge)) && outGraph.containsVertex(inGraph.getDest(edge))) {
 					outGraph.addEdge(edge, inGraph.getSource(edge), inGraph.getDest(edge));
+				}
 
 		return outGraph;
 	}
