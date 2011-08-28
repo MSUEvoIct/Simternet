@@ -17,7 +17,7 @@ import ec.gp.GPTree;
 public class GPInterconnectPricingStrategy implements ASPInterconnectPricingStrategy, Serializable {
 
 	private static final Double		MAX_PRICE	= 10.0; // $10/GB is high
-	private static final Double		MIN_PRICE	= 0.0;
+	private static final Double		MIN_PRICE	= 0.01; // $0.01/GP is low
 	protected final GPIndividual	ind;
 	protected final NetworkProvider	nsp;
 	protected final GPTree			transitPricingTree;
@@ -33,16 +33,21 @@ public class GPInterconnectPricingStrategy implements ASPInterconnectPricingStra
 		DoubleGP d = new DoubleGP();
 		d.value = 0.0;
 
-		PriceASPTransitProblem patp = new PriceASPTransitProblem(this.nsp, other);
+		PriceASPTransitProblem patp = new PriceASPTransitProblem(nsp, other);
 
-		this.transitPricingTree.child.eval(null, 0, d, null, this.ind, patp);
+		transitPricingTree.child.eval(null, 0, d, null, ind, patp);
 
-		if (d.value < GPInterconnectPricingStrategy.MIN_PRICE)
+		if (d.value < GPInterconnectPricingStrategy.MIN_PRICE) {
 			d.value = GPInterconnectPricingStrategy.MIN_PRICE;
+		}
 
-		if (d.value > GPInterconnectPricingStrategy.MAX_PRICE)
+		if (d.value > GPInterconnectPricingStrategy.MAX_PRICE) {
 			d.value = GPInterconnectPricingStrategy.MAX_PRICE;
+		}
 
-		return d.value / 1E9;
+		// return d.value / 1E9;
+		// just depend on evolution for something that's either high, low, or in
+		// between.
+		return d.value;
 	}
 }

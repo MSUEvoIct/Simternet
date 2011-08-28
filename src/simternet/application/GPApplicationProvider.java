@@ -79,7 +79,7 @@ public class GPApplicationProvider extends ApplicationProvider implements Evolva
 			}
 
 			// TODO Clean this up
-			bl.setBandwidth(bw);
+			bl.setBandwidth(bw * 1E9); // BW prices are in increments of GB
 			financials.earn(-totalPrice);
 			nsp.financials.earn(totalPrice);
 

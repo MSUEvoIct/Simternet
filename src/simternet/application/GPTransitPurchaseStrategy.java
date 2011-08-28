@@ -18,7 +18,7 @@ public class GPTransitPurchaseStrategy implements TransitPurchaseStrategy, Seria
 	protected final GPTree				tree;
 
 	// prevent infinities
-	public static final Double			MAX_AMOUNT	= 1E50;
+	public static final Double			MAX_AMOUNT	= 1E6;
 	// can't purchase negative bandwidth;
 	public static final Double			MIN_AMOUNT	= 0.0;
 
