@@ -17,11 +17,13 @@ public class EdgeDataReporter extends Reporter {
 																			+ Reporter.separater + "NSP"
 																			+ Reporter.separater + "NetworkType"
 																			+ Reporter.separater + "TransitBandwidth"
+																			+ Reporter.separater + "LocalBandwidth"
 																			+ Reporter.separater + "Congestion"
 																			+ Reporter.separater + "Price"
 																			+ Reporter.separater + "Customers"
 																			+ Reporter.separater + "Competitors"
-																			+ Reporter.separater + "MarketShare";
+																			+ Reporter.separater + "MarketShare"
+																			+ Reporter.separater + "Total Usage";
 
 	static {
 		new EdgeDataReporter().logHeaders();
@@ -65,6 +67,8 @@ public class EdgeDataReporter extends Reporter {
 				report.append(Reporter.separater);
 				report.append(en.getUpstreamIngress().getBandwidth());
 				report.append(Reporter.separater);
+				report.append(en.getMaxBandwidth());
+				report.append(Reporter.separater);
 				report.append(en.getUpstreamIngress().getCongestionAlgorithm().getUsageRatio());
 				report.append(Reporter.separater);
 				report.append(price);
@@ -74,6 +78,8 @@ public class EdgeDataReporter extends Reporter {
 				report.append(s.getNumNetworkProviders(location));
 				report.append(Reporter.separater);
 				report.append(en.getNumSubscribers() / s.getPopulation(location));
+				report.append(Reporter.separater);
+				report.append(en.totalUsage);
 				report(report.toString());
 			}
 		}
