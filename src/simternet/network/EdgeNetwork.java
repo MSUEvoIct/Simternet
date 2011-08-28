@@ -22,6 +22,8 @@ public abstract class EdgeNetwork extends Network {
 	public double				revenueFromConsumers	= 0D;
 	public double				operatingCost			= 0D;
 
+	public double				totalUsage				= 0D;
+
 	/**
 	 * Utility function used to determine the cost of building a network. AFAIK,
 	 * this can only be done by either hard-coding the edge network classes
@@ -62,7 +64,7 @@ public abstract class EdgeNetwork extends Network {
 	 * networks, this is an instantaneous measure rather than a total transfer
 	 * capacity per period. I.e., bytes per second, not bytes per month.
 	 */
-	Temporal<Double>		maxBandwidth	= new Temporal<Double>(0.0);
+	Temporal<Double>		maxBandwidth	= new Temporal<Double>(0D);
 
 	/**
 	 * The NSP that owns and operates this network.
@@ -78,6 +80,11 @@ public abstract class EdgeNetwork extends Network {
 		this.owner = owner;
 		this.location = location;
 		assetFinance = new AssetFinance(this, this.owner.financials);
+
+		// By default, networks have infinite bandwidth; they are limited only
+		// by their
+		// upstream Ingress links. TODO: Add this feature?
+		maxBandwidth.set(Double.MAX_VALUE);
 
 		Double firstPrice = this.owner.pricingStrategy.getEdgePrice(this);
 		price = new Temporal<Double>(firstPrice);
@@ -166,6 +173,10 @@ public abstract class EdgeNetwork extends Network {
 		}
 	}
 
+	/**
+	 * Retreive incoming flows from out Ingress links, process them, and send
+	 * them to consumers.
+	 */
 	public void sendFlowsToCustomers() {
 
 		/*
@@ -182,11 +193,13 @@ public abstract class EdgeNetwork extends Network {
 				 * network, 2) informing the sending network of the congestion,
 				 * 3) noting the congestion ourselves.
 				 */
-				flow.congest(getMaxBandwidth());
+				// kk-bug? flow.congest(getMaxBandwidth());
 				if (flow.isCongested()) {
 					flow.source.noteCongestion(flow);
 					noteCongestion(flow);
 				}
+
+				totalUsage += flow.getActualTransfer();
 
 				/*
 				 * Flows are now ready to be received by the users. What users
