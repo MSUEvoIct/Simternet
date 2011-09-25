@@ -10,13 +10,13 @@ import org.apache.log4j.Logger;
 import sim.engine.SimState;
 import simternet.agents.asp.ApplicationProvider;
 import simternet.engine.TraceConfig;
+import simternet.engine.asyncdata.TemporalArrayList;
 import simternet.engine.asyncdata.TemporalHashMap;
-import simternet.engine.asyncdata.TemporalHashSet;
 
 public class Datacenter extends Network {
 
 	private static final long					serialVersionUID	= 1L;
-	protected TemporalHashSet<NetFlow>			inputQueue			= new TemporalHashSet<NetFlow>();
+	protected TemporalArrayList<NetFlow>		inputQueue			= new TemporalArrayList<NetFlow>();
 	/**
 	 * Stores the congestion this application sees on each network. Congestion
 	 * is stored as the amount of bandwidth actually received by the congested
@@ -138,7 +138,7 @@ public class Datacenter extends Network {
 		for (NetFlow flow : inputQueue) {
 			this.route(flow);
 		}
-		inputQueue = new TemporalHashSet<NetFlow>();
+		inputQueue.clear();
 	}
 
 	@Override

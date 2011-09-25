@@ -57,6 +57,10 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 	protected Temporal<Double>			revenueAdvertising		= new Temporal<Double>(0.0);
 	protected Temporal<Double>			revenueSubscriptions	= new Temporal<Double>(0.0);
 
+	// Cached information; things that shouldn't change, are frequently
+	// accessed, and expensive to collect.
+	protected Double					cachedNumCustomers;
+
 	public ApplicationProvider(Simternet s, AppCategory appCategory) {
 		this.s = s;
 		this.appCategory = appCategory;
@@ -174,6 +178,10 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 	 *         are currently subscribed to this ASP.
 	 */
 	public double getCustomers() {
+
+		if (cachedNumCustomers != null)
+			return cachedNumCustomers;
+
 		double numCustomers = 0.0;
 
 		/*
@@ -190,6 +198,9 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 				numCustomers += c.getPopulation();
 			}
 		}
+
+		cachedNumCustomers = new Double(numCustomers);
+
 		return numCustomers;
 	}
 
@@ -303,5 +314,6 @@ public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate
 		priceSubscriptions.update();
 		datacenter.update();
 		quality.update();
+		cachedNumCustomers = null;
 	}
 }

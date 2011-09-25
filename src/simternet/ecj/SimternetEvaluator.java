@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
-
 import simternet.agents.asp.ApplicationProvider;
 import simternet.agents.nsp.NetworkProvider;
 import simternet.data.output.ASPInterconnectionReporter;
@@ -35,8 +34,11 @@ import ec.util.Parameter;
  */
 public class SimternetEvaluator extends Evaluator {
 
-	private static final long	serialVersionUID	= 1L;
-	boolean						inStep				= false;
+	private static final long		serialVersionUID	= 1L;
+	boolean							inStep				= false;
+
+	LinkedBlockingQueue<Runnable>	tasks				= new LinkedBlockingQueue<Runnable>();
+	ThreadPoolExecutor				threadPool;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -196,8 +198,9 @@ public class SimternetEvaluator extends Evaluator {
 
 		if (numThreads > 1) {
 			// Simulations are populated. Run them!
-			LinkedBlockingQueue<Runnable> tasks = new LinkedBlockingQueue<Runnable>();
-			ThreadPoolExecutor threadPool = new ThreadPoolExecutor(numThreads, numThreads, 10, TimeUnit.SECONDS, tasks);
+			threadPool = new ThreadPoolExecutor(numThreads, numThreads, 10, TimeUnit.SECONDS, tasks);
+			threadPool.prestartAllCoreThreads();
+
 			// for (Simternet s : simternet) {
 			for (int i = 0; i < simternet.length; i++) {
 				Simternet s = simternet[i];

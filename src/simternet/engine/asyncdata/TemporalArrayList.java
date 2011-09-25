@@ -2,18 +2,17 @@ package simternet.engine.asyncdata;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 public class TemporalArrayList<E> extends ArrayList<E> implements AsyncUpdate {
 
-	private boolean clear = false;
-	protected Set<E> toAdd = new HashSet<E>();
-	protected Set<Object> toRemove = new HashSet<Object>();
+	private boolean			clear			= false;
+	protected List<E>		toAdd			= new ArrayList<E>();
+	protected List<Object>	toRemove		= new ArrayList<Object>();
 	/**
 	 * We will only attempt to run update() method on value
 	 */
-	private boolean updateValues = true;
+	private boolean			updateValues	= true;
 
 	@Override
 	public boolean add(E e) {
@@ -57,7 +56,7 @@ public class TemporalArrayList<E> extends ArrayList<E> implements AsyncUpdate {
 
 		// If the elements of this List themselves implement AsyncUpdate,
 		// cascade the updates.
-		if (this.updateValues)
+		if (this.updateValues) {
 			for (E entry : this)
 				if (entry instanceof AsyncUpdate) {
 					AsyncUpdate au = (AsyncUpdate) entry;
@@ -66,6 +65,7 @@ public class TemporalArrayList<E> extends ArrayList<E> implements AsyncUpdate {
 					this.updateValues = false;
 					break;
 				}
+		}
 
 	}
 
