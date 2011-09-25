@@ -66,8 +66,9 @@ public class GPApplicationProvider extends ApplicationProvider implements Evolva
 			Double bw = 0.0;
 			Double totalPrice = 0.0;
 			Double price = nsp.getASPTransitPrice(this);
-			Double gpBW = transitStrategy.bandwidthToPurchase(nsp, price);
-			Double totalGPPrice = gpBW * price;
+
+			bw = transitStrategy.bandwidthToPurchase(nsp, price);
+			Double totalGPPrice = bw * price;
 			if (totalGPPrice * 3 > financials.getNetWorth()) {
 				// Can't spend more than 33% of net worth each step;
 				bw = financials.getNetWorth() / 3 / price;
