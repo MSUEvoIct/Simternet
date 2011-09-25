@@ -1,6 +1,6 @@
 package simternet.gui.inspector;
 
-import simternet.Simternet;
+import simternet.engine.Simternet;
 import simternet.gui.inspector.property.DoubleProperty;
 import simternet.gui.inspector.property.IntegerProperty;
 

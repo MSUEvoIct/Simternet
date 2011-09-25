@@ -1,7 +1,7 @@
 package simternet.ecj.problems;
 
-import simternet.Financials;
-import simternet.application.ApplicationProvider;
+import simternet.agents.asp.ApplicationProvider;
+import simternet.agents.finance.Financials;
 import ec.Problem;
 
 public class AppQualityInvestmentProblem extends Problem implements HasApplicationProvider, HasFinancials {

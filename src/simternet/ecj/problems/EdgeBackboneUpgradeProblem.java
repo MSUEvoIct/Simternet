@@ -1,11 +1,11 @@
 package simternet.ecj.problems;
 
 import sim.util.Int2D;
-import simternet.Financials;
-import simternet.Simternet;
+import simternet.agents.finance.Financials;
+import simternet.agents.nsp.NetworkProvider;
+import simternet.engine.Simternet;
 import simternet.network.BackboneLink;
 import simternet.network.EdgeNetwork;
-import simternet.nsp.NetworkProvider;
 import ec.Problem;
 
 public class EdgeBackboneUpgradeProblem extends Problem implements HasNetworkProvider, HasFinancials, HasLocation,

@@ -5,7 +5,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
 
-import simternet.Simternet;
+import simternet.engine.Simternet;
 
 /**
  * A type of Property that tracks changes to its value over time. Subclasses

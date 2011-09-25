@@ -3,7 +3,7 @@ package simternet.gui.inspector;
 import simternet.gui.inspector.property.DoubleProperty;
 import simternet.gui.inspector.property.IntegerProperty;
 import simternet.gui.inspector.property.StringProperty;
-import simternet.jung.ConsumerNetwork;
+import simternet.gui.jung.ConsumerNetwork;
 
 /**
  * Inspects a location (represented by a ConsumerNetwork) within a Simternet run

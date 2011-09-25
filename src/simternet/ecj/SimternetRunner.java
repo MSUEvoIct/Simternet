@@ -1,6 +1,6 @@
 package simternet.ecj;
 
-import simternet.Simternet;
+import simternet.engine.Simternet;
 
 public class SimternetRunner implements Runnable {
 

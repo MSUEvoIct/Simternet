@@ -2,7 +2,7 @@ package simternet.network;
 
 import java.io.Serializable;
 
-import simternet.consumer.Consumer;
+import simternet.agents.consumer.Consumer;
 
 public class UserInteractiveFlow extends NetFlow implements Serializable {
 

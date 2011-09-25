@@ -1,6 +1,6 @@
 package simternet.ecj.terminals;
 
-import simternet.Financials;
+import simternet.agents.finance.Financials;
 import simternet.ecj.BooleanGP;
 import simternet.ecj.problems.HasFinancials;
 import ec.EvolutionState;

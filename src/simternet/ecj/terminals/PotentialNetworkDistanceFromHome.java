@@ -1,8 +1,8 @@
 package simternet.ecj.terminals;
 
+import simternet.agents.nsp.PotentialNetwork;
 import simternet.ecj.DoubleGP;
 import simternet.ecj.problems.HasPotentialNetwork;
-import simternet.nsp.PotentialNetwork;
 import ec.EvolutionState;
 import ec.Problem;
 import ec.gp.ADFStack;

@@ -1,7 +1,7 @@
 package simternet.network;
 
 import sim.util.Int2D;
-import simternet.nsp.NetworkProvider;
+import simternet.agents.nsp.NetworkProvider;
 
 public class SimpleEdgeNetwork extends EdgeNetwork {
 

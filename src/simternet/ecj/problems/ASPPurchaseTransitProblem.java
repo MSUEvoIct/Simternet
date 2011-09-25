@@ -1,10 +1,10 @@
 package simternet.ecj.problems;
 
-import simternet.Financials;
-import simternet.Simternet;
-import simternet.application.ApplicationProvider;
+import simternet.agents.asp.ApplicationProvider;
+import simternet.agents.finance.Financials;
+import simternet.agents.nsp.NetworkProvider;
+import simternet.engine.Simternet;
 import simternet.network.BackboneLink;
-import simternet.nsp.NetworkProvider;
 import ec.Problem;
 
 public class ASPPurchaseTransitProblem extends Problem implements HasSimternet, HasFinancials, HasNetworkProvider,

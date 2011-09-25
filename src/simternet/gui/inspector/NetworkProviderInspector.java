@@ -1,12 +1,12 @@
 package simternet.gui.inspector;
 
+import simternet.agents.nsp.NetworkProvider;
 import simternet.ecj.EvolvableAgent;
 import simternet.gui.inspector.property.BooleanProperty;
 import simternet.gui.inspector.property.DoubleProperty;
 import simternet.gui.inspector.property.IntegerProperty;
 import simternet.gui.inspector.property.StringProperty;
 import simternet.gui.inspector.property.TreeProperty;
-import simternet.nsp.NetworkProvider;
 
 /**
  * Inspects NetworkProvider objects

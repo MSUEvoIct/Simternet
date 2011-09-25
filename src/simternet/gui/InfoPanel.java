@@ -5,7 +5,7 @@ import java.awt.GridLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import simternet.Simternet;
+import simternet.engine.Simternet;
 
 /**
  * Sets up a JPanel that displays information about the current displayed

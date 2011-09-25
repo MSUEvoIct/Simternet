@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import javax.swing.JLabel;
 
-import simternet.Simternet;
+import simternet.engine.Simternet;
 
 /**
  * A property that displays an integer value, and can track changes in the value

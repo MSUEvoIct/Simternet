@@ -8,10 +8,10 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import sim.engine.SimState;
-import simternet.TraceConfig;
-import simternet.application.ApplicationProvider;
-import simternet.temporal.TemporalHashMap;
-import simternet.temporal.TemporalHashSet;
+import simternet.agents.asp.ApplicationProvider;
+import simternet.engine.TraceConfig;
+import simternet.engine.asyncdata.TemporalHashMap;
+import simternet.engine.asyncdata.TemporalHashSet;
 
 public class Datacenter extends Network {
 
@@ -145,7 +145,7 @@ public class Datacenter extends Network {
 	public void step(SimState state) {
 		super.step(state);
 
-		if (TraceConfig.congestionASPSummary && Logger.getRootLogger().isTraceEnabled()) {
+		if (TraceConfig.networking.congestionASPSummary && Logger.getRootLogger().isTraceEnabled()) {
 			Logger.getRootLogger().log(Level.TRACE, toString() + ": Congestion\n" + printCongestion());
 		}
 	}

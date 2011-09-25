@@ -1,10 +1,10 @@
 package simternet.ecj.terminals;
 
 import sim.util.Int2D;
-import simternet.Simternet;
 import simternet.ecj.DoubleGP;
 import simternet.ecj.problems.HasLocation;
 import simternet.ecj.problems.HasSimternet;
+import simternet.engine.Simternet;
 import ec.EvolutionState;
 import ec.Problem;
 import ec.gp.ADFStack;

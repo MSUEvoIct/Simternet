@@ -9,7 +9,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
-import simternet.Simternet;
+import simternet.engine.Simternet;
 import simternet.gui.inspector.property.Property;
 import simternet.gui.inspector.property.TrackableProperty;
 

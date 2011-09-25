@@ -2,8 +2,9 @@ package simternet.gui.inspector;
 
 import java.util.Collection;
 
-import simternet.Simternet;
-import simternet.application.ApplicationProvider;
+
+import simternet.agents.asp.ApplicationProvider;
+import simternet.engine.Simternet;
 import simternet.gui.inspector.property.DoubleProperty;
 
 /**

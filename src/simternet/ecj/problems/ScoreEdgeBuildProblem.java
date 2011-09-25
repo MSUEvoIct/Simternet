@@ -1,8 +1,8 @@
 package simternet.ecj.problems;
 
-import simternet.Financials;
-import simternet.nsp.NetworkProvider;
-import simternet.nsp.PotentialNetwork;
+import simternet.agents.finance.Financials;
+import simternet.agents.nsp.NetworkProvider;
+import simternet.agents.nsp.PotentialNetwork;
 import ec.Problem;
 
 public class ScoreEdgeBuildProblem extends Problem implements HasNetworkProvider, HasPotentialNetwork, HasFinancials {

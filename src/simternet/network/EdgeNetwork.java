@@ -9,11 +9,11 @@ import org.apache.log4j.Logger;
 import sim.engine.SimState;
 import sim.util.Bag;
 import sim.util.Int2D;
-import simternet.AssetFinance;
-import simternet.TraceConfig;
-import simternet.consumer.Consumer;
-import simternet.nsp.NetworkProvider;
-import simternet.temporal.Temporal;
+import simternet.agents.consumer.Consumer;
+import simternet.agents.finance.AssetFinance;
+import simternet.agents.nsp.NetworkProvider;
+import simternet.engine.TraceConfig;
+import simternet.engine.asyncdata.Temporal;
 
 public abstract class EdgeNetwork extends Network {
 

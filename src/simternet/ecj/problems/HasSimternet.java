@@ -1,6 +1,6 @@
 package simternet.ecj.problems;
 
-import simternet.Simternet;
+import simternet.engine.Simternet;
 
 public interface HasSimternet {
 	public Simternet getSimternet();

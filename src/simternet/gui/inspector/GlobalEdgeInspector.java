@@ -2,7 +2,7 @@ package simternet.gui.inspector;
 
 import java.util.Collection;
 
-import simternet.Simternet;
+import simternet.engine.Simternet;
 import simternet.gui.inspector.property.DoubleProperty;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;

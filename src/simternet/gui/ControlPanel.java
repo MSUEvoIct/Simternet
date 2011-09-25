@@ -17,7 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import simternet.Simternet;
+import simternet.engine.Simternet;
 
 /**
  * A JPanel that provides mechanisms for controlling the current Simternet

@@ -11,8 +11,8 @@ import org.apache.log4j.Logger;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import simternet.TraceConfig;
-import simternet.temporal.AsyncUpdate;
+import simternet.engine.TraceConfig;
+import simternet.engine.asyncdata.AsyncUpdate;
 
 /**
  * Abstract Network, the base Vertex/Node in the Simternet graph/Internetwork
@@ -90,8 +90,9 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 		// If we don't have a default route yet, use this link. The effect of
 		// this procedure is that the default route is the first link added
 		// unless it is changed later.
-		if (this.defaultRoute == null)
-			this.defaultRoute = link;
+		if (defaultRoute == null) {
+			defaultRoute = link;
+		}
 	}
 
 	/**
@@ -104,14 +105,17 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 		Vector<BackboneLink> linksToDisconnect = new Vector<BackboneLink>();
 
 		// disconnect all my outgoing connections
-		for (BackboneLink connection : this.egressLinks.values())
+		for (BackboneLink connection : egressLinks.values()) {
 			linksToDisconnect.add(connection);
+		}
 		// disconnect all my incoming connections.
-		for (BackboneLink connection : this.ingressLinks.values())
+		for (BackboneLink connection : ingressLinks.values()) {
 			linksToDisconnect.add(connection);
+		}
 
-		for (BackboneLink link : linksToDisconnect)
+		for (BackboneLink link : linksToDisconnect) {
 			link.disconnect();
+		}
 	}
 
 	/**
@@ -130,25 +134,27 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 		Route best = null;
 
 		// Query the routes available to us from peers
-		for (BackboneLink link : this.egressLinks.values()) {
+		for (BackboneLink link : egressLinks.values()) {
 			Route candidate = link.routingTable.get(destination);
-			if (candidate == null) // this link has no such route
+			if (candidate == null) {
 				continue; // so do nothing
+			}
 
 			if (best == null) {
 				best = candidate;
 				continue;
 			}
 
-			if (this.routePreference.compareRoutes(best, candidate) == RoutePreference.TWO_BETTER)
+			if (routePreference.compareRoutes(best, candidate) == RoutePreference.TWO_BETTER) {
 				best = candidate;
+			}
 		}
 
 		return best;
 	}
 
 	public BackboneLink getDefaultRoute() {
-		return this.defaultRoute;
+		return defaultRoute;
 	}
 
 	/**
@@ -157,29 +163,31 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 	 * @return The associated backbone link, or null if not connected.
 	 */
 	public BackboneLink getEgressLink(Network to) {
-		return this.egressLinks.get(to);
+		return egressLinks.get(to);
 	}
 
 	public Collection<Network> getEgressPeers() {
 		Collection<Network> peers = new ArrayList<Network>();
-		for (Network n : this.egressLinks.keySet())
-			if (this.egressLinks.get(n) != null)
+		for (Network n : egressLinks.keySet())
+			if (egressLinks.get(n) != null) {
 				peers.add(n);
+			}
 		return peers;
 	}
 
 	public Collection<Network> getIngressPeers() {
 		Collection<Network> peers = new ArrayList<Network>();
-		for (Network n : this.ingressLinks.keySet())
-			if (this.ingressLinks.get(n) != null)
+		for (Network n : ingressLinks.keySet())
+			if (ingressLinks.get(n) != null) {
 				peers.add(n);
+			}
 		return peers;
 	}
 
 	public Collection<Network> getPeers() {
 		Collection<Network> peers = new ArrayList<Network>();
-		peers.addAll(this.getEgressPeers());
-		peers.addAll(this.getIngressPeers());
+		peers.addAll(getEgressPeers());
+		peers.addAll(getIngressPeers());
 		return peers;
 	}
 
@@ -193,17 +201,20 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 	 * @param config
 	 */
 	protected void initRoutes(BackboneLink link) {
-		for (Route route : this.routingTable.values())
-			if (this.routePolicy(link.routingProtocolConfig, route))
+		for (Route route : routingTable.values())
+			if (routePolicy(link.routingProtocolConfig, route)) {
 				link.updateRoute(route);
+			}
 	}
 
 	public boolean isConnectedTo(Network target) {
 		boolean isConnected = false;
-		if (this.egressLinks.containsKey(target))
+		if (egressLinks.containsKey(target)) {
 			isConnected = true;
-		if (this.ingressLinks.containsKey(target))
+		}
+		if (ingressLinks.containsKey(target)) {
 			isConnected = true;
+		}
 		return isConnected;
 	}
 
@@ -219,28 +230,30 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 	 * @param route
 	 */
 	void receiveRoute(Route route) {
-		Route existingRoute = this.routingTable.get(route.destination);
+		Route existingRoute = routingTable.get(route.destination);
 
 		// if no route exists, use this one, unless it has max distance, in
 		// which case it should be ignored.
 		if (existingRoute == null) {
-			if (route.distance < Integer.MAX_VALUE)
-				this.updateRoutingTable(route);
+			if (route.distance < Integer.MAX_VALUE) {
+				updateRoutingTable(route);
+			}
 			return;
 		}
 
 		// Otherwise, compare the routes
-		Integer preference = this.routePreference.compareRoutes(existingRoute, route);
+		Integer preference = routePreference.compareRoutes(existingRoute, route);
 		Boolean updateActiveRoute;
 
-		if (existingRoute.nextHop == route.nextHop)
+		if (existingRoute.nextHop == route.nextHop) {
 			updateActiveRoute = true;
-		else
+		} else {
 			updateActiveRoute = false;
+		}
 
 		// If the new route is better, use that instead
 		if (preference == RoutePreference.TWO_BETTER) {
-			this.updateRoutingTable(route);
+			updateRoutingTable(route);
 			return;
 		}
 
@@ -260,8 +273,8 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 			 * might have a better route) Since we're going to send to peers
 			 * anyway, just find our best route and send that.
 			 */
-			Route newRoute = this.getBestRoute(route.destination);
-			this.updateRoutingTable(newRoute);
+			Route newRoute = getBestRoute(route.destination);
+			updateRoutingTable(newRoute);
 			return;
 		}
 
@@ -281,11 +294,12 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 	 */
 	public void route() {
 		// Iterate over all interfaces receiving flows
-		for (BackboneLink link : this.ingressLinks.values()) {
+		for (BackboneLink link : ingressLinks.values()) {
 			Collection<NetFlow> flows = link.receiveFlows();
 			// Iterate over all flows received on the interface
-			for (NetFlow flow : flows)
+			for (NetFlow flow : flows) {
 				this.route(flow);
+			}
 		}
 	}
 
@@ -349,48 +363,55 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 	public void route(NetFlow flow) {
 		// Send these flows out the correct egress links
 		// Routing table lookup
-		Route rte = this.routingTable.get(flow.destination);
+		Route rte = routingTable.get(flow.destination);
 		BackboneLink outgoing;
-		if (rte == null)
-			outgoing = this.defaultRoute;
-		else
+		if (rte == null) {
+			outgoing = defaultRoute;
+		} else {
 			outgoing = rte.nextHop;
+		}
 
-		if (outgoing != null)
+		if (outgoing != null) {
 			// place in appropriate output queue
 			outgoing.sendFlow(flow);
-		else
+		} else {
 			System.out.println("No route for " + flow);
+		}
 	}
 
 	protected boolean routePolicy(RoutingProtocolConfig config, Route route) {
 		boolean shouldBeSent = false;
 
-		if (config == RoutingProtocolConfig.TRANSIT)
+		if (config == RoutingProtocolConfig.TRANSIT) {
 			shouldBeSent = true;
+		}
 
 		if (config == RoutingProtocolConfig.PEER)
-			if (route.distance <= 1)
+			if (route.distance <= 1) {
 				shouldBeSent = true;
+			}
 
-		if (route.distance == 0)
+		if (route.distance == 0) {
 			shouldBeSent = true;
+		}
 
 		return shouldBeSent;
 	}
 
 	public String routingTableReport() {
 		StringBuffer sb = new StringBuffer();
-		for (Network dest : this.routingTable.keySet())
-			sb.append(dest + " -> " + this.routingTable.get(dest) + "\n");
-		sb.append("Default -> " + this.defaultRoute + "\n");
+		for (Network dest : routingTable.keySet()) {
+			sb.append(dest + " -> " + routingTable.get(dest) + "\n");
+		}
+		sb.append("Default -> " + defaultRoute + "\n");
 		return sb.toString();
 	}
 
 	protected void sendRouteToNeighbors(Route route) {
-		for (BackboneLink link : this.ingressLinks.values())
-			if (this.routePolicy(link.routingProtocolConfig, route))
+		for (BackboneLink link : ingressLinks.values())
+			if (routePolicy(link.routingProtocolConfig, route)) {
 				link.updateRoute(route);
+			}
 	}
 
 	public void setDefaultRoute(BackboneLink defaultRoute) {
@@ -404,12 +425,13 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 	 * @param anp
 	 */
 	public void setEgressBandwidth(Network an, Double bandwidth) {
-		BackboneLink bl = this.getEgressLink(an);
-		if (bl != null)
+		BackboneLink bl = getEgressLink(an);
+		if (bl != null) {
 			bl.setBandwidth(bandwidth);
-		else
+		} else {
 			Logger.getRootLogger().log(Level.ERROR,
 					this + " tried to set egress bandwidth to unconnected destination: " + an.toString());
+		}
 	}
 
 	/**
@@ -419,12 +441,13 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 	 * @param latency
 	 */
 	public void setEgressLatency(Network an, Double latency) {
-		BackboneLink bl = this.getEgressLink(an);
-		if (bl != null)
+		BackboneLink bl = getEgressLink(an);
+		if (bl != null) {
 			bl.setLatency(latency);
-		else
+		} else {
 			Logger.getRootLogger().log(Level.ERROR,
 					this + " tried to set egress latency to unconnected destination: " + an.toString());
+		}
 	}
 
 	/*
@@ -438,23 +461,24 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 	@Override
 	public void step(SimState state) {
 
-		if (TraceConfig.routingTables && Logger.getRootLogger().isTraceEnabled()) {
-			Logger.getRootLogger().trace(this + " Default Route: " + this.getDefaultRoute());
-			Logger.getRootLogger().trace(this + " Routing Table:\n" + this.routingTableReport());
+		if (TraceConfig.networking.routingTables && Logger.getRootLogger().isTraceEnabled()) {
+			Logger.getRootLogger().trace(this + " Default Route: " + getDefaultRoute());
+			Logger.getRootLogger().trace(this + " Routing Table:\n" + routingTableReport());
 		}
 
 		// Routing decisions are made first, analagous to a router "backplane"
 		this.route();
 		// Clear output queues on each egress interface.
-		this.transmitFlows();
+		transmitFlows();
 	}
 
 	/**
 	 * Send out traffic waiting in output queues on all egress links.
 	 */
 	public void transmitFlows() {
-		for (BackboneLink link : this.egressLinks.values())
+		for (BackboneLink link : egressLinks.values()) {
 			link.transmitFlows();
+		}
 	}
 
 	@Override
@@ -480,8 +504,8 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 			// cloned so that if route gets modified in interface it doesn't
 			// changed here as well
 			Route myRoute = route.clone();
-			this.routingTable.put(route.destination, route);
-			this.sendRouteToNeighbors(myRoute);
+			routingTable.put(route.destination, route);
+			sendRouteToNeighbors(myRoute);
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
 		}

@@ -1,6 +1,6 @@
 package simternet.ecj.problems;
 
-import simternet.application.ApplicationProvider;
+import simternet.agents.asp.ApplicationProvider;
 
 public interface HasApplicationProvider {
 	public ApplicationProvider getApplicationProvider();

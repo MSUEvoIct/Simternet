@@ -1,6 +1,6 @@
 package simternet.network;
 
-import simternet.consumer.Consumer;
+import simternet.agents.consumer.Consumer;
 
 public class UserBackgroundFlow extends NetFlow {
 

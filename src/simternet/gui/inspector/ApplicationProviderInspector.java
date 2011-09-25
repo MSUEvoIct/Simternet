@@ -1,6 +1,6 @@
 package simternet.gui.inspector;
 
-import simternet.application.ApplicationProvider;
+import simternet.agents.asp.ApplicationProvider;
 import simternet.ecj.EvolvableAgent;
 import simternet.gui.inspector.property.DoubleProperty;
 import simternet.gui.inspector.property.StringProperty;

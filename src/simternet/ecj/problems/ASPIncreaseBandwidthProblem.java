@@ -1,8 +1,8 @@
 package simternet.ecj.problems;
 
-import simternet.Financials;
-import simternet.Simternet;
-import simternet.application.ApplicationProvider;
+import simternet.agents.asp.ApplicationProvider;
+import simternet.agents.finance.Financials;
+import simternet.engine.Simternet;
 import ec.Problem;
 
 public class ASPIncreaseBandwidthProblem extends Problem implements HasApplicationProvider, HasFinancials, HasSimternet {

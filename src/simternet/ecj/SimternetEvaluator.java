@@ -9,15 +9,16 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
-import simternet.Simternet;
-import simternet.application.ApplicationProvider;
-import simternet.nsp.NetworkProvider;
-import simternet.reporters.ASPInterconnectionReporter;
-import simternet.reporters.ApplicationProviderFitnessReporter;
-import simternet.reporters.ConsumerDataReporter;
-import simternet.reporters.EdgeDataReporter;
-import simternet.reporters.EdgeMarketReporter;
-import simternet.reporters.NetworkProviderFitnessReporter;
+
+import simternet.agents.asp.ApplicationProvider;
+import simternet.agents.nsp.NetworkProvider;
+import simternet.data.output.ASPInterconnectionReporter;
+import simternet.data.output.ApplicationProviderFitnessReporter;
+import simternet.data.output.ConsumerDataReporter;
+import simternet.data.output.EdgeDataReporter;
+import simternet.data.output.EdgeMarketReporter;
+import simternet.data.output.NetworkProviderFitnessReporter;
+import simternet.engine.Simternet;
 import ec.Evaluator;
 import ec.EvolutionState;
 import ec.Individual;

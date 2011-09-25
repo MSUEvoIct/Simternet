@@ -2,8 +2,8 @@ package simternet.network;
 
 import java.util.Comparator;
 
-import simternet.TraceConfig;
-import simternet.consumer.Consumer;
+import simternet.agents.consumer.Consumer;
+import simternet.engine.TraceConfig;
 
 /**
  * TODO: Modify to require user, source, destination, at time of object

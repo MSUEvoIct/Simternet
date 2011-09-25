@@ -1,7 +1,7 @@
 package simternet.network;
 
 import sim.engine.SimState;
-import simternet.nsp.NetworkProvider;
+import simternet.agents.nsp.NetworkProvider;
 
 /**
  * BackboneNetworks are those operated by Network Service Providers. They

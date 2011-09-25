@@ -1,6 +1,6 @@
 package simternet.ecj.terminals;
 
-import simternet.application.ApplicationProvider;
+import simternet.agents.asp.ApplicationProvider;
 import simternet.ecj.DoubleGP;
 import simternet.ecj.problems.HasApplicationProvider;
 import ec.EvolutionState;
