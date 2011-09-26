@@ -3,561 +3,171 @@ Generation: 0
 Best Individual:
 Subpopulation 0:
 Evaluated: true
-Fitness: 2.8704791E9
+Fitness: 3.78606976E9
 Tree 0:
- (/ MinOtherEdgePrice Financials.DepreciationRate)
+ Financial.AssetsCapital
 Tree 1:
- (/ (+ Financials.PerStepFinancingCost Financials.DebitInterestRate)
-     (- Financials.TotalFinancingCost Financials.DebtBalance))
+ Financials.AssetsLiquid
 Tree 2:
- (/ 5 ERC[0.6178201615826392])
+ (+ (/ (* Financials.TotalRevenue Financials.DebtPayoffRate)
+     (/ Financials.PerStepFinancingCost Financials.TotalRevenue))
+     (* (- ERC[0.503149494804731] Financials.PerStepInvestment)
+         (/ Financials.TotalFinancingCost Financials.DebtBalance)))
 Tree 3:
- 5
+ MinOtherEdgePrice
 Subpopulation 1:
 Evaluated: true
-Fitness: 2.58942608E8
+Fitness: 2.71469984E8
 Tree 0:
- 7
+ (+ (+ Financials.TotalFinancingCost Financials.TotalRevenue)
+     (/ Financials.PerStepFinancingCost Financials.DepreciationRate))
 Tree 1:
- (* Financial.AssetsCapital (* (- 5 5) Financials.TotalFinancingCost))
+ (/ (* (+ (if (not Financials.IncreasingRevenue
+     Financials.IncreasingRevenue) (+ Financials.DeltaRevenue
+     Financials.PerStepOperationsCost) (/ Financials.TotalFinancingCost
+     Price)) (+ (if Financials.IncreasingRevenue
+     Financials.AssetsLiquid Financials.DebtPayoffRate)
+     (if Financials.IncreasingRevenue Financials.DepreciationRate
+         Financials.NetWorth))) (if (or (> ERC[0.2897847021332566]
+     Financials.TotalFinancingCost) (xor Financials.IncreasingRevenue
+     Financials.IncreasingRevenue)) (+ (- Financials.PerStepInvestment
+     Financials.DepreciationRate) (- Financials.NetWorth
+     Financials.TotalRevenue)) (- (/ Financials.NetWorth
+     Financials.DebtBalance) (/ ASPNumConnectedNSPs()
+     ASPNumConnectedNSPs())))) (+ (if (< (- Financials.TotalFinancingCost
+     Financials.NetWorth) (/ Financials.DebtPayoffRate
+     Financials.DebitInterestRate)) (+ (+ Financials.DepreciationRate
+     Financials.TotalFinancingCost) (if Financials.IncreasingRevenue
+     ASPNumConnectedNSPs() Price)) (+ (/ Financials.DebtPayoffRate
+     Financials.DebtPayoffRate) (- Financials.DebitInterestRate
+     Financials.PerStepFinancingCost))) (+ (if
+     (or Financials.IncreasingRevenue Financials.IncreasingRevenue)
+     (/ Financials.AssetsLiquid Financials.PresentValue)
+     (if Financials.IncreasingRevenue 7 7)) (/
+     (+ Price Financials.TotalFinancingCost) (*
+     Financials.PerStepInvestment Financials.DebtPayoffRate)))))
 Tree 2:
- NumASPCustomers
+ (+ Financials.NetWorth ERC[0.18425461951269662])
 
 Generation: 1
 Best Individual:
 Subpopulation 0:
 Evaluated: true
-Fitness: 3.31591936E9
+Fitness: 3.56113741E9
 Tree 0:
- (+ Financials.PerStepFinancingCost Financials.TotalFinancingCost)
+ (+ (- (* (/ Financials.DebitInterestRate
+     Financials.NetWorth) (* Financial.AssetsCapital
+     Financials.DebitInterestRate)) (+ (/ Financials.NetWorth
+     Financials.PerStepOperationsCost) (+ Financials.AssetsLiquid
+     Financials.DebtBalance))) (/ (if (or Financials.IncreasingRevenue
+     Financials.IncreasingRevenue) (/ Financials.TotalRevenue
+     edge.numSubscribers()) (* Financials.PerStepInvestment
+     7)) (- (- Financials.TotalFinancingCost NumEdgeNetworks)
+     (+ Financials.PerStepFinancingCost MinOtherEdgePrice))))
 Tree 1:
- Financials.TotalFinancingCost
+ (/ (/ Financials.PerStepInvestment Financials.PerStepOperationsCost)
+     (+ PotentialNetwork.distanceFromHome PotentialNetwork.distanceFromHome))
 Tree 2:
- (- Financials.DebitInterestRate Financials.DebtPayoffRate)
+ Financials.TotalRevenue
 Tree 3:
- (+ (* (* (if (> Financials.DebtBalance Financials.AssetsLiquid)
-     (if Financials.IncreasingRevenue BackbonCongestionRatio()
-         Financials.PresentValue) (* Financials.DebtBalance
-     MinOtherEdgePrice)) (* (if Financials.IncreasingRevenue
-     5 Financials.TotalFinancingCost) (if Financials.IncreasingRevenue
-     Financials.PresentValue MinOtherEdgePrice)))
-     (if (not (xor Financials.IncreasingRevenue
-         Financials.IncreasingRevenue) (> NumEdgeNetworks
-         BackboneBandwidth())) (- (* Financials.NetWorth
-         MinOtherEdgePrice) (* Financials.TotalRevenue
-         ERC[0.13369731839103915])) (* (if Financials.IncreasingRevenue
-         MinOtherEdgePrice Financials.TotalRevenue)
-         (+ BackboneBandwidth() Financials.DebtPayoffRate))))
-     (if (< (+ (- MinOtherEdgePrice NumEdgeNetworks)
-         (if Financials.IncreasingRevenue BackboneBandwidth()
-             Financial.AssetsCapital)) (if (not Financials.IncreasingRevenue
-         Financials.IncreasingRevenue) (if Financials.IncreasingRevenue
-         Financials.DebtPayoffRate Financials.TotalFinancingCost)
-         (if Financials.IncreasingRevenue Financials.PerStepFinancingCost
-             BackbonCongestionRatio()))) (- (/ (+ MinEdgePrice
-         7) (if Financials.IncreasingRevenue Financials.DebtPayoffRate
-         NumEdgeNetworks)) (/ (if Financials.IncreasingRevenue
-         Financials.DebitInterestRate BackbonCongestionRatio())
-         (* Financials.NetWorth Financials.DebitInterestRate)))
-         (/ (if (not Financials.IncreasingRevenue
-             Financials.IncreasingRevenue) (if Financials.IncreasingRevenue
-             BackboneBandwidth() Financials.NetWorth)
-             (* MinOtherEdgePrice MinOtherEdgePrice))
-             (* (* Financials.PerStepInvestment Financials.DebtBalance)
-                 (* Financials.PerStepInvestment Financials.PerStepInvestment)))))
+ Financials.DepreciationRate
 Subpopulation 1:
 Evaluated: true
-Fitness: 2.64705856E8
+Fitness: 2.73969696E8
 Tree 0:
- (/ Financials.DepreciationRate ERC[0.019846483731145836])
+ (+ (/ (* Financials.PresentValue 5) (if Financials.IncreasingRevenue
+     7 Financials.PerStepOperationsCost)) (* (+
+     7 Financials.NetWorth) (+ Financial.AssetsCapital
+     Financials.TotalFinancingCost)))
 Tree 1:
- (if (> 5 Financials.NetWorth) (* Financials.DepreciationRate
-     Financials.DebtBalance) (if Financials.IncreasingRevenue
-     Financials.DebitInterestRate Financials.DeltaRevenue))
+ (+ (if (> (- Financials.PerStepOperationsCost
+     Financials.DepreciationRate) (+ Financials.TotalRevenue
+     5)) (- (if Financials.IncreasingRevenue Financials.NetWorth
+     5) (if Financials.IncreasingRevenue Financials.TotalFinancingCost
+     Financials.TotalFinancingCost)) (/ (if Financials.IncreasingRevenue
+     Financials.DeltaRevenue Financials.DebitInterestRate)
+     (- Financials.PerStepOperationsCost Financials.NetWorth)))
+     (/ (- (+ ERC[0.01645835459957301] Financials.AssetsLiquid)
+         (* Financials.PerStepFinancingCost Price))
+         (* (* 5 Financials.DebtPayoffRate) (/ 5 Financials.TotalFinancingCost))))
 Tree 2:
- (* Financials.PerStepFinancingCost Financials.PerStepInvestment)
+ (/ (+ (* Financials.TotalRevenue 5) (if Financials.IncreasingRevenue
+     5 NumASPCustomers)) (if (or Financials.IncreasingRevenue
+     Financials.IncreasingRevenue) (+ Financials.AssetsLiquid
+     Financials.DepreciationRate) (+ Financials.PresentValue
+     Financial.AssetsCapital)))
 
 Generation: 2
 Best Individual:
 Subpopulation 0:
 Evaluated: true
-Fitness: 3.52659149E9
-Tree 0:
- Financial.AssetsCapital
-Tree 1:
- (* (/ (if Financials.IncreasingRevenue PotentialNetwork.population
-     Financial.AssetsCapital) (* Financials.DebitInterestRate
-     Financials.DebtPayoffRate)) (* (if Financials.IncreasingRevenue
-     5 Financials.NetWorth) (+ Financials.TotalRevenue
-     PotentialNetwork.numCompetitors)))
-Tree 2:
- 7
-Tree 3:
- Financials.TotalFinancingCost
-Subpopulation 1:
-Evaluated: true
-Fitness: 2.64432144E8
-Tree 0:
- 5
-Tree 1:
- ASPNumConnectedNSPs()
-Tree 2:
- (- (/ Financials.PresentValue Financials.DebitInterestRate)
-     (if Financials.IncreasingRevenue Financials.AssetsLiquid
-         Financials.NetWorth))
-
-Generation: 3
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: 3.46613581E9
-Tree 0:
- Financial.AssetsCapital
-Tree 1:
- (/ (* Financials.DepreciationRate Financials.DebtPayoffRate)
-     (* ERC[0.6642641173166824] ERC[0.16744051490298262]))
-Tree 2:
- Financials.AssetsLiquid
-Tree 3:
- (+ (* (* (- (- Financials.DeltaRevenue Financials.AssetsLiquid)
-     (if Financials.IncreasingRevenue Financials.TotalFinancingCost
-         Financials.AssetsLiquid)) (/ (- Financial.AssetsCapital
-     Financials.DepreciationRate) (- NumEdgeNetworks
-     Financials.TotalFinancingCost))) (- (+ (-
-     Financials.DeltaRevenue Financials.DebitInterestRate)
-     (* Financials.DeltaRevenue 5)) (* (/ Financials.DeltaRevenue
-     MinEdgePrice) (+ Financials.TotalFinancingCost
-     5)))) (+ (if (or (xor Financials.IncreasingRevenue
-     Financials.IncreasingRevenue) (and Financials.IncreasingRevenue
-     Financials.IncreasingRevenue)) (/ (/ Financials.DepreciationRate
-     BackboneBandwidth()) (+ BackboneBandwidth()
-     Financials.TotalRevenue)) (/ (/ Financials.NetWorth
-     Financials.DeltaRevenue) (- Financials.TotalRevenue
-     Financials.DeltaRevenue))) (+ (+ (- Financials.DeltaRevenue
-     Financials.TotalFinancingCost) (+ Financials.DepreciationRate
-     Financials.TotalFinancingCost)) (+ (* Financials.DebtPayoffRate
-     NumEdgeNetworks) (- Financials.PerStepFinancingCost
-     7)))))
-Subpopulation 1:
-Evaluated: true
-Fitness: 2.60791744E8
-Tree 0:
- (/ 7 7)
-Tree 1:
- Financials.DebtPayoffRate
-Tree 2:
- (if Financials.IncreasingRevenue Financial.AssetsCapital
-     Financials.PresentValue)
-
-Generation: 4
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: 3.48377958E9
-Tree 0:
- Financial.AssetsCapital
-Tree 1:
- (* (/ (if Financials.IncreasingRevenue PotentialNetwork.population
-     Financial.AssetsCapital) (* Financials.DebitInterestRate
-     Financials.DebtPayoffRate)) (* (if Financials.IncreasingRevenue
-     5 Financials.NetWorth) (+ Financials.TotalRevenue
-     PotentialNetwork.numCompetitors)))
-Tree 2:
- 7
-Tree 3:
- Financials.TotalFinancingCost
-Subpopulation 1:
-Evaluated: true
-Fitness: 2.66210192E8
-Tree 0:
- (- (* Financials.PerStepOperationsCost Financials.TotalRevenue)
-     (+ 7 5))
-Tree 1:
- (- Financials.PerStepOperationsCost Financials.DebitInterestRate)
-Tree 2:
- (/ Financials.PerStepInvestment Financials.TotalRevenue)
-
-Generation: 5
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: 3.43789235E9
-Tree 0:
- Financial.AssetsCapital
-Tree 1:
- (/ (* Financials.DepreciationRate Financials.DebtPayoffRate)
-     (* ERC[0.6642641173166824] ERC[0.16744051490298262]))
-Tree 2:
- Financials.AssetsLiquid
-Tree 3:
- (+ (* (* (- (- Financials.DeltaRevenue Financials.AssetsLiquid)
-     (if Financials.IncreasingRevenue Financials.TotalFinancingCost
-         Financials.AssetsLiquid)) (/ (- Financial.AssetsCapital
-     Financials.DepreciationRate) (- NumEdgeNetworks
-     Financials.TotalFinancingCost))) (- (+ (-
-     Financials.DeltaRevenue Financials.DebitInterestRate)
-     (* Financials.DeltaRevenue 5)) (* (/ Financials.DeltaRevenue
-     MinEdgePrice) (+ Financials.TotalFinancingCost
-     5)))) (+ (if (or (xor Financials.IncreasingRevenue
-     Financials.IncreasingRevenue) (and Financials.IncreasingRevenue
-     Financials.IncreasingRevenue)) (/ (/ Financials.DepreciationRate
-     BackboneBandwidth()) (+ BackboneBandwidth()
-     Financials.TotalRevenue)) (/ (/ Financials.NetWorth
-     Financials.DeltaRevenue) (- Financials.TotalRevenue
-     Financials.DeltaRevenue))) (+ (+ (- Financials.DeltaRevenue
-     Financials.TotalFinancingCost) (+ Financials.DepreciationRate
-     Financials.TotalFinancingCost)) (+ (* Financials.DebtPayoffRate
-     NumEdgeNetworks) (- Financials.PerStepFinancingCost
-     7)))))
-Subpopulation 1:
-Evaluated: true
-Fitness: 2.626024E8
-Tree 0:
- 7
-Tree 1:
- (* Financial.AssetsCapital (* (- 5 5) Financials.TotalFinancingCost))
-Tree 2:
- NumASPCustomers
-
-Generation: 6
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: 3.40241664E9
-Tree 0:
- Financials.PerStepFinancingCost
-Tree 1:
- (* (/ (if Financials.IncreasingRevenue PotentialNetwork.population
-     Financial.AssetsCapital) (* Financials.DebitInterestRate
-     Financials.DebtPayoffRate)) (* (if Financials.IncreasingRevenue
-     5 Financials.NetWorth) (+ Financials.TotalRevenue
-     PotentialNetwork.numCompetitors)))
-Tree 2:
- Financials.NetWorth
-Tree 3:
- (if (and (xor (and Financials.IncreasingRevenue
-     Financials.IncreasingRevenue) (not Financials.IncreasingRevenue
-     Financials.IncreasingRevenue)) (not (< Financials.DebitInterestRate
-     Financial.AssetsCapital) (< Financials.TotalFinancingCost
-     5))) (* (* (/ Financials.DebtPayoffRate 7)
-     (+ BackboneBandwidth() NumEdgeNetworks))
-     (+ (* Financials.NetWorth Financials.TotalRevenue)
-         (/ Financials.DebtPayoffRate Financials.AssetsLiquid)))
-     (* (/ (/ Financials.DebtBalance Financials.TotalFinancingCost)
-         (+ Financials.DebitInterestRate Financials.PerStepFinancingCost))
-         (/ (- Financials.PerStepInvestment Financials.DebitInterestRate)
-             (* Financials.TotalRevenue Financials.PerStepInvestment))))
-Subpopulation 1:
-Evaluated: true
-Fitness: 2.57794032E8
-Tree 0:
- (- (* Financials.PerStepOperationsCost Financials.TotalRevenue)
-     (- (* Financials.PerStepOperationsCost Financials.TotalRevenue)
-         (+ 7 5)))
-Tree 1:
- (* ERC[0.16415833920894485] Financials.PerStepInvestment)
-Tree 2:
- Financials.DebtBalance
-
-Generation: 7
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: 3.36909568E9
-Tree 0:
- Financial.AssetsCapital
-Tree 1:
- (- Financials.DebitInterestRate Financials.AssetsLiquid)
-Tree 2:
- 7
-Tree 3:
- (- Financials.DepreciationRate Financials.PerStepFinancingCost)
-Subpopulation 1:
-Evaluated: true
-Fitness: 2.59784112E8
-Tree 0:
- Financials.PerStepInvestment
-Tree 1:
- (/ (* (if (> (+ Financials.AssetsLiquid ERC[0.10657812463574556])
-     (/ Financials.DebtBalance Financials.TotalFinancingCost))
-     (* (- 5 5) (if Financials.IncreasingRevenue
-         Financials.PerStepFinancingCost Financials.PerStepInvestment))
-     (/ (- Financials.DeltaRevenue Financials.DebitInterestRate)
-         (+ Financials.TotalFinancingCost Financials.TotalRevenue)))
-     (/ Financials.TotalFinancingCost (if (> Financials.DebitInterestRate
-         Financial.AssetsCapital) (/ Financials.TotalFinancingCost
-         Financials.NetWorth) (* (if Financials.IncreasingRevenue
-         Financials.PerStepInvestment Financials.DebitInterestRate)
-         (* Financials.PerStepOperationsCost Financials.DebtBalance)))))
-     (* (if (or (not Financials.IncreasingRevenue
-         Financials.IncreasingRevenue) (or Financials.IncreasingRevenue
-         Financials.IncreasingRevenue)) (if (and Financials.IncreasingRevenue
-         Financials.IncreasingRevenue) (if Financials.IncreasingRevenue
-         Financials.TotalFinancingCost Financials.TotalFinancingCost)
-         (if Financials.IncreasingRevenue Financials.TotalRevenue
-             Financial.AssetsCapital)) (/ (/ Financials.AssetsLiquid
-         Financials.DebtPayoffRate) (* Price Financials.NetWorth)))
-         (+ (- (if Financials.IncreasingRevenue 5
-             Financials.DepreciationRate) (/ Financials.DebtBalance
-             Financials.PerStepOperationsCost)) (/ (*
-             7 ERC[0.2561231150946044]) (+ NumASPCustomers
-             Financials.PerStepFinancingCost)))))
-Tree 2:
- Financials.PerStepFinancingCost
-
-Generation: 8
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: 3.44050202E9
-Tree 0:
- Financials.NetWorth
-Tree 1:
- PotentialNetwork.numCompetitors
-Tree 2:
- 5
-Tree 3:
- MinEdgePrice
-Subpopulation 1:
-Evaluated: true
-Fitness: 2.64065088E8
-Tree 0:
- (- (* Financials.PerStepOperationsCost Financials.TotalRevenue)
-     (+ 7 5))
-Tree 1:
- (/ Financials.PerStepOperationsCost ASPNumConnectedNSPs())
-Tree 2:
- (if Financials.IncreasingRevenue Financials.AssetsLiquid
-     Financials.NetWorth)
-
-Generation: 9
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: 3.36075136E9
-Tree 0:
- Financials.NetWorth
-Tree 1:
- (/ (- Financials.PerStepOperationsCost Financials.PerStepFinancingCost)
-     (- Financials.DebitInterestRate Financials.AssetsLiquid))
-Tree 2:
- Financials.TotalRevenue
-Tree 3:
- (if (and (xor (and Financials.IncreasingRevenue
-     Financials.IncreasingRevenue) (not Financials.IncreasingRevenue
-     Financials.IncreasingRevenue)) (not (< Financials.DebitInterestRate
-     Financial.AssetsCapital) (< Financials.TotalFinancingCost
-     5))) (* (* (/ Financials.DebtPayoffRate 7)
-     (+ BackboneBandwidth() NumEdgeNetworks))
-     (+ (* Financials.NetWorth Financials.TotalRevenue)
-         (/ Financials.DebtPayoffRate Financials.AssetsLiquid)))
-     (* (/ (/ Financials.DebtBalance Financials.TotalFinancingCost)
-         (+ Financials.DebitInterestRate Financials.PerStepFinancingCost))
-         (/ (- Financials.PerStepInvestment Financials.DebitInterestRate)
-             (* Financials.TotalRevenue Financials.PerStepInvestment))))
-Subpopulation 1:
-Evaluated: true
-Fitness: 2.58155952E8
-Tree 0:
- (+ 7 5)
-Tree 1:
- (/ (* (if (> (+ Financials.AssetsLiquid ERC[0.10657812463574556])
-     (/ Financials.DebtBalance Financials.TotalFinancingCost))
-     (* (- 5 5) (if Financials.IncreasingRevenue
-         Financials.PerStepFinancingCost Financials.PerStepInvestment))
-     (/ (- Financials.DeltaRevenue Financials.DebitInterestRate)
-         (+ Financials.TotalFinancingCost Financials.TotalRevenue)))
-     (/ Financials.TotalFinancingCost (if (> Financials.DebitInterestRate
-         Financial.AssetsCapital) (/ Financials.TotalFinancingCost
-         Financials.NetWorth) (* (if Financials.IncreasingRevenue
-         Financials.PerStepInvestment Financials.DebitInterestRate)
-         (* Financials.PerStepOperationsCost Financials.DebtBalance)))))
-     (* (if (or (not Financials.IncreasingRevenue
-         Financials.IncreasingRevenue) (or Financials.IncreasingRevenue
-         Financials.IncreasingRevenue)) (if (and Financials.IncreasingRevenue
-         Financials.IncreasingRevenue) (if Financials.IncreasingRevenue
-         Financials.TotalFinancingCost Financials.TotalFinancingCost)
-         (if Financials.IncreasingRevenue Financials.TotalRevenue
-             Financial.AssetsCapital)) (/ (/ Financials.AssetsLiquid
-         Financials.DebtPayoffRate) (* Price Financials.NetWorth)))
-         (+ (- (if Financials.IncreasingRevenue 5
-             Financials.DepreciationRate) (/ Financials.DebtBalance
-             Financials.PerStepOperationsCost)) (/ (*
-             7 ERC[0.2561231150946044]) (+ NumASPCustomers
-             Financials.PerStepFinancingCost)))))
-Tree 2:
- Financials.PerStepFinancingCost
-
-Generation: 10
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: 3.418912E9
-Tree 0:
- Financial.AssetsCapital
-Tree 1:
- Financials.DepreciationRate
-Tree 2:
- Financials.DebtBalance
-Tree 3:
- (- Financials.DepreciationRate Financials.PerStepFinancingCost)
-Subpopulation 1:
-Evaluated: true
-Fitness: 2.62495648E8
-Tree 0:
- (- (* Financials.PerStepOperationsCost Financials.TotalRevenue)
-     (+ 7 5))
-Tree 1:
- (/ Financials.PerStepOperationsCost ASPNumConnectedNSPs())
-Tree 2:
- (if Financials.IncreasingRevenue Financials.AssetsLiquid
-     Financials.NetWorth)
-
-Generation: 11
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: 3.43093376E9
-Tree 0:
- Financials.NetWorth
-Tree 1:
- (* (/ (if Financials.IncreasingRevenue PotentialNetwork.population
-     Financial.AssetsCapital) (* Financials.DebitInterestRate
-     Financials.DebtPayoffRate)) (* (if Financials.IncreasingRevenue
-     5 Financials.NetWorth) (+ Financials.TotalRevenue
-     Financials.TotalRevenue)))
-Tree 2:
- 5
-Tree 3:
- MinEdgePrice
-Subpopulation 1:
-Evaluated: true
-Fitness: 2.63397968E8
-Tree 0:
- (- (* Financials.PerStepOperationsCost Financials.TotalRevenue)
-     (+ 7 5))
-Tree 1:
- (/ Financials.PerStepOperationsCost Financials.DebitInterestRate)
-Tree 2:
- Financials.PresentValue
-
-Generation: 12
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: 6.4263603E8
-Tree 0:
- Financials.PerStepFinancingCost
-Tree 1:
- (/ (- Financials.TotalRevenue Financials.DepreciationRate)
-     (/ Financials.DebitInterestRate Financials.AssetsLiquid))
-Tree 2:
- (+ (if Financials.IncreasingRevenue Financials.NetWorth
-     BackbonCongestionRatio()) (+ Financials.NetWorth
-     Financial.AssetsCapital))
-Tree 3:
- (if (and (xor (and Financials.IncreasingRevenue
-     Financials.IncreasingRevenue) (not Financials.IncreasingRevenue
-     Financials.IncreasingRevenue)) (not (< Financials.DebitInterestRate
-     Financial.AssetsCapital) (< Financials.TotalFinancingCost
-     5))) (* MinEdgePrice (+ (* Financials.NetWorth
-     Financials.TotalRevenue) (/ Financials.DebtPayoffRate
-     Financials.AssetsLiquid))) (* (/ (/ Financials.DebtBalance
-     Financials.TotalFinancingCost) (+ Financials.DebitInterestRate
-     Financials.PerStepFinancingCost)) (/ (- Financials.PerStepInvestment
-     Financials.DebitInterestRate) (* Financials.TotalRevenue
-     Financials.PerStepInvestment))))
-Subpopulation 1:
-Evaluated: true
-Fitness: 2.48149136E8
-Tree 0:
- (+ (* Financials.PerStepOperationsCost Financials.TotalRevenue)
-     (+ 7 5))
-Tree 1:
- (+ Financials.PerStepOperationsCost Financials.DebitInterestRate)
-Tree 2:
- (if Financials.IncreasingRevenue Financials.AssetsLiquid
-     Financials.NetWorth)
-
-Generation: 13
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: 3.38624384E9
+Fitness: 3.76633856E9
 Tree 0:
  Financials.DebtBalance
 Tree 1:
- Financial.AssetsCapital
+ PotentialNetwork.cost
 Tree 2:
- (if Financials.IncreasingRevenue Financials.NetWorth
-     BackbonCongestionRatio())
+ (* Financials.TotalRevenue (- (if Financials.IncreasingRevenue
+     Financials.PerStepFinancingCost Financials.TotalFinancingCost)
+     (* Financials.DebtBalance Financials.AssetsLiquid)))
 Tree 3:
- (if Financials.IncreasingRevenue Financials.NetWorth
-     ERC[0.8779332397757577])
+ (+ (- (if (xor (not Financials.IncreasingRevenue
+     Financials.IncreasingRevenue) (> BackboneBandwidth()
+     Financials.NetWorth)) (/ (* 5 Financials.DebtPayoffRate)
+     (+ NumEdgeNetworks MinEdgePrice)) (if (<
+     Financials.TotalFinancingCost Financials.TotalRevenue)
+     (if Financials.IncreasingRevenue Financials.NetWorth
+         Financials.PerStepOperationsCost) (+ 7 Financials.PresentValue)))
+     (/ (* (- Financials.AssetsLiquid Financials.AssetsLiquid)
+         (if Financials.IncreasingRevenue 5 Financials.PerStepFinancingCost))
+         (+ (- NumEdgeNetworks Financials.TotalRevenue)
+             (+ 7 Financials.AssetsLiquid)))) (if (< (-
+     (+ Financials.DepreciationRate Financials.DeltaRevenue)
+     (- BackbonCongestionRatio() Financials.DebtBalance))
+     (/ (/ BackbonCongestionRatio() Financials.NetWorth)
+         (/ BackbonCongestionRatio() Financials.AssetsLiquid)))
+     (- (- (* Financials.DebtBalance BackboneBandwidth())
+         (if Financials.IncreasingRevenue Financials.NetWorth
+             Financials.DebitInterestRate)) (/ (/ Financials.PerStepInvestment
+         BackboneBandwidth()) (if Financials.IncreasingRevenue
+         BackbonCongestionRatio() Financials.TotalFinancingCost)))
+     (/ (* (* BackboneBandwidth() BackbonCongestionRatio())
+         (- Financials.NetWorth 5)) (- (- BackboneBandwidth()
+         Financials.NetWorth) (/ MinEdgePrice MinEdgePrice)))))
 Subpopulation 1:
 Evaluated: true
-Fitness: 2.60069088E8
+Fitness: 2.79762432E8
 Tree 0:
- (- (* Financials.PerStepOperationsCost Financials.TotalRevenue)
-     (+ 7 5))
+ (if (< (+ Financials.PerStepInvestment Financials.DebtBalance)
+     (+ Financials.PerStepOperationsCost Financials.PresentValue))
+     (* (+ ERC[0.21155636968371982] Financial.AssetsCapital)
+         (- Financials.PresentValue Financials.PerStepFinancingCost))
+     (if (> 5 ERC[0.7892680822949596]) (if Financials.IncreasingRevenue
+         Financials.AssetsLiquid Financials.PresentValue)
+         (/ 5 Financials.PerStepOperationsCost)))
 Tree 1:
- (* Financial.AssetsCapital (/ Financials.PerStepOperationsCost
-     Financials.DebitInterestRate))
-Tree 2:
  Financials.PerStepOperationsCost
-
-Generation: 14
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: 3.43076147E9
-Tree 0:
- Financials.DebtBalance
-Tree 1:
- Financial.AssetsCapital
 Tree 2:
- (if Financials.IncreasingRevenue Financials.NetWorth
-     BackbonCongestionRatio())
-Tree 3:
- (if Financials.IncreasingRevenue Financials.NetWorth
-     ERC[0.8779332397757577])
-Subpopulation 1:
-Evaluated: true
-Fitness: 2.69734784E8
-Tree 0:
- (- (* Financials.PerStepOperationsCost Financials.TotalRevenue)
-     (- (* Financials.PerStepOperationsCost Financials.TotalRevenue)
-         (+ 7 5)))
-Tree 1:
- (/ Financials.PerStepOperationsCost Financials.DebitInterestRate)
-Tree 2:
- Financials.PerStepFinancingCost
-
-Generation: 15
-Best Individual:
-Subpopulation 0:
-Evaluated: true
-Fitness: 3.48043827E9
-Tree 0:
- Financials.NetWorth
-Tree 1:
- Financial.AssetsCapital
-Tree 2:
- (+ (if Financials.IncreasingRevenue Financials.NetWorth
-     BackbonCongestionRatio()) (+ Financials.NetWorth
-     Financial.AssetsCapital))
-Tree 3:
- (if Financials.IncreasingRevenue Financials.NetWorth
-     ERC[0.8779332397757577])
-Subpopulation 1:
-Evaluated: true
-Fitness: 2.67342608E8
-Tree 0:
- (- (* Financials.PerStepOperationsCost Financials.TotalRevenue)
-     (+ 7 5))
-Tree 1:
- (/ Financials.PerStepOperationsCost Financials.DebitInterestRate)
-Tree 2:
- (- (if Financials.IncreasingRevenue NumASPCustomers
-     Financials.TotalFinancingCost) (/ Financial.AssetsCapital
-     Financials.DepreciationRate))
+ (/ (+ (+ (- (+ Financials.DebtPayoffRate
+     7) (- Financials.TotalFinancingCost 5)) (-
+     (- Financials.PerStepFinancingCost Financials.AssetsLiquid)
+     (- Financials.PerStepOperationsCost Financials.DebtPayoffRate)))
+     (+ (* (+ Financials.TotalFinancingCost Financials.TotalFinancingCost)
+         (+ Financials.NetWorth Financials.TotalFinancingCost))
+         (+ (- Financials.PerStepFinancingCost Financials.PresentValue)
+             (* 7 ASPNumConnectedNSPs())))) (if (and (not
+     (and Financials.IncreasingRevenue Financials.IncreasingRevenue)
+     (> Financials.PerStepOperationsCost Financials.DebtPayoffRate))
+     (xor (> Financials.PerStepOperationsCost
+         7) (or Financials.IncreasingRevenue Financials.IncreasingRevenue)))
+     (if (and (< Financials.PresentValue Financials.DepreciationRate)
+         (and Financials.IncreasingRevenue Financials.IncreasingRevenue))
+         (/ (* Financials.NetWorth Financials.DebitInterestRate)
+             (/ Financials.DebtPayoffRate Financials.DeltaRevenue))
+         (if (< 7 Financials.PerStepOperationsCost)
+             (/ Financials.PerStepOperationsCost Financials.DepreciationRate)
+             (/ Financials.PerStepFinancingCost Financials.PerStepFinancingCost)))
+     (/ (- (* 7 Financials.TotalFinancingCost)
+         (- Financials.TotalFinancingCost 5)) (/ (+
+         Financials.PerStepOperationsCost NumASPCustomers)
+         (* Financials.TotalFinancingCost Financials.DeltaRevenue)))))
