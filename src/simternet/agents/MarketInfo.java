@@ -15,7 +15,7 @@ import simternet.network.Network;
 /**
  * Returns various information about the simternet ICT market that is useful to
  * many agents and does not naturally belong within the methods of a single
- * agent type's class. I.e., how many network providers there are.
+ * agent type's class. i.e., how many network providers there are.
  * 
  * @author kkoning
  * 
