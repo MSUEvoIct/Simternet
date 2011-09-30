@@ -1,7 +1,7 @@
 package simternet.engine;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import sim.engine.Schedule;
 import sim.engine.SimState;
@@ -33,7 +33,7 @@ public class AsyncDataSchedule extends Schedule {
 	 * set rather than a list/vector/array because updating an agent more than
 	 * once would cause undesirable (inaccurate) behavior.
 	 */
-	protected Set<AsyncUpdate>	asyncUpdaters		= new HashSet<AsyncUpdate>();
+	protected Set<AsyncUpdate>	asyncUpdaters		= new TreeSet<AsyncUpdate>();
 
 	@Override
 	public boolean scheduleOnce(Steppable event) {
@@ -101,11 +101,14 @@ public class AsyncDataSchedule extends Schedule {
 
 	@Override
 	public synchronized boolean step(SimState state) {
+		Simternet s = (Simternet) state;
+
 		// process the previous step's updates before any new processing occurs
 		// this timestep.
 		for (AsyncUpdate updater : asyncUpdaters) {
 			updater.update();
 		}
+
 		// run the schedule as normal.
 		return super.step(state);
 	}

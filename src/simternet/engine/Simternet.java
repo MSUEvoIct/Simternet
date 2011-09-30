@@ -78,6 +78,24 @@ public class Simternet extends SimState implements Serializable {
 		schedule = new AsyncDataSchedule();
 	}
 
+	@Override
+	public void start() {
+		super.start();
+
+		// Initialize Network Service Providers
+		networkServiceProviders = new ArrayList<NetworkProvider>();
+
+		// Initialize Application Service Providers
+		applicationProviders = new ArrayList<ApplicationProvider>();
+		applicationProvidersByCategory = new HashMap<AppCategory, Collection<ApplicationProvider>>();
+
+		// Initialize Consumer Agents
+		consumerAgents = new SparseGrid2D(config.gridSize.x, config.gridSize.y);
+		initConsumerClasses();
+		// Do not insert NSP or ASP agents ourselves; let ECJ handle that.
+
+	}
+
 	public void addReporter(Reporter r) {
 		schedule.scheduleRepeating(Schedule.EPOCH, 100, r);
 	}
@@ -406,24 +424,6 @@ public class Simternet extends SimState implements Serializable {
 				enterMarket(c);
 			}
 		}
-	}
-
-	@Override
-	public void start() {
-		super.start();
-
-		// Initialize Network Service Providers
-		networkServiceProviders = new ArrayList<NetworkProvider>();
-
-		// Initialize Application Service Providers
-		applicationProviders = new ArrayList<ApplicationProvider>();
-		applicationProvidersByCategory = new HashMap<AppCategory, Collection<ApplicationProvider>>();
-
-		// Initialize Consumer Agents
-		consumerAgents = new SparseGrid2D(config.gridSize.x, config.gridSize.y);
-		initConsumerClasses();
-		// Do not insert NSP or ASP agents ourselves; let ECJ handle that.
-
 	}
 
 }

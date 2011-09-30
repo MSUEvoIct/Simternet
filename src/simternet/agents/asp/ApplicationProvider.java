@@ -1,20 +1,17 @@
 package simternet.agents.asp;
 
-import java.io.Serializable;
 import java.util.HashSet;
 
 import org.apache.log4j.Logger;
 
 import sim.engine.SimState;
-import sim.engine.Steppable;
 import sim.util.Bag;
 import simternet.agents.consumer.Consumer;
 import simternet.agents.finance.Financials;
 import simternet.agents.nsp.NetworkProvider;
-import simternet.ecj.problems.HasFinancials;
+import simternet.engine.Firm;
 import simternet.engine.Simternet;
 import simternet.engine.TraceConfig;
-import simternet.engine.asyncdata.AsyncUpdate;
 import simternet.engine.asyncdata.Temporal;
 import simternet.network.Backbone;
 import simternet.network.Datacenter;
@@ -24,7 +21,7 @@ import simternet.network.Network;
 import simternet.network.RoutingProtocolConfig;
 import simternet.network.UserInteractiveFlow;
 
-public class ApplicationProvider implements Steppable, Serializable, AsyncUpdate, HasFinancials {
+public class ApplicationProvider implements Firm {
 	private static final long			serialVersionUID		= 1L;
 
 	// "Housekeeping" information
