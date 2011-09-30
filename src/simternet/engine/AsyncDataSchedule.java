@@ -109,11 +109,6 @@ public class AsyncDataSchedule extends Schedule {
 			updater.update();
 		}
 
-		// Update aggregate data about the simulated world
-		s.updateWorld();
-
-		s.aggregateData();
-
 		// run the schedule as normal.
 		return super.step(state);
 	}
