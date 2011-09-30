@@ -13,6 +13,7 @@ import simternet.agents.asp.ApplicationProvider;
 import simternet.agents.nsp.NetworkProvider;
 import simternet.data.output.ASPInterconnectionReporter;
 import simternet.data.output.ApplicationProviderFitnessReporter;
+import simternet.data.output.BackboneLinkReporter;
 import simternet.data.output.ConsumerDataReporter;
 import simternet.data.output.EdgeDataReporter;
 import simternet.data.output.EdgeMarketReporter;
@@ -119,6 +120,11 @@ public class SimternetEvaluator extends Evaluator {
 			emr.setGeneration(state.generation);
 			emr.setChunk(i);
 			simternet[i].addReporter(emr);
+
+			BackboneLinkReporter blr = new BackboneLinkReporter(1);
+			blr.setGeneration(state.generation);
+			blr.setChunk(i);
+			simternet[i].addReporter(blr);
 
 			// PrintStream testPS = null;
 			// try {

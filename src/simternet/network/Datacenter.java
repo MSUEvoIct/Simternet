@@ -104,7 +104,7 @@ public class Datacenter extends Network {
 
 		sb.append("Congestion status of Egress Links\n");
 		for (BackboneLink bb : egressLinks.values()) {
-			sb.append(bb + " has usage factor of " + bb.congestionAlgorithm.getUsageRatio() + "\n");
+			sb.append(bb + " has usage factor of " + bb.perStepCongestionRatio() + "\n");
 		}
 
 		sb.append("Congestion status of Edge Networks\n");

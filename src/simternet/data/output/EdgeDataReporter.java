@@ -13,19 +13,22 @@ public class EdgeDataReporter extends Reporter {
 
 	protected static HashMap<String, String>	netTypeAbbreviations;
 	private static final long					serialVersionUID	= 1L;
-	public static final String					specificHeaders		= "LocationX" + Reporter.separater + "LocationY"
-																			+ Reporter.separater + "NSP"
-																			+ Reporter.separater + "NetworkType"
-																			+ Reporter.separater + "TransitBandwidth"
-																			+ Reporter.separater + "LocalBandwidth"
-																			+ Reporter.separater + "Congestion"
-																			+ Reporter.separater + "Price"
-																			+ Reporter.separater + "Customers"
-																			+ Reporter.separater + "Competitors"
-																			+ Reporter.separater + "MarketShare"
-																			+ Reporter.separater + "Total Usage";
-
+	public static final String					specificHeaders;
 	static {
+
+		// pos 1 & 2
+		specificHeaders = "LocationX" + Reporter.separater + "LocationY" + Reporter.separater + "NSP" // pos
+																										// 3
+				+ Reporter.separater + "NetworkType" // pos 4
+				+ Reporter.separater + "TransitBandwidth" // pos 5
+				+ Reporter.separater + "LocalBandwidth" // pos 6
+				+ Reporter.separater + "Congestion" // pos 7
+				+ Reporter.separater + "Price" // pos 8
+				+ Reporter.separater + "Customers" // pos 9
+				+ Reporter.separater + "Competitors" // pos 10
+				+ Reporter.separater + "MarketShare" // pos 11
+				+ Reporter.separater + "Total Usage"; // pos 12
+
 		new EdgeDataReporter().logHeaders();
 
 		// Initialize the hash table for abbreviations of network types.
@@ -57,29 +60,32 @@ public class EdgeDataReporter extends Reporter {
 					price = Double.NaN;
 				}
 
-				report.append(location.x);
+				report.append(location.x); // pos 1
 				report.append(Reporter.separater);
-				report.append(location.y);
+				report.append(location.y); // pos 2
 				report.append(Reporter.separater);
-				report.append(en.getOwner().getName());
+				report.append(en.getOwner().getName()); // pos 3
 				report.append(Reporter.separater);
+				// pos 4
 				report.append(EdgeDataReporter.netTypeAbbreviations.get(en.getClass().toString()));
 				report.append(Reporter.separater);
-				report.append(en.getUpstreamIngress().getBandwidth());
+				report.append(en.getUpstreamIngress().getBandwidth()); // pos 5
 				report.append(Reporter.separater);
-				report.append(en.getMaxBandwidth());
+				report.append(en.getMaxBandwidth()); // pos 6
 				report.append(Reporter.separater);
-				report.append(en.getUpstreamIngress().getCongestionAlgorithm().getUsageRatio());
+				// pos 7
+				report.append(en.getUpstreamIngress().totalCongestionRatio());
 				report.append(Reporter.separater);
-				report.append(price);
+				report.append(price); // pos 8
 				report.append(Reporter.separater);
-				report.append(en.getNumSubscribers());
+				report.append(en.getNumSubscribers()); // pos 9
 				report.append(Reporter.separater);
-				report.append(s.getNumNetworkProviders(location));
+				report.append(s.getNumNetworkProviders(location)); // pos 10
 				report.append(Reporter.separater);
+				// pos 11
 				report.append(en.getNumSubscribers() / s.getPopulation(location));
 				report.append(Reporter.separater);
-				report.append(en.totalUsage);
+				report.append(en.totalUsage); // pos 12
 				report(report.toString());
 			}
 		}
