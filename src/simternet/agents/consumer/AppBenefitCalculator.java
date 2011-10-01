@@ -12,15 +12,41 @@ import simternet.network.EdgeNetwork;
  * @author kkoning
  * 
  */
-public interface AppBenefitCalculator extends Serializable {
+public abstract class AppBenefitCalculator implements Serializable {
+	private static final long	serialVersionUID	= 1L;
+
 	/**
 	 * Calculate the benefit to consumer c of using application asp on
 	 * edgeNetwork net
 	 * 
 	 * @param c
+	 *            The consumer
 	 * @param asp
-	 * @param expectedFraction
-	 * @return
+	 *            The application
+	 * @param fractionReceived
+	 *            The ration of bandwidth requested to received
+	 * @return the benefit of using the application
 	 */
-	public abstract double calculateBenefit(Consumer c, ApplicationProvider asp, EdgeNetwork net);
+	public abstract double calculateBenefit(Consumer c, ApplicationProvider asp, Double fractionReceived);
+
+	/**
+	 * Estimate the benefit that will be received by the customer from using the
+	 * application on the specified edge network by assuming that congestion
+	 * will remain constant.
+	 * 
+	 * @param c
+	 *            The consumer
+	 * @param asp
+	 *            The application
+	 * @param net
+	 *            The edge network
+	 * @return The estimated benefit of using the applicaiton on the specified
+	 *         edge network
+	 */
+	public double estimateBenefit(Consumer c, ApplicationProvider asp, EdgeNetwork net) {
+		Double expectedFraction = asp.getExpectedFraction(net);
+		Double estimatedBenefit = calculateBenefit(c, asp, expectedFraction);
+		return estimatedBenefit;
+	}
+
 }
