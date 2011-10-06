@@ -14,6 +14,8 @@ import simternet.agents.asp.ApplicationProvider;
 import simternet.agents.consumer.behavior.DefaultAppBenefitCalculator;
 import simternet.agents.consumer.behavior.DefaultAppCategoryBudgetCalculator;
 import simternet.engine.Simternet;
+import simternet.engine.StepBooleanSequence;
+import simternet.engine.StepDoubleSequence;
 import simternet.engine.TraceConfig;
 import simternet.engine.asyncdata.AsyncUpdate;
 import simternet.engine.asyncdata.Temporal;
@@ -53,6 +55,12 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 */
 	protected NetManager												netManager;
 
+	/**
+	 * Controls the consumer's allocation of its overall application budget
+	 * among the different categories of available applications. It is expected
+	 * that consumers could shift expenditures into categories which provide
+	 * them with a greater benefit.
+	 */
 	protected AppCategoryBudgetCalculator								appCatBudgetManager;
 
 	// Consumer State
@@ -117,11 +125,66 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 																										null);
 
 	// Tracking Variables
-	public double														benefitSeen				= 0.0;
-	public double														congestionSeen			= 0.0;
-	public double														paidToNSPs				= 0.0;
-	public double														transferReceived		= 0.0;
-	public double														transferRequested		= 0.0;
+	// These should not be used to make decisions for agents; at least, not
+	// unless they are limited to data
+	// in previous steps (and not the current step).
+
+	/**
+	 * The amount of benefit the consumer expects to receive based on its
+	 * valuation of applications and the expected congestion of the network.
+	 */
+	public StepDoubleSequence											benefitRequested;
+
+	/**
+	 * The total calculated benefit the consumer has received from applications
+	 * per time step.
+	 */
+	public StepDoubleSequence											benefitReceived;
+
+	/**
+	 * The amount paid to network service providers each time period.
+	 */
+	public StepDoubleSequence											paidToNSPs;
+
+	/**
+	 * The amount of transfer capacity that would have been used by the customer
+	 * in the absence of any network congestion.
+	 */
+	public StepDoubleSequence											transferRequested;
+
+	/**
+	 * The amount of transfer capacity actually received by the consumer
+	 */
+	public StepDoubleSequence											transferReceived;
+
+	/**
+	 * The number of times this consumer has switched to a different Network
+	 * Service Provider
+	 */
+	public StepBooleanSequence											switchedNSP;
+
+	/**
+	 * The number of steps in which this consumer agent decided to consume some
+	 * network service.
+	 */
+	public StepBooleanSequence											usedNSP;
+
+	/**
+	 * The number of network flows requested by this customer. Mainly used for
+	 * debugging purposes.
+	 */
+	public StepDoubleSequence											numFlowsRequested;
+
+	/**
+	 * The number of network flows actually received by this customer. Mainly
+	 * used for debugging purposes.
+	 */
+	public StepDoubleSequence											numFlowsReceived;
+
+	/**
+	 * The number of ASPs the consumer used per time step.
+	 */
+	public StepDoubleSequence											numASPsUsed;
 
 	// Remember; every Temporal variable needs to be listed here!
 	@Override
@@ -135,9 +198,6 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	// Top level consumer behavior
 	@Override
 	public void step(SimState state) {
-		if (TraceConfig.steppingConsumer && Logger.getRootLogger().isTraceEnabled()) {
-			Logger.getRootLogger().trace("Stepping" + toString());
-		}
 
 		// Actualize our consumption decisions from the last time step.
 		consumeNetworks();
@@ -158,6 +218,20 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 			appCatBudgetManager.calculateAppCategoryBudgets(this);
 		}
 
+		// Collect data on our current condition
+		//
+
+		// are we currently using an NSP?
+		boolean usingNSP = true;
+		if (edgeNetwork.get() == null) {
+			usingNSP = false;
+		}
+		usedNSP.set(usingNSP);
+
+		// How many apps are we using?
+		int numApps = this.getNumAppsUsed();
+		numASPsUsed.set(numApps);
+
 	}
 
 	/**
@@ -169,6 +243,18 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 			AppBenefitCalculator abc, AppCategoryBudgetCalculator acbc) {
 		this.s = s;
 		// this.name = s.config.getCCName();
+
+		// Initialize data tracking structures
+		benefitRequested = new StepDoubleSequence(s);
+		benefitReceived = new StepDoubleSequence(s);
+		paidToNSPs = new StepDoubleSequence(s);
+		transferRequested = new StepDoubleSequence(s);
+		transferReceived = new StepDoubleSequence(s);
+		numFlowsRequested = new StepDoubleSequence(s);
+		numFlowsReceived = new StepDoubleSequence(s);
+		numASPsUsed = new StepDoubleSequence(s);
+		usedNSP = new StepBooleanSequence(s);
+		switchedNSP = new StepBooleanSequence(s);
 
 		if (location != null) {
 			this.location = location;
@@ -224,13 +310,16 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	}
 
 	/**
+	 * Actualize the consumption of a particular application on a particular
+	 * edge network.
+	 * 
 	 * @param asp
-	 *            The application to use
+	 *            The application to be used
 	 * @param aen
 	 *            The network on which to use the application
 	 */
-	protected void consumeApplication(ApplicationProvider application, EdgeNetwork network) {
-		application.processUsage(this, network);
+	protected NetFlow consumeApplication(ApplicationProvider application, EdgeNetwork network) {
+		return application.processUsage(this, network);
 	}
 
 	/**
@@ -249,7 +338,18 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 			// Each ASP with that category
 			for (ApplicationProvider asp : asps) {
 				// Use that app on the network we're subscribed to
-				consumeApplication(asp, edgeNetwork.get());
+				NetFlow flow = consumeApplication(asp, edgeNetwork.get());
+
+				// We need to request a flow to receive this application
+				numFlowsRequested.increment();
+
+				// That flow requires a certain amount of bandwidth
+				benefitRequested.add(flow.bandwidthRequested);
+
+				// We expect to receive the estimated beenfit
+				double expectedBenefit = appBenefitCalculator.estimateBenefit(this, asp, edgeNetwork.get());
+				benefitRequested.add(expectedBenefit);
+
 				if (TraceConfig.consumerUsedApp && Logger.getRootLogger().isTraceEnabled()) {
 					Logger.getRootLogger().trace(this + " consumed " + asp);
 				}
@@ -267,6 +367,11 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 */
 	protected void consumeNetwork(EdgeNetwork edge) {
 		edge.processUsage(this);
+
+		// In order to consume a network, we're going to need to pay the NSP to
+		// use it.
+		double paidToNSP = edge.getPrice();
+		paidToNSPs.add(paidToNSP);
 	}
 
 	/**
@@ -339,8 +444,16 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 					this + " received " + flow + ", congestion = " + flow.describeCongestionForHumans());
 		}
 
-		transferRequested += flow.getRequestedTransfer();
-		transferReceived += flow.getActualTransfer();
+		// Update the total transfer received
+		transferReceived.add(flow.bandwidth);
+
+		// We have received one additional flow.
+		numFlowsReceived.increment();
+
+		// What is the actual benefit we saw?
+		double appBenefit = appBenefitCalculator.calculateBenefit(this, flow.getApplicationProvider(),
+				flow.getTransferFraction());
+		benefitReceived.add(appBenefit);
 	}
 
 	public void setName(String name) {
@@ -358,6 +471,29 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 
 	public TemporalHashMap<AppCategory, List<ApplicationProvider>> getAppsUsed() {
 		return appsUsed;
+	}
+
+	/**
+	 * @param category
+	 *            The application category
+	 * @return The number of applications used by the consumer in a single
+	 *         application category
+	 */
+	public int getNumAppsUsed(AppCategory category) {
+		List<ApplicationProvider> apps = appsUsed.get(category);
+		return apps.size();
+	}
+
+	/**
+	 * @return The number of applications used by the consumer in all
+	 *         application categories.
+	 */
+	public int getNumAppsUsed() {
+		int numAppsUsed = 0;
+		for (List<ApplicationProvider> asps : appsUsed.values()) {
+			numAppsUsed = numAppsUsed + asps.size();
+		}
+		return numAppsUsed;
 	}
 
 	public Double getMaxNetworkPrice() {
