@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import simternet.engine.Simternet;
+
 /**
  * This is the new Reporter system for Simternet.
  * 
@@ -34,12 +36,14 @@ import java.util.List;
 public abstract class Reporter2 implements Serializable {
 	private static final long				serialVersionUID	= 1L;
 
-	protected BufferedCSVWriter				csvWriter;
+	protected transient BufferedCSVWriter	csvWriter;
 	protected ArrayList<ReporterComponent>	components			= new ArrayList<ReporterComponent>();
 	boolean									tryPrintingHeaders	= true;
+	protected Simternet						s;
 
-	public Reporter2(BufferedCSVWriter csvWriter) {
+	public Reporter2(BufferedCSVWriter csvWriter, Simternet s) {
 		this.csvWriter = csvWriter;
+		this.s = s;
 	}
 
 	/**
@@ -60,11 +64,15 @@ public abstract class Reporter2 implements Serializable {
 		// Prepend the values from the ReporterComponents
 		for (ReporterComponent rc : components) {
 			Object componentValues[] = rc.getValues();
-			allValues.add(componentValues);
+			for (Object o : componentValues) {
+				allValues.add(o);
+			}
 		}
 
 		// Append the specificValues
-		allValues.add(specificValues);
+		for (Object o : specificValues) {
+			allValues.add(o);
+		}
 
 		// Build the string and write it to the file
 		String csvLine = buildCSVLine(allValues);

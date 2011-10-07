@@ -16,11 +16,18 @@ public class BufferedCSVWriter implements Runnable {
 	public boolean					headersWritten		= false;
 	public boolean					dataWritten			= false;
 
-	public BufferedCSVWriter(String fileName, int bufferSize) throws IOException {
+	public BufferedCSVWriter(String fileName, int bufferSize) {
 		// Set up file output
-		FileWriter fw = new FileWriter(fileName);
-		BufferedWriter bw = new BufferedWriter(fw, bufferSize);
-		outputWriter = new PrintWriter(bw);
+		FileWriter fw = null;
+		BufferedWriter bw = null;
+
+		try {
+			fw = new FileWriter(fileName);
+			bw = new BufferedWriter(fw, bufferSize);
+			outputWriter = new PrintWriter(bw);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		// Set up the per-line output queue
 		outputQueue = new ArrayBlockingQueue<String>(bufferSize);
@@ -28,6 +35,10 @@ public class BufferedCSVWriter implements Runnable {
 		// Set up the thread that writes to disk
 		writerThread = new Thread(this);
 		writerThread.start();
+	}
+
+	public BufferedCSVWriter(String fileName) {
+		this(fileName, BufferedCSVWriter.defaultBufferSize);
 	}
 
 	@Override
@@ -86,11 +97,7 @@ public class BufferedCSVWriter implements Runnable {
 	public static void main(String[] args) {
 		int numRunnables = 500;
 		BufferedCSVWriter bcw = null;
-		try {
-			bcw = new BufferedCSVWriter("foo.csv", 100);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		bcw = new BufferedCSVWriter("foo.csv", 100);
 
 		Thread loggerThreads[] = new Thread[numRunnables];
 		for (int i = 0; i < numRunnables; i++) {

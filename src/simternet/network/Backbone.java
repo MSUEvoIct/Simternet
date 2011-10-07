@@ -17,11 +17,11 @@ public class Backbone extends Network {
 	private static final long		serialVersionUID	= 1L;
 
 	public Backbone(final NetworkProvider nsp) {
-		this.owner = nsp;
+		owner = nsp;
 	}
 
 	public NetworkProvider getOwner() {
-		return this.owner;
+		return owner;
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class Backbone extends Network {
 
 	@Override
 	public String toString() {
-		return "Backbone of " + this.owner.toString();
+		return "Backbone of " + owner.getName();
 	}
 
 }

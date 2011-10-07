@@ -1,58 +1,56 @@
 package simternet.data.output;
 
 import java.util.Collection;
-import java.util.HashMap;
 
-import sim.engine.SimState;
 import sim.util.Int2D;
 import simternet.engine.Simternet;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 
-public class EdgeDataReporter extends Reporter {
+public class EdgeDataReporter extends Reporter2 {
 
-	protected static HashMap<String, String>	netTypeAbbreviations;
+	// protected static HashMap<String, String> netTypeAbbreviations;
 	private static final long					serialVersionUID	= 1L;
-	public static final String					specificHeaders;
+
+	private static final int					numFields			= 11;
+	private static final String[]				headers;
+	private static final String					filename			= "data/output/EdgeData.out.csv";
+	private static transient BufferedCSVWriter	csvWriter;
+
 	static {
+		EdgeDataReporter.csvWriter = new BufferedCSVWriter(EdgeDataReporter.filename);
 
-		// pos 1 & 2
-		specificHeaders = "LocationX" + Reporter.separater + "LocationY" + Reporter.separater + "NSP" // pos
-																										// 3
-				+ Reporter.separater + "NetworkType" // pos 4
-				+ Reporter.separater + "TransitBandwidth" // pos 5
-				+ Reporter.separater + "LocalBandwidth" // pos 6
-				+ Reporter.separater + "Congestion" // pos 7
-				+ Reporter.separater + "Price" // pos 8
-				+ Reporter.separater + "Customers" // pos 9
-				+ Reporter.separater + "Competitors" // pos 10
-				+ Reporter.separater + "MarketShare" // pos 11
-				+ Reporter.separater + "Total Usage"; // pos 12
+		headers = new String[EdgeDataReporter.numFields];
 
-		new EdgeDataReporter().logHeaders();
+		EdgeDataReporter.headers[0] = "LocationX";
+		EdgeDataReporter.headers[1] = "LocationY";
+		EdgeDataReporter.headers[2] = "NSP";
+		EdgeDataReporter.headers[3] = "TransitBandwidth";
+		EdgeDataReporter.headers[4] = "LocalBandwidth";
+		EdgeDataReporter.headers[5] = "Congestion";
+		EdgeDataReporter.headers[6] = "Price";
+		EdgeDataReporter.headers[7] = "Customers";
+		EdgeDataReporter.headers[8] = "Competitors";
+		EdgeDataReporter.headers[9] = "MarketShare";
+		EdgeDataReporter.headers[10] = "TotalUsage";
 
 		// Initialize the hash table for abbreviations of network types.
-		EdgeDataReporter.netTypeAbbreviations = new HashMap<String, String>();
-		EdgeDataReporter.netTypeAbbreviations.put("class simternet.network.SimpleEdgeNetwork", "Simple");
+		// EdgeDataReporter.netTypeAbbreviations = new HashMap<String,
+		// String>();
+		// EdgeDataReporter.netTypeAbbreviations.put("class simternet.network.SimpleEdgeNetwork",
+		// "Simple");
 	}
 
-	public EdgeDataReporter() {
-		super();
-	}
-
-	public EdgeDataReporter(Integer interval) {
-		super(interval);
+	public EdgeDataReporter(Simternet s) {
+		super(EdgeDataReporter.csvWriter, s);
 	}
 
 	@Override
-	public void collectData(SimState state) {
-
-		Simternet s = (Simternet) state;
+	public void report() {
 		for (Int2D location : s.allLocations()) {
 			Collection<Network> edgeNets = s.getNetworks(null, EdgeNetwork.class, location);
 			for (Network edgeNet : edgeNets) {
 				EdgeNetwork en = (EdgeNetwork) edgeNet;
-				StringBuffer report = new StringBuffer();
 
 				// Hack for reporting odd prices as NA
 				double price = en.getPrice();
@@ -60,46 +58,31 @@ public class EdgeDataReporter extends Reporter {
 					price = Double.NaN;
 				}
 
-				report.append(location.x); // pos 1
-				report.append(Reporter.separater);
-				report.append(location.y); // pos 2
-				report.append(Reporter.separater);
-				report.append(en.getOwner().getName()); // pos 3
-				report.append(Reporter.separater);
-				// pos 4
-				report.append(EdgeDataReporter.netTypeAbbreviations.get(en.getClass().toString()));
-				report.append(Reporter.separater);
-				report.append(en.getUpstreamIngress().getBandwidth()); // pos 5
-				report.append(Reporter.separater);
-				report.append(en.getMaxBandwidth()); // pos 6
-				report.append(Reporter.separater);
-				// pos 7
-				report.append(en.getUpstreamIngress().totalCongestionRatio());
-				report.append(Reporter.separater);
-				report.append(price); // pos 8
-				report.append(Reporter.separater);
-				report.append(en.getNumSubscribers()); // pos 9
-				report.append(Reporter.separater);
-				report.append(s.getNumNetworkProviders(location)); // pos 10
-				report.append(Reporter.separater);
-				// pos 11
-				report.append(en.getNumSubscribers() / s.getPopulation(location));
-				report.append(Reporter.separater);
-				report.append(en.totalUsage); // pos 12
-				report(report.toString());
+				Object[] values = new Object[EdgeDataReporter.numFields];
+				values[0] = location.x;
+				values[1] = location.y;
+				values[2] = en.getOwner().getName();
+				values[3] = en.getUpstreamIngress().getBandwidth();
+				values[4] = en.getMaxBandwidth();
+				values[5] = en.getUpstreamIngress().totalCongestionRatio();
+				values[6] = price;
+				values[7] = en.getNumSubscribers();
+				values[8] = s.getNumNetworkProviders(location);
+				values[9] = en.getNumSubscribers() / s.getPopulation(location);
+				values[10] = en.totalUsage;
+
+				report(values);
+
+				// Grayson's abbreviation for Network Types -kk
+				// report.append(EdgeDataReporter.netTypeAbbreviations.get(en.getClass().toString()));
 			}
 		}
 
 	}
 
 	@Override
-	public String getLogger() {
-		return "EdgeData";
-	}
-
-	@Override
-	public String getSpecificHeaders() {
-		return EdgeDataReporter.specificHeaders;
+	public String[] getHeaders() {
+		return EdgeDataReporter.headers;
 	}
 
 }
