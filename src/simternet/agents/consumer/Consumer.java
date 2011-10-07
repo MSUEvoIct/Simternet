@@ -122,6 +122,11 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	protected Temporal<EdgeNetwork>										edgeNetwork				= new Temporal<EdgeNetwork>(
 																										null);
 
+	/**
+	 * XXX: A random preference for the diversityFactor in Applications.
+	 */
+	public double														diversityFactor			= 1.0;
+
 	// Remember; every Temporal variable needs to be listed here!
 	@Override
 	public void update() {
@@ -194,6 +199,9 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 		} else {
 			appBenefitCalculator = DefaultAppBenefitCalculator.getSingleton();
 		}
+
+		diversityFactor = s.random.nextDouble();
+
 	}
 
 	public static class EdgeNetworkBenefit {

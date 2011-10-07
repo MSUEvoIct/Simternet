@@ -52,6 +52,10 @@ public class DefaultAppBenefitCalculator extends AppBenefitCalculator {
 		//
 		double adjustedExpectedFraction = fractionReceived * 2 - 1;
 		double benefit = Math.pow(asp.getQuality(), 0.5) * adjustedExpectedFraction;
+
+		double randomPreference = Math.abs(asp.diversityFactor - c.diversityFactor);
+		benefit = benefit * randomPreference;
+
 		return benefit;
 
 	}

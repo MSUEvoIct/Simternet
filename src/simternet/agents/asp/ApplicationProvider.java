@@ -58,6 +58,11 @@ public class ApplicationProvider implements Firm {
 	// accessed, and expensive to collect.
 	protected Double					cachedNumCustomers;
 
+	/**
+	 * A random preference matching with Consumer.diversityFactor
+	 */
+	public double						diversityFactor			= 1.0;
+
 	public ApplicationProvider(Simternet s, AppCategory appCategory) {
 		this.s = s;
 		this.appCategory = appCategory;
@@ -67,6 +72,8 @@ public class ApplicationProvider implements Firm {
 
 		// Create datacenter, connect it to all NSPs.
 		datacenter = new Datacenter(this);
+
+		diversityFactor = s.random.nextDouble();
 	}
 
 	private void connectDatacenter() {
