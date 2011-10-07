@@ -8,7 +8,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 public class BufferedCSVWriter implements Runnable {
-	public static int				defaultBufferSize	= 1000;
+	public static int				defaultBufferSize	= 10000;
 	public BlockingQueue<String>	outputQueue;
 	public PrintWriter				outputWriter;
 	public Thread					writerThread;
@@ -23,7 +23,7 @@ public class BufferedCSVWriter implements Runnable {
 
 		try {
 			fw = new FileWriter(fileName);
-			bw = new BufferedWriter(fw, bufferSize);
+			bw = new BufferedWriter(fw, bufferSize * 100); // in bytes
 			outputWriter = new PrintWriter(bw);
 		} catch (IOException e) {
 			e.printStackTrace();
