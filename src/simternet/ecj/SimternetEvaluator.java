@@ -13,10 +13,15 @@ import simternet.agents.asp.ApplicationProvider;
 import simternet.agents.nsp.NetworkProvider;
 import simternet.data.output.ASPInterconnectionReporter;
 import simternet.data.output.ApplicationProviderFitnessReporter;
+import simternet.data.output.BackboneLinkReporter;
 import simternet.data.output.ConsumerDataReporter;
+import simternet.data.output.ECJEvolutionReporterComponent;
 import simternet.data.output.EdgeDataReporter;
 import simternet.data.output.EdgeMarketReporter;
 import simternet.data.output.NetworkProviderFitnessReporter;
+import simternet.data.output.Reporter2;
+import simternet.data.output.StepReporterComponent;
+import simternet.engine.AsyncDataSchedule;
 import simternet.engine.Simternet;
 import ec.Evaluator;
 import ec.EvolutionState;
@@ -87,53 +92,64 @@ public class SimternetEvaluator extends Evaluator {
 
 		for (int i = 0; i < simternet.length; i++) {
 
-			int interval = 49;
-
 			// add reporters
-			NetworkProviderFitnessReporter npfr = new NetworkProviderFitnessReporter(interval);
-			npfr.setGeneration(state.generation);
-			npfr.setChunk(i);
-			simternet[i].addReporter(npfr);
+			// NetworkProviderFitnessReporter npfr = new
+			// NetworkProviderFitnessReporter(interval);
+			// npfr.setGeneration(state.generation);
+			// npfr.setChunk(i);
+			// simternet[i].addReporter(npfr);
 
-			ApplicationProviderFitnessReporter apfr = new ApplicationProviderFitnessReporter(interval);
-			apfr.setGeneration(state.generation);
-			apfr.setChunk(i);
-			simternet[i].addReporter(apfr);
+			// ApplicationProviderFitnessReporter apfr = new
+			// ApplicationProviderFitnessReporter(interval);
+			// apfr.setGeneration(state.generation);
+			// apfr.setChunk(i);
+			// simternet[i].addReporter(apfr);
 
-			EdgeDataReporter edr = new EdgeDataReporter(interval);
-			edr.setGeneration(state.generation);
-			edr.setChunk(i);
-			simternet[i].addReporter(edr);
+			// Prep the simtenet's schedule and reporter components
+			AsyncDataSchedule schedule = (AsyncDataSchedule) simternet[i].schedule;
+			ECJEvolutionReporterComponent eerc = new ECJEvolutionReporterComponent(simternet[i]);
+			StepReporterComponent src = new StepReporterComponent(simternet[i]);
 
-			ConsumerDataReporter cdr = new ConsumerDataReporter(interval);
-			cdr.setGeneration(state.generation);
-			cdr.setChunk(i);
-			simternet[i].addReporter(cdr);
+			ApplicationProviderFitnessReporter apfr = new ApplicationProviderFitnessReporter(simternet[i]);
+			apfr.addComponent(eerc);
+			apfr.addComponent(src);
+			schedule.addReporter(apfr);
 
-			ASPInterconnectionReporter air = new ASPInterconnectionReporter(interval);
-			air.setGeneration(state.generation);
-			air.setChunk(i);
-			simternet[i].addReporter(air);
+			// Network Provider Fitness Reporter
+			NetworkProviderFitnessReporter npfr = new NetworkProviderFitnessReporter(simternet[i]);
+			npfr.addComponent(eerc);
+			npfr.addComponent(src);
+			schedule.addReporter(npfr);
 
-			EdgeMarketReporter emr = new EdgeMarketReporter(interval);
-			emr.setGeneration(state.generation);
-			emr.setChunk(i);
-			simternet[i].addReporter(emr);
+			// Consumer Data Reporter
+			Reporter2 cdr2 = new ConsumerDataReporter(simternet[i]);
+			cdr2.addComponent(eerc);
+			cdr2.addComponent(src);
+			schedule.addReporter(cdr2);
 
-			// PrintStream testPS = null;
-			// try {
-			// FileOutputStream fos = new FileOutputStream("test");
-			// BufferedOutputStream bos = new BufferedOutputStream(fos, 100000);
-			// testPS = new PrintStream(bos);
-			// } catch (IOException e) {
-			// // TODO Auto-generated catch block
-			// e.printStackTrace();
-			// }
-			//
-			// TestReporter tr = new TestReporter(testPS, interval);
-			// tr.setGeneration(state.generation);
-			// tr.setChunk(i);
-			// simternet[i].addReporter(tr);
+			// Backbone Link Reporter
+			BackboneLinkReporter blr = new BackboneLinkReporter(simternet[i]);
+			blr.addComponent(eerc);
+			blr.addComponent(src);
+			schedule.addReporter(blr);
+
+			// ASP Interconnection Reporter
+			ASPInterconnectionReporter air = new ASPInterconnectionReporter(simternet[i]);
+			air.addComponent(eerc);
+			air.addComponent(src);
+			schedule.addReporter(air);
+
+			// Edge Market Reporter
+			EdgeMarketReporter emr = new EdgeMarketReporter(simternet[i]);
+			emr.addComponent(eerc);
+			emr.addComponent(src);
+			schedule.addReporter(emr);
+
+			// Edge Data Reporter
+			EdgeDataReporter edr = new EdgeDataReporter(simternet[i]);
+			edr.addComponent(eerc);
+			edr.addComponent(src);
+			schedule.addReporter(edr);
 
 		}
 

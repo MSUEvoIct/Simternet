@@ -11,11 +11,11 @@ public class TraceConfig {
 	}
 
 	public static class networking {
-		public static final boolean	congestionASPSummary	= false;
-		public static final boolean	congestionNSPSummary	= false;
+		public static final boolean	congestionASPSummary	= true;
+		public static final boolean	congestionNSPSummary	= true;
 		public static final boolean	consumerFlowReceived	= false;
 		public static final boolean	routingTables			= false;
-		public static final boolean	edgeUsageSummary		= false;
+		public static final boolean	edgeUsageSummary		= true;
 	}
 
 	public static class ops {

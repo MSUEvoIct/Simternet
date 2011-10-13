@@ -42,7 +42,7 @@ public class GreedyAppManager implements AppManager {
 
 				// looks at congestion of ASP on the Edge Network we're on
 				EdgeNetwork en = c.getEdgeNetwork().getFuture();
-				ab.benefit = abc.calculateBenefit(c, asp, en);
+				ab.benefit = abc.estimateBenefit(c, asp, en);
 				ab.cost = asp.getPriceSubscriptions();
 				appBenefits.add(ab);
 			}

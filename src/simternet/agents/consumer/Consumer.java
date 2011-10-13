@@ -126,6 +126,11 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	public double														transferReceived				= 0.0;
 	public double														transferRequested				= 0.0;
 
+	/**
+	 * XXX: A random preference for the diversityFactor in Applications.
+	 */
+	public double														diversityFactor			= 1.0;
+
 	// Remember; every Temporal variable needs to be listed here!
 	@Override
 	public void update() {
@@ -206,6 +211,8 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 		// benefits.
 		networkBenefitExponentVariance = s.random.nextDouble() * s.config.networkValueExponentVarianceRange;
 		networkCostExponentVariance = s.random.nextDouble() * s.config.networkValueExponentVarianceRange;
+
+		diversityFactor = s.random.nextDouble();
 
 	}
 

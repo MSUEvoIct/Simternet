@@ -21,7 +21,7 @@ public class LinkPaintTransformer implements Transformer<BackboneLink, Paint> {
 	@Override
 	public Paint transform(BackboneLink link) {
 
-		double congestion = link.getCongestionAlgorithm().getUsageRatio();
+		double congestion = link.perStepCongestionRatio();
 
 		// ideally, congestion shouldn't ever go out of this range.
 		double min = 0;

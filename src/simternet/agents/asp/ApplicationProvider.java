@@ -58,6 +58,11 @@ public class ApplicationProvider implements Firm {
 	// accessed, and expensive to collect.
 	protected Double					cachedNumCustomers;
 
+	/**
+	 * A random preference matching with Consumer.diversityFactor
+	 */
+	public double						diversityFactor			= 1.0;
+
 	public ApplicationProvider(Simternet s, AppCategory appCategory) {
 		this.s = s;
 		this.appCategory = appCategory;
@@ -67,6 +72,8 @@ public class ApplicationProvider implements Firm {
 
 		// Create datacenter, connect it to all NSPs.
 		datacenter = new Datacenter(this);
+
+		diversityFactor = s.random.nextDouble();
 	}
 
 	private void connectDatacenter() {
@@ -263,8 +270,9 @@ public class ApplicationProvider implements Firm {
 	 *            Where the usage originates from
 	 * @param datacenterLocation
 	 *            Where the usage was serviced/processed from
+	 * @return The Netflow created by this consumption
 	 */
-	public void processUsage(Consumer consumer, EdgeNetwork network) {
+	public NetFlow processUsage(Consumer consumer, EdgeNetwork network) {
 
 		double ads = priceAdvertising.get();
 		double sub = priceSubscriptions.get();
@@ -278,6 +286,7 @@ public class ApplicationProvider implements Firm {
 		NetFlow flow = createNetFlow(consumer, network);
 
 		datacenter.originate(flow);
+		return flow;
 	}
 
 	public void setName(String name) {

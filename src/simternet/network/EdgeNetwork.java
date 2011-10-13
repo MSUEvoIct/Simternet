@@ -21,7 +21,6 @@ public abstract class EdgeNetwork extends Network {
 
 	public double				revenueFromConsumers	= 0D;
 	public double				operatingCost			= 0D;
-
 	public double				totalUsage				= 0D;
 
 	/**
@@ -91,7 +90,7 @@ public abstract class EdgeNetwork extends Network {
 	}
 
 	public boolean isCongested() {
-		if (getUpstreamIngress().congestionAlgorithm.getUsageRatio() >= 1)
+		if (getUpstreamIngress().perStepCongestionRatio() > 0)
 			return true;
 		else
 			return false;
@@ -132,7 +131,7 @@ public abstract class EdgeNetwork extends Network {
 	}
 
 	public double getUsageRatio() {
-		double usageRatio = getUpstreamIngress().congestionAlgorithm.getUsageRatio();
+		double usageRatio = getUpstreamIngress().perStepCongestionRatio();
 		return usageRatio;
 	}
 

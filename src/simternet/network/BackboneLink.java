@@ -2,6 +2,7 @@ package simternet.network;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,6 +92,13 @@ public class BackboneLink implements Serializable {
 	 */
 	protected final Network			source;
 
+	public double					perStepDemand			= 0D;
+	public double					perStepTransmitted		= 0D;
+	public double					totalDemand				= 0D;
+	public double					totalTransmitted		= 0D;
+	// per step capacity is bandwidth. bw may change, per step...
+	public double					totalCapacity			= 0D;
+
 	/**
 	 * Create a backbone link, automatically add it to the source and
 	 * destination networks as egress and ingress links respectively.
@@ -103,50 +111,51 @@ public class BackboneLink implements Serializable {
 	public BackboneLink(final Network source, final Network destination, Double bandwidth) {
 		this.source = source;
 		this.destination = destination;
-		if (bandwidth != null)
+		if (bandwidth != null) {
 			this.bandwidth = bandwidth;
+		}
 
 		this.source.egressLinks.put(destination, this);
 		this.destination.ingressLinks.put(source, this);
 
-		this.initRoutingTable();
+		initRoutingTable();
 	}
 
 	public void disconnect() {
-		this.stopRoutingProtocol();
-		this.destination.ingressLinks.remove(this.source);
-		this.source.egressLinks.remove(this.destination);
+		stopRoutingProtocol();
+		destination.ingressLinks.remove(source);
+		source.egressLinks.remove(destination);
 	}
 
 	public Double getBandwidth() {
-		return this.bandwidth;
+		return bandwidth;
 	}
 
 	public CongestionAlgorithm getCongestionAlgorithm() {
-		return this.congestionAlgorithm;
+		return congestionAlgorithm;
 	}
 
 	public Network getDestination() {
-		return this.destination;
+		return destination;
 	}
 
 	public Double getLatency() {
-		return this.inherentLatency;
+		return inherentLatency;
 	}
 
 	public RoutingProtocolConfig getRoutingProtocolConfig() {
-		return this.routingProtocolConfig;
+		return routingProtocolConfig;
 	}
 
 	public Network getSource() {
-		return this.source;
+		return source;
 	}
 
 	private void initRoutingTable() {
-		this.routingTable = new HashMap<Network, Route>();
-		Route directlyConnected = new Route(this.destination, this, 0);
-		this.routingTable.put(this.destination, directlyConnected);
-		this.source.receiveRoute(directlyConnected);
+		routingTable = new HashMap<Network, Route>();
+		Route directlyConnected = new Route(destination, this, 0);
+		routingTable.put(destination, directlyConnected);
+		source.receiveRoute(directlyConnected);
 	}
 
 	/**
@@ -154,9 +163,9 @@ public class BackboneLink implements Serializable {
 	 * 
 	 */
 	public void makeInfinite() {
-		this.inherentLatency = 0D;
+		inherentLatency = 0D;
 		// this.bandwidth = Double.MAX_VALUE;
-		this.bandwidth = 5.0E7;
+		bandwidth = 5.0E7;
 
 	}
 
@@ -169,8 +178,8 @@ public class BackboneLink implements Serializable {
 	 *         the destination network.
 	 */
 	public List<NetFlow> receiveFlows() {
-		List<NetFlow> toReturn = this.outputQueue;
-		this.outputQueue = new ArrayList<NetFlow>();
+		List<NetFlow> toReturn = outputQueue;
+		outputQueue = new ArrayList<NetFlow>();
 		return toReturn;
 
 	}
@@ -184,14 +193,15 @@ public class BackboneLink implements Serializable {
 	 * @param flow
 	 */
 	public void sendFlow(NetFlow flow) {
-		this.inputQueue.add(flow);
+		inputQueue.add(flow);
 	}
 
 	public void setBandwidth(Double bandwidth) {
-		if (bandwidth < 0)
+		if (bandwidth < 0) {
 			this.bandwidth = 0.0;
-		else
+		} else {
 			this.bandwidth = bandwidth;
+		}
 	}
 
 	public void setCongestionAlgorithm(CongestionAlgorithm congestionAlgorithm) {
@@ -199,7 +209,7 @@ public class BackboneLink implements Serializable {
 	}
 
 	public void setLatency(Double latency) {
-		this.inherentLatency = latency;
+		inherentLatency = latency;
 	}
 
 	public void setRoutingProtocolConfig(RoutingProtocolConfig routingProtocolConfig) {
@@ -207,42 +217,42 @@ public class BackboneLink implements Serializable {
 			return; // no change, do nothing
 
 		if (routingProtocolConfig.equals(RoutingProtocolConfig.NONE)) {
-			this.stopRoutingProtocol(); // was something, now nothing
+			stopRoutingProtocol(); // was something, now nothing
 			this.routingProtocolConfig = RoutingProtocolConfig.NONE;
 			return;
 		}
 
 		// Otherwise, we're changing from none to some, or between them. so
 		// reset
-		this.stopRoutingProtocol();
-		this.startRoutingProtocol();
+		stopRoutingProtocol();
+		startRoutingProtocol();
 		this.routingProtocolConfig = routingProtocolConfig;
 	}
 
 	private void startRoutingProtocol() {
 		// start with a fresh new routing table
-		this.initRoutingTable();
+		initRoutingTable();
 
 		// the destination network tells the sending network which
 		// other networks it can reach through this link.
-		this.destination.initRoutes(this);
+		destination.initRoutes(this);
 	}
 
 	private void stopRoutingProtocol() {
 		// withdraw all routes
-		for (Route route : this.routingTable.values()) {
+		for (Route route : routingTable.values()) {
 			route.distance = Integer.MAX_VALUE;
-			this.source.receiveRoute(route);
+			source.receiveRoute(route);
 		}
 
 		// wipe routing table
-		this.initRoutingTable();
+		initRoutingTable();
 	}
 
 	@Override
 	public String toString() {
-		return "Link " + this.getSource() + "->" + this.getDestination() + ", BW=" + this.bandwidth + ", ROUTE="
-				+ this.routingProtocolConfig.toString();
+		return "Link " + getSource() + "->" + getDestination() + ", BW=" + bandwidth + ", ROUTE="
+				+ routingProtocolConfig.toString();
 	}
 
 	/**
@@ -251,12 +261,26 @@ public class BackboneLink implements Serializable {
 	 * placed in the output queue to be retrieved by the target network.
 	 */
 	public void transmitFlows() {
-		for (NetFlow f : this.inputQueue)
-			f.latency += this.inherentLatency;
+		totalCapacity += bandwidth;
 
-		this.outputQueue.addAll(this.congestionAlgorithm.limit(this.inputQueue, this));
+		perStepDemand = 0D;
+		for (NetFlow f : inputQueue) {
+			perStepDemand += f.bandwidth;
+		}
+		totalDemand += perStepDemand;
 
-		this.inputQueue.clear();
+		// Congest the flows, get new list of congested flows
+		Collection<NetFlow> congestedFlows = congestionAlgorithm.limit(inputQueue, this);
+
+		perStepTransmitted = 0D;
+		for (NetFlow f : congestedFlows) {
+			perStepTransmitted += f.bandwidth;
+		}
+		totalTransmitted += perStepTransmitted;
+
+		// put congested flows in output queue and clear input queue
+		outputQueue.addAll(congestedFlows);
+		inputQueue.clear();
 	}
 
 	/**
@@ -276,8 +300,9 @@ public class BackboneLink implements Serializable {
 		boolean beingWithdrawn = false;
 
 		// if we're being told the route is being withdrawn
-		if (route.distance == Integer.MAX_VALUE)
+		if (route.distance == Integer.MAX_VALUE) {
 			beingWithdrawn = true;
+		}
 
 		// We need a new copy of the route, as we're going to have our own
 		// distance, path, etc...
@@ -292,7 +317,7 @@ public class BackboneLink implements Serializable {
 		newRoute.setNextHop(this);
 
 		// Track the network path (i.e., AS-PATH) for loop detection
-		newRoute.path.add(this.destination);
+		newRoute.path.add(destination);
 
 		if (!beingWithdrawn) {
 			// By default, increase the distance by 1
@@ -300,15 +325,25 @@ public class BackboneLink implements Serializable {
 
 			// If we're going to reach the destination network via this link,
 			// we're going to do so using this route
-			this.routingTable.put(route.destination, newRoute);
+			routingTable.put(route.destination, newRoute);
 		} else {
 			newRoute.setDistance(Integer.MAX_VALUE);
-			this.routingTable.remove(route.destination);
+			routingTable.remove(route.destination);
 		}
 
 		// The network using this link to send (the source) needs to process the
 		// update
-		this.source.receiveRoute(newRoute);
+		source.receiveRoute(newRoute);
+	}
+
+	public double totalCongestionRatio() {
+		double fracServed = totalTransmitted / totalDemand;
+		return 1 - fracServed;
+	}
+
+	public double perStepCongestionRatio() {
+		double fracServed = perStepTransmitted / perStepDemand;
+		return 1 - fracServed;
 	}
 
 }

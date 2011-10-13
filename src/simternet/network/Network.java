@@ -22,34 +22,34 @@ import simternet.engine.asyncdata.AsyncUpdate;
  */
 public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 
-	private static final long					serialVersionUID	= 1L;
+	private static final long				serialVersionUID	= 1L;
 
 	/**
 	 * If there is no specific route, send traffic out this link. The link
 	 * should still be in the list of egress links, along with the associated
 	 * queue.
 	 */
-	protected BackboneLink						defaultRoute		= null;
+	protected BackboneLink					defaultRoute		= null;
 
 	/**
 	 * Contains the set of other networks we can send traffic to, and the
 	 * associated backbone link.
 	 */
-	protected HashMap<Network, BackboneLink>	egressLinks			= new HashMap<Network, BackboneLink>();
+	public HashMap<Network, BackboneLink>	egressLinks			= new HashMap<Network, BackboneLink>();
 
 	/**
 	 * Contains the set of other networks we receive traffic from, and the
 	 * associated backbone link.
 	 */
-	protected HashMap<Network, BackboneLink>	ingressLinks		= new HashMap<Network, BackboneLink>();
+	public HashMap<Network, BackboneLink>	ingressLinks		= new HashMap<Network, BackboneLink>();
 
-	protected RoutePreference					routePreference		= new RoutePreference();
+	protected RoutePreference				routePreference		= new RoutePreference();
 
 	/**
 	 * Contains the full routing table of all networks we can reach, and a
 	 * routing table entry (i.e., the next hop)
 	 */
-	protected HashMap<Network, Route>			routingTable		= new HashMap<Network, Route>();
+	protected HashMap<Network, Route>		routingTable		= new HashMap<Network, Route>();
 
 	// /**
 	// * Accept ingress link requests from other networks. For now, this

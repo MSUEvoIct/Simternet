@@ -93,10 +93,10 @@ public class WFQCongestionAlgorithm implements CongestionAlgorithm, Serializable
 		return flows;
 	}
 
-	@Override
-	public Double getUsageRatio() {
-		double usageRatio = requestedUsage / link.getBandwidth();
-		return usageRatio;
-	}
+	// @Override
+	// public Double getUsageRatio() {
+	// double usageRatio = requestedUsage / link.getBandwidth();
+	// return usageRatio;
+	// }
 
 }

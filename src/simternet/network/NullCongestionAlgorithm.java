@@ -18,18 +18,6 @@ public class NullCongestionAlgorithm implements CongestionAlgorithm {
 		this.link = link;
 	}
 
-	/*
-	 * Always report that we have zero congestion
-	 * 
-	 * (non-Javadoc)
-	 * 
-	 * @see simternet.network.CongestionAlgorithm#getCongestionRatio()
-	 */
-	@Override
-	public Double getUsageRatio() {
-		return 0.0;
-	}
-
 	@Override
 	public BackboneLink getLink() {
 		return link;

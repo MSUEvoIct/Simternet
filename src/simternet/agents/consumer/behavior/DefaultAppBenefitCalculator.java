@@ -3,7 +3,6 @@ package simternet.agents.consumer.behavior;
 import simternet.agents.asp.ApplicationProvider;
 import simternet.agents.consumer.AppBenefitCalculator;
 import simternet.agents.consumer.Consumer;
-import simternet.network.EdgeNetwork;
 
 /**
  * Default is (quality^0.5)*(congestionRatio * 2 - 1)
@@ -14,7 +13,7 @@ import simternet.network.EdgeNetwork;
  * @author kkoning
  * 
  */
-public class DefaultAppBenefitCalculator implements AppBenefitCalculator {
+public class DefaultAppBenefitCalculator extends AppBenefitCalculator {
 	private static final long			serialVersionUID	= 1L;
 
 	// Default, singleton factory
@@ -28,28 +27,37 @@ public class DefaultAppBenefitCalculator implements AppBenefitCalculator {
 	}
 
 	/**
+	 * XXX: MODEL CRITICAL MATH
+	 * 
+	 * Benefit is calculated as quality^0.5 * (fraction * 2 - 1)
+	 * 
 	 * @param c
+	 *            The consumer
 	 * @param asp
-	 * @param expectedFraction
-	 *            The portion of requested usage the consumer expects will make
-	 *            it through the network accounting for congestion
-	 * @return
+	 *            The application
+	 * @param fractionReceived
+	 *            The ration of bandwidth received to that requested by the
+	 *            application usage The portion of requested usage the consumer
+	 *            expects will make it through the network accounting for
+	 *            congestion
+	 * @return The benefit received
 	 */
 	@Override
-	public double calculateBenefit(Consumer c, ApplicationProvider asp, EdgeNetwork net) {
-		// MODEL CRITICAL MATH
-		Double expectedFraction = asp.getExpectedFraction(net);
-
+	public double calculateBenefit(Consumer c, ApplicationProvider asp, Double fractionReceived) {
 		// If there's no information on what the congestion is, assume it's
 		// zero.
-		if (expectedFraction == null) {
-			expectedFraction = 1.0;
+		if (fractionReceived == null) {
+			fractionReceived = 1.0;
 		}
-
-		double adjustedExpectedFraction = expectedFraction * 2 - 1;
-
+		//
+		double adjustedExpectedFraction = fractionReceived * 2 - 1;
 		double benefit = Math.pow(asp.getQuality(), 0.5) * adjustedExpectedFraction;
+
+		double randomPreference = Math.abs(asp.diversityFactor - c.diversityFactor);
+		benefit = benefit * randomPreference;
+
 		return benefit;
 
 	}
+
 }

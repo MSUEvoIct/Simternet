@@ -53,7 +53,7 @@ public class RationalNetManager extends NetManager implements Serializable {
 					AppBenefitCalculator abc = c.getAppBenefitCalculator();
 					// The % bandwidth we think will get through
 
-					double expectedBenefit = abc.calculateBenefit(c, asp, en);
+					double expectedBenefit = abc.estimateBenefit(c, asp, en);
 					estimatedBenefit.sumAppBenefits += expectedBenefit;
 				}
 			}

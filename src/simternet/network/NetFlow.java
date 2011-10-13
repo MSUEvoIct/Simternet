@@ -2,6 +2,7 @@ package simternet.network;
 
 import java.util.Comparator;
 
+import simternet.agents.asp.ApplicationProvider;
 import simternet.agents.consumer.Consumer;
 import simternet.engine.TraceConfig;
 
@@ -117,6 +118,23 @@ public abstract class NetFlow {
 		return requestedTransfer;
 	}
 
+	/**
+	 * 
+	 * @return The ratio of actual transfer over transfer requested. If transfer
+	 *         requested is zero, return 1.
+	 */
+	public double getTransferFraction() {
+		double requestedTransfer = getRequestedTransfer();
+		double transferFraction = 0D;
+		if (requestedTransfer == 0D)
+			return 1;
+		else {
+			transferFraction = getActualTransfer() / requestedTransfer;
+		}
+
+		return transferFraction;
+	}
+
 	public double getBlockedTransfer() {
 		double blockedTransfer = getRequestedTransfer() - getActualTransfer();
 		return blockedTransfer;
@@ -146,6 +164,18 @@ public abstract class NetFlow {
 	@Override
 	public String toString() {
 		return "Flow: " + source + " -> " + user + "@" + destination + ", " + describeCongestionForHumans();
+	}
+
+	/**
+	 * @return If this flow was originated by an application provider, return a
+	 *         reference to that application provider. Otherwise, return null.
+	 */
+	public ApplicationProvider getApplicationProvider() {
+		if (source instanceof Datacenter) {
+			Datacenter dc = (Datacenter) source;
+			return dc.getOwner();
+		} else
+			return null;
 	}
 
 	/**
