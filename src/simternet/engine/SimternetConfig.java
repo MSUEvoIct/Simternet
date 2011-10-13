@@ -61,8 +61,9 @@ public class SimternetConfig extends Properties implements Serializable {
 	public final double			consumerMaxPriceNSP;
 	public final double			consumerPopulationMax;
 	// TODO: Rename; see RationalNetManager
-	public final double			alpha;
-	public final double			gamma;
+	public final double			networkBenefitExponent;
+	public final double			networkCostExponent;
+	public final double			networkValueExponentVarianceRange;
 
 	public final double			financeDepreciationRate;
 	public final double			financeInterestRate;
@@ -124,8 +125,9 @@ public class SimternetConfig extends Properties implements Serializable {
 		consumerIndifferencePrice = d("consumerIndifferencePrice");
 		consumerMaxPriceNSP = d("consumerMaxPriceNSP");
 		consumerPopulationMax = d("consumerPopulationMax");
-		alpha = d("alpha");
-		gamma = d("gamma");
+		networkBenefitExponent = d("alpha");
+		networkCostExponent = d("gamma");
+		networkValueExponentVarianceRange = d("networkValueExponentVarianceRange");
 
 		financeDepreciationRate = d("financeDepreciationRate");
 		financeInterestRate = d("financeInterestRate");

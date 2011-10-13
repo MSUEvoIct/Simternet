@@ -23,7 +23,7 @@ import simternet.network.NetFlow;
 
 public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	// Housekeeping
-	private static final long											serialVersionUID		= 1L;
+	private static final long											serialVersionUID				= 1L;
 	public final Simternet												s;
 
 	// Consumer Behavior
@@ -82,7 +82,7 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 * from paying (effectively) infinite prices, this may have model
 	 * significance; get from a parameter file.
 	 */
-	private double														maxNetworkPrice			= 100.0;
+	private double														maxNetworkPrice					= 100.0;
 
 	/**
 	 * The proportion of this period's consumption which is determined by the
@@ -99,7 +99,7 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 * consuming entertainment content), this should be reflected by changing
 	 * these values.
 	 */
-	protected TemporalHashMap<AppCategory, Double>						appBudgetConstraints	= new TemporalHashMap<AppCategory, Double>();
+	protected TemporalHashMap<AppCategory, Double>						appBudgetConstraints			= new TemporalHashMap<AppCategory, Double>();
 
 	/**
 	 * The actual list of application service providers selected for use, sorted
@@ -107,21 +107,24 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 * data structure, based on appBudgetConstraints and the qualities of the
 	 * applications themselves.
 	 */
-	protected TemporalHashMap<AppCategory, List<ApplicationProvider>>	appsUsed				= new TemporalHashMap<AppCategory, List<ApplicationProvider>>();
+	protected TemporalHashMap<AppCategory, List<ApplicationProvider>>	appsUsed						= new TemporalHashMap<AppCategory, List<ApplicationProvider>>();
 
 	/**
 	 * The edge network currently used by this set of consumers. In the current
 	 * model, consumers may only use one edge network.
 	 */
-	protected Temporal<EdgeNetwork>										edgeNetwork				= new Temporal<EdgeNetwork>(
-																										null);
+	protected Temporal<EdgeNetwork>										edgeNetwork						= new Temporal<EdgeNetwork>(
+																												null);
+
+	public double														networkBenefitExponentVariance	= 0.0;
+	public double														networkCostExponentVariance		= 0.0;
 
 	// Tracking Variables
-	public double														benefitSeen				= 0.0;
-	public double														congestionSeen			= 0.0;
-	public double														paidToNSPs				= 0.0;
-	public double														transferReceived		= 0.0;
-	public double														transferRequested		= 0.0;
+	public double														benefitSeen						= 0.0;
+	public double														congestionSeen					= 0.0;
+	public double														paidToNSPs						= 0.0;
+	public double														transferReceived				= 0.0;
+	public double														transferRequested				= 0.0;
 
 	// Remember; every Temporal variable needs to be listed here!
 	@Override
@@ -198,6 +201,12 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 		} else {
 			appBenefitCalculator = DefaultAppBenefitCalculator.getSingleton();
 		}
+
+		// Initialize random variance in valuation of network costs and
+		// benefits.
+		networkBenefitExponentVariance = s.random.nextDouble() * s.config.networkValueExponentVarianceRange;
+		networkCostExponentVariance = s.random.nextDouble() * s.config.networkValueExponentVarianceRange;
+
 	}
 
 	public static class EdgeNetworkBenefit {

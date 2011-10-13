@@ -73,10 +73,12 @@ public class RationalNetManager extends NetManager implements Serializable {
 		EdgeNetwork edgeToSelect = null;
 		double highestPreferenceFactor = 0D;
 		for (Consumer.EdgeNetworkBenefit enb : edgeBenefits) {
-			double alpha = c.s.config.alpha;
-			double gamma = c.s.config.gamma;
-			double adjustedBenefit = Math.pow(enb.sumAppBenefits, alpha);
-			double adjustedCost = Math.pow(enb.network.getPriceFuture(), gamma);
+			double networkBenefitExponent = c.s.config.networkBenefitExponent;
+			double networkCostExponent = c.s.config.networkCostExponent;
+			networkBenefitExponent = networkBenefitExponent + c.networkBenefitExponentVariance;
+			networkCostExponent = networkCostExponent + c.networkCostExponentVariance;
+			double adjustedBenefit = Math.pow(enb.sumAppBenefits, networkBenefitExponent);
+			double adjustedCost = Math.pow(enb.network.getPriceFuture(), networkCostExponent);
 
 			double preferenceFactor = adjustedBenefit / adjustedCost;
 
