@@ -65,6 +65,14 @@ public class SimternetConfig extends Properties implements Serializable {
 	public final double			networkCostExponent;
 	public final double			networkValueExponentVarianceRange;
 
+	/**
+	 * Used to grant a random bonus to ASPs which were used in the previous time
+	 * step, thereby adding a random element to consumer switching behavior in
+	 * terms of when the ASP falls far enough in relation to its competitors to
+	 * drop out of the set of applications used by the consumer.
+	 */
+	public final double			applicationUsageBonusRatio;
+
 	public final double			financeDepreciationRate;
 	public final double			financeInterestRate;
 	public final double			financePaybackRate;
@@ -125,9 +133,11 @@ public class SimternetConfig extends Properties implements Serializable {
 		consumerIndifferencePrice = d("consumerIndifferencePrice");
 		consumerMaxPriceNSP = d("consumerMaxPriceNSP");
 		consumerPopulationMax = d("consumerPopulationMax");
+
 		networkBenefitExponent = d("alpha");
 		networkCostExponent = d("gamma");
 		networkValueExponentVarianceRange = d("networkValueExponentVarianceRange");
+		applicationUsageBonusRatio = d("applicationUsageBonusRatio");
 
 		financeDepreciationRate = d("financeDepreciationRate");
 		financeInterestRate = d("financeInterestRate");

@@ -13,11 +13,11 @@ library(sqldf)
 
 ## Assumes R's working directory is where this script is
 ## Load data from CSV Files
-AspFitness <- read.csv("../output/ApplicationProviderFitness.out.csv")
-NspFitness <- read.csv("../output/NetworkProviderFitness.out.csv")
+AspFitness <- read.csv("../output/ASPFitness.out.csv")
+NspFitness <- read.csv("../output/NSPFitness.out.csv")
 
 #Interconnection between ASPs and NSPs
-AspInterconnection <- read.csv("../output/ASPInterconnection.out.csv")
+AspInterconnection <- read.csv("../output/AspInterconnection.out.csv")
 
 #ConsumerData <- read.csv("../output/ConsumerData.out.csv")
 

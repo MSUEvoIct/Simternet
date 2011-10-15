@@ -14,12 +14,10 @@ import simternet.agents.nsp.NetworkProvider;
 import simternet.data.output.ASPInterconnectionReporter;
 import simternet.data.output.ApplicationProviderFitnessReporter;
 import simternet.data.output.BackboneLinkReporter;
-import simternet.data.output.ConsumerDataReporter;
 import simternet.data.output.ECJEvolutionReporterComponent;
 import simternet.data.output.EdgeDataReporter;
 import simternet.data.output.EdgeMarketReporter;
 import simternet.data.output.NetworkProviderFitnessReporter;
-import simternet.data.output.Reporter2;
 import simternet.data.output.StepReporterComponent;
 import simternet.engine.AsyncDataSchedule;
 import simternet.engine.Simternet;
@@ -122,10 +120,10 @@ public class SimternetEvaluator extends Evaluator {
 			schedule.addReporter(npfr);
 
 			// Consumer Data Reporter
-			Reporter2 cdr2 = new ConsumerDataReporter(simternet[i]);
-			cdr2.addComponent(eerc);
-			cdr2.addComponent(src);
-			schedule.addReporter(cdr2);
+			// Reporter2 cdr2 = new ConsumerDataReporter(simternet[i]);
+			// cdr2.addComponent(eerc);
+			// cdr2.addComponent(src);
+			// schedule.addReporter(cdr2);
 
 			// Backbone Link Reporter
 			BackboneLinkReporter blr = new BackboneLinkReporter(simternet[i]);
