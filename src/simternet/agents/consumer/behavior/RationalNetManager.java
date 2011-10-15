@@ -48,6 +48,8 @@ public class RationalNetManager extends NetManager implements Serializable {
 			EdgeNetwork en = (EdgeNetwork) net;
 			Consumer.EdgeNetworkBenefit estimatedBenefit = new Consumer.EdgeNetworkBenefit();
 			estimatedBenefit.network = en;
+
+			// Aggregate the benefit from the applications.
 			for (List<ApplicationProvider> categoryASPs : c.getAppsUsed().values()) {
 				for (ApplicationProvider asp : categoryASPs) {
 					AppBenefitCalculator abc = c.getAppBenefitCalculator();
@@ -63,6 +65,17 @@ public class RationalNetManager extends NetManager implements Serializable {
 			 * zero by the price.
 			 */
 			estimatedBenefit.sumAppBenefits++;
+
+			// If this is the NSP Edge that we're currently using, give it a
+			// random propotional bonus to
+			// de-synchronize switching behavior.
+			EdgeNetwork currentEdge = c.getEdgeNetwork().get();
+			if (currentEdge != null) {
+				if (c.equals(en)) {
+					double randomBonus = c.s.config.networkUsageBonusRatio * c.s.random.nextDouble();
+					estimatedBenefit.sumAppBenefits *= 1 + randomBonus;
+				}
+			}
 
 			// estimatedBenefit now has the sum of all ASPs
 			edgeBenefits.add(estimatedBenefit);

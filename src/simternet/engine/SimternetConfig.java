@@ -72,6 +72,7 @@ public class SimternetConfig extends Properties implements Serializable {
 	 * drop out of the set of applications used by the consumer.
 	 */
 	public final double			applicationUsageBonusRatio;
+	public final double			networkUsageBonusRatio;
 
 	public final double			financeDepreciationRate;
 	public final double			financeInterestRate;
@@ -137,7 +138,9 @@ public class SimternetConfig extends Properties implements Serializable {
 		networkBenefitExponent = d("alpha");
 		networkCostExponent = d("gamma");
 		networkValueExponentVarianceRange = d("networkValueExponentVarianceRange");
+
 		applicationUsageBonusRatio = d("applicationUsageBonusRatio");
+		networkUsageBonusRatio = d("networkUsageBonusRatio");
 
 		financeDepreciationRate = d("financeDepreciationRate");
 		financeInterestRate = d("financeInterestRate");
