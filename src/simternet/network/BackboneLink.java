@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import simternet.engine.TraceConfig;
+
 /**
  * A BackboneLink is a simplex connection between two Networks. BackboneLinks
  * are roughly analagous to router 'interfaces'. While its endpoints cannot be
@@ -258,10 +260,11 @@ public class BackboneLink implements Serializable {
 	/**
 	 * Called by the source network once all flows for this time step are in the
 	 * queue. These flows are then processed by the congestion algorithm and
-	 * placed in the output queue to be retrieved by the target network.
+	 * placed in the input queue to be retrieved by the target network.
 	 */
 	public void transmitFlows() {
 		totalCapacity += bandwidth;
+		int numFlows = 0;
 
 		perStepDemand = 0D;
 		for (NetFlow f : inputQueue) {
@@ -275,8 +278,18 @@ public class BackboneLink implements Serializable {
 		perStepTransmitted = 0D;
 		for (NetFlow f : congestedFlows) {
 			perStepTransmitted += f.bandwidth;
+			numFlows++;
 		}
 		totalTransmitted += perStepTransmitted;
+
+		if (TraceConfig.networking.flowSent) {
+			TraceConfig.out.println(this + " transmitting " + numFlows + " flows, with aggregate bw="
+					+ perStepTransmitted);
+			for (NetFlow f : congestedFlows) {
+				TraceConfig.out.println(this + " transmitted " + f);
+
+			}
+		}
 
 		// put congested flows in output queue and clear input queue
 		outputQueue.addAll(congestedFlows);

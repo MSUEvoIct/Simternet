@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import simternet.agents.asp.ApplicationProvider;
+import simternet.engine.TraceConfig;
 import simternet.network.EdgeNetwork;
 
 /**
@@ -58,7 +59,11 @@ public abstract class AppBenefitCalculator implements Serializable {
 		if (usedLastPeriod) {
 			double randomBonus = c.s.config.applicationUsageBonusRatio * c.s.random.nextDouble();
 			estimatedBenefit *= 1 + randomBonus;
+			if (TraceConfig.modelMath.aspBenefit) {
+				TraceConfig.out.println("Benefit increased by " + randomBonus * 100 + "% b/c/o use last period");
+			}
 		}
+
 		return estimatedBenefit;
 	}
 

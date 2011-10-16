@@ -3,9 +3,6 @@ package simternet.agents.consumer;
 import java.io.Serializable;
 import java.util.List;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Int2D;
@@ -134,6 +131,10 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	// Remember; every Temporal variable needs to be listed here!
 	@Override
 	public void update() {
+		if (TraceConfig.updates) {
+			TraceConfig.out.println("Updating temporal variables for " + this);
+		}
+
 		appBudgetConstraints.update();
 		appsUsed.update();
 		population.update();
@@ -143,8 +144,8 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	// Top level consumer behavior
 	@Override
 	public void step(SimState state) {
-		if (TraceConfig.steppingConsumer && Logger.getRootLogger().isTraceEnabled()) {
-			Logger.getRootLogger().trace("Stepping" + toString());
+		if (TraceConfig.programFlow) {
+			TraceConfig.out.println("Entering " + this + ".step()");
 		}
 
 		// Actualize our consumption decisions from the last time step.
@@ -166,6 +167,9 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 			appCatBudgetManager.calculateAppCategoryBudgets(this);
 		}
 
+		if (TraceConfig.programFlow) {
+			TraceConfig.out.println("Leaving " + this + ".step()");
+		}
 	}
 
 	/**
@@ -177,6 +181,9 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 			AppBenefitCalculator abc, AppCategoryBudgetCalculator acbc) {
 		this.s = s;
 		// this.name = s.config.getCCName();
+		if (TraceConfig.agentInit) {
+			TraceConfig.out.println("Initializing " + this);
+		}
 
 		if (location != null) {
 			this.location = location;
@@ -216,6 +223,20 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 
 		diversityFactor = s.random.nextDouble();
 
+		if (TraceConfig.agentInit) {
+			TraceConfig.out.println(this + ".location initialized to " + location);
+			TraceConfig.out.println(this + ".population initialized to " + population);
+			TraceConfig.out.println(this + ".earlyAdopter initialized to " + earlyAdopter);
+			TraceConfig.out.println(this + ".appBenefitCalculator initialized to " + appBenefitCalculator);
+			TraceConfig.out.println(this + ".appManager initialized to " + appManager);
+			TraceConfig.out.println(this + ".netManager initialized to " + netManager);
+			TraceConfig.out.println(this + ".networkBenefitExponentVariance initialized to "
+					+ networkBenefitExponentVariance);
+			TraceConfig.out
+					.println(this + ".networkCostExponentVariance initialized to " + networkCostExponentVariance);
+			TraceConfig.out.println(this + ".diversityFactor initialized to " + diversityFactor);
+		}
+
 	}
 
 	public static class EdgeNetworkBenefit {
@@ -248,6 +269,10 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 *            The network on which to use the application
 	 */
 	protected void consumeApplication(ApplicationProvider application, EdgeNetwork network) {
+		if (TraceConfig.ops.consumerActions) {
+			TraceConfig.out.println("Consuming app of " + application);
+		}
+
 		application.processUsage(this, network);
 	}
 
@@ -256,21 +281,32 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 * consumeApplication() to actualize that consumption.
 	 */
 	protected void consumeApplications() {
+		if (TraceConfig.programFlow) {
+			TraceConfig.out.println("Entering consumeApplications()");
+		}
 
 		// if we are not subscribed to a network, we cannot consume any network
 		// applications
-		if (edgeNetwork.get() == null)
+		if (edgeNetwork.get() == null) {
+			if (TraceConfig.ops.consumerActions) {
+				TraceConfig.out.println("Not subscribed to any edge network; cannot consume");
+			}
+
 			return;
+		}
 
 		// For Each Category
-		for (List<ApplicationProvider> asps : appsUsed.values()) {
+		for (AppCategory appCat : appsUsed.keySet()) {
+			List<ApplicationProvider> asps = appsUsed.get(appCat);
+
+			if (TraceConfig.ops.consumerActions) {
+				TraceConfig.out.println("Consuming subscribed apps in category " + appCat);
+			}
+
 			// Each ASP with that category
 			for (ApplicationProvider asp : asps) {
 				// Use that app on the network we're subscribed to
 				consumeApplication(asp, edgeNetwork.get());
-				if (TraceConfig.consumerUsedApp && Logger.getRootLogger().isTraceEnabled()) {
-					Logger.getRootLogger().trace(this + " consumed " + asp);
-				}
 			}
 		}
 	}
@@ -284,6 +320,10 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 * @param network
 	 */
 	protected void consumeNetwork(EdgeNetwork edge) {
+		if (TraceConfig.ops.consumerActions) {
+			TraceConfig.out.println(this + ".consumeNetwork(" + edge + ")");
+		}
+
 		edge.processUsage(this);
 	}
 
@@ -292,6 +332,10 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 * consumeNetwork(AbstractEdgeNetwork) to handle the details.
 	 */
 	protected void consumeNetworks() {
+		if (TraceConfig.ops.consumerActions) {
+			TraceConfig.out.println(this + " consuming networks");
+		}
+
 		if (edgeNetwork.get() != null) {
 			consumeNetwork(edgeNetwork.get());
 		}
@@ -351,14 +395,13 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 * @param flow
 	 */
 	public void receiveFlow(NetFlow flow) {
-
-		if (TraceConfig.networking.congestionNSPSummary && Logger.getRootLogger().isTraceEnabled()) {
-			Logger.getRootLogger().log(Level.TRACE,
-					this + " received " + flow + ", congestion = " + flow.describeCongestionForHumans());
-		}
-
 		transferRequested += flow.getRequestedTransfer();
 		transferReceived += flow.getActualTransfer();
+
+		if (TraceConfig.networking.consumerFlowReceived) {
+			TraceConfig.out.println(this + " received flow " + flow + ", transfer received/requested = "
+					+ flow.getRequestedTransfer() + "/" + flow.getActualTransfer());
+		}
 	}
 
 	public void setName(String name) {
@@ -384,6 +427,10 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 
 	public void setEdgeNetwork(EdgeNetwork en) {
 		edgeNetwork.set(en);
+
+		if (TraceConfig.kitchenSink) {
+			TraceConfig.out.println(this + " edge network set to " + en);
+		}
 	}
 
 	public Temporal<EdgeNetwork> getEdgeNetwork() {

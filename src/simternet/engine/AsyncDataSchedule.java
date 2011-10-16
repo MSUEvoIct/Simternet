@@ -44,6 +44,10 @@ public class AsyncDataSchedule extends Schedule {
 
 	@Override
 	public synchronized boolean step(SimState state) {
+		if (TraceConfig.basics) {
+			TraceConfig.out.println("Entering step " + getTime());
+		}
+
 		Simternet s = (Simternet) state;
 
 		// process the previous step's updates before any new processing occurs

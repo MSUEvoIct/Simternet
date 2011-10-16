@@ -11,6 +11,7 @@ import simternet.agents.consumer.AppBenefitCalculator;
 import simternet.agents.consumer.AppManager;
 import simternet.agents.consumer.Consumer;
 import simternet.agents.consumer.Consumer.AppBenefit;
+import simternet.engine.TraceConfig;
 import simternet.network.EdgeNetwork;
 
 public class GreedyAppManager implements AppManager {
@@ -27,6 +28,11 @@ public class GreedyAppManager implements AppManager {
 
 	@Override
 	public void manageApplications(Consumer c) {
+
+		if (TraceConfig.kitchenSink) {
+			TraceConfig.out.println(this + " managing applications for " + c);
+		}
+
 		// do the "greedy" algorithm
 		for (AppCategory ac : AppCategory.values()) {
 			// calculate the expected benefit from each application in category
@@ -71,6 +77,12 @@ public class GreedyAppManager implements AppManager {
 					newASPs.add(ab.asp);
 					budget -= ab.cost;
 				}
+
+			if (TraceConfig.kitchenSink) {
+				TraceConfig.out
+						.println("After consuming apps with highest positive benefit density in descending order, " + c
+								+ " has remaining budget in AppCategory " + ac + " of " + budget);
+			}
 
 			// Put our new list object into the structure used to actualize
 			// consumption.

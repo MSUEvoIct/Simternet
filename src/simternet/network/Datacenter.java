@@ -80,23 +80,43 @@ public class Datacenter extends Network {
 	public void originate(NetFlow flow) {
 		// Check to see if this flow was congested in previous periods. If so,
 		// pre-congest it to just faster than last period.
-		Double observedBandwidth = this.observedBandwidth.get(flow.destination);
+		if (TraceConfig.networking.aspSentFlow) {
+			TraceConfig.out.println(this + " originating " + flow + " to " + flow.user);
+		}
 
-		if (observedBandwidth != null) {
+		Double observedBandwidth = this.observedBandwidth.get(flow.destination);
+		if (TraceConfig.networking.aspFlowControl) {
+			TraceConfig.out.println(this + " observed max BW at destination to be " + observedBandwidth);
+		}
+
+		if (observedBandwidth != null && observedBandwidth * 1.0001 < flow.bandwidthRequested) {
 			double increasedBandwidth = observedBandwidth * (1 + owner.s.config.applicationFlowGrowthProportion);
 			double minimumBandwidth = owner.getBandwidth() * owner.s.config.applicationFlowMinimumProportion;
-			double bandwidth = 0D;
+			double bandwidth = Double.NaN;
 
 			if (increasedBandwidth < minimumBandwidth) {
+				if (TraceConfig.networking.aspFlowControl) {
+					TraceConfig.out.println(this + " minimum banwidth " + minimumBandwidth
+							+ " exceeds flow-control suggested rate of " + increasedBandwidth
+							+ ", trying minimum instead");
+				}
 				bandwidth = minimumBandwidth;
 			} else {
 				bandwidth = increasedBandwidth;
 			}
 
-			flow.congest(bandwidth);
+			if (TraceConfig.networking.aspFlowControl) {
+				TraceConfig.out.println(this + " flow control suggests trying bw=" + bandwidth);
+			}
+
+			if (bandwidth < flow.bandwidthRequested) {
+				flow.congest(bandwidth);
+			}
 		}
 
-		inputQueue.add(flow);
+		// Immediately route the flow to the proper output backbone link.
+		// Look in our input queue
+		this.route(flow);
 	}
 
 	public String printCongestion() {
@@ -134,14 +154,6 @@ public class Datacenter extends Network {
 	}
 
 	@Override
-	public void route() {
-		for (NetFlow flow : inputQueue) {
-			this.route(flow);
-		}
-		inputQueue.clear();
-	}
-
-	@Override
 	public void step(SimState state) {
 		super.step(state);
 
@@ -158,7 +170,6 @@ public class Datacenter extends Network {
 	@Override
 	public void update() {
 		super.update();
-		inputQueue.update();
 		observedBandwidth.update();
 	}
 

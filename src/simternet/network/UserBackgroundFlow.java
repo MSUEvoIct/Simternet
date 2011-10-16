@@ -1,6 +1,7 @@
 package simternet.network;
 
 import simternet.agents.consumer.Consumer;
+import simternet.engine.TraceConfig;
 
 public class UserBackgroundFlow extends NetFlow {
 
@@ -43,8 +44,14 @@ public class UserBackgroundFlow extends NetFlow {
 
 	@Override
 	public void congest(double bandwidthLimit) {
+
 		if (bandwidth > bandwidthLimit) {
 			congested = true;
+
+			if (TraceConfig.networking.flowCongestion) {
+				TraceConfig.out.println(this + " wants bw=" + bandwidth + " and only " + bandwidthLimit
+						+ " available; limiting to available");
+			}
 
 			// Usage remains constant until maxDuration is exceeded
 			double usage = bandwidth * duration;
@@ -56,6 +63,7 @@ public class UserBackgroundFlow extends NetFlow {
 			} else {
 				duration = maxDuration;
 			}
+
 		}
 	}
 

@@ -362,6 +362,7 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 
 	public void route(NetFlow flow) {
 		// Send these flows out the correct egress links
+
 		// Routing table lookup
 		Route rte = routingTable.get(flow.destination);
 		BackboneLink outgoing;
@@ -369,6 +370,10 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 			outgoing = defaultRoute;
 		} else {
 			outgoing = rte.nextHop;
+		}
+
+		if (TraceConfig.networking.routingDecisions) {
+			TraceConfig.out.println("Routing " + flow + " to outgoing Link = " + outgoing);
 		}
 
 		if (outgoing != null) {

@@ -9,6 +9,7 @@ import simternet.agents.asp.ApplicationProvider;
 import simternet.agents.consumer.AppBenefitCalculator;
 import simternet.agents.consumer.Consumer;
 import simternet.agents.consumer.NetManager;
+import simternet.engine.TraceConfig;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 
@@ -38,6 +39,12 @@ public class RationalNetManager extends NetManager implements Serializable {
 
 	@Override
 	public void manageNetworks(Consumer c) {
+
+		if (TraceConfig.programFlow) {
+			TraceConfig.out.println(this + " managing networks for " + c);
+			TraceConfig.out.println("Current Network = " + c.getEdgeNetwork().get());
+		}
+
 		Collection<Network> availableEdges = c.s.getNetworks(null, EdgeNetwork.class, c.getLocation());
 		Collection<Consumer.EdgeNetworkBenefit> edgeBenefits = new ArrayList<Consumer.EdgeNetworkBenefit>();
 
@@ -54,26 +61,40 @@ public class RationalNetManager extends NetManager implements Serializable {
 				for (ApplicationProvider asp : categoryASPs) {
 					AppBenefitCalculator abc = c.getAppBenefitCalculator();
 					// The % bandwidth we think will get through
+					if (TraceConfig.modelMath.aspBenefit) {
+						TraceConfig.out.println("Estimating benefit for " + asp.getName() + " on " + en);
+					}
 
 					double expectedBenefit = abc.estimateBenefit(c, asp, en);
 					estimatedBenefit.sumAppBenefits += expectedBenefit;
 				}
 			}
 			/*
-			 * add 1 to edgeBenefits; shouldn't bias calc but still allows
-			 * consumer to select the cheapest Edge Network rather than dividing
-			 * zero by the price.
+			 * add a small number to edgeBenefits; shouldn't bias calc but still
+			 * allows consumer to select the cheapest Edge Network rather than
+			 * dividing zero by the price.
 			 */
-			estimatedBenefit.sumAppBenefits++;
+			estimatedBenefit.sumAppBenefits += 0.00001;
+
+			if (TraceConfig.modelMath.nspBenefit) {
+				TraceConfig.out.println("Calculated estimated benefit for " + en + " of "
+						+ estimatedBenefit.sumAppBenefits);
+				TraceConfig.out
+						.println("  (Will differ slightly even on identically performing networks, b/c/o random component to reused applications)");
+			}
 
 			// If this is the NSP Edge that we're currently using, give it a
 			// random propotional bonus to
 			// de-synchronize switching behavior.
 			EdgeNetwork currentEdge = c.getEdgeNetwork().get();
 			if (currentEdge != null) {
-				if (c.equals(en)) {
+				if (currentEdge.equals(en)) {
 					double randomBonus = c.s.config.networkUsageBonusRatio * c.s.random.nextDouble();
 					estimatedBenefit.sumAppBenefits *= 1 + randomBonus;
+					if (TraceConfig.modelMath.nspBenefit) {
+						TraceConfig.out.println("As currently used edge, it receives a random bonus of " + randomBonus
+								* 100 + "%, benefit now " + estimatedBenefit.sumAppBenefits);
+					}
 				}
 			}
 
@@ -95,6 +116,16 @@ public class RationalNetManager extends NetManager implements Serializable {
 
 			double preferenceFactor = adjustedBenefit / adjustedCost;
 
+			if (TraceConfig.modelMath.nspBenefit) {
+				TraceConfig.out.println("Calculating preference factor for edge " + enb.network);
+				TraceConfig.out.println("Formula is (b)^be/(c)^ce; a c/b ratio");
+				TraceConfig.out.println("b = " + enb.sumAppBenefits);
+				TraceConfig.out.println("be = " + networkBenefitExponent);
+				TraceConfig.out.println("c = " + enb.network.getPriceFuture());
+				TraceConfig.out.println("ce = " + networkCostExponent);
+				TraceConfig.out.println("Result is " + preferenceFactor);
+			}
+
 			// TODO: Add a benefit scaled switching probability?
 			// Compare to benefit on network the user is currently subscribed
 			// to, if any.
@@ -104,9 +135,12 @@ public class RationalNetManager extends NetManager implements Serializable {
 			}
 		}
 
+		if (TraceConfig.kitchenSink) {
+			TraceConfig.out.println("Winner is " + edgeToSelect);
+		}
+
 		// Finally! Consume that network.
 		c.setEdgeNetwork(edgeToSelect);
 
 	}
-
 }

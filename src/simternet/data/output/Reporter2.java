@@ -53,6 +53,12 @@ public abstract class Reporter2 implements Serializable {
 	public abstract void report();
 
 	protected void report(Object[] specificValues) {
+
+		// FIXME: Architecture needs to have reporters work for snapshots;
+		// reporters must somehow be set within simternet.
+		if (csvWriter == null)
+			return;
+
 		// The data to be written when we're done
 		List<Object> allValues = new ArrayList<Object>();
 

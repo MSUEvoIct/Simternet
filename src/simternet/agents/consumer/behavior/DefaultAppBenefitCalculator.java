@@ -3,6 +3,7 @@ package simternet.agents.consumer.behavior;
 import simternet.agents.asp.ApplicationProvider;
 import simternet.agents.consumer.AppBenefitCalculator;
 import simternet.agents.consumer.Consumer;
+import simternet.engine.TraceConfig;
 
 /**
  * Default is (quality^0.5)*(congestionRatio * 2 - 1)
@@ -56,8 +57,16 @@ public class DefaultAppBenefitCalculator extends AppBenefitCalculator {
 		double randomPreference = Math.abs(asp.diversityFactor - c.diversityFactor);
 		benefit = benefit * randomPreference;
 
-		return benefit;
+		if (TraceConfig.modelMath.aspBenefit) {
+			TraceConfig.out.println(c + " calculated actual benefit for " + asp.getName() + " as " + benefit
+					+ ", based on");
+			TraceConfig.out.println("  quality = " + asp.getQuality());
+			TraceConfig.out.println("  consumer diversity factor = " + c.diversityFactor);
+			TraceConfig.out.println("  asp diversity factor = " + asp.diversityFactor);
+			TraceConfig.out.println("  expected % not lost to congestion = " + fractionReceived * 100);
+		}
 
+		return benefit;
 	}
 
 }
