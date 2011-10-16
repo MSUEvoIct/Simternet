@@ -1,0 +1,7 @@
+ASPFitness <- read.csv("ASPFitness.csv")
+NSPFitness <- read.csv("NSPFitness.csv")
+BackboneInfo <- read.csv("BackboneInfo.csv")
+ConsumerData <- read.csv("ConsumerData.csv")
+EdgeData <- read.csv("EdgeData.csv")
+EdgeMarket <- read.csv("EdgeMarket.csv")
+NSP-ASP-Interconnection <- read.csv("NSP-ASP-Interconnection.csv")
