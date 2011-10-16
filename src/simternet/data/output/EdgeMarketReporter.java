@@ -5,20 +5,13 @@ import simternet.engine.Simternet;
 
 public class EdgeMarketReporter extends Reporter2 {
 
-	private static final long					serialVersionUID	= 1L;
+	private static final long		serialVersionUID	= 1L;
 
-	private static final int					numFields			= 4;
-	private static final String[]				headers;
-	private static final String					filename			= "data/output/EdgeMarket.out.csv";
-	private static transient BufferedCSVWriter	csvWriter;
-
-	public static final String					specificHeaders		= "LocactionX" + Reporter.separater + "LocationY"
-																			+ Reporter.separater + "NumConsumers"
-																			+ Reporter.separater + "NumNetworks";
+	private static final int		numFields			= 4;
+	private static final String[]	headers;
+	public static final String		fileName			= "EdgeMarket";
 
 	static {
-		EdgeMarketReporter.csvWriter = new BufferedCSVWriter(EdgeMarketReporter.filename);
-
 		headers = new String[EdgeMarketReporter.numFields];
 		EdgeMarketReporter.headers[0] = "LocationX";
 		EdgeMarketReporter.headers[1] = "LocationY";
@@ -28,7 +21,7 @@ public class EdgeMarketReporter extends Reporter2 {
 	}
 
 	public EdgeMarketReporter(Simternet s) {
-		super(EdgeMarketReporter.csvWriter, s);
+		super(s);
 	}
 
 	@Override
@@ -49,6 +42,11 @@ public class EdgeMarketReporter extends Reporter2 {
 	@Override
 	public String[] getHeaders() {
 		return EdgeMarketReporter.headers;
+	}
+
+	@Override
+	public String getFileName() {
+		return EdgeMarketReporter.fileName;
 	}
 
 }

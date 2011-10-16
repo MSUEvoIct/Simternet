@@ -15,10 +15,12 @@ public class SimternetRunner implements Runnable {
 	@Override
 	public void run() {
 		int step = 0;
-		while (step < this.steps) {
-			this.s.schedule.step(this.s);
+		while (step < steps) {
+			s.schedule.step(s);
 			step++;
 		}
+		s.finish();
+		s = null;
 	}
 
 }

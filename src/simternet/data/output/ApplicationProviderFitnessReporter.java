@@ -4,17 +4,13 @@ import simternet.agents.asp.ApplicationProvider;
 import simternet.engine.Simternet;
 
 public class ApplicationProviderFitnessReporter extends Reporter2 {
-	private static final long					serialVersionUID	= 1L;
+	private static final long		serialVersionUID	= 1L;
 
-	private static final int					numFields			= 11;
-	private static final String[]				headers;
-	private static final String					filename			= "data/output/ASPFitness.out.csv";
-	private static transient BufferedCSVWriter	csvWriter;
+	private static final int		numFields			= 11;
+	private static final String[]	headers;
+	private static final String		filename			= "ASPFitness";
 
 	static {
-		ApplicationProviderFitnessReporter.csvWriter = new BufferedCSVWriter(
-				ApplicationProviderFitnessReporter.filename);
-
 		headers = new String[ApplicationProviderFitnessReporter.numFields];
 		ApplicationProviderFitnessReporter.headers[0] = "ASP";
 		ApplicationProviderFitnessReporter.headers[1] = "Fitness";
@@ -30,7 +26,7 @@ public class ApplicationProviderFitnessReporter extends Reporter2 {
 	}
 
 	public ApplicationProviderFitnessReporter(Simternet s) {
-		super(ApplicationProviderFitnessReporter.csvWriter, s);
+		super(s);
 	}
 
 	@Override
@@ -58,6 +54,11 @@ public class ApplicationProviderFitnessReporter extends Reporter2 {
 	@Override
 	public String[] getHeaders() {
 		return ApplicationProviderFitnessReporter.headers;
+	}
+
+	@Override
+	public String getFileName() {
+		return ApplicationProviderFitnessReporter.filename;
 	}
 
 }

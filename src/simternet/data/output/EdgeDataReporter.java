@@ -10,16 +10,13 @@ import simternet.network.Network;
 public class EdgeDataReporter extends Reporter2 {
 
 	// protected static HashMap<String, String> netTypeAbbreviations;
-	private static final long					serialVersionUID	= 1L;
+	private static final long		serialVersionUID	= 1L;
 
-	private static final int					numFields			= 11;
-	private static final String[]				headers;
-	private static final String					filename			= "data/output/EdgeData.out.csv";
-	private static transient BufferedCSVWriter	csvWriter;
+	private static final int		numFields			= 11;
+	private static final String[]	headers;
+	private static final String		filename			= "EdgeData";
 
 	static {
-		EdgeDataReporter.csvWriter = new BufferedCSVWriter(EdgeDataReporter.filename);
-
 		headers = new String[EdgeDataReporter.numFields];
 
 		EdgeDataReporter.headers[0] = "LocationX";
@@ -42,7 +39,7 @@ public class EdgeDataReporter extends Reporter2 {
 	}
 
 	public EdgeDataReporter(Simternet s) {
-		super(EdgeDataReporter.csvWriter, s);
+		super(s);
 	}
 
 	@Override
@@ -83,6 +80,11 @@ public class EdgeDataReporter extends Reporter2 {
 	@Override
 	public String[] getHeaders() {
 		return EdgeDataReporter.headers;
+	}
+
+	@Override
+	public String getFileName() {
+		return EdgeDataReporter.filename;
 	}
 
 }

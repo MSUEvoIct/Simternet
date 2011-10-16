@@ -4,28 +4,13 @@ import simternet.agents.nsp.NetworkProvider;
 import simternet.engine.Simternet;
 
 public class NetworkProviderFitnessReporter extends Reporter2 {
+	private static final long		serialVersionUID	= 1L;
 
-	private static final long					serialVersionUID	= 1L;
-	public static final String					specificHeaders		= "NSP" + Reporter.separater + "Fitness"
-																			+ Reporter.separater + "CapitalAssets"
-																			+ Reporter.separater + "LiquidAssets"
-																			+ Reporter.separater + "TotalInvestment"
-																			+ Reporter.separater + "TotalFinancing"
-																			+ Reporter.separater + "TotalOperating"
-																			+ Reporter.separater + "TotalRevenue"
-																			+ Reporter.separater + "NumEdges"
-																			+ Reporter.separater + "Bankrupt"
-																			+ Reporter.separater + "NumCustomers"
-																			+ Reporter.separater + "MarketShare";
-
-	private static final int					numFields			= 12;
-	private static final String[]				headers;
-	private static final String					filename			= "data/output/NSPFitness.out.csv";
-	private static transient BufferedCSVWriter	csvWriter;
+	private static final int		numFields			= 12;
+	private static final String[]	headers;
+	private static final String		filename			= "NSPFitness";
 
 	static {
-		NetworkProviderFitnessReporter.csvWriter = new BufferedCSVWriter(NetworkProviderFitnessReporter.filename);
-
 		headers = new String[NetworkProviderFitnessReporter.numFields];
 		NetworkProviderFitnessReporter.headers[0] = "NSP";
 		NetworkProviderFitnessReporter.headers[1] = "Fitness";
@@ -43,7 +28,7 @@ public class NetworkProviderFitnessReporter extends Reporter2 {
 	}
 
 	public NetworkProviderFitnessReporter(Simternet s) {
-		super(NetworkProviderFitnessReporter.csvWriter, s);
+		super(s);
 	}
 
 	@Override
@@ -76,6 +61,11 @@ public class NetworkProviderFitnessReporter extends Reporter2 {
 	@Override
 	public String[] getHeaders() {
 		return NetworkProviderFitnessReporter.headers;
+	}
+
+	@Override
+	public String getFileName() {
+		return NetworkProviderFitnessReporter.filename;
 	}
 
 }

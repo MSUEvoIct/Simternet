@@ -7,16 +7,13 @@ import simternet.network.BackboneLink;
 
 public class ASPInterconnectionReporter extends Reporter2 {
 
-	private static final long					serialVersionUID	= 1L;
+	private static final long		serialVersionUID	= 1L;
 
-	public static final int						numFields			= 4;
-	public static final String[]				headers;
-	public static final String					filename			= "data/output/AspInterconnection.out.csv";
-	public static transient BufferedCSVWriter	csvWriter;
+	public static final int			numFields			= 4;
+	public static final String[]	headers;
+	public static final String		filename			= "NSP-ASP-Interconnection";
 
 	static {
-		ASPInterconnectionReporter.csvWriter = new BufferedCSVWriter(ASPInterconnectionReporter.filename);
-
 		headers = new String[ASPInterconnectionReporter.numFields];
 		ASPInterconnectionReporter.headers[0] = "NSP";
 		ASPInterconnectionReporter.headers[1] = "ASP";
@@ -25,7 +22,7 @@ public class ASPInterconnectionReporter extends Reporter2 {
 	}
 
 	public ASPInterconnectionReporter(Simternet s) {
-		super(ASPInterconnectionReporter.csvWriter, s);
+		super(s);
 	}
 
 	@Override
@@ -52,6 +49,11 @@ public class ASPInterconnectionReporter extends Reporter2 {
 	@Override
 	public String[] getHeaders() {
 		return ASPInterconnectionReporter.headers;
+	}
+
+	@Override
+	public String getFileName() {
+		return ASPInterconnectionReporter.filename;
 	}
 
 }

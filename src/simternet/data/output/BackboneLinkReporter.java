@@ -11,16 +11,13 @@ import simternet.network.Datacenter;
 import simternet.network.EdgeNetwork;
 
 public class BackboneLinkReporter extends Reporter2 {
-	private static final long					serialVersionUID	= 1L;
+	private static final long		serialVersionUID	= 1L;
 
-	public static final int						numFields			= 7;
-	public static final String[]				headers;
-	public static final String					filename			= "data/output/BackboneInfo.out.csv";
-	private static transient BufferedCSVWriter	csvWriter;
+	public static final int			numFields			= 7;
+	public static final String[]	headers;
+	public static final String		filename			= "BackboneInfo";
 
 	static {
-		BackboneLinkReporter.csvWriter = new BufferedCSVWriter(BackboneLinkReporter.filename);
-
 		headers = new String[BackboneLinkReporter.numFields];
 
 		BackboneLinkReporter.headers[0] = "Source";
@@ -33,7 +30,7 @@ public class BackboneLinkReporter extends Reporter2 {
 	}
 
 	public BackboneLinkReporter(Simternet s) {
-		super(BackboneLinkReporter.csvWriter, s);
+		super(s);
 	}
 
 	@Override
@@ -83,6 +80,11 @@ public class BackboneLinkReporter extends Reporter2 {
 	@Override
 	public String[] getHeaders() {
 		return BackboneLinkReporter.headers;
+	}
+
+	@Override
+	public String getFileName() {
+		return BackboneLinkReporter.filename;
 	}
 
 }

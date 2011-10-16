@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Level;
@@ -27,8 +26,16 @@ import simternet.agents.consumer.behavior.DefaultAppCategoryBudgetCalculator;
 import simternet.agents.consumer.behavior.GreedyAppManager;
 import simternet.agents.consumer.behavior.RationalNetManager;
 import simternet.agents.nsp.NetworkProvider;
-import simternet.data.NetworkGraphDataOutput;
-import simternet.data.output.Reporter;
+import simternet.data.output.ASPInterconnectionReporter;
+import simternet.data.output.ApplicationProviderFitnessReporter;
+import simternet.data.output.BackboneLinkReporter;
+import simternet.data.output.ConsumerDataReporter;
+import simternet.data.output.ECJEvolutionReporterComponent;
+import simternet.data.output.EdgeDataReporter;
+import simternet.data.output.EdgeMarketReporter;
+import simternet.data.output.NetworkProviderFitnessReporter;
+import simternet.data.output.Reporter2;
+import simternet.data.output.StepReporterComponent;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 
@@ -82,6 +89,8 @@ public class Simternet extends SimState implements Serializable {
 	public void start() {
 		super.start();
 
+		initReporters();
+
 		// Initialize Network Service Providers
 		networkServiceProviders = new ArrayList<NetworkProvider>();
 
@@ -96,8 +105,9 @@ public class Simternet extends SimState implements Serializable {
 
 	}
 
-	public void addReporter(Reporter r) {
-		schedule.scheduleRepeating(Schedule.EPOCH, 100, r);
+	public void addReporter(Reporter2 r) {
+		AsyncDataSchedule s2 = (AsyncDataSchedule) schedule;
+		s2.addReporter(r);
 	}
 
 	/**
@@ -162,25 +172,30 @@ public class Simternet extends SimState implements Serializable {
 	@Override
 	public void finish() {
 		super.finish();
-
-		List<Network> nets = new ArrayList<Network>();
+		Collection<Reporter2> reporters = ((AsyncDataSchedule) schedule).reporters;
+		for (Reporter2 reporter : reporters) {
+			reporter.finish();
+		}
 
 		// TODO: Why is this here? isn't finish() called just before Simternet
-		// is garbage collected?
-		for (ApplicationProvider asp : applicationProviders) {
-			nets.add(asp.getDatacenter());
-		}
-
-		for (NetworkProvider nsp : networkServiceProviders) {
-			nets.add(nsp.getBackboneNetwork());
-			for (Network aen : nsp.getEdgeNetworks()) {
-				nets.add(aen);
-			}
-		}
-
-		NetworkGraphDataOutput ngdo = new NetworkGraphDataOutput(this, nets);
-
-		ngdo.output();
+		// is garbage collected? Ans: This was to output a network connection
+		// graph.
+		// List<Network> nets = new ArrayList<Network>();
+		//
+		// for (ApplicationProvider asp : applicationProviders) {
+		// nets.add(asp.getDatacenter());
+		// }
+		//
+		// for (NetworkProvider nsp : networkServiceProviders) {
+		// nets.add(nsp.getBackboneNetwork());
+		// for (Network aen : nsp.getEdgeNetworks()) {
+		// nets.add(aen);
+		// }
+		// }
+		//
+		// NetworkGraphDataOutput ngdo = new NetworkGraphDataOutput(this, nets);
+		//
+		// ngdo.output();
 
 	}
 
@@ -379,31 +394,6 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	/**
-	 * Collects a list
-	 * 
-	 * @param net
-	 * @param x
-	 * @param y
-	 * @return
-	 * 
-	 */
-	// public Map<AbstractNetworkProvider, Double> getPriceList(Class<? extends
-	// AbstractNetwork> net,
-	// AbstractConsumerClass acc, Int2D location) {
-	// Map<AbstractNetworkProvider, Double> prices = new
-	// HashMap<AbstractNetworkProvider, Double>();
-	// for (AbstractNetworkProvider nsp : this.getNetworkServiceProviders())
-	// if (nsp.hasNetworkAt(net, location))
-	// prices.put(nsp, nsp.getPrice(net, acc, location));
-	//
-	// return prices;
-	// }
-
-	// private void initArbiter() {
-	// schedule.scheduleRepeating(new Arbiter(), 99999999, 1);
-	// }
-
-	/**
 	 * Adds 40 consumer agents at each grid square.
 	 * 
 	 * TODO: Parameterize?
@@ -426,4 +416,51 @@ public class Simternet extends SimState implements Serializable {
 		}
 	}
 
+	private void initReporters() {
+
+		ECJEvolutionReporterComponent eerc = new ECJEvolutionReporterComponent(this);
+		StepReporterComponent src = new StepReporterComponent(this);
+
+		// TODO: Parmeterize which reporters are activated
+		ApplicationProviderFitnessReporter apfr = new ApplicationProviderFitnessReporter(this);
+		apfr.addComponent(eerc);
+		apfr.addComponent(src);
+		addReporter(apfr);
+
+		// Network Provider Fitness Reporter
+		NetworkProviderFitnessReporter npfr = new NetworkProviderFitnessReporter(this);
+		npfr.addComponent(eerc);
+		npfr.addComponent(src);
+		addReporter(npfr);
+
+		// Consumer Data Reporter
+		Reporter2 cdr2 = new ConsumerDataReporter(this);
+		cdr2.addComponent(eerc);
+		cdr2.addComponent(src);
+		addReporter(cdr2);
+
+		// Backbone Link Reporter
+		BackboneLinkReporter blr = new BackboneLinkReporter(this);
+		blr.addComponent(eerc);
+		blr.addComponent(src);
+		addReporter(blr);
+
+		// ASP Interconnection Reporter
+		ASPInterconnectionReporter air = new ASPInterconnectionReporter(this);
+		air.addComponent(eerc);
+		air.addComponent(src);
+		addReporter(air);
+
+		// Edge Market Reporter
+		EdgeMarketReporter emr = new EdgeMarketReporter(this);
+		emr.addComponent(eerc);
+		emr.addComponent(src);
+		addReporter(emr);
+
+		// Edge Data Reporter
+		EdgeDataReporter edr = new EdgeDataReporter(this);
+		edr.addComponent(eerc);
+		edr.addComponent(src);
+		addReporter(edr);
+	}
 }

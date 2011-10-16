@@ -1,6 +1,12 @@
 package simternet.data.output;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -36,13 +42,17 @@ import simternet.engine.Simternet;
 public abstract class Reporter2 implements Serializable {
 	private static final long				serialVersionUID	= 1L;
 
-	protected transient BufferedCSVWriter	csvWriter;
 	protected ArrayList<ReporterComponent>	components			= new ArrayList<ReporterComponent>();
 	boolean									tryPrintingHeaders	= true;
 	protected Simternet						s;
+	protected transient File				outputFile;
+	protected transient BufferedWriter		bw;
+	protected transient PrintWriter			writer;
+	private static final int				bufferSize			= 100000;
 
-	public Reporter2(BufferedCSVWriter csvWriter, Simternet s) {
-		this.csvWriter = csvWriter;
+	public abstract String getFileName();
+
+	public Reporter2(Simternet s) {
 		this.s = s;
 	}
 
@@ -52,20 +62,58 @@ public abstract class Reporter2 implements Serializable {
 	 */
 	public abstract void report();
 
-	protected void report(Object[] specificValues) {
+	public void finish() {
+		try {
+			writer.flush();
+			bw.flush();
+			writer.close();
+			bw.close();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		outputFile = null;
+	}
 
-		// FIXME: Architecture needs to have reporters work for snapshots;
-		// reporters must somehow be set within simternet.
-		if (csvWriter == null)
-			return;
+	private void initPrintWriter() {
+		// get directory to output to
+		DecimalFormat df = new DecimalFormat();
+		df.setMinimumIntegerDigits(3);
+
+		String directory = "data/output/PerStep/gen-" + df.format(s.generation) + "/";
+
+		File outputDir = new File(directory);
+		if (!outputDir.exists()) {
+			outputDir.mkdirs();
+		}
+
+		String fileName = directory + getFileName() + ".chunk-" + df.format(s.chunk) + ".csv";
+		outputFile = new File(fileName);
+
+		// create a buffered printwriter for us to use.
+		FileWriter fw;
+		try {
+			fw = new FileWriter(outputFile);
+			bw = new BufferedWriter(fw, Reporter2.bufferSize);
+			writer = new PrintWriter(bw);
+			printHeaders();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	private final PrintWriter getWriter() {
+		if (outputFile == null || writer == null) {
+			initPrintWriter();
+		}
+
+		return writer;
+	}
+
+	protected void report(Object[] specificValues) {
 
 		// The data to be written when we're done
 		List<Object> allValues = new ArrayList<Object>();
-
-		// If we're the first, we need to make sure headers are written.
-		if (tryPrintingHeaders) {
-			printHeaders();
-		}
 
 		// Prepend the values from the ReporterComponents
 		for (ReporterComponent rc : components) {
@@ -82,7 +130,7 @@ public abstract class Reporter2 implements Serializable {
 
 		// Build the string and write it to the file
 		String csvLine = buildCSVLine(allValues);
-		csvWriter.writeLine(csvLine);
+		getWriter().println(csvLine);
 	}
 
 	public void addComponent(ReporterComponent rc) {
@@ -90,28 +138,23 @@ public abstract class Reporter2 implements Serializable {
 	}
 
 	private void printHeaders() {
-		// Only print the headers if the CSV file has not yet had headers
-		// written to it.
-		if (csvWriter.headersWritten == false) {
-			List<Object> headers = new ArrayList<Object>();
+		List<Object> headers = new ArrayList<Object>();
 
-			// Prepend headers from each Reporter Component
-			for (ReporterComponent rc : components) {
-				for (String header : rc.getHeaders()) {
-					headers.add(header);
-				}
-			}
-
-			// Then add our headers, which we'll pull.
-			for (String header : getHeaders()) {
+		// Prepend headers from each Reporter Component
+		for (ReporterComponent rc : components) {
+			for (String header : rc.getHeaders()) {
 				headers.add(header);
 			}
-
-			// Build and write the CSV String for the headers
-			String headerString = buildCSVLine(headers);
-			csvWriter.writeHeaders(headerString);
 		}
-		tryPrintingHeaders = false;
+
+		// Then add our headers, which we'll pull.
+		for (String header : getHeaders()) {
+			headers.add(header);
+		}
+
+		// Build and write the CSV String for the headers
+		String headerString = buildCSVLine(headers);
+		getWriter().println(headerString);
 	}
 
 	/**
