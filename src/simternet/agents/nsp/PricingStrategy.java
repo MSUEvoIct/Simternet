@@ -5,8 +5,17 @@ import java.io.Serializable;
 import simternet.network.EdgeNetwork;
 
 public abstract class PricingStrategy implements Serializable {
-
 	private static final long	serialVersionUID	= 1L;
+
+	/**
+	 * Rediculous minimum price just prevents infinite negative prices etc...
+	 */
+	public static final Double	MAX_PRICE			= 1000D;
+	
+	/**
+	 * Price must now be non-negative, as it is raised to a fracitonal power.
+	 */
+	public static final Double	MIN_PRICE			= 0.1D;
 
 	protected NetworkProvider	nsp;
 
@@ -36,11 +45,14 @@ public abstract class PricingStrategy implements Serializable {
 	public void priceEdges() {
 		for (EdgeNetwork edge : nsp.getEdgeNetworks()) {
 			Double price = calculateEdgePrice(edge);
-			// If the price is more than the consumer will ever pay, set a price
-			// of that number + 1 (prevent 1E8 prices, throwing off averages
-			// etc...)
-			if (price > nsp.s.config.consumerMaxPriceNSP) {
-				price = nsp.s.config.consumerMaxPriceNSP + 1;
+
+			// Adjust prices to sane limits; do not allow 1.0E9 prices to throw
+			// off averages
+			if (price < PricingStrategy.MIN_PRICE) {
+				price = PricingStrategy.MIN_PRICE;
+			}
+			if (price > PricingStrategy.MAX_PRICE) {
+				price = PricingStrategy.MAX_PRICE;
 			}
 
 			edge.setPrice(price);
