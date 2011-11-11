@@ -117,11 +117,10 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	public double														networkCostExponentVariance		= 0.0;
 
 	// Tracking Variables
-	public double														benefitSeen						= 0.0;
-	public double														congestionSeen					= 0.0;
-	public double														paidToNSPs						= 0.0;
-	public double														transferReceived				= 0.0;
-	public double														transferRequested				= 0.0;
+	public Temporal<Double>												transferRequested;
+	public Temporal<Double>												transferReceived;
+	public Temporal<Double>												benefitReceived;
+	public Temporal<Double>												paidToNSPs;
 
 	/**
 	 * XXX: A random preference for the diversityFactor in Applications.
@@ -139,6 +138,12 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 		appsUsed.update();
 		population.update();
 		edgeNetwork.update();
+
+		transferRequested.update();
+		transferReceived.update();
+		benefitReceived.update();
+		paidToNSPs.update();
+
 	}
 
 	// Top level consumer behavior
@@ -180,6 +185,11 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	public Consumer(Simternet s, Int2D location, Double population, NetManager netManager, AppManager appManager,
 			AppBenefitCalculator abc, AppCategoryBudgetCalculator acbc) {
 		this.s = s;
+		transferRequested = new Temporal<Double>(0.0, 0.0);
+		transferReceived = new Temporal<Double>(0.0, 0.0);
+		benefitReceived = new Temporal<Double>(0.0, 0.0);
+		paidToNSPs = new Temporal<Double>(0.0, 0.0);
+
 		// this.name = s.config.getCCName();
 		if (TraceConfig.agentInit) {
 			TraceConfig.out.println("Initializing " + this);
@@ -324,6 +334,8 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 			TraceConfig.out.println(this + ".consumeNetwork(" + edge + ")");
 		}
 
+		paidToNSPs.increase(edge.getPrice());
+
 		edge.processUsage(this);
 	}
 
@@ -395,12 +407,17 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	 * @param flow
 	 */
 	public void receiveFlow(NetFlow flow) {
-		transferRequested += flow.getRequestedTransfer();
-		transferReceived += flow.getActualTransfer();
+		transferRequested.increase(flow.getRequestedTransfer());
+		transferReceived.increase(flow.getActualTransfer());
+
+		double benefitReceived = appBenefitCalculator.calculateBenefit(this, flow.getApplicationProvider(),
+				flow.getTransferFraction());
+
+		this.benefitReceived.increase(benefitReceived);
 
 		if (TraceConfig.networking.consumerFlowReceived) {
 			TraceConfig.out.println(this + " received flow " + flow + ", transfer received/requested = "
-					+ flow.getRequestedTransfer() + "/" + flow.getActualTransfer());
+					+ flow.getActualTransfer() + "/" + flow.getRequestedTransfer());
 		}
 	}
 
@@ -410,7 +427,7 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 
 	@Override
 	public String toString() {
-		return name + "*" + population.get() + "@" + location;
+		return name + "*" + Simternet.nf.format(population.get()) + "@" + location.x + "," + location.y;
 	}
 
 	public Boolean usesNetwork(EdgeNetwork network) {

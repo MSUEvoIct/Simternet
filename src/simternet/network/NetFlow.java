@@ -4,6 +4,7 @@ import java.util.Comparator;
 
 import simternet.agents.asp.ApplicationProvider;
 import simternet.agents.consumer.Consumer;
+import simternet.engine.Simternet;
 import simternet.engine.TraceConfig;
 
 /**
@@ -150,14 +151,14 @@ public abstract class NetFlow {
 	 */
 	public String describeCongestionForHumans() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("BW=");
-		sb.append(bandwidth);
+		sb.append("B=");
+		sb.append(Simternet.nf.format(bandwidth));
 		sb.append("/");
-		sb.append(bandwidthRequested);
-		sb.append(",DUR=");
-		sb.append(duration);
+		sb.append(Simternet.nf.format(bandwidthRequested));
+		sb.append(",D=");
+		sb.append(Simternet.nf.format(duration));
 		sb.append("/");
-		sb.append(durationRequested);
+		sb.append(Simternet.nf.format(durationRequested));
 		return sb.toString();
 	}
 

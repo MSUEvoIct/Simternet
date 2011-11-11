@@ -16,11 +16,11 @@ public class ASPPurchaseTransitProblem extends Problem implements HasSimternet, 
 	protected final double				price;
 	private static final long			serialVersionUID	= 1L;
 
-	public ASPPurchaseTransitProblem(ApplicationProvider asp, NetworkProvider nsp, BackboneLink existing) {
+	public ASPPurchaseTransitProblem(ApplicationProvider asp, NetworkProvider nsp, Double price, BackboneLink existing) {
 		customer = asp;
 		this.nsp = nsp;
 		this.existing = existing;
-		price = nsp.getASPTransitPrice(asp);
+		this.price = price;
 	}
 
 	@Override

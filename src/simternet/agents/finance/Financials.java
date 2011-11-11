@@ -16,9 +16,18 @@ import simternet.engine.asyncdata.Temporal;
  * 
  */
 public class Financials implements Serializable, AsyncUpdate {
-	/**
-	 * 
-	 */
+
+	public static enum Accounts {
+		CAPITAL_STOCK, //
+		ACCUMULATED_DEPRECIATION, //
+		CASH, //
+		DEBT, //
+		INTEREST_EXPENSE, //
+		WITH_CONSUMERS, // xactions with consumers
+		WITH_NSPS, // xactions with nsps
+		WITH_ASPS // xations with asps
+	}
+
 	private static final long	serialVersionUID	= 1L;
 	private Temporal<Double>	assetsCapital;
 	private Temporal<Double>	assetsLiquid;

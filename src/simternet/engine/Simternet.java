@@ -1,14 +1,12 @@
 package simternet.engine;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 import sim.engine.Schedule;
 import sim.engine.SimState;
@@ -34,7 +32,7 @@ import simternet.data.output.ECJEvolutionReporterComponent;
 import simternet.data.output.EdgeDataReporter;
 import simternet.data.output.EdgeMarketReporter;
 import simternet.data.output.NetworkProviderFitnessReporter;
-import simternet.data.output.Reporter2;
+import simternet.data.output.Reporter;
 import simternet.data.output.StepReporterComponent;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
@@ -76,6 +74,8 @@ public class Simternet extends SimState implements Serializable {
 	 */
 	public MarketInfo											marketInfo			= new MarketInfo(this);
 
+	public static final DecimalFormat							nf					= new DecimalFormat("0.###E0");
+
 	/**
 	 * @param seed
 	 *            Random seed for this Simternet
@@ -83,6 +83,7 @@ public class Simternet extends SimState implements Serializable {
 	public Simternet(long seed) {
 		super(seed);
 		schedule = new AsyncDataSchedule();
+
 	}
 
 	@Override
@@ -105,7 +106,7 @@ public class Simternet extends SimState implements Serializable {
 
 	}
 
-	public void addReporter(Reporter2 r) {
+	public void addReporter(Reporter r) {
 		AsyncDataSchedule s2 = (AsyncDataSchedule) schedule;
 		s2.addReporter(r);
 	}
@@ -164,17 +165,21 @@ public class Simternet extends SimState implements Serializable {
 			throw new RuntimeException("Adding unknown agent");
 
 		schedule.scheduleRepeating(Schedule.EPOCH, ordering, agent);
-		if (TraceConfig.finance.marketEntry && Logger.getRootLogger().isTraceEnabled()) {
-			Logger.getRootLogger().log(Level.INFO, "Market Entry: " + agent);
+		if (TraceConfig.finance.marketEntry) {
+			TraceConfig.out.println("Market Entry: " + agent);
 		}
 	}
 
 	@Override
 	public void finish() {
 		super.finish();
-		Collection<Reporter2> reporters = ((AsyncDataSchedule) schedule).reporters;
-		for (Reporter2 reporter : reporters) {
+		Collection<Reporter> reporters = ((AsyncDataSchedule) schedule).reporters;
+		for (Reporter reporter : reporters) {
 			reporter.finish();
+		}
+
+		if (TraceConfig.out != null) {
+			TraceConfig.out.close();
 		}
 
 		// TODO: Why is this here? isn't finish() called just before Simternet
@@ -411,6 +416,12 @@ public class Simternet extends SimState implements Serializable {
 				Consumer c = new Consumer(this, location, pop, RationalNetManager.getSingleton(),
 						GreedyAppManager.getSingleton(), DefaultAppBenefitCalculator.getSingleton(),
 						DefaultAppCategoryBudgetCalculator.getSingleton());
+				// Consumer c = new Consumer(this, location, pop,
+				// UtilityNetManager.getSingleton(),
+				// GreedyAppManager.getSingleton(),
+				// DefaultAppBenefitCalculator.getSingleton(),
+				// DefaultAppCategoryBudgetCalculator.getSingleton());
+
 				enterMarket(c);
 			}
 		}
@@ -434,7 +445,7 @@ public class Simternet extends SimState implements Serializable {
 		addReporter(npfr);
 
 		// Consumer Data Reporter
-		Reporter2 cdr2 = new ConsumerDataReporter(this);
+		Reporter cdr2 = new ConsumerDataReporter(this);
 		cdr2.addComponent(eerc);
 		cdr2.addComponent(src);
 		addReporter(cdr2);

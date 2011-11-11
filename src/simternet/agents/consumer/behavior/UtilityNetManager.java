@@ -9,32 +9,36 @@ import simternet.agents.asp.ApplicationProvider;
 import simternet.agents.consumer.AppBenefitCalculator;
 import simternet.agents.consumer.Consumer;
 import simternet.agents.consumer.NetManager;
+import simternet.engine.Simternet;
 import simternet.engine.TraceConfig;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 
 /**
- * RationalNetManager calculates the sum of expected benefits, X from
- * application providers it is currently using on each potential edge network.
- * It then calculates a benefit density for that Edge network by dividing X by
- * the price of that Edge Network. It then consumes the Edge Network with the
- * highest benefit density.
+ * UtilityNetManager calculates the sum of expected benefits, X from application
+ * providers it is currently using on each potential edge network.
  * 
- * If the consumer is not currently using any applications, choose the cheapest
- * EdgeNetwork.
+ * It then calculates a willingness to pay for the network service based on this
+ * benefit.
+ * 
+ * Finally, it chooses the network which give it the highest positive surplus.
+ * 
+ * The motivation behind trying this approach is that it connects higher
+ * benefits from applications with a higher willingness to pay, and therefore
+ * greater revenue from providers.
  * 
  * @author kkoning
  * 
  */
-public class RationalNetManager extends NetManager implements Serializable {
+public class UtilityNetManager extends NetManager implements Serializable {
 
-	private static RationalNetManager	singleton;
+	private static UtilityNetManager	singleton;
 
-	public static RationalNetManager getSingleton() {
-		if (RationalNetManager.singleton == null) {
-			RationalNetManager.singleton = new RationalNetManager();
+	public static UtilityNetManager getSingleton() {
+		if (UtilityNetManager.singleton == null) {
+			UtilityNetManager.singleton = new UtilityNetManager();
 		}
-		return RationalNetManager.singleton;
+		return UtilityNetManager.singleton;
 	}
 
 	@Override
@@ -102,41 +106,30 @@ public class RationalNetManager extends NetManager implements Serializable {
 			edgeBenefits.add(estimatedBenefit);
 		}
 
-		// Find the edge with the highest density that isn't more than our price
-		// limit
+		// Find the edge with the highest surplus
 		EdgeNetwork edgeToSelect = null;
-		double highestPreferenceFactor = 0D;
+		double highestSurplus = 0D;
 		for (Consumer.EdgeNetworkBenefit enb : edgeBenefits) {
-			double networkBenefitExponent = c.s.config.networkBenefitExponent;
-			double networkCostExponent = c.s.config.networkCostExponent;
-			networkBenefitExponent = networkBenefitExponent + c.networkBenefitExponentVariance;
-			networkCostExponent = networkCostExponent + c.networkCostExponentVariance;
-			double adjustedBenefit = Math.pow(enb.sumAppBenefits, networkBenefitExponent);
-			double adjustedCost = Math.pow(enb.network.getPriceFuture(), networkCostExponent);
-
-			double preferenceFactor = adjustedBenefit / adjustedCost;
+			double wtp = 10 + Math.pow(Math.E, enb.sumAppBenefits);
 
 			if (TraceConfig.modelMath.nspBenefit) {
-				TraceConfig.out.println("Calculating preference factor for edge " + enb.network);
-				TraceConfig.out.println("Formula is (b)^be/(c)^ce; a c/b ratio");
-				TraceConfig.out.println("b = " + enb.sumAppBenefits);
-				TraceConfig.out.println("be = " + networkBenefitExponent);
-				TraceConfig.out.println("c = " + enb.network.getPriceFuture());
-				TraceConfig.out.println("ce = " + networkCostExponent);
-				TraceConfig.out.println("Result is " + preferenceFactor);
+				TraceConfig.out.println("WTP(Ben=" + Simternet.nf.format(enb.sumAppBenefits) + ")="
+						+ Simternet.nf.format(wtp));
 			}
 
-			// TODO: Add a benefit scaled switching probability?
-			// Compare to benefit on network the user is currently subscribed
-			// to, if any.
-			if (preferenceFactor > highestPreferenceFactor && enb.network.getPriceFuture() <= c.getMaxNetworkPrice()) {
-				highestPreferenceFactor = preferenceFactor;
-				edgeToSelect = enb.network;
+			double surplus = wtp - enb.network.getPriceFuture();
+
+			if (surplus > highestSurplus) {
+				highestSurplus = surplus;
+				if (surplus > 0) {
+					edgeToSelect = enb.network;
+				}
 			}
+
 		}
 
-		if (TraceConfig.ops.consumerDecisions) {
-			TraceConfig.out.println("Consumer selected edge " + edgeToSelect);
+		if (TraceConfig.kitchenSink) {
+			TraceConfig.out.println("Winner is " + edgeToSelect);
 		}
 
 		// Finally! Consume that network.

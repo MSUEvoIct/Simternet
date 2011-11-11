@@ -7,7 +7,7 @@ import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.engine.Stoppable;
-import simternet.data.output.Reporter2;
+import simternet.data.output.Reporter;
 import simternet.engine.asyncdata.AsyncUpdate;
 
 /**
@@ -40,7 +40,7 @@ public class AsyncDataSchedule extends Schedule {
 	 * A set of reporters to run each step. Reporters probe the simulation and
 	 * output data.
 	 */
-	protected Set<Reporter2>	reporters			= new HashSet<Reporter2>();
+	protected Set<Reporter>	reporters			= new HashSet<Reporter>();
 
 	@Override
 	public synchronized boolean step(SimState state) {
@@ -57,7 +57,7 @@ public class AsyncDataSchedule extends Schedule {
 		}
 
 		// run the reporters to gather data
-		for (Reporter2 reporter : reporters) {
+		for (Reporter reporter : reporters) {
 			reporter.report();
 		}
 
@@ -129,7 +129,7 @@ public class AsyncDataSchedule extends Schedule {
 		return super.scheduleRepeating(time, ordering, event, interval);
 	}
 
-	public void addReporter(Reporter2 reporter) {
+	public void addReporter(Reporter reporter) {
 		reporters.add(reporter);
 	}
 

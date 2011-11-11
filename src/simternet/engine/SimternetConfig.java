@@ -1,13 +1,9 @@
 package simternet.engine;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Properties;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 import sim.util.Int2D;
 import simternet.network.EdgeNetwork;
@@ -101,16 +97,28 @@ public class SimternetConfig extends Properties implements Serializable {
 	 * Initializes model parameters from data/configuration/default.properties
 	 */
 	public SimternetConfig(Simternet sim) {
-		this(sim, "data/config/simternet.properties");
+		this(sim, null);
 	}
 
 	/**
-	 * Initializes model parameters from specified file
+	 * Initializes model parameters from specified file. File defaults first to
+	 * the environment variable SIMTERNET_CONFIG, and if that is empty then
+	 * etc/simternet.properties.
 	 * 
 	 * @param file
 	 *            The Java Properties file to load
 	 */
 	public SimternetConfig(Simternet sim, String file) {
+
+		if (file == null) {
+			Map<String, String> env = System.getenv();
+			String configFile = env.get("SIMTERNET_CONFIG");
+			if (configFile != null) {
+				file = configFile;
+			} else {
+				file = "etc/simternet.properties";
+			}
+		}
 
 		// Keep a back-reference to this Simternet
 		s = sim;
@@ -120,10 +128,9 @@ public class SimternetConfig extends Properties implements Serializable {
 			FileInputStream fis = new FileInputStream(file);
 			this.load(fis);
 			fis.close();
-		} catch (FileNotFoundException e) {
-			Logger.getRootLogger().log(Level.FATAL, "Cannot load SimternetConfig", e);
-		} catch (IOException e) {
-			Logger.getRootLogger().log(Level.FATAL, "Cannot load SimternetConfig", e);
+		} catch (Exception e) {
+			System.out.println("Cannot load SimternetConfig" + e);
+			System.exit(-1);
 		}
 
 		// Parse variables from config file here.

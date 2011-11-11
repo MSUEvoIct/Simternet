@@ -6,9 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Vector;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import simternet.engine.TraceConfig;
@@ -434,8 +431,10 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 		if (bl != null) {
 			bl.setBandwidth(bandwidth);
 		} else {
-			Logger.getRootLogger().log(Level.ERROR,
-					this + " tried to set egress bandwidth to unconnected destination: " + an.toString());
+			if (TraceConfig.sanityChecks) {
+				TraceConfig.out.println(this + " tried to set egress bandwidth to unconnected destination: "
+						+ an.toString());
+			}
 		}
 	}
 
@@ -450,8 +449,10 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 		if (bl != null) {
 			bl.setLatency(latency);
 		} else {
-			Logger.getRootLogger().log(Level.ERROR,
-					this + " tried to set egress latency to unconnected destination: " + an.toString());
+			if (TraceConfig.sanityChecks) {
+				TraceConfig.out.println(this + " tried to set egress latency to unconnected destination: "
+						+ an.toString());
+			}
 		}
 	}
 
@@ -466,13 +467,14 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 	@Override
 	public void step(SimState state) {
 
-		if (TraceConfig.networking.routingTables && Logger.getRootLogger().isTraceEnabled()) {
-			Logger.getRootLogger().trace(this + " Default Route: " + getDefaultRoute());
-			Logger.getRootLogger().trace(this + " Routing Table:\n" + routingTableReport());
+		if (TraceConfig.networking.routingTables) {
+			TraceConfig.out.println(this + " Default Route: " + getDefaultRoute());
+			TraceConfig.out.println(this + " Routing Table:\n" + routingTableReport());
 		}
 
 		// Routing decisions are made first, analagous to a router "backplane"
 		this.route();
+
 		// Clear output queues on each egress interface.
 		transmitFlows();
 	}

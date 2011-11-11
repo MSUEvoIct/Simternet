@@ -3,7 +3,7 @@ package simternet.data.output;
 import sim.util.Int2D;
 import simternet.engine.Simternet;
 
-public class EdgeMarketReporter extends Reporter2 {
+public class EdgeMarketReporter extends Reporter {
 
 	private static final long		serialVersionUID	= 1L;
 

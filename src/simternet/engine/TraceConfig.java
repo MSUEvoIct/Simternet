@@ -55,11 +55,13 @@ public class TraceConfig {
 		public static final boolean	flowReceived			= false;
 		public static final boolean	flowSent				= false;
 		public static final boolean	routingDecisions		= false;
+		public static final boolean	edgeStatus				= false;
 	}
 
 	public static class ops {
 		public static final boolean	nspDecisions		= false;
 		public static final boolean	aspDecisions		= false;
+		public static final boolean	aspTransitDecision	= false;
 		public static final boolean	consumerDecisions	= false;
 		public static final boolean	nspActions			= false;
 		public static final boolean	aspActions			= false;

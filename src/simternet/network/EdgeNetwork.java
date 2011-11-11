@@ -3,9 +3,6 @@ package simternet.network;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import sim.engine.SimState;
 import sim.util.Bag;
 import sim.util.Int2D;
@@ -153,7 +150,10 @@ public abstract class EdgeNetwork extends Network {
 		if (i == 1)
 			return l;
 
-		Logger.getLogger("Network").log(Level.ERROR, "Num of Ingress links for " + this + " = " + i);
+		if (TraceConfig.sanityChecks) {
+			TraceConfig.out.println("Num of Ingress links for " + this + " = " + i);
+		}
+
 		return null;
 	}
 
@@ -167,8 +167,8 @@ public abstract class EdgeNetwork extends Network {
 		owner.financials.earn(revenue);
 		revenueFromConsumers += revenue;
 
-		if (TraceConfig.consumerPaidNSP && Logger.getRootLogger().isTraceEnabled()) {
-			Logger.getRootLogger().trace(acc + " paid " + price + " for " + this);
+		if (TraceConfig.consumerPaidNSP) {
+			TraceConfig.out.println(acc + " paid " + price + " for " + this);
 		}
 	}
 
@@ -229,7 +229,7 @@ public abstract class EdgeNetwork extends Network {
 
 	@Override
 	public String toString() {
-		return "Edge of " + owner.toString() + " @" + getLocation();
+		return "Edge-" + owner.toString() + " @" + getLocation().x + "," + getLocation().y;
 	}
 
 	@Override

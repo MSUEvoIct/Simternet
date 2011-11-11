@@ -3,7 +3,7 @@ package simternet.data.output;
 import simternet.agents.asp.ApplicationProvider;
 import simternet.engine.Simternet;
 
-public class ApplicationProviderFitnessReporter extends Reporter2 {
+public class ApplicationProviderFitnessReporter extends Reporter {
 	private static final long		serialVersionUID	= 1L;
 
 	private static final int		numFields			= 11;

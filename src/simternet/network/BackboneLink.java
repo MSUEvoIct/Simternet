@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import simternet.engine.Simternet;
 import simternet.engine.TraceConfig;
 
 /**
@@ -253,8 +254,8 @@ public class BackboneLink implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Link " + getSource() + "->" + getDestination() + ", BW=" + bandwidth + ", ROUTE="
-				+ routingProtocolConfig.toString();
+		return "Link:" + getSource() + "->" + getDestination() + ",B=" + Simternet.nf.format(bandwidth) + ",R="
+				+ routingProtocolConfig.toString().charAt(0) + ",C=" + Simternet.nf.format(perStepCongestionRatio());
 	}
 
 	/**

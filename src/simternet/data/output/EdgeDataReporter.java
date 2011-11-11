@@ -7,7 +7,7 @@ import simternet.engine.Simternet;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 
-public class EdgeDataReporter extends Reporter2 {
+public class EdgeDataReporter extends Reporter {
 
 	// protected static HashMap<String, String> netTypeAbbreviations;
 	private static final long		serialVersionUID	= 1L;
@@ -50,10 +50,10 @@ public class EdgeDataReporter extends Reporter2 {
 				EdgeNetwork en = (EdgeNetwork) edgeNet;
 
 				// Hack for reporting odd prices as NA
-				double price = en.getPrice();
-				if (price > s.config.consumerMaxPriceNSP) {
-					price = Double.NaN;
-				}
+				// double price = en.getPrice();
+				// if (price > s.config.consumerMaxPriceNSP) {
+				// price = Double.NaN;
+				// }
 
 				Object[] values = new Object[EdgeDataReporter.numFields];
 				values[0] = location.x;
@@ -62,7 +62,7 @@ public class EdgeDataReporter extends Reporter2 {
 				values[3] = en.getUpstreamIngress().getBandwidth();
 				values[4] = en.getMaxBandwidth();
 				values[5] = en.getUpstreamIngress().totalCongestionRatio();
-				values[6] = price;
+				values[6] = en.getPrice();
 				values[7] = en.getNumSubscribers();
 				values[8] = s.getNumNetworkProviders(location);
 				values[9] = en.getNumSubscribers() / s.getPopulation(location);

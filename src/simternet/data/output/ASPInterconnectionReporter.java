@@ -5,7 +5,7 @@ import simternet.agents.nsp.NetworkProvider;
 import simternet.engine.Simternet;
 import simternet.network.BackboneLink;
 
-public class ASPInterconnectionReporter extends Reporter2 {
+public class ASPInterconnectionReporter extends Reporter {
 
 	private static final long		serialVersionUID	= 1L;
 

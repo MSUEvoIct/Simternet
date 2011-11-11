@@ -7,6 +7,8 @@ import simternet.agents.asp.TransitPurchaseStrategy;
 import simternet.agents.nsp.NetworkProvider;
 import simternet.ecj.DoubleGP;
 import simternet.ecj.problems.ASPPurchaseTransitProblem;
+import simternet.engine.Simternet;
+import simternet.engine.TraceConfig;
 import simternet.network.BackboneLink;
 import ec.gp.GPIndividual;
 import ec.gp.GPTree;
@@ -40,15 +42,31 @@ public class GPTransitPurchaseStrategy implements TransitPurchaseStrategy, Seria
 
 		BackboneLink existing = asp.getDatacenter().getEgressLink(destination.getBackboneNetwork());
 
-		ASPPurchaseTransitProblem aptp = new ASPPurchaseTransitProblem(asp, destination, existing);
+		if (TraceConfig.ops.aspTransitDecision) {
+			TraceConfig.out.println(asp + " evaluating transit to " + destination + ", price="
+					+ Simternet.nf.format(price));
+			TraceConfig.out.println("\t Current = " + existing);
+		}
+
+		ASPPurchaseTransitProblem aptp = new ASPPurchaseTransitProblem(asp, destination, price, existing);
 		tree.child.eval(null, 0, d, null, ind, aptp);
+
+		if (TraceConfig.ops.aspTransitDecision) {
+			TraceConfig.out.println("\tGP Alg Q= " + Simternet.nf.format(d.value));
+		}
 
 		if (d.value > GPTransitPurchaseStrategy.MAX_AMOUNT) {
 			d.value = GPTransitPurchaseStrategy.MAX_AMOUNT;
+			if (TraceConfig.ops.aspTransitDecision) {
+				TraceConfig.out.println("\tToo high, adjusting to " + Simternet.nf.format(d.value));
+			}
 		}
 
 		if (d.value < GPTransitPurchaseStrategy.MIN_AMOUNT) {
 			d.value = GPTransitPurchaseStrategy.MIN_AMOUNT;
+			if (TraceConfig.ops.aspTransitDecision) {
+				TraceConfig.out.println("\tToo Low, adjusting to = " + Simternet.nf.format(d.value));
+			}
 		}
 
 		if (new Double(d.value).isNaN())

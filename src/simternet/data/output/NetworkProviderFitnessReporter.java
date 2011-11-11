@@ -3,7 +3,7 @@ package simternet.data.output;
 import simternet.agents.nsp.NetworkProvider;
 import simternet.engine.Simternet;
 
-public class NetworkProviderFitnessReporter extends Reporter2 {
+public class NetworkProviderFitnessReporter extends Reporter {
 	private static final long		serialVersionUID	= 1L;
 
 	private static final int		numFields			= 12;

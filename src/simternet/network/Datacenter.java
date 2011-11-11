@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import sim.engine.SimState;
 import simternet.agents.asp.ApplicationProvider;
 import simternet.engine.TraceConfig;
@@ -157,14 +154,14 @@ public class Datacenter extends Network {
 	public void step(SimState state) {
 		super.step(state);
 
-		if (TraceConfig.networking.congestionASPSummary && Logger.getRootLogger().isTraceEnabled()) {
-			Logger.getRootLogger().log(Level.TRACE, toString() + ": Congestion\n" + printCongestion());
+		if (TraceConfig.networking.congestionASPSummary) {
+			TraceConfig.out.println(this + ": Congestion\n" + printCongestion());
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "Datacenter of " + owner.getName();
+		return "DC of " + owner.getName();
 	}
 
 	@Override

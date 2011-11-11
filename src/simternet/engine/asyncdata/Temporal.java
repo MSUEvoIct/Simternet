@@ -71,13 +71,13 @@ public class Temporal<T> implements AsyncUpdate, Serializable {
 	@SuppressWarnings("unchecked")
 	private T clone(T src) {
 		T dst;
-		if (src == null)
+		if (src == null) {
 			dst = null;
-		else if (src instanceof Double)
-			dst = (T) CloneHelper.cloneDouble((Double) this.current);
-		else if (src instanceof Integer)
-			dst = (T) CloneHelper.cloneInteger((Integer) this.current);
-		else
+		} else if (src instanceof Double) {
+			dst = (T) CloneHelper.cloneDouble((Double) src);
+		} else if (src instanceof Integer) {
+			dst = (T) CloneHelper.cloneInteger((Integer) src);
+		} else
 			throw new RuntimeException("Unable to clone " + this.current.getClass().getCanonicalName());
 		return dst;
 	}
@@ -105,15 +105,17 @@ public class Temporal<T> implements AsyncUpdate, Serializable {
 
 		if (this.current instanceof Double) {
 			Double past = (Double) this.past;
-			if (past == null)
+			if (past == null) {
 				past = 0.0;
+			}
 			Double current = (Double) this.current;
 			Double change = current - past;
 			toReturn = (T) change;
 		} else if (this.current instanceof Integer) {
 			Integer past = (Integer) this.past;
-			if (past == null)
+			if (past == null) {
 				past = 0;
+			}
 			Integer current = (Integer) this.current;
 			Integer change = current - past;
 			toReturn = (T) change;
@@ -125,6 +127,9 @@ public class Temporal<T> implements AsyncUpdate, Serializable {
 
 	@SuppressWarnings("unchecked")
 	public final void increase(Number amount) {
+		if (amount == null)
+			return;
+
 		if (!this.isNumeric())
 			throw new RuntimeException("Cannot increment a non-numeric type!");
 
@@ -178,18 +183,19 @@ public class Temporal<T> implements AsyncUpdate, Serializable {
 
 	@Override
 	public String toString() {
-		return this.past + "->" + this.current + "->" + this.future + "(" + this.resetValue + ")";
+		return this.past + " <- " + this.current + " -> " + this.future + "(" + this.resetValue + ")";
 	}
 
 	public void update() {
 		this.past = this.current;
 		this.current = this.future;
-		if (this.resetValue != null)
+		if (this.resetValue != null) {
 			this.future = this.clone(this.resetValue);
-		else if (this.isNumeric())
+		} else if (this.isNumeric()) {
 			this.future = this.clone(this.current);
-		else
+		} else {
 			this.future = this.current;
+		}
 	}
 
 }

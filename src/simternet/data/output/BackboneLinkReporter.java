@@ -10,7 +10,7 @@ import simternet.network.BackboneLink;
 import simternet.network.Datacenter;
 import simternet.network.EdgeNetwork;
 
-public class BackboneLinkReporter extends Reporter2 {
+public class BackboneLinkReporter extends Reporter {
 	private static final long		serialVersionUID	= 1L;
 
 	public static final int			numFields			= 7;

@@ -21,6 +21,8 @@ public class CheckpointRun {
 			s.schedule.step(s);
 		}
 
+		s.finish();
+
 		System.exit(0);
 
 	}

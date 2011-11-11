@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Bag;
@@ -99,8 +96,8 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate, HasFina
 			getBackboneNetwork().createEgressLinkTo(aen, s.config.nspInitialEdgeNetworkBandwidth,
 					RoutingProtocolConfig.NONE);
 
-			if (TraceConfig.NSPBuiltNetwork && Logger.getRootLogger().isTraceEnabled()) {
-				Logger.getRootLogger().trace(this + " building " + type + " @ " + location);
+			if (TraceConfig.NSPBuiltNetwork) {
+				TraceConfig.out.println(this + " building " + type + " @ " + location);
 			}
 
 		} catch (Exception e) {
@@ -276,9 +273,10 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate, HasFina
 	 * Dispose of all assets, exit market
 	 */
 	private void goBankrupt() {
-		if (TraceConfig.finance.bankruptcy && Logger.getRootLogger().isTraceEnabled()) {
-			Logger.getRootLogger().trace(this + " going bankrupt: " + financials);
+		if (TraceConfig.finance.bankruptcy) {
+			TraceConfig.out.println("BANKRPUTCY: " + this + " has net worth of " + financials.getNetWorth());
 		}
+
 		for (EdgeNetwork edge : (Iterable<EdgeNetwork>) edgeNetworks) {
 			edge.disconnect();
 		}
@@ -413,35 +411,36 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate, HasFina
 			aen.step(state);
 		}
 
-		if (Logger.getRootLogger().isTraceEnabled()) {
-			// Log financials
-			if (TraceConfig.financialStatusNSP) {
-				Logger.getRootLogger().trace(this + " Financials: " + financials);
-			}
+		// Log financials
+		if (TraceConfig.financialStatusNSP) {
+			TraceConfig.out.println(this + " Financials: " + financials);
+		}
 
-			// Log price map
-			if (TraceConfig.NSPPriceTables) {
-				Logger.getRootLogger().trace(this + " Price Map:\n" + printPriceGrid());
-			}
+		// Log price map
+		if (TraceConfig.NSPPriceTables) {
+			TraceConfig.out.println(this + " Price Map:\n" + printPriceGrid());
+		}
 
-			// Log customer map
-			if (TraceConfig.NSPCustomerTables) {
-				Logger.getRootLogger().trace(this + " Customer Map:\n" + printCustomerGrid());
-			}
-			// Log this NSP's Network
-			Logger.getRootLogger().log(Level.INFO, this + " Network Map:\n" + printNetworkGrid());
+		// Log customer map
+		if (TraceConfig.NSPCustomerTables) {
+			TraceConfig.out.println(this + " Customer Map:\n" + printCustomerGrid());
+		}
+		// Log this NSP's Network
+		if (TraceConfig.networking.edgeStatus) {
+			TraceConfig.out.println(this + " Network Map:\n" + printNetworkGrid());
+		}
 
-			// Log ALL NSP's networks
-			Logger.getRootLogger().log(Level.INFO, "Unified Network Map:\n" + printAllNetworkGrid());
-
-			// Log edge congestion
-			Logger.getRootLogger().log(Level.INFO, edgeUsageReport());
-
-			// Log edge congestion
-			if (TraceConfig.networking.edgeUsageSummary) {
-				Logger.getRootLogger().trace(edgeUsageReport());
-			}
-
+		// Log ALL NSP's networks
+		if (TraceConfig.networking.edgeStatus) {
+			TraceConfig.out.println("Unified Network Map:\n" + printAllNetworkGrid());
+		}
+		// Log edge congestion
+		if (TraceConfig.networking.congestionNSPSummary) {
+			TraceConfig.out.println(edgeUsageReport());
+		}
+		// Log edge congestion
+		if (TraceConfig.networking.edgeUsageSummary) {
+			TraceConfig.out.println(edgeUsageReport());
 		}
 
 		if (financials.getNetWorth() < -10000.0) {
@@ -451,7 +450,7 @@ public abstract class NetworkProvider implements Steppable, AsyncUpdate, HasFina
 
 	@Override
 	public String toString() {
-		return this.getClass().getCanonicalName() + "-" + name;
+		return this.getClass().getSimpleName() + "-" + name;
 	}
 
 	public void update() {

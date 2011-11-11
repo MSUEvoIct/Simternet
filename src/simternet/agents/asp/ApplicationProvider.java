@@ -2,8 +2,6 @@ package simternet.agents.asp;
 
 import java.util.HashSet;
 
-import org.apache.log4j.Logger;
-
 import sim.engine.SimState;
 import sim.util.Bag;
 import simternet.agents.consumer.Consumer;
@@ -295,12 +293,16 @@ public class ApplicationProvider implements Firm {
 
 	@Override
 	public void step(SimState state) {
+		if (TraceConfig.programFlow) {
+			TraceConfig.out.println("Stepping " + this);
+		}
+
 		connectDatacenter();
 		datacenter.step(state);
 		qualityStrategy.investInQuality();
 
-		if (TraceConfig.financialStatusASP && Logger.getRootLogger().isTraceEnabled()) {
-			Logger.getRootLogger().trace(this + " Financials: " + financials);
+		if (TraceConfig.financialStatusASP) {
+			TraceConfig.out.println(this + " Financials: " + financials);
 		}
 	}
 

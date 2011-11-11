@@ -48,7 +48,7 @@ public abstract class PricingStrategy implements Serializable {
 
 			// Adjust prices to sane limits; do not allow 1.0E9 prices to throw
 			// off averages
-			if (price < PricingStrategy.MIN_PRICE) {
+			if (price < PricingStrategy.MIN_PRICE || price.isNaN() ) {
 				price = PricingStrategy.MIN_PRICE;
 			}
 			if (price > PricingStrategy.MAX_PRICE) {

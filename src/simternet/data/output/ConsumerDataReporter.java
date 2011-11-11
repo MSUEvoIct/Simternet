@@ -4,7 +4,7 @@ import sim.util.Bag;
 import simternet.agents.consumer.Consumer;
 import simternet.engine.Simternet;
 
-public class ConsumerDataReporter extends Reporter2 {
+public class ConsumerDataReporter extends Reporter {
 	private static final long		serialVersionUID	= 1L;
 
 	public static final int			numFields;
@@ -12,12 +12,14 @@ public class ConsumerDataReporter extends Reporter2 {
 	public static final String		filename			= "ConsumerData";
 
 	static {
-		numFields = 2;
+		numFields = 6;
 		headers = new String[ConsumerDataReporter.numFields];
 		ConsumerDataReporter.headers[0] = "Consumer";
 		ConsumerDataReporter.headers[1] = "Population";
-		// ConsumerDataReporter2.headers[2] = "TransferRequested";
-		// ConsumerDataReporter2.headers[3] = "TransferActual";
+		ConsumerDataReporter.headers[2] = "PaidToNSPs";
+		ConsumerDataReporter.headers[3] = "BenefitReceived";
+		ConsumerDataReporter.headers[4] = "TransferRequested";
+		ConsumerDataReporter.headers[5] = "TransferReceived";
 
 	}
 
@@ -35,8 +37,10 @@ public class ConsumerDataReporter extends Reporter2 {
 
 			values[0] = c.name;
 			values[1] = c.getPopulation().intValue();
-			// values[2] = c.getTransferRequested();
-			// values[3] = c.getTransferReceived();
+			values[2] = c.paidToNSPs.get();
+			values[3] = c.benefitReceived.get();
+			values[4] = c.transferRequested.get();
+			values[5] = c.transferReceived.get();
 
 			this.report(values);
 		}

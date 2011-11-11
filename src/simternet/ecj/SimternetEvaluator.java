@@ -7,8 +7,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Logger;
-
 import simternet.agents.asp.ApplicationProvider;
 import simternet.agents.nsp.NetworkProvider;
 import simternet.engine.Simternet;
@@ -64,7 +62,7 @@ public class SimternetEvaluator extends Evaluator {
 		int numChunks = state.parameters.getInt(base.push("chunks"), null);
 		int numSteps = state.parameters.getInt(base.push("steps"), null);
 		boolean simternetCheckpoint = state.parameters.getBoolean(base.push("checkpoint"), null, false);
-		int checkpointModulo = state.parameters.getInt(base.push("checkpoint-modulo"), new Parameter(
+		int simternetCheckpointModulo = state.parameters.getInt(base.push("checkpoint-modulo"), new Parameter(
 				"checkpoint-modulo"));
 
 		// Create and initialize our simulations
@@ -102,7 +100,8 @@ public class SimternetEvaluator extends Evaluator {
 			// How many agents to a chunk?
 			int numAgents = numAgents(sp.individuals.length, numChunks);
 
-			// Randomize the subpopulation before populating simulations
+			// Randomize the order of subpopulation before populating
+			// simulations
 			for (int j = 0; j < sp.individuals.length; j++) {
 				int randomPosition = state.random[0].nextInt(sp.individuals.length);
 				Individual temp = sp.individuals[j];
@@ -146,7 +145,7 @@ public class SimternetEvaluator extends Evaluator {
 				Simternet s = simternet[i];
 				// Save initial checkpoints
 				if (simternetCheckpoint)
-					if (state.generation % checkpointModulo == 0) {
+					if (state.generation % simternetCheckpointModulo == 0) {
 						generateCheckpoint(state, s, i);
 					}
 
@@ -160,17 +159,11 @@ public class SimternetEvaluator extends Evaluator {
 				int waiting = 60; // update every 60 seconds
 				int timeout = 1200; // 20 minutes
 				while (seconds < timeout) {
-					if (threadPool.isTerminated()) {
-						Logger.getRootLogger().info("Comleted evaluation of population");
-						break;
-					} else {
-						Logger.getRootLogger().info("Evaluating population, " + seconds + "/" + timeout + "s");
-					}
 					threadPool.awaitTermination(waiting, TimeUnit.SECONDS);
 					seconds += waiting;
 				}
 				if (!threadPool.isTerminated()) {
-					Logger.getRootLogger().fatal("Could not evaluate population in under " + timeout + " seconds");
+					System.out.println("Could not evaluate population in under " + timeout + " seconds");
 					System.exit(-1);
 				}
 			} catch (InterruptedException e) {
@@ -181,7 +174,7 @@ public class SimternetEvaluator extends Evaluator {
 				Simternet s = simternet[i];
 				SimternetRunner sr = new SimternetRunner(s, numSteps);
 				if (simternetCheckpoint)
-					if (state.generation % checkpointModulo == 0) {
+					if (state.generation % simternetCheckpointModulo == 0) {
 						generateCheckpoint(state, s, i);
 					}
 				sr.run();
@@ -215,7 +208,9 @@ public class SimternetEvaluator extends Evaluator {
 			checkpointGenDir.mkdirs();
 		}
 
-		String checkpointFileName = "chunk-" + chunk + ".checkpoint";
+		String chunkString = df.format(chunk);
+
+		String checkpointFileName = "chunk-" + chunkString + ".checkpoint";
 		File outputFile = new File(genDirName + checkpointFileName);
 		s.writeToCheckpoint(outputFile);
 		s.postCheckpoint();

@@ -10,7 +10,7 @@
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="ec.Evolve"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-file data/config/evolve-test.properties -p stat.gather-full=true"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-file etc/evolve-small.properties -p stat.gather-full=true"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Simternet"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx8192M"/>
 </launchConfiguration>

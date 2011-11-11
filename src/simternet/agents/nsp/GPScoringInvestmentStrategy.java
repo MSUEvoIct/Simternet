@@ -2,8 +2,6 @@ package simternet.agents.nsp;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import simternet.ecj.DoubleGP;
 import simternet.ecj.problems.ScoreEdgeBuildProblem;
 import simternet.engine.TraceConfig;
@@ -21,7 +19,7 @@ public class GPScoringInvestmentStrategy extends ScoringInvestmentStrategy {
 			GPIndividual individual, GPTree tree) {
 		super(nsp, networkTypes, 0.0);
 		this.individual = individual;
-		this.scoringTree = tree;
+		scoringTree = tree;
 	}
 
 	@Override
@@ -29,12 +27,13 @@ public class GPScoringInvestmentStrategy extends ScoringInvestmentStrategy {
 		DoubleGP d = new DoubleGP();
 		d.value = 0.0;
 
-		ScoreEdgeBuildProblem sebp = new ScoreEdgeBuildProblem(this.nsp, pn);
-		this.scoringTree.child.eval(null, 0, d, null, this.individual, sebp);
+		ScoreEdgeBuildProblem sebp = new ScoreEdgeBuildProblem(nsp, pn);
+		scoringTree.child.eval(null, 0, d, null, individual, sebp);
 		pn.score = d.value;
 
-		if (TraceConfig.potentialNetworkScoring && Logger.getRootLogger().isTraceEnabled())
-			Logger.getRootLogger().trace("Scoring PN:" + pn + ", Score: " + pn.score);
+		if (TraceConfig.potentialNetworkScoring) {
+			TraceConfig.out.println("Scoring PN:" + pn + ", Score: " + pn.score);
+		}
 
 	}
 

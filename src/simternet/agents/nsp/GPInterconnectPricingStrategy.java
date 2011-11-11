@@ -2,7 +2,6 @@ package simternet.agents.nsp;
 
 import java.io.Serializable;
 
-
 import simternet.agents.asp.ApplicationProvider;
 import simternet.ecj.DoubleGP;
 import simternet.ecj.problems.PriceASPTransitProblem;
@@ -18,7 +17,7 @@ import ec.gp.GPTree;
 public class GPInterconnectPricingStrategy implements ASPInterconnectPricingStrategy, Serializable {
 
 	private static final Double		MAX_PRICE	= 10.0; // $10/GB is high
-	private static final Double		MIN_PRICE	= 0.01; // $0.01/GP is low
+	private static final Double		MIN_PRICE	= 0.01; // $0.01/GB r64 is low
 	protected final GPIndividual	ind;
 	protected final NetworkProvider	nsp;
 	protected final GPTree			transitPricingTree;
@@ -49,6 +48,7 @@ public class GPInterconnectPricingStrategy implements ASPInterconnectPricingStra
 		// return d.value / 1E9;
 		// just depend on evolution for something that's either high, low, or in
 		// between.
+
 		return d.value;
 	}
 }
