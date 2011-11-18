@@ -73,7 +73,7 @@ public class GPTransitPurchaseStrategy implements TransitPurchaseStrategy, Seria
 			// Printing out the full exception takes up too much console space.
 			// System.err
 			// .println("Exception at simternet.application.GPTransitPurchaseStrategy(52): Purchase amount is NaN");
-			return 0.0;
+			return -1.0;
 
 		return d.value;
 	}
