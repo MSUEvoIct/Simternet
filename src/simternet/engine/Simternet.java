@@ -362,6 +362,35 @@ public class Simternet extends SimState implements Serializable {
 	}
 
 	/**
+	 * @return The number of Consumers using any NSP
+	 */
+	public Double getNumActiveNSPUsers() {
+		double numUsers = 0.0;
+		for (Int2D location : allLocations()) {
+			numUsers += getNumActiveNSPUsers(location);
+		}
+		return numUsers;
+	}
+
+	public Double getNumActiveNSPUsers(Int2D location) {
+		Double numUsers = 0.0;
+		Bag consumers = consumerAgents.getObjectsAtLocation(location);
+		if (consumers == null)
+			return 0.0;
+		else if (consumers.isEmpty())
+			return 0.0;
+		else {
+			for (int i = 0; i < consumers.numObjs; i++) {
+				Consumer c = (Consumer) consumers.objs[i];
+				if (c.getEdgeNetwork().get() != null) {
+					numUsers += c.getPopulation();
+				}
+			}
+		}
+		return numUsers;
+	}
+
+	/**
 	 * @param location
 	 *            The x,y coordinates on the map.
 	 * @return The total population of ALL consumers at a SPECIFIC location.

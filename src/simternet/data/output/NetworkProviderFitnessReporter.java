@@ -51,7 +51,7 @@ public class NetworkProviderFitnessReporter extends Reporter {
 			values[8] = nsp.getEdgeNetworks().size();
 			values[9] = nsp.bankrupt;
 			values[10] = nsp.getCustomers();
-			values[11] = nsp.getCustomers() / s.getPopulation();
+			values[11] = nsp.getCustomers() / s.getNumActiveNSPUsers();
 
 			report(values);
 		}

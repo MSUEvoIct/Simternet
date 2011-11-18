@@ -65,7 +65,7 @@ public class EdgeDataReporter extends Reporter {
 				values[6] = en.getPrice();
 				values[7] = en.getNumSubscribers();
 				values[8] = s.getNumNetworkProviders(location);
-				values[9] = en.getNumSubscribers() / s.getPopulation(location);
+				values[9] = en.getNumSubscribers() / s.getNumActiveNSPUsers(location);
 				values[10] = en.totalUsage;
 
 				report(values);
