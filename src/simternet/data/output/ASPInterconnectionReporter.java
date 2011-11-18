@@ -19,6 +19,7 @@ public class ASPInterconnectionReporter extends Reporter {
 		ASPInterconnectionReporter.headers[1] = "ASP";
 		ASPInterconnectionReporter.headers[2] = "Price";
 		ASPInterconnectionReporter.headers[3] = "Quantity";
+		ASPInterconnectionReporter.headers[4] = "Congestion";
 	}
 
 	public ASPInterconnectionReporter(Simternet s) {
@@ -39,6 +40,7 @@ public class ASPInterconnectionReporter extends Reporter {
 				values[1] = asp.getName();
 				values[2] = nsp.getASPTransitPrice(asp);
 				values[3] = bandwidth;
+				values[4] = bl.perStepCongestionRatio();
 
 				report(values);
 			}
