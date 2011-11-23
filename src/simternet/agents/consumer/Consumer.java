@@ -374,6 +374,20 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 	}
 
 	/**
+	 * @return the number of applications currently in use by this consumer.
+	 */
+	public int getNumAppsUsed() {
+		int numApps = 0;
+		for (AppCategory cat : AppCategory.values()) {
+			List<ApplicationProvider> asps = appsUsed.get(cat);
+			if (asps != null) {
+				numApps += asps.size();
+			}
+		}
+		return numApps;
+	}
+
+	/**
 	 * @param aen
 	 *            Network
 	 * @return If the agent is connected to the specific network, this function

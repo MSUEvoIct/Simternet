@@ -7,4 +7,4 @@ fi
 
 . ${SIMTERNET_DIR}/scripts/stuff.sh
 
-java -server -Xmx8192M -XX:ParallelGCThreads=12 ec.Evolve -file ${SIMTERNET_DIR}/etc/$1.properties -p stat.gather-full=true
+java -Xmx8192M -XX:ParallelGCThreads=24 ec.Evolve -file ${SIMTERNET_DIR}/etc/$1.properties -p stat.gather-full=true

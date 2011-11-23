@@ -1,25 +1,36 @@
 #!/usr/bin/perl -w
 
-$toJoin = $ARGV[0];
-$numChunks = $ARGV[1];
-$outFile = "${toJoin}.csv";
+$cwd = `pwd`;
+chomp $cwd;
 
-`head -1 ${toJoin}.chunk-000.csv > $outFile`;
+print "Working in $cwd\n";
 
-$sedCmd = "sed 1,1d ";
+# get to the data/per-step directory
+$target_dir = "$cwd/data/output/PerStep/";
+chdir $target_dir or die "Cannot get to data directory!\n";
 
-for ($i = 0; $i < $numChunks; $i++) {
+# iterate through each of the generations in the output directory
+foreach $gen_dir (`ls`) {
+	chomp $gen_dir;
+	chdir $gen_dir or die "Cannot chdir to ${gen_dir}!\n";
+	print "Processing $gen_dir\n";
 
-$chunkString = ".chunk-" . sprintf("%03d", $i);
-$inFileName = $toJoin . $chunkString . ".csv";
+	#iterate through each file in the output directory
+	foreach $file (`ls`) {
+		chomp $file;
+		
+		$class = $file;
+		$class =~ s/(.*)\.chunk-.*\.csv/$1/;
 
-$cmdString = "$sedCmd $inFileName >> $outFile";
-$rmString = "rm $inFileName";
-`$cmdString`;
-`$rmString`;
+		`sed 1d $file >> ../../${class}.csv`;
+		`rm $file`;
+		
+	}
+	
+	chdir $target_dir;
+} 
 
-#print "cmdString is $cmdString\n";
-#print "rmString is $rmString\n";
+
+chdir $cwd;
 
 
-}

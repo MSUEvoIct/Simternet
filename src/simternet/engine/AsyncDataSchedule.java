@@ -40,7 +40,7 @@ public class AsyncDataSchedule extends Schedule {
 	 * A set of reporters to run each step. Reporters probe the simulation and
 	 * output data.
 	 */
-	protected Set<Reporter>	reporters			= new HashSet<Reporter>();
+	protected Set<Reporter>		reporters			= new HashSet<Reporter>();
 
 	@Override
 	public synchronized boolean step(SimState state) {
@@ -58,7 +58,10 @@ public class AsyncDataSchedule extends Schedule {
 
 		// run the reporters to gather data
 		for (Reporter reporter : reporters) {
-			reporter.report();
+			// only run when we're asked to!
+			if (getSteps() % reporter.stepModulo == 0) {
+				reporter.report();
+			}
 		}
 
 		// run the schedule as normal.

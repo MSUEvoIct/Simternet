@@ -9,7 +9,7 @@ public class ASPInterconnectionReporter extends Reporter {
 
 	private static final long		serialVersionUID	= 1L;
 
-	public static final int			numFields			= 4;
+	public static final int			numFields			= 5;
 	public static final String[]	headers;
 	public static final String		filename			= "NSP-ASP-Interconnection";
 
@@ -31,16 +31,18 @@ public class ASPInterconnectionReporter extends Reporter {
 		for (NetworkProvider nsp : s.getNetworkServiceProviders()) {
 			for (ApplicationProvider asp : s.getASPs()) {
 				BackboneLink bl = asp.getDatacenter().getEgressLink(nsp.getBackboneNetwork());
-				Double bandwidth = 0.0;
+				double bandwidth = 0.0;
+				double congestionRatio = 0.0;
 				if (bl != null) {
 					bandwidth = bl.getBandwidth();
+					congestionRatio = bl.perStepCongestionRatio();
 				}
 				Object values[] = new Object[ASPInterconnectionReporter.numFields];
 				values[0] = nsp.getName();
 				values[1] = asp.getName();
 				values[2] = nsp.getASPTransitPrice(asp);
 				values[3] = bandwidth;
-				values[4] = bl.perStepCongestionRatio();
+				values[4] = congestionRatio;
 
 				report(values);
 			}

@@ -25,9 +25,9 @@ import simternet.agents.consumer.behavior.GreedyAppManager;
 import simternet.agents.consumer.behavior.RationalNetManager;
 import simternet.agents.nsp.NetworkProvider;
 import simternet.data.output.ASPInterconnectionReporter;
+import simternet.data.output.AggregateConsumerDataReporter;
 import simternet.data.output.ApplicationProviderFitnessReporter;
 import simternet.data.output.BackboneLinkReporter;
-import simternet.data.output.ConsumerDataReporter;
 import simternet.data.output.ECJEvolutionReporterComponent;
 import simternet.data.output.EdgeDataReporter;
 import simternet.data.output.EdgeMarketReporter;
@@ -458,6 +458,18 @@ public class Simternet extends SimState implements Serializable {
 
 	private void initReporters() {
 
+		int genModulo = config.reporterGenerationModulo;
+		int chunkModulo = config.reporterChunkModulo;
+		int stepModulo = config.reporterStepModulo;
+
+		// Don't bother initializing these reporters if we're never going to run
+		// them anyway
+		if (generation % genModulo != 0)
+			return;
+
+		if (chunk % chunkModulo != 0)
+			return;
+
 		ECJEvolutionReporterComponent eerc = new ECJEvolutionReporterComponent(this);
 		StepReporterComponent src = new StepReporterComponent(this);
 
@@ -465,42 +477,56 @@ public class Simternet extends SimState implements Serializable {
 		ApplicationProviderFitnessReporter apfr = new ApplicationProviderFitnessReporter(this);
 		apfr.addComponent(eerc);
 		apfr.addComponent(src);
+		apfr.stepModulo = stepModulo;
 		addReporter(apfr);
 
 		// Network Provider Fitness Reporter
 		NetworkProviderFitnessReporter npfr = new NetworkProviderFitnessReporter(this);
 		npfr.addComponent(eerc);
 		npfr.addComponent(src);
+		npfr.stepModulo = stepModulo;
 		addReporter(npfr);
 
 		// Consumer Data Reporter
-		Reporter cdr2 = new ConsumerDataReporter(this);
-		cdr2.addComponent(eerc);
-		cdr2.addComponent(src);
-		addReporter(cdr2);
+		// Reporter cdr2 = new ConsumerDataReporter(this);
+		// cdr2.addComponent(eerc);
+		// cdr2.addComponent(src);
+		// cdr2.stepModulo = stepModulo;
+		// addReporter(cdr2);
+
+		// Aggregate Consumer Data Reporter
+		AggregateConsumerDataReporter acdr = new AggregateConsumerDataReporter(this);
+		acdr.addComponent(eerc);
+		acdr.addComponent(src);
+		acdr.stepModulo = stepModulo;
+		addReporter(acdr);
 
 		// Backbone Link Reporter
 		BackboneLinkReporter blr = new BackboneLinkReporter(this);
 		blr.addComponent(eerc);
 		blr.addComponent(src);
+		blr.stepModulo = stepModulo;
 		addReporter(blr);
 
 		// ASP Interconnection Reporter
 		ASPInterconnectionReporter air = new ASPInterconnectionReporter(this);
 		air.addComponent(eerc);
 		air.addComponent(src);
+		air.stepModulo = stepModulo;
 		addReporter(air);
 
 		// Edge Market Reporter
 		EdgeMarketReporter emr = new EdgeMarketReporter(this);
 		emr.addComponent(eerc);
 		emr.addComponent(src);
+		emr.stepModulo = stepModulo;
 		addReporter(emr);
 
 		// Edge Data Reporter
 		EdgeDataReporter edr = new EdgeDataReporter(this);
 		edr.addComponent(eerc);
 		edr.addComponent(src);
+		edr.stepModulo = stepModulo;
 		addReporter(edr);
 	}
 }

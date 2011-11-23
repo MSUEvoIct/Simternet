@@ -91,6 +91,11 @@ public class SimternetConfig extends Properties implements Serializable {
 
 	public final String			simternetOutputDir;
 
+	// Controls when reporters are triggered
+	public final int			reporterGenerationModulo;
+	public final int			reporterChunkModulo;
+	public final int			reporterStepModulo;
+
 	public final Simternet		s;
 
 	/**
@@ -166,6 +171,10 @@ public class SimternetConfig extends Properties implements Serializable {
 		prefixConsumer = s("prefixConsumer");
 		prefixNSP = s("prefixNSP");
 		simternetOutputDir = s("simternetOutputDir");
+
+		reporterGenerationModulo = i("reporterGenerationModulo");
+		reporterChunkModulo = i("reporterChunkModulo");
+		reporterStepModulo = i("reporterStepModulo");
 
 	}
 

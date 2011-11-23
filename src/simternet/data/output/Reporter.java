@@ -48,6 +48,8 @@ public abstract class Reporter implements Serializable {
 	protected Simternet						s;
 	protected transient PrintWriter			writer;
 	private static final int				bufferSize			= 100000;
+	// output every n
+	public int								stepModulo			= 1;
 
 	public abstract String getFileName();
 

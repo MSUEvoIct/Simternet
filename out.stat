@@ -3631,3 +3631,54 @@ Tree 1:
  (+ Financials.DepreciationRate ASPNumConnectedNSPs())
 Tree 2:
  (/ Financials.TotalRevenue Financials.TotalFinancingCost)
+
+Generation: 66
+Best Individual:
+Subpopulation 0:
+Evaluated: true
+Fitness: 1.0014342E7
+Tree 0:
+ (* Financials.PresentValue Financials.TotalFinancingCost)
+Tree 1:
+ (- (- 7 PotentialNetwork.population) (- (-
+     7 PotentialNetwork.population) (* (- Financials.PerStepFinancingCost
+     Financials.TotalFinancingCost) (+ (/ Financials.DebtPayoffRate
+     Financials.TotalRevenue) (- 5 PotentialNetwork.numCompetitors)))))
+Tree 2:
+ (- Financials.NetWorth Financial.AssetsCapital)
+Tree 3:
+ (+ (/ (if (or (and Financials.IncreasingRevenue
+     Financials.IncreasingRevenue) (< ERC[0.5878545034533885]
+     5)) (/ (if Financials.IncreasingRevenue Financials.TotalFinancingCost
+     Financials.TotalRevenue) (- MinEdgePrice
+     Financials.DebtPayoffRate)) (if (and Financials.IncreasingRevenue
+     Financials.IncreasingRevenue) (* MinOtherEdgePrice
+     NumEdgeNetworks) (+ Financials.PerStepInvestment
+     NumEdgeNetworks))) (if (xor (< Financials.DebtPayoffRate
+     Financials.PresentValue) (> Financials.TotalFinancingCost
+     Financials.DebitInterestRate)) (* (* 7 MinEdgePrice)
+     (/ Financials.TotalRevenue Financials.TotalFinancingCost))
+     (+ (if Financials.IncreasingRevenue MinOtherEdgePrice
+         Financials.DebitInterestRate) (+ MinOtherEdgePrice
+         Financials.DeltaRevenue)))) (- (+ (+ (/ BackboneBandwidth()
+     BackbonCongestionRatio()) (- BackboneBandwidth()
+     ERC[0.7062161964991248])) (* (if Financials.IncreasingRevenue
+     NumEdgeNetworks Financials.TotalRevenue)
+     (* Financials.AssetsLiquid NumEdgeNetworks)))
+     (- (if Financials.IncreasingRevenue 7 Financials.DebtPayoffRate)
+         (if (< Financials.PresentValue Financials.DepreciationRate)
+             (/ Financials.DebitInterestRate 7) (- MinEdgePrice
+             MinOtherEdgePrice)))))
+Subpopulation 1:
+Evaluated: true
+Fitness: 6.6308956E7
+Tree 0:
+ (+ Financials.TotalFinancingCost Financials.PresentValue)
+Tree 1:
+ (+ Financials.PerStepOperationsCost Financials.DebitInterestRate)
+Tree 2:
+ (+ (if (> Financials.DebitInterestRate 7)
+     (/ (/ Financials.TotalRevenue Financials.TotalFinancingCost)
+         (/ Financials.TotalRevenue Financials.TotalFinancingCost))
+     (/ Financials.DebitInterestRate Financials.PerStepInvestment))
+     (/ Financials.TotalRevenue NumASPCustomers))
