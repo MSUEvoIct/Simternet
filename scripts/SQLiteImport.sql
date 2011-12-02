@@ -20,17 +20,17 @@ TotalRevenue double);
 delete from ASPFitness where Generation = 'Generation';
 
 -- Consumer Data
-create table ConsumerData(
+create table AggregateConsumerData(
 Generation integer, 
 Chunk integer, 
 Step integer, 
-Consumer string, 
-Population double, 
-PaidToNSPs double, 
-BenefitReceived double, 
-TransferRequested double, 
-TransferReceived double);
-.import ConsumerData.csv ConsumerData
+NumNetworkUsers double,
+NumAppSubscriptions integer,
+BenefitReceived double,
+TransferRequested double,
+TransferReceived
+);
+.import AggregateConsumerData.csv AggregateConsumerData
 delete from ConsumerData where Generation = 'Generation';
 
 -- EdgeMarket
