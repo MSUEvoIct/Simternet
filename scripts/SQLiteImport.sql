@@ -25,10 +25,11 @@ Generation integer,
 Chunk integer, 
 Step integer, 
 NumNetworkUsers double,
+PaidToNSPs double,
 NumAppSubscriptions integer,
 BenefitReceived double,
 TransferRequested double,
-TransferReceived
+TransferReceived double
 );
 .import AggregateConsumerData.csv AggregateConsumerData
 delete from AggregateConsumerData where Generation = 'Generation';
