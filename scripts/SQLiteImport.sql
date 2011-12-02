@@ -31,7 +31,7 @@ TransferRequested double,
 TransferReceived
 );
 .import AggregateConsumerData.csv AggregateConsumerData
-delete from ConsumerData where Generation = 'Generation';
+delete from AggregateConsumerData where Generation = 'Generation';
 
 -- EdgeMarket
 create table EdgeMarket(
