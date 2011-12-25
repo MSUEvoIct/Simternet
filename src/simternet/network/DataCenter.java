@@ -40,29 +40,38 @@ public class DataCenter extends Network {
 	}
 
 	/**
-	 * Function used in flow control and consumption functions to retrieve the expected
-	 * congestion of this ApplicationProvider on the specified EdgeNetwork.  If there is 
-	 * no information,
+	 * Function used in flow control and consumption functions to retrieve the
+	 * expected congestion of this ApplicationProvider on the specified
+	 * EdgeNetwork. If there is no information, the expectation is that there
+	 * will be zero congestion.
 	 * 
-	 * @param en The target EdgeNetwork 
+	 * TODO: Limit this to the maximum bandwidhth of the EdgeNetwork's
+	 * "last-mile" connections
+	 * 
+	 * @param en
+	 *            The target EdgeNetwork
 	 * @return The ratio of observed to requested bandwidth [0->1]
 	 */
-	
 	public Double getFractionExpected(EdgeNetwork en) {
 		Double obsBW = this.observedBandwidth.get(en);
 		Double requestedBandwidth = owner.getBandwidth();
 		double fractionExpected = 1.0;
-		
+
 		if (obsBW != null && requestedBandwidth != null)
 			fractionExpected = obsBW / requestedBandwidth;
-		
+
 		// Sanity Check
-		if (fractionExpected < 0 || fractionExpected > 1)
-			throw new RuntimeException("Expected fraction of requested bandwidth cannot be outside the range [0->1]");
-	
+		if (TraceConfig.sanityChecks)
+			if (fractionExpected < 0 || fractionExpected > 1)
+				throw new RuntimeException(
+						"Expected fraction of requested bandwidth cannot be outside the range [0->1]");
+
 		return fractionExpected;
 	}
 
+	/**
+	 * @return The operator of this DataCenter
+	 */
 	public ApplicationProvider getOwner() {
 		return owner;
 	}
@@ -86,11 +95,12 @@ public class DataCenter extends Network {
 	}
 
 	/**
-	 * Originate traffic, inject it into the network. This method should be
-	 * called by methods related to customer usage, not methods related to the
-	 * operation of the network.
+	 * Originate traffic; inject it into the network. This method should only be
+	 * invoked by the ApplicationProvider who owns this network.
 	 * 
 	 * @param flow
+	 *            A NetFlow object representing the network resources requested
+	 *            by the use of this application.
 	 */
 	public void originate(NetFlow flow) {
 		// Check to see if this flow was congested in previous periods. If so,

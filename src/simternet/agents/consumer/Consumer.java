@@ -283,7 +283,7 @@ public class Consumer implements Steppable, AsyncUpdate, Serializable {
 			TraceConfig.out.println("Consuming app of " + application);
 		}
 
-		application.processUsage(this, network);
+		application.use(this, network);
 	}
 
 	/**

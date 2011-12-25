@@ -253,7 +253,7 @@ public class ApplicationProvider implements Firm {
 	 *            Where the usage was serviced/processed from
 	 * @return The Netflow created by this consumption
 	 */
-	public NetFlow processUsage(Consumer consumer, EdgeNetwork network) {
+	public void use(Consumer consumer, EdgeNetwork network) {
 
 		double ads = priceAdvertising.get();
 		double sub = priceSubscriptions.get();
@@ -267,7 +267,6 @@ public class ApplicationProvider implements Firm {
 		NetFlow flow = createNetFlow(consumer, network);
 
 		datacenter.originate(flow);
-		return flow;
 	}
 
 	public void setName(String name) {
