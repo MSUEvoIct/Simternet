@@ -8,7 +8,7 @@ import org.apache.commons.collections15.Transformer;
 
 import simternet.engine.Simternet;
 import simternet.network.Backbone;
-import simternet.network.Datacenter;
+import simternet.network.DataCenter;
 import simternet.network.Network;
 
 /**
@@ -78,7 +78,7 @@ public class LocationTransformer implements Transformer<Network, Point2D> {
 	 *            a datacenter network to place
 	 * @return the point in the JUNG display that net should be placed
 	 */
-	protected Point2D transform(Datacenter net) {
+	protected Point2D transform(DataCenter net) {
 		int x = 0, y = 0;
 
 		// Leave some space for the ConsumerNetworks...
@@ -105,8 +105,8 @@ public class LocationTransformer implements Transformer<Network, Point2D> {
 			return this.transform((ConsumerNetwork) net);
 		if (net instanceof Backbone)
 			return this.transform((Backbone) net);
-		if (net instanceof Datacenter)
-			return this.transform((Datacenter) net);
+		if (net instanceof DataCenter)
+			return this.transform((DataCenter) net);
 		// If we see a point at (-50,-50) -- top left -- we know it's an error.
 		System.err.println("Trying to place an object in the visualization that shouldn't be there.");
 		return new Point(-50, -50);

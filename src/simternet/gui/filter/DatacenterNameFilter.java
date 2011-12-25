@@ -1,7 +1,7 @@
 package simternet.gui.filter;
 
 import simternet.network.BackboneLink;
-import simternet.network.Datacenter;
+import simternet.network.DataCenter;
 import simternet.network.Network;
 
 /**
@@ -30,8 +30,8 @@ public class DatacenterNameFilter extends SingleFilter<Network, BackboneLink> {
 
 	@Override
 	public boolean acceptVertex(Network vertex) {
-		if (vertex instanceof Datacenter)
-			if (!((Datacenter) vertex).toString().equals(name))
+		if (vertex instanceof DataCenter)
+			if (!((DataCenter) vertex).toString().equals(name))
 				return false;
 		return true;
 	}

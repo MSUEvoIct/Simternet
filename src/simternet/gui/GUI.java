@@ -39,7 +39,7 @@ import simternet.gui.jung.appearance.NetworkPaintTransformer;
 import simternet.gui.jung.appearance.NetworkShapeTransformer;
 import simternet.network.Backbone;
 import simternet.network.BackboneLink;
-import simternet.network.Datacenter;
+import simternet.network.DataCenter;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
@@ -419,8 +419,8 @@ public class GUI extends JPanel {
 			inspector = new ConsumerNetworkInspector((ConsumerNetwork) vertex);
 		} else if (vertex instanceof Backbone) {
 			inspector = new NetworkProviderInspector(((Backbone) vertex).getOwner());
-		} else if (vertex instanceof Datacenter) {
-			inspector = new ApplicationProviderInspector(((Datacenter) vertex).getOwner());
+		} else if (vertex instanceof DataCenter) {
+			inspector = new ApplicationProviderInspector(((DataCenter) vertex).getOwner());
 		}
 
 		if (inspector != null) {

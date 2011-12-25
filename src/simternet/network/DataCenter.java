@@ -23,18 +23,31 @@ public class DataCenter extends Network {
 	private static final long					serialVersionUID	= 1L;
 
 	/**
+	 * The ApplicationProvider which operates this DataCenter.
+	 */
+	protected final ApplicationProvider			owner;
+	
+	/**
 	 * Stores the congestion this application sees on each network. Congestion
 	 * is stored as the amount of bandwidth actually received by the congested
 	 * flow. I.e., you would need to compare this to the application's bandwidth
 	 * use to calculate a percentage of congestion.
 	 */
 	protected TemporalHashMap<Network, Double>	observedBandwidth	= new TemporalHashMap<Network, Double>();
-	protected final ApplicationProvider			owner;
-
+	
 	public DataCenter(ApplicationProvider owner) {
 		this.owner = owner;
 	}
 
+	/**
+	 * Function used in flow control and consumption functions to retrieve the expected
+	 * congestion of this ApplicationProvider on the specified EdgeNetwork.  If there is 
+	 * no information,
+	 * 
+	 * @param en The target EdgeNetwork 
+	 * @return The ratio of observed to requested bandwidth [0->1]
+	 */
+	
 	public Double getFractionExpected(EdgeNetwork en) {
 		Double observedBandwidth = getObservedBandwidth(en);
 		Double requestedBandwidth = owner.getBandwidth();
@@ -151,7 +164,7 @@ public class DataCenter extends Network {
 			if (net == null)
 				throw new RuntimeException("wtf?");
 			sb.append(net.toString() + ": ObservedBW=" + observedBandwidth.get(net));
-			sb.append(" (" + owner.getExpectedFraction(net) + ")");
+			sb.append(" (" + owner.getFractionExpected((EdgeNetwork) net) + ")");
 			sb.append("\n");
 		}
 

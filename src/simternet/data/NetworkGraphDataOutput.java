@@ -13,7 +13,7 @@ import simternet.agents.asp.ApplicationProvider;
 import simternet.agents.nsp.NetworkProvider;
 import simternet.engine.Simternet;
 import simternet.network.Backbone;
-import simternet.network.Datacenter;
+import simternet.network.DataCenter;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 
@@ -100,7 +100,7 @@ public class NetworkGraphDataOutput {
 				// Size
 				EdgeNetwork aen = (EdgeNetwork) an;
 				size = Math.log(aen.getNumSubscribers());
-			} else if (an instanceof Datacenter) {
+			} else if (an instanceof DataCenter) {
 				// Sides
 				sides = 4; // Datacenters are squares
 
@@ -108,7 +108,7 @@ public class NetworkGraphDataOutput {
 				color = "green";
 
 				// Size
-				Datacenter d = (Datacenter) an;
+				DataCenter d = (DataCenter) an;
 				ApplicationProvider asp = d.getOwner();
 				double customers = asp.getCustomers();
 				size = Math.log(customers);

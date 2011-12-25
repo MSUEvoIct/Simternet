@@ -8,7 +8,7 @@ import java.awt.geom.Rectangle2D;
 import org.apache.commons.collections15.Transformer;
 
 import simternet.gui.jung.ConsumerNetwork;
-import simternet.network.Datacenter;
+import simternet.network.DataCenter;
 import simternet.network.Network;
 
 /**
@@ -40,7 +40,7 @@ public class NetworkShapeTransformer implements Transformer<Network, Shape> {
 			Shape shape = new Ellipse2D.Double(-pop * scale / 2, -pop * scale / 2, pop * scale, pop * scale);
 			return shape;
 
-		} else if (net instanceof Datacenter) {
+		} else if (net instanceof DataCenter) {
 			// DataCenters are triangles
 			int x[] = { 0, 10, -10 };
 			int y[] = { -10, 10, 10 };

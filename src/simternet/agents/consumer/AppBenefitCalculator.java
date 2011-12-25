@@ -48,7 +48,7 @@ public abstract class AppBenefitCalculator implements Serializable {
 	 *         edge network
 	 */
 	public double estimateBenefit(Consumer c, ApplicationProvider asp, EdgeNetwork net) {
-		Double expectedFraction = asp.getExpectedFraction(net);
+		Double expectedFraction = asp.getFractionExpected(net);
 		Double estimatedBenefit = calculateBenefit(c, asp, expectedFraction);
 		List<ApplicationProvider> appsUsed = c.appsUsed.get(asp.getAppCategory());
 		boolean usedLastPeriod = false;

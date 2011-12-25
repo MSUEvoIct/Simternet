@@ -12,7 +12,7 @@ import simternet.engine.Simternet;
 import simternet.engine.TraceConfig;
 import simternet.engine.asyncdata.Temporal;
 import simternet.network.Backbone;
-import simternet.network.Datacenter;
+import simternet.network.DataCenter;
 import simternet.network.EdgeNetwork;
 import simternet.network.NetFlow;
 import simternet.network.Network;
@@ -24,6 +24,7 @@ public class ApplicationProvider implements Firm {
 
 	// "Housekeeping" information
 	public Simternet					s;
+	
 	/**
 	 * Other data structures will rely on this not changing, e.g., one that
 	 * keeps a lists of ASPs within an App Category.
@@ -44,7 +45,7 @@ public class ApplicationProvider implements Firm {
 	protected Temporal<Double>			priceSubscriptions		= new Temporal<Double>(3.0);
 
 	// Network Information
-	protected Datacenter				datacenter;
+	protected DataCenter				datacenter;
 	protected HashSet<Network>			connectedNetworks		= new HashSet<Network>();
 
 	// Financial Information
@@ -69,7 +70,7 @@ public class ApplicationProvider implements Firm {
 		financials = new Financials(s, s.config.aspEndowment);
 
 		// Create datacenter, connect it to all NSPs.
-		datacenter = new Datacenter(this);
+		datacenter = new DataCenter(this);
 
 		diversityFactor = s.random.nextDouble();
 	}
@@ -147,25 +148,14 @@ public class ApplicationProvider implements Firm {
 	}
 
 	/**
-	 * If the application is congested on the specified network, return a ratio
-	 * equal to the actual (observed) bandwidth over the amount of bandwidth
-	 * requested by the application.
+	 * This is a delegate method for DataCenter.getFractionExpected, exposed for
+	 * use by other agents.
 	 * 
 	 * @param an
 	 * @return the congestion ratio
 	 */
-	public Double getExpectedFraction(Network an) {
-		Double congestionRatio;
-
-		Double observedBandwidth = getCongestedBandwidth(an);
-		Double desiredBandwidth = bandwidth.get();
-		congestionRatio = observedBandwidth / desiredBandwidth;
-
-		if (congestionRatio > 1.0) {
-			congestionRatio = 1.0;
-		}
-
-		return congestionRatio;
+	public Double getFractionExpected(EdgeNetwork en) {
+		return datacenter.getFractionExpected(en);
 	}
 
 	/*
@@ -206,7 +196,7 @@ public class ApplicationProvider implements Firm {
 		return numCustomers;
 	}
 
-	public Datacenter getDatacenter() {
+	public DataCenter getDatacenter() {
 		return datacenter;
 	}
 

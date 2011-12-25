@@ -7,7 +7,7 @@ import simternet.agents.nsp.NetworkProvider;
 import simternet.engine.Simternet;
 import simternet.network.Backbone;
 import simternet.network.BackboneLink;
-import simternet.network.Datacenter;
+import simternet.network.DataCenter;
 import simternet.network.EdgeNetwork;
 
 public class BackboneLinkReporter extends Reporter {
@@ -39,7 +39,7 @@ public class BackboneLinkReporter extends Reporter {
 		// Collect all ASP links to Network Provider backbones
 		Collection<ApplicationProvider> asps = s.getASPs();
 		for (ApplicationProvider asp : asps) {
-			Datacenter dc = asp.getDatacenter();
+			DataCenter dc = asp.getDatacenter();
 			Collection<BackboneLink> bbs = dc.egressLinks.values();
 			for (BackboneLink bb : bbs) {
 				Object values[] = new Object[BackboneLinkReporter.numFields];

@@ -3,7 +3,7 @@ package simternet.gui.jung.appearance;
 import org.apache.commons.collections15.Transformer;
 
 import simternet.network.Backbone;
-import simternet.network.Datacenter;
+import simternet.network.DataCenter;
 import simternet.network.EdgeNetwork;
 import simternet.network.Network;
 
@@ -23,8 +23,8 @@ public class NetworkLabeller implements Transformer<Network, String> {
 			return null;
 		else if (net instanceof Backbone)
 			return ((Backbone) net).getOwner().getName();
-		else if (net instanceof Datacenter)
-			return ((Datacenter) net).getOwner().getName();
+		else if (net instanceof DataCenter)
+			return ((DataCenter) net).getOwner().getName();
 
 		return null;
 	}
