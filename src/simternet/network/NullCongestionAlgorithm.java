@@ -18,7 +18,6 @@ public class NullCongestionAlgorithm implements CongestionAlgorithm {
 		this.link = link;
 	}
 
-	@Override
 	public BackboneLink getLink() {
 		return link;
 	}

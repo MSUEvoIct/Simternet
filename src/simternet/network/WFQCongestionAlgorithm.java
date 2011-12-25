@@ -21,7 +21,6 @@ public class WFQCongestionAlgorithm implements CongestionAlgorithm, Serializable
 		this.link = link;
 	}
 
-	@Override
 	public BackboneLink getLink() {
 		return link;
 	}
