@@ -140,13 +140,6 @@ public class ApplicationProvider implements Firm {
 		return bandwidth.get();
 	}
 
-	protected Double getCongestedBandwidth(Network an) {
-		Double congestedMaxSeen = datacenter.getObservedBandwidth(an);
-		if (congestedMaxSeen == null)
-			return bandwidth.get();
-		return congestedMaxSeen;
-	}
-
 	/**
 	 * This is a delegate method for DataCenter.getFractionExpected, exposed for
 	 * use by other agents.

@@ -49,21 +49,12 @@ public class DataCenter extends Network {
 	 */
 	
 	public Double getFractionExpected(EdgeNetwork en) {
-		Double observedBandwidth = getObservedBandwidth(en);
+		Double obsBW = this.observedBandwidth.get(en);
 		Double requestedBandwidth = owner.getBandwidth();
-		if (observedBandwidth == null || requestedBandwidth == null)
+		if (obsBW == null || requestedBandwidth == null)
 			return 1.0;
 		else
-			return observedBandwidth / requestedBandwidth;
-	}
-
-	/**
-	 * @param an
-	 * @return The actual bandwidth received by congested flows at this edge
-	 *         network.
-	 */
-	public Double getObservedBandwidth(Network an) {
-		return observedBandwidth.get(an);
+			return obsBW / requestedBandwidth;
 	}
 
 	public ApplicationProvider getOwner() {
