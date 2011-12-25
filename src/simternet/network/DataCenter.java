@@ -51,10 +51,16 @@ public class DataCenter extends Network {
 	public Double getFractionExpected(EdgeNetwork en) {
 		Double obsBW = this.observedBandwidth.get(en);
 		Double requestedBandwidth = owner.getBandwidth();
-		if (obsBW == null || requestedBandwidth == null)
-			return 1.0;
-		else
-			return obsBW / requestedBandwidth;
+		double fractionExpected = 1.0;
+		
+		if (obsBW != null && requestedBandwidth != null)
+			fractionExpected = obsBW / requestedBandwidth;
+		
+		// Sanity Check
+		if (fractionExpected < 0 || fractionExpected > 1)
+			throw new RuntimeException("Expected fraction of requested bandwidth cannot be outside the range [0->1]");
+	
+		return fractionExpected;
 	}
 
 	public ApplicationProvider getOwner() {
