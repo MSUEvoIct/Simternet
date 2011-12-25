@@ -31,15 +31,7 @@ import simternet.engine.TraceConfig;
  * 
  */
 public class BackboneLink implements Serializable {
-
 	private static final long	serialVersionUID	= 1L;
-
-	public static BackboneLink createSymmetricLink(BackboneLink a) {
-		BackboneLink b = new BackboneLink(a.source, a.destination, a.bandwidth);
-		b.setBandwidth(a.getBandwidth());
-		b.setLatency(a.getLatency());
-		return b;
-	}
 
 	/**
 	 * The number of data units this link may transfer each model time step.
