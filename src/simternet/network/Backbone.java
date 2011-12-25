@@ -12,14 +12,17 @@ import simternet.agents.nsp.NetworkProvider;
  * 
  */
 public class Backbone extends Network {
-
-	protected final NetworkProvider	owner;
 	private static final long		serialVersionUID	= 1L;
+
+	private final NetworkProvider	owner;
 
 	public Backbone(final NetworkProvider nsp) {
 		owner = nsp;
 	}
 
+	/**
+	 * @return The Network Provider that owns this Backbone network
+	 */
 	public NetworkProvider getOwner() {
 		return owner;
 	}
