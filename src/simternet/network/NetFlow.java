@@ -172,8 +172,8 @@ public abstract class NetFlow {
 	 *         reference to that application provider. Otherwise, return null.
 	 */
 	public ApplicationProvider getApplicationProvider() {
-		if (source instanceof Datacenter) {
-			Datacenter dc = (Datacenter) source;
+		if (source instanceof DataCenter) {
+			DataCenter dc = (DataCenter) source;
 			return dc.getOwner();
 		} else
 			return null;

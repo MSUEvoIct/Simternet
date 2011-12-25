@@ -10,7 +10,17 @@ import simternet.engine.TraceConfig;
 import simternet.engine.asyncdata.TemporalArrayList;
 import simternet.engine.asyncdata.TemporalHashMap;
 
-public class Datacenter extends Network {
+/**
+ * DataCenters are the networks run by ApplicationProviders. In addition to the
+ * functions of a standard network (i.e., routing, etc...), DataCenters provide
+ * functionality required by ApplicationProviders, such as originating traffic
+ * into the network and tracking information on congestion characteristics for
+ * the use of Consumers and the ApplicationProvider.
+ * 
+ * @author kkoning
+ * 
+ */
+public class DataCenter extends Network {
 
 	private static final long					serialVersionUID	= 1L;
 	protected TemporalArrayList<NetFlow>		inputQueue			= new TemporalArrayList<NetFlow>();
@@ -23,7 +33,7 @@ public class Datacenter extends Network {
 	protected TemporalHashMap<Network, Double>	observedBandwidth	= new TemporalHashMap<Network, Double>();
 	protected final ApplicationProvider			owner;
 
-	public Datacenter(ApplicationProvider owner) {
+	public DataCenter(ApplicationProvider owner) {
 		this.owner = owner;
 	}
 
