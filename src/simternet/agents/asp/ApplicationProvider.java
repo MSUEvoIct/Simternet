@@ -41,7 +41,24 @@ public class ApplicationProvider implements Firm {
 	protected Temporal<Double>			quality					= new Temporal<Double>(0.0);
 	protected Temporal<Double>			bandwidth				= new Temporal<Double>(100.0);
 	protected Temporal<Double>			duration				= new Temporal<Double>(100.0);
+
+	/**
+	 * This ApplicationProvider earns priceAdvertising from Advertisers for each
+	 * consumer (the population of each Consumer object) who uses the
+	 * application.
+	 * 
+	 * TODO: This should be related to / change if an ASP is allowed to choose
+	 * the "intrusiveness" of ads
+	 */
 	protected Temporal<Double>			priceAdvertising		= new Temporal<Double>(3.0);
+	
+	/**
+	 * This ApplicationProvider earns priceSubscription from each consumer (the
+	 * population of each Consumer object) who uses the application.
+	 * 
+	 * XXX: This should be related to / change if an ASP is allowed to choose
+	 * the price of their application.  (This should be a high-priority enhancement)
+	 */
 	protected Temporal<Double>			priceSubscriptions		= new Temporal<Double>(3.0);
 
 	// Network Information
@@ -257,6 +274,7 @@ public class ApplicationProvider implements Firm {
 
 		double ads = priceAdvertising.get();
 		double sub = priceSubscriptions.get();
+
 		double popSize = consumer.getPopulation();
 		double adRev = ads * popSize;
 		double subRev = sub * popSize;
