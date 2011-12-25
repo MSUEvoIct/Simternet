@@ -7,7 +7,6 @@ import java.util.Comparator;
 import sim.engine.SimState;
 import simternet.agents.asp.ApplicationProvider;
 import simternet.engine.TraceConfig;
-import simternet.engine.asyncdata.TemporalArrayList;
 import simternet.engine.asyncdata.TemporalHashMap;
 
 /**
@@ -21,9 +20,8 @@ import simternet.engine.asyncdata.TemporalHashMap;
  * 
  */
 public class DataCenter extends Network {
-
 	private static final long					serialVersionUID	= 1L;
-	protected TemporalArrayList<NetFlow>		inputQueue			= new TemporalArrayList<NetFlow>();
+
 	/**
 	 * Stores the congestion this application sees on each network. Congestion
 	 * is stored as the amount of bandwidth actually received by the congested
