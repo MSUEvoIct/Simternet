@@ -77,7 +77,7 @@ public class ApplicationProvider implements Firm {
 	/**
 	 * A random preference matching with Consumer.diversityFactor
 	 */
-	public double						diversityFactor			= 1.0;
+	public final Double						diversityFactor;
 
 	public ApplicationProvider(Simternet s, AppCategory appCategory) {
 		this.s = s;

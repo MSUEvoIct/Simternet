@@ -108,39 +108,34 @@ public class DataCenter extends Network {
 		if (TraceConfig.networking.aspSentFlow) {
 			TraceConfig.out.println(this + " originating " + flow + " to " + flow.user);
 		}
-
-		Double observedBandwidth = this.observedBandwidth.get(flow.destination);
+		
+		Double estimatedBandwidth = this.getFractionExpected((EdgeNetwork)flow.destination) * this.owner.getBandwidth();
 		if (TraceConfig.networking.aspFlowControl) {
 			TraceConfig.out.println(this + " observed max BW at destination to be " + observedBandwidth);
 		}
-
-		if (observedBandwidth != null && observedBandwidth * 1.0001 < flow.bandwidthRequested) {
-			double increasedBandwidth = observedBandwidth * (1 + owner.s.config.applicationFlowGrowthProportion);
-			double minimumBandwidth = owner.getBandwidth() * owner.s.config.applicationFlowMinimumProportion;
-			double bandwidth = Double.NaN;
-
-			if (increasedBandwidth < minimumBandwidth) {
-				if (TraceConfig.networking.aspFlowControl) {
-					TraceConfig.out.println(this + " minimum banwidth " + minimumBandwidth
-							+ " exceeds flow-control suggested rate of " + increasedBandwidth
-							+ ", trying minimum instead");
-				}
-				bandwidth = minimumBandwidth;
-			} else {
-				bandwidth = increasedBandwidth;
-			}
-
+		
+		// Try to increase the bandwidth by a fixed proportion (i.e., 10%)
+		double growthRatio = (1 + owner.s.config.applicationFlowGrowthProportion);
+		if (estimatedBandwidth < flow.bandwidthRequested)
+			estimatedBandwidth = estimatedBandwidth * growthRatio;
+		
+		// But make sure it's at least that same fixed proportion of the requested bandwidth
+		double minimumBandwidth = flow.bandwidthRequested * owner.s.config.applicationFlowGrowthProportion;
+		if (estimatedBandwidth < minimumBandwidth )
+			estimatedBandwidth = minimumBandwidth;
+		
+		// But never more than 100% of the requested bandwidth
+		if (estimatedBandwidth > flow.bandwidthRequested)
+			estimatedBandwidth = flow.bandwidthRequested;
+		
+		if (estimatedBandwidth < flow.bandwidthRequested) {
 			if (TraceConfig.networking.aspFlowControl) {
-				TraceConfig.out.println(this + " flow control suggests trying bw=" + bandwidth);
+				TraceConfig.out.println(this + " flow control observed bw=" +  ", trying bw=" + estimatedBandwidth);
 			}
-
-			if (bandwidth < flow.bandwidthRequested) {
-				flow.congest(bandwidth);
-			}
+			flow.congest(estimatedBandwidth);
 		}
 
 		// Immediately route the flow to the proper output backbone link.
-		// Look in our input queue
 		this.route(flow);
 	}
 
