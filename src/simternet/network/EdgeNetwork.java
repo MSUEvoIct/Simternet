@@ -7,7 +7,6 @@ import sim.engine.SimState;
 import sim.util.Bag;
 import sim.util.Int2D;
 import simternet.agents.consumer.Consumer;
-import simternet.agents.finance.AssetFinance;
 import simternet.agents.nsp.NetworkProvider;
 import simternet.engine.TraceConfig;
 import simternet.engine.asyncdata.Temporal;
@@ -47,9 +46,7 @@ public abstract class EdgeNetwork extends Network {
 
 		return buildCost;
 	}
-
-	final AssetFinance		assetFinance;
-
+	
 	/**
 	 * The location of this network in the landscape.
 	 */
@@ -75,7 +72,6 @@ public abstract class EdgeNetwork extends Network {
 	public EdgeNetwork(NetworkProvider owner, Int2D location) {
 		this.owner = owner;
 		this.location = location;
-		assetFinance = new AssetFinance(this, this.owner.financials);
 
 		// By default, networks have infinite bandwidth; they are limited only
 		// by their

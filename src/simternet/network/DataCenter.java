@@ -139,6 +139,11 @@ public class DataCenter extends Network {
 		this.route(flow);
 	}
 
+	/**
+	 * Debug routine used for reporting DataCenter-wide congestion metrics.
+	 * 
+	 * @return a formatted String describing congestion per EdgeNetwork.
+	 */
 	public String printCongestion() {
 		StringBuffer sb = new StringBuffer();
 
