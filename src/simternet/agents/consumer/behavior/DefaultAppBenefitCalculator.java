@@ -57,6 +57,13 @@ public class DefaultAppBenefitCalculator extends AppBenefitCalculator {
 		double randomPreference = Math.abs(asp.diversityFactor - c.diversityFactor);
 		benefit = benefit * randomPreference;
 
+		// Give the application an added benefit if it is already being used
+		double usageBonus = c.s.config.applicationUsageBonusRatio + 1;
+		boolean isSubscribed = c.isSubscriber(asp);
+		if (isSubscribed) {
+			benefit = benefit * usageBonus;
+		}
+
 		if (TraceConfig.modelMath.aspBenefit) {
 			TraceConfig.out.println(c + " calculated actual benefit for " + asp.getName() + " as " + benefit
 					+ ", based on");
@@ -64,6 +71,9 @@ public class DefaultAppBenefitCalculator extends AppBenefitCalculator {
 			TraceConfig.out.println("  consumer diversity factor = " + c.diversityFactor);
 			TraceConfig.out.println("  asp diversity factor = " + asp.diversityFactor);
 			TraceConfig.out.println("  expected % not lost to congestion = " + fractionReceived * 100);
+			if (isSubscribed) {
+
+			}
 		}
 
 		return benefit;
