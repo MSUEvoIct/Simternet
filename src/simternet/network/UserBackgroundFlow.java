@@ -35,7 +35,7 @@ public class UserBackgroundFlow extends NetFlow {
 	 */
 	public UserBackgroundFlow(Network source, EdgeNetwork destination, Consumer user, double totalTransfer,
 			Double maxDuration) {
-		super(source, destination, user, destination.getMaxBandwidth(), totalTransfer / destination.getMaxBandwidth()
+		super(source, destination, user, destination.maxBandwidth, totalTransfer / destination.maxBandwidth
 				* user.getPopulation());
 
 		this.maxDuration = maxDuration * user.getPopulation();

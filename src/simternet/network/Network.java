@@ -74,7 +74,7 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 	 * @param bandwidth
 	 * @param config
 	 */
-	public void createEgressLinkTo(Network toNetwork, Double bandwidth, RoutingProtocolConfig config) {
+	public void createEgressLinkTo(Network toNetwork, double bandwidth, RoutingProtocolConfig config) {
 
 		// merely by creation this link will be in this.egressLinks and
 		// toNetwork.ingressLinks
