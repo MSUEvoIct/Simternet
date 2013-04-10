@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import simternet.engine.Simternet;
-import simternet.engine.TraceConfig;
+import simternet.Simternet;
+import simternet.TraceConfig;
 
 /**
  * A BackboneLink is a simplex connection between two Networks. BackboneLinks

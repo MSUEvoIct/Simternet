@@ -2,6 +2,7 @@ package simternet.network;
 
 import java.util.List;
 
+import sim.engine.SimState;
 import simternet.nsp.NSP;
 
 public class EdgeNetwork extends Network {
@@ -20,6 +21,12 @@ public class EdgeNetwork extends Network {
 	 * Is this still correct?
 	 */
 	double maxBandwidth;
+	
+	
+	/**
+	 * congestion[aspID] = that ASP's congestion on this network.
+	 */
+	float[] congestion;
 
 	/*************************
 	 * Operational Variables *
@@ -32,6 +39,8 @@ public class EdgeNetwork extends Network {
 		this.posX = posX;
 		this.posY = posY;
 
+		this.congestion = new float[owner.s.allASPs.length];
+		
 		// TODO Edge networks currently have infinite bandwidth
 		maxBandwidth = Double.MAX_VALUE;
 	}
@@ -49,46 +58,32 @@ public class EdgeNetwork extends Network {
 		return null;
 	}
 
-	/**
-	 * Retreive incoming flows from out Ingress links, process them, and send
-	 * them to consumers.
-	 */
-	public void sendFlowsToCustomers() {
-		/*
-		 * We need to iterate over every flow, received on every ingress link.
-		 * (Actually, there should be only one, since this is an edge network,
-		 * but other networks can have many ingress links.)
-		 */
-		for (BackboneLink link : ingressLinks.values()) {
-			List<NetFlow> flows = link.receiveFlows();
-			for (NetFlow flow : flows) {
-				/*
-				 * Process congestion information first. This includes 1)
-				 * further congesting to the maximum bandwidth of this edge
-				 * network, 2) informing the sending network of the congestion,
-				 * 3) noting the congestion ourselves.
-				 */
-				// kk-bug? flow.congest(getMaxBandwidth());
-				if (flow.isCongested()) {
-					flow.source.noteCongestion(flow);
-					noteCongestion(flow);
-				}
-
-				/*
-				 * Flows are now ready to be received by the users. What users
-				 * do with them from here is up to them. They may discard the
-				 * information, track statistics, take certain actions, etc...
-				 */
-				flow.user.receiveFlow(flow);
-
-			}
-		}
-	}
-
 	public void receivePayment(byte consumerID, double populationSize) {
 		double totalRevenue = populationSize * this.price;
 		owner.financials.earnRevenue(totalRevenue);
-		
+	}
+
+	/**
+	 * Retreive incoming flows from out Ingress links. Process them so that we
+	 * have congestion and bandwidth stats.
+	 */
+	void netflowFinalProcess() {
+		BackboneLink link = getUpstreamIngress();
+
+		List<NetFlow> flows = link.receiveFlows();
+		for (NetFlow flow : flows) {
+			/*
+			 * If a flow is congested, we want to
+			 * TODO: Finish 
+			 */
+		}
+
+	}
+
+	@Override
+	public void step(SimState state) {
+		super.step(state);
+		netflowFinalProcess();
 	}
 
 }

@@ -6,7 +6,7 @@ import sim.util.Int2D;
 import simternet.Financials;
 import simternet.Simternet;
 import simternet.consumer.Consumer;
-import simternet.engine.TraceConfig;
+import simternet.TraceConfig;
 import simternet.network.Backbone;
 import simternet.network.EdgeNetwork;
 import simternet.network.RoutingProtocolConfig;

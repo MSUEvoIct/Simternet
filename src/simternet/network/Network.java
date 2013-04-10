@@ -8,8 +8,7 @@ import java.util.Vector;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import simternet.engine.TraceConfig;
-import simternet.engine.asyncdata.AsyncUpdate;
+import simternet.TraceConfig;
 
 /**
  * Abstract Network, the base Vertex/Node in the Simternet graph/Internetwork
@@ -17,7 +16,7 @@ import simternet.engine.asyncdata.AsyncUpdate;
  * @author kkoning
  * 
  */
-public abstract class Network implements AsyncUpdate, Steppable, Serializable {
+public abstract class Network implements Steppable, Serializable {
 
 	private static final long				serialVersionUID	= 1L;
 
@@ -486,17 +485,6 @@ public abstract class Network implements AsyncUpdate, Steppable, Serializable {
 		for (BackboneLink link : egressLinks.values()) {
 			link.transmitFlows();
 		}
-	}
-
-	@Override
-	public void update() {
-		/*
-		 * By default, Networks don't have any Temporal objects that need
-		 * updating. Temporal structures in network structure create fundamental
-		 * inconsistencies that are a PITA to deal with. Don't change this
-		 * unless you've thought about it, decided it's necessary, and make sure
-		 * things still work properly!
-		 */
 	}
 
 	/**

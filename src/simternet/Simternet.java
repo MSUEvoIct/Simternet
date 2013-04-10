@@ -1,5 +1,6 @@
 package simternet;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -89,6 +90,9 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	public Consumer[] allConsumers;
 	int aspIDs, nspIDs, consumerIDs;
 
+	// Misc
+	public static final DecimalFormat nf = new DecimalFormat("0.###E0");
+
 	/**
 	 * Initializes the simulation with a default seed. A no-arg constructor is
 	 * needed to fit the ec.Setup pattern used in ECJ and Agency. A specific
@@ -125,30 +129,29 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 
 		// ASP Variables
 		aspEndowment = pd.getFloat(pRoot.push("aspEndowment"), null);
-		qualityToBandwidthExponent = pd.getFloat(pRoot.push("qtyToBandwidthExponent"), null);
-		
+		qualityToBandwidthExponent = pd.getFloat(
+				pRoot.push("qtyToBandwidthExponent"), null);
 
 		// Consumer Variables
 		qualityExponent = pd.getFloat(pRoot.push("qualityExponent"), null);
-		preferenceExponent = pd.getFloat(pRoot.push("preferenceExponent"), null);
+		preferenceExponent = pd
+				.getFloat(pRoot.push("preferenceExponent"), null);
 		wtpExponent = pd.getFloat(pRoot.push("wtpExponent"), null);
 		appBudget = pd.getFloat(pRoot.push("appBudget"), null);
-		
-		
+
 		steps = pd.getInt(pRoot.push("steps"), null);
 
-		
 		// Set up population initializer
 		try {
 			Parameter pPopInit = pRoot.push("populationInitializer");
 			Class popInitClass = (Class) pd.getClassForParameter(pPopInit,
 					null, PopulationInitializer.class);
-			populationInitializer = (PopulationInitializer) popInitClass.newInstance();
-			populationInitializer.setup(pd,pPopInit);
+			populationInitializer = (PopulationInitializer) popInitClass
+					.newInstance();
+			populationInitializer.setup(pd, pPopInit);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		
 
 		beenSetup = true;
 	}
@@ -236,10 +239,10 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 
 	protected Consumer createConsumer(ConsumerIndividual consInd, byte consID) {
 		Consumer cons = new Consumer(this, consInd, consID);
-		// The full arrays for NSPs and ASPs must have been chosen by this point,
+		// The full arrays for NSPs and ASPs must have been chosen by this
+		// point,
 		// because we need those sizes to initialize consumer data structures
-		
-		
+
 		return cons;
 	}
 
@@ -329,8 +332,8 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 
 	@Override
 	public Map<Individual, Fitness> getFitnesses() {
-		Map<Individual,Fitness> fitnesses = new IdentityHashMap<Individual,Fitness>();
-		
+		Map<Individual, Fitness> fitnesses = new IdentityHashMap<Individual, Fitness>();
+
 		// put in all the ASPs
 		for (byte aspID = 0; aspID < allASPs.length; aspID++) {
 			Individual ind = (Individual) allASPs[aspID].ind;
@@ -339,7 +342,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			fit.setFitness(null, fitMeasure, false);
 			fitnesses.put(ind, fit);
 		}
-		
+
 		// put in all the NSPs
 		for (byte nspID = 0; nspID < allASPs.length; nspID++) {
 			Individual ind = (Individual) allNSPs[nspID].ind;
@@ -348,7 +351,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			fit.setFitness(null, fitMeasure, false);
 			fitnesses.put(ind, fit);
 		}
-		
+
 		return fitnesses;
 	}
 

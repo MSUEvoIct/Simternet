@@ -2,10 +2,7 @@ package simternet.network;
 
 import java.util.Comparator;
 
-import simternet.agents.asp.ApplicationProvider;
-import simternet.agents.consumer.Consumer;
-import simternet.engine.Simternet;
-import simternet.engine.TraceConfig;
+import simternet.TraceConfig;
 
 /**
  * TODO: Modify to require user, source, destination, at time of object
@@ -14,22 +11,17 @@ import simternet.engine.TraceConfig;
  * @author kkoning
  * 
  */
-public abstract class NetFlow {
+public class NetFlow {
 
 	//
 	// FLOW ROUTING INFORMATION
 	//
+	public byte aspID;
+	public final Network source;
+	public final Network destination;
 
-	public final Network		source;
-	public final Network		destination;
-
-	/**
-	 * The user this traffic is intended for, once we reach the destination
-	 * network. This is analagous to the host portion of a CIDR IPv4 address.
-	 */
-	protected final Consumer	user;
-
-	public Integer				TTL			= 20;
+	// Just a counter to prevent infinite loops of network traffic.
+	public int TTL = 7;
 
 	//
 	// FLOW PERFORMANCE INFORMATION
@@ -39,28 +31,11 @@ public abstract class NetFlow {
 	 * The actual current bandwidth of this flow, which changes as it transits
 	 * the network.
 	 */
-	public double				bandwidth;
-	public final double			bandwidthRequested;
+	public float bandwidth;
+	public final float bandwidthRequested;
 
-	/**
-	 * Has this flow ever been congested?
-	 */
-	public boolean				congested	= false;
-
-	/**
-	 * The actual duration of this flow. For interactive flows, this should
-	 * always be equal to maxTime. For non-interactive flows, this may be less
-	 * because the flows will transfer as quickly as possible.
-	 */
-	public double				duration;
-	public double				durationRequested;
-
-	/**
-	 * The accumulated latency of this flow
-	 */
-	public double				latency		= 0D;
-
-	protected NetFlow(Network source, Network destination, Consumer user, double bandwidth, double duration) {
+	protected NetFlow(byte aspID, Network source, Network destination,
+			float bandwidth) {
 
 		// These checks are important for debugging to make sure that EA's
 		// cannot exploit
@@ -70,20 +45,18 @@ public abstract class NetFlow {
 				throw new RuntimeException("Can't send a packet from nowhere");
 			if (destination == null)
 				throw new RuntimeException("Can't send a packet to nowhere");
-			if (Double.isInfinite(bandwidth) || Double.isNaN(bandwidth) || bandwidth <= 0)
-				throw new RuntimeException("Can't have nonsense bandwidth " + bandwidth);
-			if (Double.isInfinite(duration) || Double.isNaN(duration) || duration <= 0)
-				throw new RuntimeException("Can't have nonsense duration " + duration);
+			if (Double.isInfinite(bandwidth) || Double.isNaN(bandwidth)
+					|| bandwidth <= 0)
+				throw new RuntimeException("Can't have nonsense bandwidth "
+						+ bandwidth);
 		}
 
+		this.aspID = aspID;
 		this.source = source;
 		this.destination = destination;
-		this.user = user;
 
 		this.bandwidth = bandwidth;
-		bandwidthRequested = bandwidth;
-		this.duration = duration;
-		durationRequested = duration;
+		this.bandwidthRequested = bandwidth;
 	}
 
 	/**
@@ -94,89 +67,49 @@ public abstract class NetFlow {
 	 * @param bandwidth
 	 *            Restrict the flow to this maximum bandwidth
 	 */
-	public abstract void congest(double bandwidth);
-
-	/**
-	 * Non-interactive flows will not reduce their total usage unless the
-	 * bandwidth falls below the point where its maximum duration is exceeded.
-	 * Interactive flows will reduce their bandwidth consumption immediately. We
-	 * need to know what this level is for all types of flows before we can
-	 * execute a WFQ-like congestion algorithm.
-	 * 
-	 * @return The bandwidth at which this flow will reduce its usage.
-	 */
-	public abstract Double getCongestionBandwidth();
-
-	public abstract double getCongestionDuration();
-
-	public double getActualTransfer() {
-		double actualTransfer = bandwidth * duration;
-		return actualTransfer;
-	}
-
-	public double getRequestedTransfer() {
-		double requestedTransfer = bandwidthRequested * durationRequested;
-		return requestedTransfer;
-	}
-
-	/**
-	 * 
-	 * @return The ratio of actual transfer over transfer requested. If transfer
-	 *         requested is zero, return 1.
-	 */
-	public double getTransferFraction() {
-		double requestedTransfer = getRequestedTransfer();
-		double transferFraction = 0D;
-		if (requestedTransfer == 0D)
-			return 1;
-		else {
-			transferFraction = getActualTransfer() / requestedTransfer;
+	public void congest(float bandwidth) {
+		if (this.bandwidth > bandwidth) {
+			this.bandwidth = bandwidth;
 		}
-
-		return transferFraction;
 	}
 
-	public double getBlockedTransfer() {
-		double blockedTransfer = getRequestedTransfer() - getActualTransfer();
-		return blockedTransfer;
-	}
+	// /**
+	// *
+	// * @return The ratio of actual transfer over transfer requested. If
+	// transfer
+	// * requested is zero, return 1.
+	// */
+	// public double getTransferFraction() {
+	// double requestedTransfer = getRequestedTransfer();
+	// double transferFraction = 0D;
+	// if (requestedTransfer == 0D)
+	// return 1;
+	// else {
+	// transferFraction = getActualTransfer() / requestedTransfer;
+	// }
+	//
+	// return transferFraction;
+	// }
 
-	public boolean isCongested() {
-		return congested;
-	}
+	// public double getBlockedTransfer() {
+	// double blockedTransfer = getRequestedTransfer() - getActualTransfer();
+	// return blockedTransfer;
+	// }
 
-	/**
-	 * @return A human-readable interpretation of how this flow is congested,
-	 *         e.g., 5/10Mbps.
-	 */
-	public String describeCongestionForHumans() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("B=");
-		sb.append(Simternet.nf.format(bandwidth));
-		sb.append("/");
-		sb.append(Simternet.nf.format(bandwidthRequested));
-		sb.append(",D=");
-		sb.append(Simternet.nf.format(duration));
-		sb.append("/");
-		sb.append(Simternet.nf.format(durationRequested));
-		return sb.toString();
+	// public boolean isCongested() {
+	// return congested;
+	// }
+
+	public float congestionRatio() {
+		float percentThrough = bandwidth / bandwidthRequested;
+		float percentCongested = 1 - percentThrough;
+		return percentCongested;
 	}
 
 	@Override
 	public String toString() {
-		return "Flow: " + source + " -> " + user + "@" + destination + ", " + describeCongestionForHumans();
-	}
-
-	/**
-	 * @return If this flow was originated by an application provider, return a
-	 *         reference to that application provider. Otherwise, return null.
-	 */
-	public ApplicationProvider getApplicationProvider() {
-		if (source instanceof DataCenter) {
-			DataCenter dc = (DataCenter) source;
-			return dc.getOwner();
-		} else
-			return null;
+		return "Flow: " + source + " -> " + destination + ", BW=" + bandwidth
+				+ "/" + bandwidthRequested;
 	}
 
 	/**
@@ -187,12 +120,13 @@ public abstract class NetFlow {
 	 * @author kkoning
 	 * 
 	 */
-	public static class CongestionBandwidthComparator implements Comparator<NetFlow> {
+	public static class CongestionBandwidthComparator implements
+			Comparator<NetFlow> {
 		@Override
 		public int compare(NetFlow o1, NetFlow o2) {
-			if (o1.getCongestionBandwidth() > o2.getCongestionBandwidth())
+			if (o1.bandwidth > o2.bandwidth)
 				return 1;
-			if (o1.getCongestionBandwidth() < o2.getCongestionBandwidth())
+			if (o1.bandwidth < o2.bandwidth)
 				return -1;
 			return 0;
 		}

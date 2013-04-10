@@ -5,9 +5,8 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import sim.engine.SimState;
-import simternet.agents.asp.ApplicationProvider;
-import simternet.engine.TraceConfig;
-import simternet.engine.asyncdata.TemporalHashMap;
+import simternet.TraceConfig;
+import simternet.asp.ASP;
 
 /**
  * DataCenters are the networks run by ApplicationProviders. In addition to the
@@ -20,22 +19,15 @@ import simternet.engine.asyncdata.TemporalHashMap;
  * 
  */
 public class DataCenter extends Network {
-	private static final long					serialVersionUID	= 1L;
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The ApplicationProvider which operates this DataCenter.
 	 */
-	protected final ApplicationProvider			owner;
-	
-	/**
-	 * Stores the congestion this application sees on each network. Congestion
-	 * is stored as the amount of bandwidth actually received by the congested
-	 * flow. I.e., you would need to compare this to the application's bandwidth
-	 * use to calculate a percentage of congestion.
-	 */
-	protected TemporalHashMap<Network, Double>	observedBandwidth	= new TemporalHashMap<Network, Double>();
-	
-	public DataCenter(ApplicationProvider owner) {
+	protected final ASP owner;
+
+
+	public DataCenter(ASP owner) {
 		this.owner = owner;
 	}
 
@@ -69,13 +61,6 @@ public class DataCenter extends Network {
 		return fractionExpected;
 	}
 
-	/**
-	 * @return The operator of this DataCenter
-	 */
-	public ApplicationProvider getOwner() {
-		return owner;
-	}
-
 	/*
 	 * Once a flow is finally sent to a customer, this method should be called
 	 * so that the application provider can be aware of how its application
@@ -89,7 +74,8 @@ public class DataCenter extends Network {
 	public void noteCongestion(NetFlow flow) {
 		if (TraceConfig.sanityChecks) {
 			if (flow.destination == null)
-				throw new RuntimeException("A packet going nowhere is congested?!");
+				throw new RuntimeException(
+						"A packet going nowhere is congested?!");
 		}
 		observedBandwidth.put(flow.destination, flow.bandwidth);
 	}
@@ -106,31 +92,39 @@ public class DataCenter extends Network {
 		// Check to see if this flow was congested in previous periods. If so,
 		// pre-congest it to just faster than last period.
 		if (TraceConfig.networking.aspSentFlow) {
-			TraceConfig.out.println(this + " originating " + flow + " to " + flow.user);
+			TraceConfig.out.println(this + " originating " + flow + " to "
+					+ flow.user);
 		}
-		
-		Double estimatedBandwidth = this.getFractionExpected((EdgeNetwork)flow.destination) * this.owner.getBandwidth();
+
+		Double estimatedBandwidth = this
+				.getFractionExpected((EdgeNetwork) flow.destination)
+				* this.owner.getBandwidth();
 		if (TraceConfig.networking.aspFlowControl) {
-			TraceConfig.out.println(this + " observed max BW at destination to be " + observedBandwidth);
+			TraceConfig.out.println(this
+					+ " observed max BW at destination to be "
+					+ observedBandwidth);
 		}
-		
+
 		// Try to increase the bandwidth by a fixed proportion (i.e., 10%)
 		double growthRatio = (1 + owner.s.config.applicationFlowGrowthProportion);
 		if (estimatedBandwidth < flow.bandwidthRequested)
 			estimatedBandwidth = estimatedBandwidth * growthRatio;
-		
-		// But make sure it's at least that same fixed proportion of the requested bandwidth
-		double minimumBandwidth = flow.bandwidthRequested * owner.s.config.applicationFlowGrowthProportion;
-		if (estimatedBandwidth < minimumBandwidth )
+
+		// But make sure it's at least that same fixed proportion of the
+		// requested bandwidth
+		double minimumBandwidth = flow.bandwidthRequested
+				* owner.s.config.applicationFlowGrowthProportion;
+		if (estimatedBandwidth < minimumBandwidth)
 			estimatedBandwidth = minimumBandwidth;
-		
+
 		// But never more than 100% of the requested bandwidth
 		if (estimatedBandwidth > flow.bandwidthRequested)
 			estimatedBandwidth = flow.bandwidthRequested;
-		
+
 		if (estimatedBandwidth < flow.bandwidthRequested) {
 			if (TraceConfig.networking.aspFlowControl) {
-				TraceConfig.out.println(this + " flow control observed bw=" +  ", trying bw=" + estimatedBandwidth);
+				TraceConfig.out.println(this + " flow control observed bw="
+						+ ", trying bw=" + estimatedBandwidth);
 			}
 			flow.congest(estimatedBandwidth);
 		}
@@ -149,7 +143,8 @@ public class DataCenter extends Network {
 
 		sb.append("Congestion status of Egress Links\n");
 		for (BackboneLink bb : egressLinks.values()) {
-			sb.append(bb + " has usage factor of " + bb.perStepCongestionRatio() + "\n");
+			sb.append(bb + " has usage factor of "
+					+ bb.perStepCongestionRatio() + "\n");
 		}
 
 		sb.append("Congestion status of Edge Networks\n");
@@ -170,7 +165,8 @@ public class DataCenter extends Network {
 		for (Network net : nets) {
 			if (net == null)
 				throw new RuntimeException("wtf?");
-			sb.append(net.toString() + ": ObservedBW=" + observedBandwidth.get(net));
+			sb.append(net.toString() + ": ObservedBW="
+					+ observedBandwidth.get(net));
 			sb.append(" (" + owner.getFractionExpected((EdgeNetwork) net) + ")");
 			sb.append("\n");
 		}
@@ -183,19 +179,14 @@ public class DataCenter extends Network {
 		super.step(state);
 
 		if (TraceConfig.networking.congestionASPSummary) {
-			TraceConfig.out.println(this + ": Congestion\n" + printCongestion());
+			TraceConfig.out
+					.println(this + ": Congestion\n" + printCongestion());
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "DC of " + owner.getName();
-	}
-
-	@Override
-	public void update() {
-		super.update();
-		observedBandwidth.update();
+		return "DC of " + owner;
 	}
 
 }
