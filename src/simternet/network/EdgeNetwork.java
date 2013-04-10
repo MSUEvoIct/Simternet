@@ -3,6 +3,7 @@ package simternet.network;
 import java.util.List;
 
 import sim.engine.SimState;
+import simternet.Simternet;
 import simternet.nsp.NSP;
 
 public class EdgeNetwork extends Network {
@@ -26,7 +27,13 @@ public class EdgeNetwork extends Network {
 	/**
 	 * congestion[aspID] = that ASP's congestion on this network.
 	 */
-	float[] congestion;
+	public float[] congestion;
+	
+	/**
+	 * maxObservedBandwidth[aspID] = the maximum bandwidth seen from
+	 * that asp to this edge network.  Used for flow control.
+	 */
+	public float[] maxObservedBandwidth;
 
 	/*************************
 	 * Operational Variables *
@@ -67,23 +74,37 @@ public class EdgeNetwork extends Network {
 	 * Retreive incoming flows from out Ingress links. Process them so that we
 	 * have congestion and bandwidth stats.
 	 */
-	void netflowFinalProcess() {
+	void netflowFinalProcess(Simternet s) {
 		BackboneLink link = getUpstreamIngress();
+		
+		float[] requestedBW = new float[s.allASPs.length];
+		float[] observedBW = new float[s.allASPs.length];
 
+		// zero out max bw seen
+		for (byte i = 0; i < maxObservedBandwidth.length; i++) {
+			maxObservedBandwidth[i] = 0;
+		}
+		
+		// grab/aggregate information from flows
 		List<NetFlow> flows = link.receiveFlows();
 		for (NetFlow flow : flows) {
-			/*
-			 * If a flow is congested, we want to
-			 * TODO: Finish 
-			 */
+			requestedBW[flow.aspID] += flow.bandwidthRequested;
+			observedBW[flow.aspID] += flow.bandwidth; 
+			if (flow.bandwidth > maxObservedBandwidth[flow.aspID]) {
+				maxObservedBandwidth[flow.aspID] = flow.bandwidth;
+			}
 		}
-
+		
+		// convert to congestion metric
+		for (byte aspID = 0; aspID < requestedBW.length; aspID++) {
+			congestion[aspID] = 1 - (observedBW[aspID] / requestedBW[aspID]);
+		}
 	}
 
 	@Override
 	public void step(SimState state) {
 		super.step(state);
-		netflowFinalProcess();
+		netflowFinalProcess((Simternet)state);
 	}
 
 }

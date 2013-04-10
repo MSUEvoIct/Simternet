@@ -34,7 +34,7 @@ public class ASP implements Steppable {
 	DataCenter datacenter;
 
 	/** Reference to the main simulation object */
-	Simternet s;
+	public Simternet s;
 
 	/** The individual/agent controlling the ASP */
 	public ASPIndividual ind;

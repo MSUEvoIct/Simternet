@@ -54,6 +54,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	// ASP variables
 	public float aspEndowment;
 	public float qualityToBandwidthExponent;
+	public float applicationFlowGrowthProportion;
 
 	// Consumer Variables
 	public PopulationInitializer populationInitializer;
@@ -131,6 +132,9 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		aspEndowment = pd.getFloat(pRoot.push("aspEndowment"), null);
 		qualityToBandwidthExponent = pd.getFloat(
 				pRoot.push("qtyToBandwidthExponent"), null);
+
+		applicationFlowGrowthProportion = pd.getFloat(
+				pRoot.push("applicationFlowGrowthProportion"), null);
 
 		// Consumer Variables
 		qualityExponent = pd.getFloat(pRoot.push("qualityExponent"), null);
