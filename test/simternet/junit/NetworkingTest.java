@@ -60,5 +60,53 @@ public class NetworkingTest {
 		 */
 
 	}
+	
+	
+	/**
+	 * TODO: Implement this
+	 * 
+	 * This test should make sure that NetFlow objects actually traverse
+	 * the network as set up.
+	 * 
+	 */
+	@Test
+	public void transmissionTest() {
+		/*
+		 * Create a simternet with at least one ASP, NSP, and Consumer
+		 */
+		
+		
+		/*
+		 * Make sure that the ASP is connected to the NSP, and the NSP builds
+		 * an edge network at at least location (0,0) and the consumer subscribes
+		 * to it.  Use test individuals so that behavior can be controlled.
+		 */
+		
+		
+		/*
+		 * Make sure that the consumer uses the ASP, and the ASP generates a 
+		 * packet.
+		 */
+		
+		
+		
+		/*
+		 * Make sure that, as the Simternet object is run/stepped, the packet 
+		 * shows up at the edge network associated with the request.
+		 */
+		
+
+		
+		/*
+		 * Optional:  Ensure that the BackboneLinks exist, but do not have 
+		 * sufficient capacity to get the netflow object across without 
+		 * congestion.  Make sure congestion happens.
+		 */
+		
+		
+		
+		
+	}
+	
 
 }
