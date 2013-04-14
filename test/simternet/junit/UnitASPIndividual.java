@@ -16,9 +16,9 @@ public class UnitASPIndividual extends FloatVectorIndividual implements ASPIndiv
 	}
 
 	@Override
-	public void setQuality(ASP asp, Simternet s) {
+	public void improveQuality(ASP asp, Simternet s) {
 		// just set unit quality; for testing purposes
-		asp.quality = 1;
+		asp.improveQuality(1);
 		
 	}
 

@@ -22,16 +22,15 @@ public class EdgeNetwork extends Network {
 	 * Is this still correct?
 	 */
 	double maxBandwidth;
-	
-	
+
 	/**
 	 * congestion[aspID] = that ASP's congestion on this network.
 	 */
 	public float[] congestion;
-	
+
 	/**
-	 * maxObservedBandwidth[aspID] = the maximum bandwidth seen from
-	 * that asp to this edge network.  Used for flow control.
+	 * maxObservedBandwidth[aspID] = the maximum bandwidth seen from that asp to
+	 * this edge network. Used for flow control.
 	 */
 	public float[] maxObservedBandwidth;
 
@@ -47,7 +46,7 @@ public class EdgeNetwork extends Network {
 		this.posY = posY;
 
 		this.congestion = new float[owner.s.allASPs.length];
-		
+
 		// TODO Edge networks currently have infinite bandwidth
 		maxBandwidth = Double.MAX_VALUE;
 	}
@@ -76,7 +75,7 @@ public class EdgeNetwork extends Network {
 	 */
 	void netflowFinalProcess(Simternet s) {
 		BackboneLink link = getUpstreamIngress();
-		
+
 		float[] requestedBW = new float[s.allASPs.length];
 		float[] observedBW = new float[s.allASPs.length];
 
@@ -84,27 +83,32 @@ public class EdgeNetwork extends Network {
 		for (byte i = 0; i < maxObservedBandwidth.length; i++) {
 			maxObservedBandwidth[i] = 0;
 		}
-		
+
 		// grab/aggregate information from flows
 		List<NetFlow> flows = link.receiveFlows();
 		for (NetFlow flow : flows) {
 			requestedBW[flow.aspID] += flow.bandwidthRequested;
-			observedBW[flow.aspID] += flow.bandwidth; 
+			observedBW[flow.aspID] += flow.bandwidth;
 			if (flow.bandwidth > maxObservedBandwidth[flow.aspID]) {
 				maxObservedBandwidth[flow.aspID] = flow.bandwidth;
 			}
 		}
-		
+
 		// convert to congestion metric
 		for (byte aspID = 0; aspID < requestedBW.length; aspID++) {
-			congestion[aspID] = 1 - (observedBW[aspID] / requestedBW[aspID]);
+			float fracNewCongestion = s.congestionAdjustmentSpeed;
+			float fracOldCongestion = 1 - s.congestionAdjustmentSpeed;
+			float newCongestion = 1 - (observedBW[aspID] / requestedBW[aspID]);
+
+			congestion[aspID] = congestion[aspID] * fracOldCongestion
+					+ fracNewCongestion * newCongestion;
 		}
 	}
 
 	@Override
 	public void step(SimState state) {
 		super.step(state);
-		netflowFinalProcess((Simternet)state);
+		netflowFinalProcess((Simternet) state);
 	}
 
 }

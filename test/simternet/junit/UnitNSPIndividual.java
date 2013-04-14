@@ -34,9 +34,9 @@ public class UnitNSPIndividual extends FloatVectorIndividual implements NSPIndiv
 					nsp.edgeNetworks[x][y].price = 1;
 			}
 		}
-		
 	}
 
+	
 	@Override
 	public void priceBandwidth(Simternet s, NSP nsp) {
 		// TODO Auto-generated method stub

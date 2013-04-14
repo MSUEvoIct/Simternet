@@ -5,8 +5,8 @@ import sim.engine.Steppable;
 import sim.util.Int2D;
 import simternet.Financials;
 import simternet.Simternet;
-import simternet.consumer.Consumer;
 import simternet.TraceConfig;
+import simternet.consumer.Consumer;
 import simternet.network.Backbone;
 import simternet.network.EdgeNetwork;
 import simternet.network.RoutingProtocolConfig;
@@ -38,7 +38,7 @@ public class NSP implements Steppable {
 
 	// Reference to the main sumulation object
 	public Simternet s;
-	
+
 	// The individual/agent controlling this NSP.
 	public NSPIndividual ind;
 
@@ -101,7 +101,7 @@ public class NSP implements Steppable {
 			return proposedPrice;
 		}
 	}
-	
+
 	public void setASPTransitPrice(byte aspID, double price) {
 		aspTransitPrices[aspID] = limitAspTransitPrice(price);
 	}
@@ -125,7 +125,7 @@ public class NSP implements Steppable {
 	public double getCustomers(byte x, byte y) {
 		Double numCustomers = 0.0;
 		for (Consumer c : s.allConsumers) {
-			numCustomers += c.getNSPSubscribers(x,y,id);
+			numCustomers += c.getNSPSubscribers(x, y, id);
 		}
 		return numCustomers;
 	}
@@ -134,7 +134,7 @@ public class NSP implements Steppable {
 	 * Dispose of all assets, exit market
 	 */
 	private void goBankrupt() {
-		// TODO:  Complete
+		// TODO: Complete
 	}
 
 	public boolean hasNetworkAt(byte x, byte y) {
@@ -144,92 +144,92 @@ public class NSP implements Steppable {
 			return true;
 	}
 
-//	private StringBuffer printAllNetworkGrid() {
-//		StringBuffer sb = new StringBuffer();
-//		DecimalFormat positionFormat = new DecimalFormat("00");
-//		DecimalFormat numCustFormat = new DecimalFormat("0000000");
-//
-//		int curY = 0;
-//
-//		sb.append(positionFormat.format(0));
-//		for (Int2D location : s.allLocations()) {
-//			if (location.y > curY) {
-//				sb.append("\n");
-//				curY++;
-//				sb.append(positionFormat.format(curY));
-//			}
-//			sb.append(Utils.padLeft(
-//					String.valueOf(s.getNetworks(null, null, location).size()),
-//					4));
-//		}
-//
-//		return sb;
-//	}
-//
-//	private StringBuffer printCustomerGrid() {
-//		StringBuffer sb = new StringBuffer();
-//
-//		int curY = 0;
-//
-//		sb.append(NetworkProvider.positionFormat.format(0));
-//		for (Int2D location : s.allLocations()) {
-//			if (location.y > curY) {
-//				sb.append("\n");
-//				curY++;
-//				sb.append(NetworkProvider.positionFormat.format(curY));
-//			}
-//			sb.append(Utils.padLeft(
-//					String.valueOf(Math.round(this.getCustomers(location))), 7));
-//		}
-//
-//		return sb;
-//	}
-//
-//	private StringBuffer printNetworkGrid() {
-//		StringBuffer sb = new StringBuffer();
-//		DecimalFormat positionFormat = new DecimalFormat("00");
-//		DecimalFormat numCustFormat = new DecimalFormat("0000000");
-//
-//		int curY = 0;
-//
-//		sb.append(positionFormat.format(0));
-//		for (Int2D location : s.allLocations()) {
-//			if (location.y > curY) {
-//				sb.append("\n");
-//				curY++;
-//				sb.append(positionFormat.format(curY));
-//			}
-//			sb.append(Utils.padLeft(
-//					String.valueOf(this.getNetworks(location).size()), 4));
-//		}
-//
-//		return sb;
-//	}
-//
-//	private StringBuffer printPriceGrid() {
-//		StringBuffer sb = new StringBuffer();
-//		int curY = 0;
-//
-//		sb.append(NetworkProvider.positionFormat.format(0));
-//		for (Int2D location : s.allLocations()) {
-//			if (location.y > curY) {
-//				sb.append("\n");
-//				curY++;
-//				sb.append(NetworkProvider.positionFormat.format(curY));
-//			}
-//			EdgeNetwork net = (EdgeNetwork) getNetworkAt(EdgeNetwork.class,
-//					location);
-//			String price;
-//			if (net == null) {
-//				price = "   N/A";
-//			} else {
-//				price = NetworkProvider.priceFormat.format(net.getPrice());
-//			}
-//			sb.append(" " + price);
-//		}
-//
-//		return sb;
-//	}
+	// private StringBuffer printAllNetworkGrid() {
+	// StringBuffer sb = new StringBuffer();
+	// DecimalFormat positionFormat = new DecimalFormat("00");
+	// DecimalFormat numCustFormat = new DecimalFormat("0000000");
+	//
+	// int curY = 0;
+	//
+	// sb.append(positionFormat.format(0));
+	// for (Int2D location : s.allLocations()) {
+	// if (location.y > curY) {
+	// sb.append("\n");
+	// curY++;
+	// sb.append(positionFormat.format(curY));
+	// }
+	// sb.append(Utils.padLeft(
+	// String.valueOf(s.getNetworks(null, null, location).size()),
+	// 4));
+	// }
+	//
+	// return sb;
+	// }
+	//
+	// private StringBuffer printCustomerGrid() {
+	// StringBuffer sb = new StringBuffer();
+	//
+	// int curY = 0;
+	//
+	// sb.append(NetworkProvider.positionFormat.format(0));
+	// for (Int2D location : s.allLocations()) {
+	// if (location.y > curY) {
+	// sb.append("\n");
+	// curY++;
+	// sb.append(NetworkProvider.positionFormat.format(curY));
+	// }
+	// sb.append(Utils.padLeft(
+	// String.valueOf(Math.round(this.getCustomers(location))), 7));
+	// }
+	//
+	// return sb;
+	// }
+	//
+	// private StringBuffer printNetworkGrid() {
+	// StringBuffer sb = new StringBuffer();
+	// DecimalFormat positionFormat = new DecimalFormat("00");
+	// DecimalFormat numCustFormat = new DecimalFormat("0000000");
+	//
+	// int curY = 0;
+	//
+	// sb.append(positionFormat.format(0));
+	// for (Int2D location : s.allLocations()) {
+	// if (location.y > curY) {
+	// sb.append("\n");
+	// curY++;
+	// sb.append(positionFormat.format(curY));
+	// }
+	// sb.append(Utils.padLeft(
+	// String.valueOf(this.getNetworks(location).size()), 4));
+	// }
+	//
+	// return sb;
+	// }
+	//
+	// private StringBuffer printPriceGrid() {
+	// StringBuffer sb = new StringBuffer();
+	// int curY = 0;
+	//
+	// sb.append(NetworkProvider.positionFormat.format(0));
+	// for (Int2D location : s.allLocations()) {
+	// if (location.y > curY) {
+	// sb.append("\n");
+	// curY++;
+	// sb.append(NetworkProvider.positionFormat.format(curY));
+	// }
+	// EdgeNetwork net = (EdgeNetwork) getNetworkAt(EdgeNetwork.class,
+	// location);
+	// String price;
+	// if (net == null) {
+	// price = "   N/A";
+	// } else {
+	// price = NetworkProvider.priceFormat.format(net.getPrice());
+	// }
+	// sb.append(" " + price);
+	// }
+	//
+	// return sb;
+	// }
 
 	/**
 	 * NOTE: The order in which this function is called vis-a-vis other agents
@@ -240,13 +240,13 @@ public class NSP implements Steppable {
 	@Override
 	public void step(SimState state) {
 
-//		if (bankrupt)
-//			return;
+		// if (bankrupt)
+		// return;
 
-		ind.buildEdges(s,this);
-		ind.priceEdges(s,this);
-		ind.manageBackbone(s,this);
-		ind.priceBandwidth(s,this);
+		ind.buildEdges(s, this);
+		ind.priceEdges(s, this);
+		ind.manageBackbone(s, this);
+		ind.priceBandwidth(s, this);
 
 		// operate our backbone network
 		backbone.step(state);
@@ -265,44 +265,43 @@ public class NSP implements Steppable {
 		}
 
 		// Log price map
-//		if (TraceConfig.NSPPriceTables) {
-//			TraceConfig.out.println(this + " Price Map:\n" + printPriceGrid());
-//		}
+		// if (TraceConfig.NSPPriceTables) {
+		// TraceConfig.out.println(this + " Price Map:\n" + printPriceGrid());
+		// }
 
 		// Log customer map
-//		if (TraceConfig.NSPCustomerTables) {
-//			TraceConfig.out.println(this + " Customer Map:\n"
-//					+ printCustomerGrid());
-//		}
+		// if (TraceConfig.NSPCustomerTables) {
+		// TraceConfig.out.println(this + " Customer Map:\n"
+		// + printCustomerGrid());
+		// }
 		// Log this NSP's Network
-//		if (TraceConfig.networking.edgeStatus) {
-//			TraceConfig.out.println(this + " Network Map:\n"
-//					+ printNetworkGrid());
-//		}
+		// if (TraceConfig.networking.edgeStatus) {
+		// TraceConfig.out.println(this + " Network Map:\n"
+		// + printNetworkGrid());
+		// }
 
 		// Log ALL NSP's networks
-//		if (TraceConfig.networking.edgeStatus) {
-//			TraceConfig.out.println("Unified Network Map:\n"
-//					+ printAllNetworkGrid());
-//		}
+		// if (TraceConfig.networking.edgeStatus) {
+		// TraceConfig.out.println("Unified Network Map:\n"
+		// + printAllNetworkGrid());
+		// }
 		// Log edge congestion
-//		if (TraceConfig.networking.congestionNSPSummary) {
-//			TraceConfig.out.println(edgeUsageReport());
-//		}
+		// if (TraceConfig.networking.congestionNSPSummary) {
+		// TraceConfig.out.println(edgeUsageReport());
+		// }
 		// Log edge congestion
-//		if (TraceConfig.networking.edgeUsageSummary) {
-//			TraceConfig.out.println(edgeUsageReport());
-//		}
-//
-//		if (financials.getNetWorth() < -10000.0) {
-//			goBankrupt();
-//		}
-		
+		// if (TraceConfig.networking.edgeUsageSummary) {
+		// TraceConfig.out.println(edgeUsageReport());
+		// }
+		//
+		// if (financials.getNetWorth() < -10000.0) {
+		// goBankrupt();
+		// }
+
 	}
 
 	private void payForEdge(EdgeNetwork edgeNetwork) {
-		
-		
+
 	}
 
 	@Override

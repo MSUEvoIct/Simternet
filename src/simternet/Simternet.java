@@ -50,9 +50,12 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	public float edgeOpCostFixed;
 	public float edgeOpCostPerUser;
 	public float edgeInitialBandwidth;
+	public float congestionAdjustmentSpeed;
+
 
 	// ASP variables
 	public float aspEndowment;
+	public float qualityPrice;
 	public float qualityToBandwidthExponent;
 	public float applicationFlowGrowthProportion;
 
@@ -90,7 +93,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	public NSP[] allNSPs;
 	public Consumer[] allConsumers;
 	int aspIDs, nspIDs, consumerIDs;
-
+	
 	// Misc
 	public static final DecimalFormat nf = new DecimalFormat("0.###E0");
 
@@ -127,9 +130,16 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		edgeOpCostPerUser = pd.getFloat(pRoot.push("edgeOpCostPerUser"), null);
 		edgeInitialBandwidth = pd.getFloat(pRoot.push("edgeInitialBandwidth"),
 				null);
+		congestionAdjustmentSpeed = pd.getFloat(pRoot.push("congestionAdjustmentSpeed"),
+				null);
+		
 
 		// ASP Variables
 		aspEndowment = pd.getFloat(pRoot.push("aspEndowment"), null);
+		
+		qualityPrice = pd.getFloat(
+				pRoot.push("qualityPrice"), null);
+		
 		qualityToBandwidthExponent = pd.getFloat(
 				pRoot.push("qtyToBandwidthExponent"), null);
 

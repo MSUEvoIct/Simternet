@@ -16,7 +16,11 @@ public class ASP implements Steppable {
 	public Financials financials = new Financials();
 
 	/** Represents the investment made in the usefulness of the application */
-	public double quality;
+	double quality;
+
+	public double getQuality() {
+		return quality;
+	}
 
 	/** From [0..1]; closer to specialization of consumer -> higher utility */
 	public double specialization;
@@ -56,7 +60,7 @@ public class ASP implements Steppable {
 	@Override
 	public void step(SimState state) {
 		// Set quality
-		ind.setQuality(this,s);
+		ind.improveQuality(this,s);
 		
 		// Set price
 		ind.setPrice(this,s);
@@ -70,10 +74,14 @@ public class ASP implements Steppable {
 	public String toString() {
 		return "ASP" + id;
 	}
-
-	public float congestionAtEdge(byte x, byte y, byte nspID) {
-		// TODO Auto-generated method stub
-		return 0;
+	
+	public void improveQuality(double amount) {
+		// increase quality
+		quality += amount;
+		
+		// account for financial impact of the investment
+		double price = amount * s.qualityPrice;
+		financials.invest(price);
 	}
 
 	public void customerUse(byte custID, double population, byte x, byte y, byte nspID) {

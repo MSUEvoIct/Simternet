@@ -93,10 +93,10 @@ public class Consumer implements Steppable {
 		AppBenefit toReturn = new AppBenefit();
 		
 		ASP asp = s.allASPs[aspID];
-		double qualTerm = Math.pow(asp.quality, s.qualityExponent);
+		double qualTerm = Math.pow(asp.getQuality(), s.qualityExponent);
 		double prefDiff = Math.abs(this.preference - asp.specialization); 
 		double prefTerm = Math.pow(prefDiff, s.preferenceExponent);
-		double congest = s.allASPs[aspID].congestionAtEdge(x, y, nspID);
+		double congest = s.allNSPs[nspID].edgeNetworks[x][y].congestion[aspID];
 		double congestTerm = 1-congest;
 		
 		toReturn.aspID = aspID;
