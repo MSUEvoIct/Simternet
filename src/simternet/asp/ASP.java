@@ -6,6 +6,7 @@ import simternet.Financials;
 import simternet.Simternet;
 import simternet.consumer.Consumer;
 import simternet.network.DataCenter;
+import simternet.network.NetFlow;
 
 public class ASP implements Steppable {
 	private static final long serialVersionUID = 1L;
@@ -60,43 +61,42 @@ public class ASP implements Steppable {
 	@Override
 	public void step(SimState state) {
 		// Set quality
-		ind.improveQuality(this,s);
-		
+		ind.improveQuality(this, s);
+
 		// Set price
-		ind.setPrice(this,s);
-		
+		ind.setPrice(this, s);
+
 		// Update bandwidth
 		bandwidth = Math.pow(quality, s.qualityToBandwidthExponent);
-		
+
 	}
 
 	@Override
 	public String toString() {
 		return "ASP" + id;
 	}
-	
+
 	public void improveQuality(double amount) {
 		// increase quality
 		quality += amount;
-		
+
 		// account for financial impact of the investment
 		double price = amount * s.qualityPrice;
 		financials.invest(price);
 	}
 
-	public void customerUse(byte custID, double population, byte x, byte y, byte nspID) {
-		// TODO Auto-generated method stub
-		
-		
-		// TODO: Send data w/ datacenter
-		
+	public void customerUse(byte custID, double population, byte x, byte y,
+			byte nspID) {
+		// Send data to customer network
+		// TODO: Scale by population size
+		NetFlow flow = new NetFlow(this.id, datacenter,
+				s.allNSPs[nspID].edgeNetworks[x][y], bandwidth);
+		datacenter.originate(flow);
+
 		// Record revenue
 		double totalRevenue = population * this.price;
 		this.financials.earnRevenue(totalRevenue);
-		
-		
+
 	}
 
-	
-	
 }

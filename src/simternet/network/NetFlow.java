@@ -31,11 +31,11 @@ public class NetFlow {
 	 * The actual current bandwidth of this flow, which changes as it transits
 	 * the network.
 	 */
-	public float bandwidth;
-	public final float bandwidthRequested;
+	public double bandwidth;
+	public final double bandwidthRequested;
 
-	protected NetFlow(byte aspID, Network source, Network destination,
-			float bandwidth) {
+	public NetFlow(byte aspID, Network source, Network destination,
+			double bandwidth) {
 
 		// These checks are important for debugging to make sure that EA's
 		// cannot exploit
@@ -67,7 +67,7 @@ public class NetFlow {
 	 * @param bandwidth
 	 *            Restrict the flow to this maximum bandwidth
 	 */
-	public void congest(float bandwidth) {
+	public void congest(double bandwidth) {
 		if (this.bandwidth > bandwidth) {
 			this.bandwidth = bandwidth;
 		}
@@ -100,9 +100,9 @@ public class NetFlow {
 	// return congested;
 	// }
 
-	public float congestionRatio() {
-		float percentThrough = bandwidth / bandwidthRequested;
-		float percentCongested = 1 - percentThrough;
+	public double congestionRatio() {
+		double percentThrough = bandwidth / bandwidthRequested;
+		double percentCongested = 1 - percentThrough;
 		return percentCongested;
 	}
 

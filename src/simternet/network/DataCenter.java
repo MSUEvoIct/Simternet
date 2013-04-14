@@ -75,7 +75,7 @@ public class DataCenter extends Network {
 
 		EdgeNetwork destEdge = (EdgeNetwork) flow.destination;
 		
-		float estimatedBandwidth = destEdge.maxObservedBandwidth[owner.id];
+		double estimatedBandwidth = destEdge.maxObservedBandwidth[owner.id];
 				
 		if (TraceConfig.networking.aspFlowControl) {
 			TraceConfig.out.println(this
@@ -84,13 +84,13 @@ public class DataCenter extends Network {
 		}
 
 		// Try to increase the bandwidth by a fixed proportion (i.e., 10%)
-		float growthRatio = (1 + owner.s.applicationFlowGrowthProportion);
+		double growthRatio = (1 + owner.s.applicationFlowGrowthProportion);
 		if (estimatedBandwidth < flow.bandwidthRequested)
 			estimatedBandwidth = estimatedBandwidth * growthRatio;
 
 		// But make sure it's not too low.  Lower threshold same proportion
 		// of the requested bandwidth
-		float minimumBandwidth = flow.bandwidthRequested
+		double minimumBandwidth = flow.bandwidthRequested
 				* owner.s.applicationFlowGrowthProportion;
 		if (estimatedBandwidth < minimumBandwidth)
 			estimatedBandwidth = minimumBandwidth;

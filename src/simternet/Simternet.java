@@ -39,25 +39,25 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	public int landscapeSizeY;
 
 	// Finance varialbes
-	public float interestRate;
-	public float depreciationRate;
-	public float payoffRate;
+	public double interestRate;
+	public double depreciationRate;
+	public double payoffRate;
 
 	// NSP variables
-	public float nspEndowment;
-	public float edgeBuildCostFixed;
-	public float edgeBuildCostPerUser;
-	public float edgeOpCostFixed;
-	public float edgeOpCostPerUser;
-	public float edgeInitialBandwidth;
-	public float congestionAdjustmentSpeed;
+	public double nspEndowment;
+	public double edgeBuildCostFixed;
+	public double edgeBuildCostPerUser;
+	public double edgeOpCostFixed;
+	public double edgeOpCostPerUser;
+	public double edgeInitialBandwidth;
+	public double congestionAdjustmentSpeed;
 
 
 	// ASP variables
-	public float aspEndowment;
-	public float qualityPrice;
-	public float qualityToBandwidthExponent;
-	public float applicationFlowGrowthProportion;
+	public double aspEndowment;
+	public double qualityPrice;
+	public double qualityToBandwidthExponent;
+	public double applicationFlowGrowthProportion;
 
 	// Consumer Variables
 	public PopulationInitializer populationInitializer;

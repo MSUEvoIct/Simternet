@@ -26,13 +26,13 @@ public class EdgeNetwork extends Network {
 	/**
 	 * congestion[aspID] = that ASP's congestion on this network.
 	 */
-	public float[] congestion;
+	public double[] congestion;
 
 	/**
 	 * maxObservedBandwidth[aspID] = the maximum bandwidth seen from that asp to
 	 * this edge network. Used for flow control.
 	 */
-	public float[] maxObservedBandwidth;
+	public double[] maxObservedBandwidth;
 
 	/*************************
 	 * Operational Variables *
@@ -45,7 +45,7 @@ public class EdgeNetwork extends Network {
 		this.posX = posX;
 		this.posY = posY;
 
-		this.congestion = new float[owner.s.allASPs.length];
+		this.congestion = new double[owner.s.allASPs.length];
 
 		// TODO Edge networks currently have infinite bandwidth
 		maxBandwidth = Double.MAX_VALUE;
@@ -96,9 +96,9 @@ public class EdgeNetwork extends Network {
 
 		// convert to congestion metric
 		for (byte aspID = 0; aspID < requestedBW.length; aspID++) {
-			float fracNewCongestion = s.congestionAdjustmentSpeed;
-			float fracOldCongestion = 1 - s.congestionAdjustmentSpeed;
-			float newCongestion = 1 - (observedBW[aspID] / requestedBW[aspID]);
+			double fracNewCongestion = s.congestionAdjustmentSpeed;
+			double fracOldCongestion = 1 - s.congestionAdjustmentSpeed;
+			double newCongestion = 1 - (observedBW[aspID] / requestedBW[aspID]);
 
 			congestion[aspID] = congestion[aspID] * fracOldCongestion
 					+ fracNewCongestion * newCongestion;
