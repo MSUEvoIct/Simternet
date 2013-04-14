@@ -46,9 +46,11 @@ public class EdgeNetwork extends Network {
 		this.posY = posY;
 
 		this.congestion = new double[owner.s.allASPs.length];
+		
 
 		// TODO Edge networks currently have infinite bandwidth
 		maxBandwidth = Double.MAX_VALUE;
+		maxObservedBandwidth = new double[owner.s.allASPs.length];
 	}
 
 	BackboneLink getUpstreamIngress() {
@@ -98,7 +100,10 @@ public class EdgeNetwork extends Network {
 		for (byte aspID = 0; aspID < requestedBW.length; aspID++) {
 			double fracNewCongestion = s.congestionAdjustmentSpeed;
 			double fracOldCongestion = 1 - s.congestionAdjustmentSpeed;
-			double newCongestion = 1 - (observedBW[aspID] / requestedBW[aspID]);
+			
+			double newCongestion = 0;
+			if (requestedBW[aspID] > 0)
+				newCongestion = 1 - (observedBW[aspID] / requestedBW[aspID]);
 
 			congestion[aspID] = congestion[aspID] * fracOldCongestion
 					+ fracNewCongestion * newCongestion;
@@ -110,5 +115,12 @@ public class EdgeNetwork extends Network {
 		super.step(state);
 		netflowFinalProcess((Simternet) state);
 	}
+
+	@Override
+	public String toString() {
+		return owner + ".edge[" + posX + "][" + posY + "]";
+	}
+	
+	
 
 }

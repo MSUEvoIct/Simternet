@@ -48,6 +48,7 @@ public class ASP implements Steppable {
 		this.s = s;
 		this.ind = ind;
 		this.id = aspID;
+		this.datacenter = new DataCenter(this);
 	}
 
 	public double getCustomers() {

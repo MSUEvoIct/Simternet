@@ -22,6 +22,8 @@ import ec.Fitness;
 import ec.Individual;
 import ec.agency.eval.AgencyModel;
 import ec.agency.eval.EvaluationGroup;
+import ec.agency.io.DataOutputFile;
+import ec.agency.io.GenerationAggregatingDataOutputFile;
 import ec.simple.SimpleFitness;
 import ec.util.Parameter;
 import ec.util.ParameterDatabase;
@@ -52,7 +54,6 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	public double edgeInitialBandwidth;
 	public double congestionAdjustmentSpeed;
 
-
 	// ASP variables
 	public double aspEndowment;
 	public double qualityPrice;
@@ -71,6 +72,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	 *************************/
 
 	// Give Simternet an awareness of its place in an EC run.
+	int job = 0;
 	int generation;
 	int simulationID;
 	int steps;
@@ -93,9 +95,12 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	public NSP[] allNSPs;
 	public Consumer[] allConsumers;
 	int aspIDs, nspIDs, consumerIDs;
-	
+
 	// Misc
 	public static final DecimalFormat nf = new DecimalFormat("0.###E0");
+
+	// Data Output
+	public static DataOutputFile out = null;
 
 	/**
 	 * Initializes the simulation with a default seed. A no-arg constructor is
@@ -111,6 +116,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	@Override
 	public void setup(EvolutionState evoState, Parameter base) {
 		setup(evoState.parameters, base);
+		job = (Integer) evoState.job[0];
 	}
 
 	public void setup(ParameterDatabase pd, Parameter base) {
@@ -130,16 +136,14 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		edgeOpCostPerUser = pd.getFloat(pRoot.push("edgeOpCostPerUser"), null);
 		edgeInitialBandwidth = pd.getFloat(pRoot.push("edgeInitialBandwidth"),
 				null);
-		congestionAdjustmentSpeed = pd.getFloat(pRoot.push("congestionAdjustmentSpeed"),
-				null);
-		
+		congestionAdjustmentSpeed = pd.getFloat(
+				pRoot.push("congestionAdjustmentSpeed"), null);
 
 		// ASP Variables
 		aspEndowment = pd.getFloat(pRoot.push("aspEndowment"), null);
-		
-		qualityPrice = pd.getFloat(
-				pRoot.push("qualityPrice"), null);
-		
+
+		qualityPrice = pd.getFloat(pRoot.push("qualityPrice"), null);
+
 		qualityToBandwidthExponent = pd.getFloat(
 				pRoot.push("qtyToBandwidthExponent"), null);
 
@@ -167,7 +171,24 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			throw new RuntimeException(e);
 		}
 
+		initOutput();
+		
 		beenSetup = true;
+	}
+
+	private void initOutput() {
+		if (Simternet.out == null) {
+			String fileName = "Simternet.out.job" + job;
+			String[] colNames = new String[6];
+			colNames[0] = "Generation";
+			colNames[1] = "aspInvestment";
+			colNames[2] = "aspProfit";
+			colNames[3] = "nspInvestment";
+			colNames[4] = "nspProfit";
+			colNames[5] = "consumerSurplus";
+			Simternet.out = new GenerationAggregatingDataOutputFile(fileName,
+					colNames);
+		}
 	}
 
 	@Override
@@ -179,6 +200,41 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			// TODO: Does anything else need to be run besides the MASON
 			// schedule?
 		}
+
+		// Output some data
+		Object[] data = new Object[6];
+		data[0] = generation;
+
+		// ASP Total Investment
+		// ASP Total Profits
+		double aspTotalInvestment = 0;
+		double aspTotalProfit = 0;
+		for (int i = 0; i < allASPs.length; i++) {
+			aspTotalProfit += allASPs[i].financials.getBalance();
+			aspTotalInvestment += allASPs[i].financials.totalInvested;
+		}
+		data[1] = aspTotalInvestment;
+		data[2] = aspTotalProfit;
+
+		// NSP Total Profits
+		// NSP Total Investment
+		double nspTotalInvestment = 0;
+		double nspTotalProfit = 0;
+		for (int i = 0; i < allNSPs.length; i++) {
+			nspTotalProfit += allNSPs[i].financials.getBalance();
+			nspTotalInvestment += allNSPs[i].financials.totalInvested;
+		}
+		data[3] = nspTotalInvestment;
+		data[4] = nspTotalProfit;
+
+		// Consumer Surplus
+		double totalConsumerSurplus = 0;
+		for (int i = 0; i < allConsumers.length; i++) {
+			totalConsumerSurplus += allConsumers[i].totalSurplus;
+		}
+		data[5] = totalConsumerSurplus;
+		
+		out.writeTuple(data);
 
 	}
 
