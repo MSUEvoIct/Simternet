@@ -64,24 +64,29 @@ public class RationalConsumer extends FloatVectorIndividual implements
 				// Get list of benefits for edge networks
 				List<EdgeBenefit> edgeBenefits = consumer.getEdgeBenefitsAt(x, y);
 				
-				
-				// Sort by consumer surplus
-				EdgeBenefit topEdge = Collections.max(edgeBenefits,
-						new Comparator<Consumer.EdgeBenefit>() {
+				if (edgeBenefits.size() > 0) {
+					// Sort by consumer surplus
+					EdgeBenefit topEdge = Collections.max(edgeBenefits,
+							new Comparator<Consumer.EdgeBenefit>() {
 
-							@Override
-							public int compare(Consumer.EdgeBenefit o1,
-									Consumer.EdgeBenefit o2) {
-								if (o1.surplus() < o2.surplus())
-									return 1;
-								if (o1.surplus() > o2.surplus())
-									return -1;
-								return 0;
-							}
-						});
+								@Override
+								public int compare(Consumer.EdgeBenefit o1,
+										Consumer.EdgeBenefit o2) {
+									if (o1.surplus() < o2.surplus())
+										return 1;
+									if (o1.surplus() > o2.surplus())
+										return -1;
+									return 0;
+								}
+							});
+					
+					byte nspToUse = topEdge.nspID;
+					consumer.nspUsed[x][y] = nspToUse;					
+				} else {
+					consumer.nspUsed[x][y] = -1;  // no benefits, no use
+				}
 				
-				byte nspToUse = topEdge.nspID;
-				consumer.nspUsed[x][y] = nspToUse;
+
 			}
 		}
 

@@ -235,14 +235,16 @@ public class Consumer implements Steppable {
 	void consumeApplications() {
 		for (byte x = 0; x < s.landscapeSizeX; x++) {
 			for (byte y = 0; y < s.landscapeSizeY; y++) {
-				for (Byte aspID : this.aspSubscriptions[x][y]) {
-					ASP asp = s.allASPs[aspID];
-					asp.customerUse(this.id, this.population[x][y], x, y,
-							this.nspUsed[x][y]);
-
-					// TODO track usage on consumer side?
-
+				// Only consume if we have a network
+				if (nspUsed[x][y] >= 0) {
+					for (Byte aspID : this.aspSubscriptions[x][y]) {
+						ASP asp = s.allASPs[aspID];
+						asp.customerUse(this.id, this.population[x][y], x, y,
+								this.nspUsed[x][y]);
+						// TODO track usage on consumer side?
+					}
 				}
+				
 			}
 		}
 	}
