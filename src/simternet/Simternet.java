@@ -414,7 +414,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		}
 
 		// put in all the NSPs
-		for (byte nspID = 0; nspID < allASPs.length; nspID++) {
+		for (byte nspID = 0; nspID < allNSPs.length; nspID++) {
 			Individual ind = (Individual) allNSPs[nspID].ind;
 			SimpleFitness fit = new SimpleFitness();
 			float fitMeasure = (float) allNSPs[nspID].financials.getBalance();
