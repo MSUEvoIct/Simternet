@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import simternet.Simternet;
 import simternet.asp.ASP;
+import simternet.asp.UnitASPIndividual;
 import simternet.consumer.Consumer;
 import simternet.consumer.RationalConsumer;
 import simternet.nsp.NSP;

@@ -62,10 +62,11 @@ public class ASP implements Steppable {
 	@Override
 	public void step(SimState state) {
 		// Set quality
-		ind.improveQuality(this, s);
+		double qualToAdd = ind.improveQuality(new QualityStimulus(this));
+		this.improveQuality(qualToAdd);
 
 		// Set price
-		ind.setPrice(this, s);
+		price = ind.setPrice(new PriceStimulus(this));
 
 		// Update bandwidth
 		bandwidth = Math.pow(quality, s.qualityToBandwidthExponent);
