@@ -1,8 +1,6 @@
-package simternet.junit;
+package simternet.nsp;
 
 import simternet.Simternet;
-import simternet.nsp.NSP;
-import simternet.nsp.NSPIndividual;
 import ec.vector.FloatVectorIndividual;
 
 public class UnitNSPIndividual extends FloatVectorIndividual implements NSPIndividual {
