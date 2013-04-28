@@ -36,7 +36,7 @@ public class NSP implements Steppable {
 	public Backbone backbone;
 	public EdgeNetwork[][] edgeNetworks;
 
-	// Reference to the main sumulation object
+	// Reference to the main simulation object
 	public Simternet s;
 
 	// The individual/agent controlling this NSP.

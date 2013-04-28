@@ -15,6 +15,7 @@ import simternet.asp.ASPIndividual;
 import simternet.consumer.Consumer;
 import simternet.consumer.ConsumerIndividual;
 import simternet.consumer.PopulationInitializer;
+import simternet.network.BackboneLink;
 import simternet.nsp.NSP;
 import simternet.nsp.NSPIndividual;
 import ec.EvolutionState;
@@ -296,7 +297,27 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			allConsumers[i] = c;
 			i++;
 		}
+		
+		// TODO for future consideration, are more complex network structures
+		// appropriate?
+		fullMesh();
+		
 
+	}
+
+	private void fullMesh() {
+		// Connect all ASPs to all NSPs
+		for(ASP asp : allASPs) {
+			for (NSP nsp : allNSPs) {
+				// Backbone links automatically take care of connecting themselves
+				// with the source and target networks.
+				// TODO:  Magic initial bandwidth
+				BackboneLink bb = new BackboneLink(asp.datacenter, nsp.backbone, 1E8);
+			}
+		}
+		
+		
+		
 	}
 
 	protected NSP createNSP(NSPIndividual nspInd, byte nspID) {
