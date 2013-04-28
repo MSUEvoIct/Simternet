@@ -116,7 +116,10 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	@Override
 	public void setup(EvolutionState evoState, Parameter base) {
 		setup(evoState.parameters, base);
-		job = (Integer) evoState.job[0];
+		if (evoState.job != null)
+			job = (Integer) evoState.job[0];
+		else
+			job = 0;
 	}
 
 	public void setup(ParameterDatabase pd, Parameter base) {
@@ -178,7 +181,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 
 	private void initOutput() {
 		if (Simternet.out == null) {
-			String fileName = "Simternet.out.job" + job;
+			String fileName = "Simternet.out.job" + job + ".tsv";
 			String[] colNames = new String[6];
 			colNames[0] = "Generation";
 			colNames[1] = "aspInvestment";
@@ -421,6 +424,17 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			fit.setFitness(null, fitMeasure, false);
 			fitnesses.put(ind, fit);
 		}
+		
+		// put in all the consumers (by total surplus)
+		// (probably have nothing to mutate, but...)
+		for (byte consumerID = 0; consumerID < allConsumers.length; consumerID++) {
+			Individual ind = (Individual) allConsumers[consumerID].ind;
+			SimpleFitness fit = new SimpleFitness();
+			float fitMeasure = (float) allConsumers[consumerID].totalSurplus;
+			fit.setFitness(null, fitMeasure, false);
+			fitnesses.put(ind, fit);
+		}
+		
 
 		return fitnesses;
 	}
