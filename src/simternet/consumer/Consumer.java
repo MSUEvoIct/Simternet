@@ -23,7 +23,7 @@ public class Consumer implements Steppable {
 
 	Simternet s;
 	public byte id;
-	ConsumerIndividual ind;
+	public ConsumerIndividual ind;
 
 	public float[][] population;
 
