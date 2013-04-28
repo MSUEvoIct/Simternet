@@ -36,7 +36,7 @@ public class ASP implements Steppable {
 	double bandwidth;
 
 	/** Network Operations */
-	DataCenter datacenter;
+	public DataCenter datacenter;
 
 	/** Reference to the main simulation object */
 	public Simternet s;
