@@ -153,15 +153,9 @@ public class BackboneLink implements Serializable {
 		source.receiveRoute(directlyConnected);
 	}
 
-	/**
-	 * TODO: Obviously, 5.0E7 is not infinite...
-	 * 
-	 */
 	public void makeInfinite() {
 		inherentLatency = 0D;
-		// this.bandwidth = Double.MAX_VALUE;
-		bandwidth = 5.0E7;
-
+		this.bandwidth = Double.MAX_VALUE;
 	}
 
 	/**
