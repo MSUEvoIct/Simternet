@@ -12,7 +12,7 @@ import simternet.TraceConfig;
 
 /**
  * A BackboneLink is a simplex connection between two Networks. BackboneLinks
- * are roughly analagous to router 'interfaces'. While its endpoints cannot be
+ * are roughly analogous to router 'interfaces'. While its end-points cannot be
  * modified once this object has been instantiated (they are marked 'final'),
  * its bandwidth, latency, and congestion properties can.
  * 
@@ -54,12 +54,12 @@ public class BackboneLink implements Serializable {
 
 	/**
 	 * The link adds this amount of latency, or delay, to each flow which it
-	 * transmits, in addition to whatever latency may be added due to queueing.
+	 * transmits, in addition to whatever latency may be added due to queuing.
 	 */
 	private Double					inherentLatency			= 0.0;
 
 	/**
-	 * This is the set of network flows which the source/transmittion network
+	 * This is the set of network flows which the source/transmission network
 	 * would like to send using this link. They are not transmitted (placed in
 	 * the outputQueue) until processing by this link's congestion algorithm. It
 	 * is analogous to the output queue of the transmitting router for this
@@ -122,29 +122,7 @@ public class BackboneLink implements Serializable {
 		source.egressLinks.remove(destination);
 	}
 
-	public Double getBandwidth() {
-		return bandwidth;
-	}
 
-	public CongestionAlgorithm getCongestionAlgorithm() {
-		return congestionAlgorithm;
-	}
-
-	public Network getDestination() {
-		return destination;
-	}
-
-	public Double getLatency() {
-		return inherentLatency;
-	}
-
-	public RoutingProtocolConfig getRoutingProtocolConfig() {
-		return routingProtocolConfig;
-	}
-
-	public Network getSource() {
-		return source;
-	}
 
 	private void initRoutingTable() {
 		routingTable = new HashMap<Network, Route>();
@@ -186,8 +164,8 @@ public class BackboneLink implements Serializable {
 	}
 
 	public void setBandwidth(Double bandwidth) {
-		if (bandwidth < 0) {
-			this.bandwidth = 0.0;
+		if (bandwidth < Double.MIN_NORMAL) {
+			this.bandwidth = Double.MIN_NORMAL;
 		} else {
 			this.bandwidth = bandwidth;
 		}
@@ -346,4 +324,29 @@ public class BackboneLink implements Serializable {
 		return 1 - fracServed;
 	}
 
+	public Double getBandwidth() {
+		return bandwidth;
+	}
+
+	public CongestionAlgorithm getCongestionAlgorithm() {
+		return congestionAlgorithm;
+	}
+
+	public Network getDestination() {
+		return destination;
+	}
+
+	public Double getLatency() {
+		return inherentLatency;
+	}
+
+	public RoutingProtocolConfig getRoutingProtocolConfig() {
+		return routingProtocolConfig;
+	}
+
+	public Network getSource() {
+		return source;
+	}
+	
+	
 }
