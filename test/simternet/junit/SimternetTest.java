@@ -17,6 +17,7 @@ import simternet.asp.UnitASPIndividual;
 import simternet.consumer.Consumer;
 import simternet.consumer.RationalConsumer;
 import simternet.nsp.NSP;
+import simternet.nsp.UnitNSPIndividual;
 import ec.Fitness;
 import ec.Individual;
 import ec.agency.eval.EvaluationGroup;
