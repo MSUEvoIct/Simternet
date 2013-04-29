@@ -37,10 +37,10 @@ public class EdgeNetwork extends Network {
 	/*************************
 	 * Operational Variables *
 	 *************************/
-	byte posX, posY;
+	int posX, posY;
 	NSP owner;
 
-	public EdgeNetwork(NSP owner, byte posX, byte posY) {
+	public EdgeNetwork(NSP owner, int posX, int posY) {
 		this.owner = owner;
 		this.posX = posX;
 		this.posY = posY;
