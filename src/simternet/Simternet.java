@@ -6,6 +6,8 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.math.stat.descriptive.SummaryStatistics;
+
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -102,6 +104,17 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 
 	// Data Output
 	public static DataOutputFile out = null;
+	
+	
+	// Tracking Variables.
+	SummaryStatistics edgePrice = new SummaryStatistics();
+	SummaryStatistics edgeSubscriptions = new SummaryStatistics();
+	SummaryStatistics edgeGini = new SummaryStatistics();
+	
+	SummaryStatistics aspPrice = new SummaryStatistics();
+	SummaryStatistics aspSubscriptions = new SummaryStatistics();
+	SummaryStatistics aspGini = new SummaryStatistics();
+	
 
 	/**
 	 * Initializes the simulation with a default seed. A no-arg constructor is
@@ -475,5 +488,9 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		}
 		return numEdges;
 	}
+	
+
+
+	
 
 }
