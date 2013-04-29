@@ -176,7 +176,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		}
 
 		initOutput();
-		
+
 		beenSetup = true;
 	}
 
@@ -237,7 +237,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			totalConsumerSurplus += allConsumers[i].totalSurplus;
 		}
 		data[5] = totalConsumerSurplus;
-		
+
 		out.writeTuple(data);
 
 	}
@@ -297,27 +297,26 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			allConsumers[i] = c;
 			i++;
 		}
-		
+
 		// TODO for future consideration, are more complex network structures
 		// appropriate?
 		fullMesh();
-		
 
 	}
 
 	private void fullMesh() {
 		// Connect all ASPs to all NSPs
-		for(ASP asp : allASPs) {
+		for (ASP asp : allASPs) {
 			for (NSP nsp : allNSPs) {
-				// Backbone links automatically take care of connecting themselves
+				// Backbone links automatically take care of connecting
+				// themselves
 				// with the source and target networks.
-				// TODO:  Magic initial bandwidth
-				BackboneLink bb = new BackboneLink(asp.datacenter, nsp.backbone, 1E8);
+				// TODO: Magic initial bandwidth
+				BackboneLink bb = new BackboneLink(asp.datacenter,
+						nsp.backbone, 1E8);
 			}
 		}
-		
-		
-		
+
 	}
 
 	protected NSP createNSP(NSPIndividual nspInd, byte nspID) {
@@ -445,9 +444,10 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			fit.setFitness(null, fitMeasure, false);
 			fitnesses.put(ind, fit);
 		}
-		
+
 		// put in all the consumers (by total surplus)
-		// (probably have nothing to mutate, but...)
+		// (probably have nothing to mutate, but ECJ/Agency needs non-null
+		// fitness)
 		for (byte consumerID = 0; consumerID < allConsumers.length; consumerID++) {
 			Individual ind = (Individual) allConsumers[consumerID].ind;
 			SimpleFitness fit = new SimpleFitness();
@@ -455,16 +455,25 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			fit.setFitness(null, fitMeasure, false);
 			fitnesses.put(ind, fit);
 		}
-		
 
 		return fitnesses;
 	}
 
-	public double getTotalPopulation(byte x, byte y) {
+	public double getTotalPopulation(int x, int y) {
 		double totalPopulation = 0;
 		for (Consumer c : allConsumers)
 			totalPopulation += c.population[x][y];
 		return totalPopulation;
+	}
+
+	public int getNumEdges(int x, int y) {
+		int numEdges = 0;
+		for (NSP nsp : allNSPs) {
+			if (nsp.hasNetworkAt(x, y)) {
+				numEdges++;
+			}
+		}
+		return numEdges;
 	}
 
 }
