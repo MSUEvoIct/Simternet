@@ -80,7 +80,10 @@ public class RationalConsumer extends FloatVectorIndividual implements
 								}
 							});
 					
-					byte nspToUse = topEdge.nspID;
+					// make sure edge surplus is positive.
+					byte nspToUse = -1;
+					if (topEdge.surplus() > 0)
+						nspToUse = topEdge.nspID;
 					consumer.nspUsed[x][y] = nspToUse;					
 				} else {
 					consumer.nspUsed[x][y] = -1;  // no benefits, no use
