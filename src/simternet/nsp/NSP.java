@@ -1,5 +1,8 @@
 package simternet.nsp;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Int2D;
@@ -60,7 +63,7 @@ public class NSP implements Steppable {
 	 *            The location of the network.
 	 */
 	@SuppressWarnings("unused")
-	public void buildNetwork(byte x, byte y) {
+	public void buildNetwork(int x, int y) {
 		// DEBUG
 		if (false)
 			System.out.println(this + " building edge @ " + x + "," + y);
@@ -102,14 +105,15 @@ public class NSP implements Steppable {
 		}
 	}
 
-	public void setASPTransitPrice(byte aspID, double price) {
+	public void setASPTransitPrice(int aspID, double price) {
+		if (aspTransitPrices == null)
+			aspTransitPrices = new double[s.allASPs.length];
 		aspTransitPrices[aspID] = limitAspTransitPrice(price);
 	}
 
 	/**
 	 * @return the total number of customers the provider currently has.
 	 */
-	@SuppressWarnings("unchecked")
 	public double getCustomers() {
 		double numCustomers = 0.0;
 		for (Consumer c : s.allConsumers) {
@@ -121,8 +125,7 @@ public class NSP implements Steppable {
 	/**
 	 * @return The total number of customers at the specified location.
 	 */
-	@SuppressWarnings("unchecked")
-	public double getCustomers(byte x, byte y) {
+	public double getCustomers(int x, int y) {
 		Double numCustomers = 0.0;
 		for (Consumer c : s.allConsumers) {
 			numCustomers += c.getNSPSubscribers(x, y, id);
@@ -137,7 +140,7 @@ public class NSP implements Steppable {
 		// TODO: Complete
 	}
 
-	public boolean hasNetworkAt(byte x, byte y) {
+	public boolean hasNetworkAt(int x, int y) {
 		if (edgeNetworks[x][y] == null)
 			return false;
 		else
@@ -243,10 +246,24 @@ public class NSP implements Steppable {
 		// if (bankrupt)
 		// return;
 
-		ind.buildEdges(s, this);
-		ind.priceEdges(s, this);
-		ind.manageBackbone(s, this);
-		ind.priceBandwidth(s, this);
+		// Possibly Build EdgeNetworks
+		for (EdgeBuildingStimulus ebs : makeEdgeBuildingStimuli()) {
+			boolean build = ind.buildEdge(ebs);
+			if (build)
+				buildNetwork(ebs.location.x, ebs.location.y);
+		}
+
+		// Price the EdgeNetworks we've built
+		for (EdgePricingStimulus eps : makeEdgePricingStimuli()) {
+			double price = ind.priceEdge(eps);
+			setEdgePrice(eps.location.x, eps.location.y, price);
+		}
+		
+		// Price ASP BackboneLink connections
+		for (BackbonePricingStimulus bps : makeBackbonePricingStimuli()) {
+			double price = ind.priceBackboneLink(bps);
+			setASPTransitPrice(bps.aspID, price);
+		}
 
 		// operate our backbone network
 		backbone.step(state);
@@ -255,7 +272,7 @@ public class NSP implements Steppable {
 		for (Int2D loc : s.getAllLocations()) {
 			if (edgeNetworks[loc.x][loc.y] != null) {
 				edgeNetworks[loc.x][loc.y].step(state);
-				payForEdge(edgeNetworks[loc.x][loc.y]);
+				payForEdge(loc.x, loc.y);
 			}
 		}
 
@@ -300,13 +317,66 @@ public class NSP implements Steppable {
 
 	}
 
-	private void payForEdge(EdgeNetwork edgeNetwork) {
+	private List<EdgeBuildingStimulus> makeEdgeBuildingStimuli() {
+		ArrayList<EdgeBuildingStimulus> stimuli = new ArrayList<EdgeBuildingStimulus>();
+		for (Int2D loc : s.getAllLocations()) {
+			if (edgeNetworks[loc.x][loc.y] == null) {
+				// Then we don't already have a network here
+				EdgeBuildingStimulus ebs = new EdgeBuildingStimulus();
+				ebs.location = loc;
+				ebs.numEdges = s.getNumEdges(loc.x, loc.y);
+				ebs.random = s.random;
+				stimuli.add(ebs);
+			}
+		}
+		return stimuli;
+	}
 
+	private List<EdgePricingStimulus> makeEdgePricingStimuli() {
+		ArrayList<EdgePricingStimulus> stimuli = new ArrayList<EdgePricingStimulus>();
+		for (Int2D loc : s.getAllLocations()) {
+			if (edgeNetworks[loc.x][loc.y] != null) {
+				// Then we have a network here
+				EdgePricingStimulus eps = new EdgePricingStimulus();
+				eps.location = loc;
+				eps.numEdges = s.getNumEdges(loc.x, loc.y);
+				eps.random = s.random;
+				
+				
+				stimuli.add(eps);
+			}
+		}
+		return stimuli;
+	}
+
+	private List<BackbonePricingStimulus> makeBackbonePricingStimuli() {
+		ArrayList<BackbonePricingStimulus> stimuli = new ArrayList<BackbonePricingStimulus>();
+		for (int aspID = 0; aspID < s.allASPs.length; aspID++) {
+			BackbonePricingStimulus bps = new BackbonePricingStimulus();
+			bps.aspID = aspID;
+			stimuli.add(bps);
+		}
+		return stimuli;
+	}
+
+	private void payForEdge(int x, int y) {
+		// only pay if we have an edge here
+		if (edgeNetworks[x][y] != null) {
+			double cost = s.edgeOpCostFixed;
+			cost += s.edgeOpCostPerUser * getCustomers(x, y);
+			financials.payExpense(cost);
+		}
 	}
 
 	@Override
 	public String toString() {
 		return "NSP" + id;
+	}
+	
+	private void setEdgePrice(int x, int y, double price) {
+		if (price < Double.MIN_NORMAL)
+			price = Double.MIN_NORMAL;
+		edgeNetworks[x][y].price = price;
 	}
 
 }
