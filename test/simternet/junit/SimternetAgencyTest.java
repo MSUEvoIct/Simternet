@@ -16,7 +16,7 @@ public class SimternetAgencyTest {
 	public void test() {
 		String[] args = new String[2];
 		args[0] = "-file";
-		args[1] = "test/simternet/junit/simternet.test.properties";
+		args[1] = "test/simternet/junit/simternet.test2.properties";
 
 		EvolveTest.main(args);
 
