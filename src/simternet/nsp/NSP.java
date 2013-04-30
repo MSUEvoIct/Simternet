@@ -117,7 +117,7 @@ public class NSP implements Steppable {
 	public double getCustomers() {
 		double numCustomers = 0.0;
 		for (Consumer c : s.allConsumers) {
-			numCustomers += c.getNSPSubscrubers(id);
+			numCustomers += c.getNSPSubscribers(id);
 		}
 		return numCustomers;
 	}
