@@ -194,13 +194,19 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	private void initOutput() {
 		if (Simternet.out == null) {
 			String fileName = "Simternet.out.job" + job + ".tsv";
-			String[] colNames = new String[6];
+			String[] colNames = new String[12];
 			colNames[0] = "Generation";
 			colNames[1] = "aspInvestment";
 			colNames[2] = "aspProfit";
 			colNames[3] = "nspInvestment";
 			colNames[4] = "nspProfit";
 			colNames[5] = "consumerSurplus";
+			colNames[6] = "edgePrice";
+			colNames[7] = "edgeSubscriptions";
+			colNames[8] = "edgeGini";
+			colNames[9] = "aspPrice";
+			colNames[10] = "aspSubscriptions";
+			colNames[11] = "aspGini";
 			Simternet.out = new GenerationAggregatingDataOutputFile(fileName,
 					colNames);
 		}
@@ -218,7 +224,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		}
 
 		// Output some data
-		Object[] data = new Object[6];
+		Object[] data = new Object[12];
 		data[0] = generation;
 
 		// ASP Total Investment
@@ -249,6 +255,14 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			totalConsumerSurplus += allConsumers[i].totalSurplus;
 		}
 		data[5] = totalConsumerSurplus;
+
+		// We've already been keeping track of these...
+		data[6] = edgePrice.getMean();
+		data[7] = edgeSubscriptions.getMean();
+		data[8] = edgeGini.getMean();
+		data[9] = aspPrice.getMean();
+		data[10] = aspSubscriptions.getMean();
+		data[11] = aspGini.getMean();
 
 		out.writeTuple(data);
 
@@ -533,25 +547,38 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			for (byte nspID = 0; nspID < allNSPs.length; nspID++) {
 				edgeSubs[nspID] = 0;
 				for (Consumer c : allConsumers) {
-					edgeSubs[nspID] += c.getNSPSubscribers(loc.x, loc.y, nspID);
-					locEdgeSubs += edgeSubs[nspID];
-					totEdgeSubs += edgeSubs[nspID];
+					double numSubs = c.getNSPSubscribers(loc.x, loc.y, nspID);
+					edgeSubs[nspID] += numSubs;
+					locEdgeSubs += numSubs;
+					totEdgeSubs += numSubs;
 				}
 			}
+
 			/*
-			 * Use the per-NSP and total subs counts to get a GINI measure for
-			 * this location
+			 * Only calculate and sample GINI if there are non-zero edge
+			 * subscriptions in this market.
 			 */
-			double nspGiniSample = 0;
-			for (byte nspID = 0; nspID < allNSPs.length; nspID++) {
-				double ratioSubs = edgeSubs[nspID] / locEdgeSubs;
-				double percent = ratioSubs * 100;
-				double giniContribution = percent * percent;
-				nspGiniSample += giniContribution;
+			if (locEdgeSubs >= Double.MIN_NORMAL) {
+
+				/*
+				 * Use the per-NSP and total subs counts to get a GINI measure
+				 * for this location
+				 */
+				double nspGiniSample = 0;
+				for (byte nspID = 0; nspID < allNSPs.length; nspID++) {
+					double ratioSubs = edgeSubs[nspID] / locEdgeSubs;
+					double percent = ratioSubs * 100;
+					double giniContribution = percent * percent;
+					nspGiniSample += giniContribution;
+				}
+				this.edgeGini.addValue(nspGiniSample);
 			}
-			this.edgeGini.addValue(nspGiniSample);
 
 		}
+		
+		if ( (totEdgeSubs / totPop) > 1 )
+			System.out.println("Debug here");
+		
 
 		edgeSubscriptions.addValue(totEdgeSubs / totPop);
 	}
