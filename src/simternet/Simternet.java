@@ -492,6 +492,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	
 	private void doMeasurements() {
 		measureEdgePrices();
+		measureEdgeSubscriptions();
 	}
 	
 	/**
@@ -508,6 +509,23 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Measures the proportion of users subscribed to an edge network.  Should
+	 * always be in the range [0..1)
+	 */
+	private void measureEdgeSubscriptions() {
+		int subscriptions = 0;
+		int consumers = 1;  // bias should be negligible, prevents /0 error
+		for (Int2D loc : getAllLocations()) {
+			for (Consumer c : allConsumers) {
+				if (c.nspUsed[loc.x][loc.y] != -1)
+					subscriptions++;
+				consumers++;
+			}
+		}
+		edgeSubscriptions.addValue(subscriptions/consumers);
 	}
 	
 	
