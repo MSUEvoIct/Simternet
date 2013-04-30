@@ -493,6 +493,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		measureEdgeSubscriptions();
 
 		measureAspPrices();
+		measureASPSubscrptions();
 	}
 
 	/**
@@ -538,6 +539,23 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		for (ASP asp : allASPs) {
 			aspPrice.addValue(asp.price);
 		}
+	}
+	
+	/**
+	 * Returns the average number of ASP subscriptions per customer.  This
+	 * should be a value in the range [0..numASPs), since there is no hard 
+	 * limit on the number of ASPs that can be used, just a budget constraint.
+	 */
+	private void measureASPSubscrptions() {
+		int numSubscriptions = 0;
+		int numConsumers = 1; // bias should be negligible, prevents /0 error
+		for (Int2D loc : getAllLocations()) {
+			for (Consumer c : allConsumers) {
+				numSubscriptions += c.aspSubscriptions[loc.x][loc.y].size();
+				numConsumers++;
+			}
+		}
+		aspSubscriptions.addValue(numSubscriptions/numConsumers);
 	}
 
 }
