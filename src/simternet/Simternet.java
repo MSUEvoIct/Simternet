@@ -490,7 +490,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 
 	private void doMeasurements() {
 		measureEdgePrices();
-		measureEdgeSubscriptions();
+		measureEdgeSubsAndGini();
 
 		measureAspPrices();
 		measureASPSubsAndGini();
@@ -516,17 +516,44 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	 * Measures the proportion of users subscribed to an edge network. Should
 	 * always be in the range [0..1)
 	 */
-	private void measureEdgeSubscriptions() {
-		int subscriptions = 0;
-		int consumers = 1; // bias should be negligible, prevents /0 error
+	private void measureEdgeSubsAndGini() {
+		double totPop = Double.MIN_NORMAL; // prevents /0 w/ negligible bias
+		double totEdgeSubs = 0;
+
 		for (Int2D loc : getAllLocations()) {
-			for (Consumer c : allConsumers) {
-				if (c.nspUsed[loc.x][loc.y] != -1)
-					subscriptions++;
-				consumers++;
+
+			totPop += getTotalPopulation(loc.x, loc.y);
+
+			/*
+			 * Get the per NSP and total # of edge subs at this location. Keep
+			 * Track total subs at all locations while we're at it.
+			 */
+			double locEdgeSubs = Double.MIN_NORMAL; // prevents /0
+			double[] edgeSubs = new double[allNSPs.length];
+			for (byte nspID = 0; nspID < allNSPs.length; nspID++) {
+				edgeSubs[nspID] = 0;
+				for (Consumer c : allConsumers) {
+					edgeSubs[nspID] += c.getNSPSubscribers(loc.x, loc.y, nspID);
+					locEdgeSubs += edgeSubs[nspID];
+					totEdgeSubs += edgeSubs[nspID];
+				}
 			}
+			/*
+			 * Use the per-NSP and total subs counts to get a GINI measure for
+			 * this location
+			 */
+			double nspGiniSample = 0;
+			for (byte nspID = 0; nspID < allNSPs.length; nspID++) {
+				double ratioSubs = edgeSubs[nspID] / locEdgeSubs;
+				double percent = ratioSubs * 100;
+				double giniContribution = percent * percent;
+				nspGiniSample += giniContribution;
+			}
+			this.edgeGini.addValue(nspGiniSample);
+
 		}
-		edgeSubscriptions.addValue(subscriptions / consumers);
+
+		edgeSubscriptions.addValue(totEdgeSubs / totPop);
 	}
 
 	/**
@@ -540,26 +567,26 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			aspPrice.addValue(asp.price);
 		}
 	}
-	
+
 	/**
-	 * Returns the average number of ASP subscriptions per customer.  This
-	 * should be a value in the range [0..numASPs), since there is no hard 
-	 * limit on the number of ASPs that can be used, just a budget constraint.
+	 * Returns the average number of ASP subscriptions per customer. This should
+	 * be a value in the range [0..numASPs), since there is no hard limit on the
+	 * number of ASPs that can be used, just a budget constraint.
 	 */
 	private void measureASPSubsAndGini() {
 		double totalPop = Double.MIN_NORMAL; // prevents /0 w/ trivial bias
 		for (Int2D loc : getAllLocations()) {
-			totalPop += getTotalPopulation(loc.x,loc.y);
+			totalPop += getTotalPopulation(loc.x, loc.y);
 		}
-		
+
 		double[] aspTotSubs = new double[allASPs.length];
 		double aspAllSubs = Double.MIN_NORMAL; // prevents /0 w/ trivial bias
-		
+
 		for (int aspID = 0; aspID < allASPs.length; aspID++) {
 			aspTotSubs[aspID] = allASPs[aspID].getCustomers();
 			aspAllSubs += aspTotSubs[aspID];
 		}
-		
+
 		double aspGiniSample = 0;
 		for (int aspID = 0; aspID < allASPs.length; aspID++) {
 			double aspFrac = aspTotSubs[aspID] / aspAllSubs;
@@ -567,7 +594,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			double giniContribution = percent * percent;
 			aspGiniSample += giniContribution;
 		}
-		
+
 		aspSubscriptions.addValue(aspAllSubs / totalPop);
 		this.aspGini.addValue(aspGiniSample);
 

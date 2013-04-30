@@ -169,7 +169,7 @@ public class Consumer implements Steppable {
 			return 0;
 	}
 
-	public float getNSPSubscrubers(byte nspID) {
+	public float getNSPSubscribers(byte nspID) {
 		float numCustomers = 0;
 		for (Int2D loc : s.getAllLocations()) {
 			numCustomers += getNSPSubscribers(loc.x, loc.y, nspID);
