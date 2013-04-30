@@ -214,6 +214,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 
 		for (int step = 0; step < steps; step++) {
 			this.schedule.step(this);
+			doMeasurements();
 			// TODO: Does anything else need to be run besides the MASON
 			// schedule?
 		}
@@ -489,7 +490,27 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		return numEdges;
 	}
 	
-
+	private void doMeasurements() {
+		measureEdgePrices();
+	}
+	
+	/**
+	 * Measures the average price of edges.  Not that this is not an average
+	 * of the price paid, which would be weighted by usage.  Instead, this
+	 * is an average of the <i>offers</i>.  A price will be included here even
+	 * if no consumers use the service.
+	 */
+	private void measureEdgePrices() {
+		for (Int2D loc : getAllLocations()) {
+			for (NSP nsp : allNSPs) {
+				if (nsp.edgeNetworks[loc.x][loc.y] != null) {
+					edgePrice.addValue(nsp.edgeNetworks[loc.x][loc.y].price);
+				}
+			}
+		}
+	}
+	
+	
 
 	
 
