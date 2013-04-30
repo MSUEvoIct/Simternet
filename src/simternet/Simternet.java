@@ -104,17 +104,15 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 
 	// Data Output
 	public static DataOutputFile out = null;
-	
-	
+
 	// Tracking Variables.
 	SummaryStatistics edgePrice = new SummaryStatistics();
 	SummaryStatistics edgeSubscriptions = new SummaryStatistics();
 	SummaryStatistics edgeGini = new SummaryStatistics();
-	
+
 	SummaryStatistics aspPrice = new SummaryStatistics();
 	SummaryStatistics aspSubscriptions = new SummaryStatistics();
 	SummaryStatistics aspGini = new SummaryStatistics();
-	
 
 	/**
 	 * Initializes the simulation with a default seed. A no-arg constructor is
@@ -489,17 +487,19 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		}
 		return numEdges;
 	}
-	
+
 	private void doMeasurements() {
 		measureEdgePrices();
 		measureEdgeSubscriptions();
+
+		measureAspPrices();
 	}
-	
+
 	/**
-	 * Measures the average price of edges.  Not that this is not an average
-	 * of the price paid, which would be weighted by usage.  Instead, this
-	 * is an average of the <i>offers</i>.  A price will be included here even
-	 * if no consumers use the service.
+	 * Measures the average price of edges. Note that this is not an average of
+	 * the price paid, which would be weighted by usage. Instead, this is an
+	 * average of the <i>offers</i>. A price will be included here even if no
+	 * consumers use the service.
 	 */
 	private void measureEdgePrices() {
 		for (Int2D loc : getAllLocations()) {
@@ -510,14 +510,14 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			}
 		}
 	}
-	
+
 	/**
-	 * Measures the proportion of users subscribed to an edge network.  Should
+	 * Measures the proportion of users subscribed to an edge network. Should
 	 * always be in the range [0..1)
 	 */
 	private void measureEdgeSubscriptions() {
 		int subscriptions = 0;
-		int consumers = 1;  // bias should be negligible, prevents /0 error
+		int consumers = 1; // bias should be negligible, prevents /0 error
 		for (Int2D loc : getAllLocations()) {
 			for (Consumer c : allConsumers) {
 				if (c.nspUsed[loc.x][loc.y] != -1)
@@ -525,11 +525,19 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 				consumers++;
 			}
 		}
-		edgeSubscriptions.addValue(subscriptions/consumers);
+		edgeSubscriptions.addValue(subscriptions / consumers);
 	}
-	
-	
 
-	
+	/**
+	 * Measures the average price of ASP services. Note that this is not an
+	 * average of the price paid, which would be weighted by usage. Instead,
+	 * this is an average of the <i>offers</i> A price will be included here
+	 * even if no consumers use the service.
+	 */
+	private void measureAspPrices() {
+		for (ASP asp : allASPs) {
+			aspPrice.addValue(asp.price);
+		}
+	}
 
 }
