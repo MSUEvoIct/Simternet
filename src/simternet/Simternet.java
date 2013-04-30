@@ -493,7 +493,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		measureEdgeSubscriptions();
 
 		measureAspPrices();
-		measureASPSubscrptions();
+		measureASPSubsAndGini();
 	}
 
 	/**
@@ -546,16 +546,31 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	 * should be a value in the range [0..numASPs), since there is no hard 
 	 * limit on the number of ASPs that can be used, just a budget constraint.
 	 */
-	private void measureASPSubscrptions() {
-		int numSubscriptions = 0;
-		int numConsumers = 1; // bias should be negligible, prevents /0 error
+	private void measureASPSubsAndGini() {
+		double totalPop = Double.MIN_NORMAL; // prevents /0 w/ trivial bias
 		for (Int2D loc : getAllLocations()) {
-			for (Consumer c : allConsumers) {
-				numSubscriptions += c.aspSubscriptions[loc.x][loc.y].size();
-				numConsumers++;
-			}
+			totalPop += getTotalPopulation(loc.x,loc.y);
 		}
-		aspSubscriptions.addValue(numSubscriptions/numConsumers);
+		
+		double[] aspTotSubs = new double[allASPs.length];
+		double aspAllSubs = Double.MIN_NORMAL; // prevents /0 w/ trivial bias
+		
+		for (int aspID = 0; aspID < allASPs.length; aspID++) {
+			aspTotSubs[aspID] = allASPs[aspID].getCustomers();
+			aspAllSubs += aspTotSubs[aspID];
+		}
+		
+		double aspGiniSample = 0;
+		for (int aspID = 0; aspID < allASPs.length; aspID++) {
+			double aspFrac = aspTotSubs[aspID] / aspAllSubs;
+			double percent = aspFrac * 100;
+			double giniContribution = percent * percent;
+			aspGiniSample += giniContribution;
+		}
+		
+		aspSubscriptions.addValue(aspAllSubs / totalPop);
+		this.aspGini.addValue(aspGiniSample);
+
 	}
 
 }
