@@ -334,6 +334,7 @@ public class NSP implements Steppable {
 
 	private List<EdgePricingStimulus> makeEdgePricingStimuli() {
 		ArrayList<EdgePricingStimulus> stimuli = new ArrayList<EdgePricingStimulus>();
+		
 		for (Int2D loc : s.getAllLocations()) {
 			if (edgeNetworks[loc.x][loc.y] != null) {
 				// Then we have a network here
@@ -342,6 +343,16 @@ public class NSP implements Steppable {
 				eps.numEdges = s.getNumEdges(loc.x, loc.y);
 				eps.random = s.random;
 				
+				double totalPopulation = Double.MIN_NORMAL;
+				totalPopulation += s.getTotalPopulation(loc.x, loc.y);
+				double mySubs = this.getCustomers(loc.x, loc.y);
+				double allSubs = Double.MIN_NORMAL;
+				for (int nspID = 0; nspID < s.allNSPs.length; nspID++) {
+					allSubs += s.allNSPs[nspID].getCustomers(loc.x, loc.y);
+				}
+				
+				eps.percentOfPopulation = mySubs / totalPopulation;
+				eps.percentOfSubscriptions = mySubs / allSubs;
 				
 				stimuli.add(eps);
 			}

@@ -2,24 +2,22 @@ package simternet.nsp;
 
 import ec.vector.FloatVectorIndividual;
 
-
-
-
 /**
  * 
  * @author kkoning
- *
+ * 
  */
 public class SimpleNSPIndividual extends FloatVectorIndividual implements
 		NSPIndividual {
 
 	static final int POS_EDGEPROBCONSTANT = 0;
 	static final int POS_EDGEPROBEDGES = 1;
-	
+
 	static final int POS_EDGEPRICECONSTANT = 2;
 	static final int POS_EDGEPRICEEDGES = 3;
-	
-	
+	static final int POS_EDGEPRICE_PERCENT_POP = 4;
+	static final int POS_EDGEPRICE_PERCENT_SUBS = 5;
+
 	@Override
 	public boolean buildEdge(EdgeBuildingStimulus ebs) {
 		float buildProb = 0;
@@ -38,6 +36,10 @@ public class SimpleNSPIndividual extends FloatVectorIndividual implements
 		float edgePrice = 0;
 		edgePrice += genome[POS_EDGEPRICECONSTANT];
 		edgePrice += genome[POS_EDGEPRICEEDGES] * eps.numEdges;
+		edgePrice += genome[POS_EDGEPRICE_PERCENT_POP]
+				* eps.percentOfPopulation;
+		edgePrice += genome[POS_EDGEPRICE_PERCENT_SUBS]
+				* eps.percentOfSubscriptions;
 
 		return edgePrice;
 	}
