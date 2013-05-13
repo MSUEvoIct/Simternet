@@ -575,10 +575,9 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			}
 
 		}
-		
-		if ( (totEdgeSubs / totPop) > 1 )
+
+		if ((totEdgeSubs / totPop) > 1)
 			System.out.println("Debug here");
-		
 
 		edgeSubscriptions.addValue(totEdgeSubs / totPop);
 	}
@@ -601,17 +600,26 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	 * number of ASPs that can be used, just a budget constraint.
 	 */
 	private void measureASPSubsAndGini() {
-		double totalPop = Double.MIN_NORMAL; // prevents /0 w/ trivial bias
-		for (Int2D loc : getAllLocations()) {
-			totalPop += getTotalPopulation(loc.x, loc.y);
-		}
+		/*
+		 * To calculate the average number of ASP subscriptions, we are going to
+		 * find the total number of ASP subscriptions and divide by the total
+		 * population.
+		 */
 
-		double[] aspTotSubs = new double[allASPs.length];
+		// Calculate the total number of subscriptions, per ASP and in total.
+		// The per ASP figure will be used in the calculation of the GINI
+		// coefficient below.
+		double[] aspTotSubs = new double[allASPs.length]; // P
 		double aspAllSubs = Double.MIN_NORMAL; // prevents /0 w/ trivial bias
-
 		for (int aspID = 0; aspID < allASPs.length; aspID++) {
 			aspTotSubs[aspID] = allASPs[aspID].getCustomers();
 			aspAllSubs += aspTotSubs[aspID];
+		}
+
+		// Calculate the total population
+		double totalPop = Double.MIN_NORMAL; // prevents /0 w/ trivial bias
+		for (Int2D loc : getAllLocations()) {
+			totalPop += getTotalPopulation(loc.x, loc.y);
 		}
 
 		double aspGiniSample = 0;
