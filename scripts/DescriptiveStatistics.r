@@ -40,7 +40,7 @@ plot(data$Generation,data$nspProfit_mean, xlab="Generation", ylab="Mean Profit (
 dev.off()
 
 png(filename="Plot.Gen.nspInvestment.png", height=h, width=w)
-plot(data$Generation,data$aspInvestment_mean, xlab="Generation", ylab="Mean Investment", main = "Investment of NSPs")
+plot(data$Generation,data$nspInvestment_mean, xlab="Generation", ylab="Mean Investment", main = "Investment of NSPs")
 dev.off()
 
 
