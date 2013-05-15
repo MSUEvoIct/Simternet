@@ -6,6 +6,7 @@ import ec.util.MersenneTwisterFast;
 public class EdgePricingStimulus {
 	Int2D location;
 	int numEdges;
+	double currentPrice;
 	double percentOfPopulation;
 	double percentOfSubscriptions;
 	MersenneTwisterFast random;
