@@ -342,6 +342,7 @@ public class NSP implements Steppable {
 				eps.location = loc;
 				eps.numEdges = s.getNumEdges(loc.x, loc.y);
 				eps.random = s.random;
+				eps.currentPrice = this.edgeNetworks[loc.x][loc.y].price;
 				
 				double totalPopulation = Double.MIN_NORMAL;
 				totalPopulation += s.getTotalPopulation(loc.x, loc.y);
