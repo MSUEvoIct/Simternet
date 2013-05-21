@@ -89,7 +89,8 @@ public class Consumer implements Steppable {
 			for (byte y = 0; y < s.landscapeSizeY; y++)
 				this.nspUsed[x][y] = -1; // start out with no NSP
 		this.aspSubscriptions = new List[s.landscapeSizeX][s.landscapeSizeY];
-		this.aspBudgetConstraint = s.appBudget;
+		this.aspBudgetConstraint = s.appBudget + s.appBudgetStdDev
+				* s.random.nextGaussian();
 		this.preference = s.random.nextDouble();
 
 	}
@@ -178,11 +179,11 @@ public class Consumer implements Steppable {
 	}
 
 	public float getASPSubscribers(int x, int y, byte aspID) {
-		// If there is no NSP at this location, there should be zero ASP 
+		// If there is no NSP at this location, there should be zero ASP
 		// subscriptions
 		if (nspUsed[x][y] < 0)
 			return 0;
-		
+
 		List<Byte> aspsUsed = aspSubscriptions[x][y];
 		// If ASP is in the list of ones used...
 		for (Byte b : aspsUsed) {
@@ -249,7 +250,7 @@ public class Consumer implements Steppable {
 						// TODO track usage on consumer side?
 					}
 				}
-				
+
 			}
 		}
 	}

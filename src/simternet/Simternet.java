@@ -26,7 +26,6 @@ import ec.Individual;
 import ec.agency.eval.AgencyModel;
 import ec.agency.eval.EvaluationGroup;
 import ec.agency.io.DataOutputFile;
-import ec.agency.io.GenerationAggregatingDataOutputFile;
 import ec.simple.SimpleFitness;
 import ec.util.Parameter;
 import ec.util.ParameterDatabase;
@@ -69,6 +68,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	public double preferenceExponent;
 	public double wtpExponent;
 	public double appBudget;
+	public double appBudgetStdDev;
 
 	/*************************
 	 * Operational Variables *
@@ -171,6 +171,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 				.getFloat(pRoot.push("preferenceExponent"), null);
 		wtpExponent = pd.getFloat(pRoot.push("wtpExponent"), null);
 		appBudget = pd.getFloat(pRoot.push("appBudget"), null);
+		appBudgetStdDev = pd.getFloat(pRoot.push("appBudgetStdDev"), null);
 
 		steps = pd.getInt(pRoot.push("steps"), null);
 
@@ -207,7 +208,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			colNames[9] = "aspPrice";
 			colNames[10] = "aspSubscriptions";
 			colNames[11] = "aspGini";
-			Simternet.out = new GenerationAggregatingDataOutputFile(fileName,
+			Simternet.out = new DataOutputFile(fileName,
 					colNames);
 		}
 	}

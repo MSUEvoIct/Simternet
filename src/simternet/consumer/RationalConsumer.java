@@ -79,11 +79,42 @@ public class RationalConsumer extends FloatVectorIndividual implements
 									return 0;
 								}
 							});
+
+					// If we have a current network, get those benefits
+					EdgeBenefit currentBenefit = null;
+					byte curNspID = consumer.nspUsed[x][y];
+					boolean considerOldNSP = false;
+					if (curNspID >= 0) {
+						currentBenefit = consumer.getEdgeBenefit(curNspID, x, y);
+						if (currentBenefit.surplus() > 0)
+							considerOldNSP = true;
+					}
+
 					
-					// make sure edge surplus is positive.
-					byte nspToUse = -1;
-					if (topEdge.surplus() > 0)
-						nspToUse = topEdge.nspID;
+					
+					// make the consumption decision
+					byte nspToUse = -1; // default no consumption
+					
+					if (considerOldNSP) {
+						// XXX FIXME HARD CODED
+						boolean keepOld = consumer.s.random.nextBoolean(0.5);
+						if (keepOld) {
+							nspToUse = curNspID;
+						} else {
+							nspToUse = topEdge.nspID;
+						}
+						
+					} else {
+						// make sure edge surplus is positive.
+						if (topEdge.surplus() > 0)
+							nspToUse = topEdge.nspID;
+					}
+					
+					
+					
+					
+					
+					
 					consumer.nspUsed[x][y] = nspToUse;					
 				} else {
 					consumer.nspUsed[x][y] = -1;  // no benefits, no use
