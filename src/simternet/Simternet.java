@@ -28,7 +28,6 @@ import ec.Individual;
 import ec.agency.eval.AgencyModel;
 import ec.agency.eval.EvaluationGroup;
 import ec.agency.io.DataOutputFile;
-import ec.agency.io.GenerationAggregatingDataOutputFile;
 import ec.simple.SimpleFitness;
 import ec.util.Parameter;
 import ec.util.ParameterDatabase;
@@ -213,7 +212,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			colNames[9] = "aspPrice";
 			colNames[10] = "aspSubscriptions";
 			colNames[11] = "aspGini";
-			Simternet.out = new GenerationAggregatingDataOutputFile(fileName,
+			Simternet.out = new DataOutputFile(fileName,
 					colNames);
 		}
 		outfileLock.unlock();
