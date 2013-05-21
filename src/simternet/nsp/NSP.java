@@ -344,19 +344,23 @@ public class NSP implements Steppable {
 				eps.random = s.random;
 				eps.currentPrice = this.edgeNetworks[loc.x][loc.y].price;
 				eps.minPrice = eps.currentPrice;
-				eps.minOtherPrice = Double.MAX_VALUE;
+				eps.minOtherPrice = 200; // TODO, hard coded max; currently very
+											// reasonable
 
 				for (int i = 0; i < s.allNSPs.length; i++) {
-					if (s.allNSPs[i].edgeNetworks[loc.x][loc.y].price < eps.minPrice) {
-						eps.minPrice = s.allNSPs[i].edgeNetworks[loc.x][loc.y].price;
-					}
-					if (i != this.id) {
-						if (s.allNSPs[i].edgeNetworks[loc.x][loc.y].price < eps.minOtherPrice) {
-							eps.minOtherPrice = s.allNSPs[i].edgeNetworks[loc.x][loc.y].price;
+					if (s.allNSPs[i].edgeNetworks[loc.x][loc.y] != null) {
+						if (s.allNSPs[i].edgeNetworks[loc.x][loc.y].price < eps.minPrice) {
+							eps.minPrice = s.allNSPs[i].edgeNetworks[loc.x][loc.y].price;
 						}
+						if (i != this.id) {
+							if (s.allNSPs[i].edgeNetworks[loc.x][loc.y].price < eps.minOtherPrice) {
+								eps.minOtherPrice = s.allNSPs[i].edgeNetworks[loc.x][loc.y].price;
+							}
+						}
+
 					}
 				}
-				
+
 				double totalPopulation = Double.MIN_NORMAL;
 				totalPopulation += s.getTotalPopulation(loc.x, loc.y);
 				double mySubs = this.getCustomers(loc.x, loc.y);
