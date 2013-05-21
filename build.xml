@@ -1,181 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- WARNING: Eclipse auto-generated file.
-              Any modifications will be overwritten.
-              To include a user specific buildfile here, simply create one in the same
-              directory with the processing instruction <?eclipse.ant.import?>
-              as the first entry and export the buildfile again. -->
-<project basedir="." default="build" name="Simternet">
-    <property environment="env"/>
-    <property name="Simternet.location" value="../Simternet"/>
-    <property name="ECLIPSE_HOME" value="../../../Applications/eclipse"/>
-    <property name="folder_prompt:Working Dir" value="."/>
-    <property name="file_prompt:Checkpoint File" value="out.stat"/>
-    <property name="string_prompt:# of Steps:50" value="50"/>
-    <property name="selected_resource_loc" value="."/>
-    <property name="ECJ.location" value="../ECJ"/>
-    <property name="Mason.location" value="../Mason"/>
-    <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.6"/>
-    <property name="source" value="1.6"/>
-    <path id="Mason.classpath">
-        <pathelement location="${Mason.location}/bin"/>
-        <pathelement location="${Mason.location}/lib/itext-1.2.jar"/>
-        <pathelement location="${Mason.location}/lib/jcommon-1.0.0.jar"/>
-        <pathelement location="${Mason.location}/lib/jfreechart-1.0.1.jar"/>
-        <pathelement location="${Mason.location}/lib/jmf.jar"/>
-        <pathelement location="${Mason.location}/lib/quaqua-colorchooser-only.jar"/>
-        <pathelement location="${Simternet.location}/lib/j3d-core-1.3.1.jar"/>
-        <pathelement location="${Simternet.location}/lib/vecmath-1.3.1.jar"/>
-        <pathelement location="${Mason.location}/lib/j3dutils.jar"/>
-    </path>
-    <path id="ECJ.classpath">
-        <pathelement location="${ECJ.location}/bin"/>
-        <pathelement location="${Simternet.location}/lib/iText-2.1.5.jar"/>
-        <pathelement location="${Simternet.location}/lib/j3d-core-1.3.1.jar"/>
-        <pathelement location="${Simternet.location}/lib/jfreechart-1.0.13.jar"/>
-        <pathelement location="${Simternet.location}/lib/jcommon-1.0.16.jar"/>
-    </path>
-    <path id="Simternet.classpath">
-        <pathelement location="bin"/>
-        <path refid="Mason.classpath"/>
-        <pathelement location="lib/log4j-1.2.16.jar"/>
-        <pathelement location="lib/collections-generic-4.01.jar"/>
-        <pathelement location="lib/iText-2.1.5.jar"/>
-        <pathelement location="lib/jcommon-1.0.16.jar"/>
-        <pathelement location="lib/jfreechart-1.0.13.jar"/>
-        <pathelement location="lib/jung-api-2.0.1.jar"/>
-        <pathelement location="lib/jung-3d-2.0.1.jar"/>
-        <pathelement location="lib/jung-algorithms-2.0.1.jar"/>
-        <pathelement location="lib/jung-graph-impl-2.0.1.jar"/>
-        <pathelement location="lib/jung-io-2.0.1.jar"/>
-        <pathelement location="lib/jung-jai-2.0.1.jar"/>
-        <pathelement location="lib/colt-1.2.0.jar"/>
-        <pathelement location="lib/concurrent-1.3.4.jar"/>
-        <pathelement location="lib/j3d-core-1.3.1.jar"/>
-        <pathelement location="lib/jung-visualization-2.0.1.jar"/>
-        <pathelement location="lib/stax-api-1.0.1.jar"/>
-        <pathelement location="lib/vecmath-1.3.1.jar"/>
-        <pathelement location="lib/wstx-asl-3.2.6.jar"/>
-        <path refid="ECJ.classpath"/>
-        <pathelement location="lib/lablib-checkboxtree-3.2.jar"/>
-        <pathelement location="lib/commons-math-2.2.jar"/>
-        <pathelement location="lib/commons-cli-1.2.jar"/>
-        <pathelement location="lib/opencsv-2.3.jar"/>
-    </path>
-    <target name="init">
-        <mkdir dir="bin"/>
-        <copy includeemptydirs="false" todir="bin">
-            <fileset dir="src">
-                <exclude name="**/*.java"/>
-            </fileset>
-        </copy>
-        <copy includeemptydirs="false" todir="bin">
-            <fileset dir="etc">
-                <include name="*properties"/>
-                <exclude name="**/*.java"/>
-            </fileset>
-        </copy>
-    </target>
-    <target name="clean">
-        <delete dir="bin"/>
-    </target>
-    <target depends="clean" name="cleanall">
-        <ant antfile="build.xml" dir="${ECJ.location}" inheritAll="false" target="clean"/>
-        <ant antfile="build.xml" dir="${Mason.location}" inheritAll="false" target="clean"/>
-    </target>
-    <target depends="build-subprojects,build-project" name="build"/>
-    <target name="build-subprojects">
-        <ant antfile="build.xml" dir="${ECJ.location}" inheritAll="false" target="build-project">
-            <propertyset>
-                <propertyref name="build.compiler"/>
-            </propertyset>
-        </ant>
-        <ant antfile="build.xml" dir="${Mason.location}" inheritAll="false" target="build-project">
-            <propertyset>
-                <propertyref name="build.compiler"/>
-            </propertyset>
-        </ant>
-    </target>
-    <target depends="init" name="build-project">
-        <echo message="${ant.project.name}: ${ant.file}"/>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
-            <src path="src"/>
-            <classpath refid="Simternet.classpath"/>
-        </javac>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
-            <src path="etc"/>
-            <include name="*properties"/>
-            <classpath refid="Simternet.classpath"/>
-        </javac>
-    </target>
-    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
-    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
-        <copy todir="${ant.library.dir}">
-            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
-        </copy>
-        <unzip dest="${ant.library.dir}">
-            <patternset includes="jdtCompilerAdapter.jar"/>
-            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
-        </unzip>
-    </target>
-    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
-        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
-        <antcall target="build"/>
-    </target>
-    <target name="BufferedCSVWriter (1)">
-        <java classname="simternet.data.output.BufferedCSVWriter" failonerror="true" fork="yes">
-            <classpath refid="Simternet.classpath"/>
-        </java>
-    </target>
-    <target name="CheckpointRun">
-        <java classname="simternet.engine.CheckpointRun" dir="${folder_prompt:Working Dir}" failonerror="true" fork="yes">
-            <arg line="${file_prompt:Checkpoint File} ${string_prompt:# of Steps:50}"/>
-            <classpath refid="Simternet.classpath"/>
-        </java>
-    </target>
-    <target name="SimternetWithUI">
-        <java classname="simternet.engine.SimternetWithUI" failonerror="true" fork="yes">
-            <classpath refid="Simternet.classpath"/>
-        </java>
-    </target>
-    <target name="Simternet">
-        <java classname="simternet.engine.Simternet" failonerror="true" fork="yes">
-            <jvmarg line="-XX:+HeapDumpOnOutOfMemoryError&#10;-Xmx1024m"/>
-            <arg line="-for 10"/>
-            <classpath refid="Simternet.classpath"/>
-        </java>
-    </target>
-    <target name="Simternet Checkpoint">
-        <java classname="simternet.engine.Simternet" failonerror="true" fork="yes">
-            <jvmarg line="-XX:+HeapDumpOnOutOfMemoryError&#10;-Xmx1024m"/>
-            <arg line="-for 10 -checkpoint ${selected_resource_loc}"/>
-            <classpath refid="Simternet.classpath"/>
-        </java>
-    </target>
-    <target name="S w UI Checkpoint">
-        <java classname="simternet.engine.SimternetWithUI" failonerror="true" fork="yes">
-            <arg line="-checkpoint ${selected_resource_loc}"/>
-            <classpath refid="Simternet.classpath"/>
-        </java>
-    </target>
-    <target name="GUI">
-        <java classname="simternet.gui.GUI" failonerror="true" fork="yes">
-            <arg line="-file data/configuration/simternet-ecj.properties =p stat.gather-full=true"/>
-            <classpath refid="Simternet.classpath"/>
-        </java>
-    </target>
-    <target name="Evolve (Workstation Run)">
-        <java classname="ec.Evolve" dir="../../../../../Users/kkoning/tmp" failonerror="true" fork="yes">
-            <jvmarg line="-Xmx8192M -server"/>
-            <arg line="-file data/config/evolve-workstation.properties -p stat.gather-full=true"/>
-            <classpath refid="Simternet.classpath"/>
-        </java>
-    </target>
-    <target name="Evolve (Small)">
-        <java classname="ec.Evolve" failonerror="true" fork="yes">
-            <jvmarg line="-Xmx8192M"/>
-            <arg line="-file etc/evolve-small.properties -p stat.gather-full=true"/>
-            <classpath refid="Simternet.classpath"/>
-        </java>
-    </target>
+<project basedir="." default="build" name="Agency">
+
+ <path id="compile.classpath">
+  <fileset dir="lib">
+   <include name="*.jar"/>
+  </fileset>
+  <fileset dir="../Agency/Agency/lib">
+   <include name="*.jar"/>
+  </fileset>
+  <pathelement location="../Agency/Agency/bin"/>
+ </path>
+
+ <target name="build">
+  <javac srcdir="src" destdir="bin">
+   <classpath refid="compile.classpath"/>
+  </javac>
+ </target>
+
 </project>
