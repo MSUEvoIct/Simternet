@@ -258,7 +258,7 @@ public class NSP implements Steppable {
 			double price = ind.priceEdge(eps);
 			setEdgePrice(eps.location.x, eps.location.y, price);
 		}
-		
+
 		// Price ASP BackboneLink connections
 		for (BackbonePricingStimulus bps : makeBackbonePricingStimuli()) {
 			double price = ind.priceBackboneLink(bps);
@@ -334,7 +334,7 @@ public class NSP implements Steppable {
 
 	private List<EdgePricingStimulus> makeEdgePricingStimuli() {
 		ArrayList<EdgePricingStimulus> stimuli = new ArrayList<EdgePricingStimulus>();
-		
+
 		for (Int2D loc : s.getAllLocations()) {
 			if (edgeNetworks[loc.x][loc.y] != null) {
 				// Then we have a network here
@@ -343,6 +343,19 @@ public class NSP implements Steppable {
 				eps.numEdges = s.getNumEdges(loc.x, loc.y);
 				eps.random = s.random;
 				eps.currentPrice = this.edgeNetworks[loc.x][loc.y].price;
+				eps.minPrice = eps.currentPrice;
+				eps.minOtherPrice = Double.MAX_VALUE;
+
+				for (int i = 0; i < s.allNSPs.length; i++) {
+					if (s.allNSPs[i].edgeNetworks[loc.x][loc.y].price < eps.minPrice) {
+						eps.minPrice = s.allNSPs[i].edgeNetworks[loc.x][loc.y].price;
+					}
+					if (i != this.id) {
+						if (s.allNSPs[i].edgeNetworks[loc.x][loc.y].price < eps.minOtherPrice) {
+							eps.minOtherPrice = s.allNSPs[i].edgeNetworks[loc.x][loc.y].price;
+						}
+					}
+				}
 				
 				double totalPopulation = Double.MIN_NORMAL;
 				totalPopulation += s.getTotalPopulation(loc.x, loc.y);
@@ -351,10 +364,10 @@ public class NSP implements Steppable {
 				for (int nspID = 0; nspID < s.allNSPs.length; nspID++) {
 					allSubs += s.allNSPs[nspID].getCustomers(loc.x, loc.y);
 				}
-				
+
 				eps.percentOfPopulation = mySubs / totalPopulation;
 				eps.percentOfSubscriptions = mySubs / allSubs;
-				
+
 				stimuli.add(eps);
 			}
 		}
@@ -384,7 +397,7 @@ public class NSP implements Steppable {
 	public String toString() {
 		return "NSP" + id;
 	}
-	
+
 	private void setEdgePrice(int x, int y, double price) {
 		if (price < Double.MIN_NORMAL)
 			price = Double.MIN_NORMAL;
