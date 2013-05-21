@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.math.stat.descriptive.SummaryStatistics;
 
@@ -26,6 +28,7 @@ import ec.Individual;
 import ec.agency.eval.AgencyModel;
 import ec.agency.eval.EvaluationGroup;
 import ec.agency.io.DataOutputFile;
+import ec.agency.io.GenerationAggregatingDataOutputFile;
 import ec.simple.SimpleFitness;
 import ec.util.Parameter;
 import ec.util.ParameterDatabase;
@@ -104,6 +107,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 
 	// Data Output
 	public static DataOutputFile out = null;
+	private static Lock outfileLock = new ReentrantLock();
 
 	// Tracking Variables.
 	SummaryStatistics edgePrice = new SummaryStatistics();
@@ -193,6 +197,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	}
 
 	private void initOutput() {
+		outfileLock.lock();
 		if (Simternet.out == null) {
 			String fileName = "Simternet.out.job" + job + ".tsv";
 			String[] colNames = new String[12];
@@ -208,9 +213,10 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			colNames[9] = "aspPrice";
 			colNames[10] = "aspSubscriptions";
 			colNames[11] = "aspGini";
-			Simternet.out = new DataOutputFile(fileName,
+			Simternet.out = new GenerationAggregatingDataOutputFile(fileName,
 					colNames);
 		}
+		outfileLock.unlock();
 	}
 
 	@Override
