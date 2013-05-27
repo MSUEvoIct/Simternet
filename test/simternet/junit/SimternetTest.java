@@ -123,7 +123,15 @@ public class SimternetTest {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		s.setup(pd, new Parameter("eval.model"));
+		
+		String[] p_base = new String[2];
+		p_base[0] = "eval";
+		p_base[1] = "model";
+		
+		Parameter base = new Parameter(p_base);
+		
+		s.setup(pd, base);
+		
 
 		return s;
 	}
