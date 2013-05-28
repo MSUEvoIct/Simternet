@@ -8,9 +8,9 @@ import java.util.List;
 import simternet.Simternet;
 import simternet.consumer.Consumer.AppBenefit;
 import simternet.consumer.Consumer.EdgeBenefit;
-import ec.vector.FloatVectorIndividual;
+import ec.agency.NullIndividual;
 
-public class RationalConsumer extends FloatVectorIndividual implements
+public class RationalConsumer extends NullIndividual implements
 		ConsumerIndividual {
 	private static final long serialVersionUID = 1L;
 
