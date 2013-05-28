@@ -72,9 +72,9 @@ public class RationalConsumer extends FloatVectorIndividual implements
 								@Override
 								public int compare(Consumer.EdgeBenefit o1,
 										Consumer.EdgeBenefit o2) {
-									if (o1.surplus() < o2.surplus())
-										return 1;
 									if (o1.surplus() > o2.surplus())
+										return 1;
+									if (o1.surplus() < o2.surplus())
 										return -1;
 									return 0;
 								}
