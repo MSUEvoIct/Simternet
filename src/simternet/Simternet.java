@@ -55,7 +55,6 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	public double edgeBuildCostPerUser;
 	public double edgeOpCostFixed;
 	public double edgeOpCostPerUser;
-	public double edgeInitialBandwidth;
 	public double congestionAdjustmentSpeed;
 
 	// ASP variables
@@ -73,9 +72,9 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	public double appBudgetStdDev;
 
 	// Networking Variables
+	public double edgeInitialBandwidth;
 	public double initialASPtoNSPBandwidth = 10E10;
-	public double initialNSPToEdgeBandwidth = 10E10;
-	
+
 	/*************************
 	 * Operational Variables *
 	 *************************/
@@ -123,7 +122,6 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	Mean aspCongestion = new Mean();
 	public Mean avgFlowBandwidthSent = new Mean();
 	public Mean avgFlowBandwidthReceived = new Mean();
-	
 
 	/**
 	 * Initializes the simulation with a default seed. A no-arg constructor is
@@ -220,14 +218,13 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			colNames[9] = "aspPrice";
 			colNames[10] = "aspSubscriptions";
 			colNames[11] = "aspGini";
-			colNames[12] = "PerASPAvgCongestion";	
+			colNames[12] = "PerASPAvgCongestion";
 			colNames[13] = "FlowBWSent";
 			colNames[14] = "FlowBWReceived";
 			colNames[15] = "NumFlowsSent";
 			colNames[16] = "NumFlowsReceived";
-			
-			Simternet.out = new DataOutputFile(fileName,
-					colNames);
+
+			Simternet.out = new DataOutputFile(fileName, colNames);
 		}
 		outfileLock.unlock();
 	}
@@ -288,7 +285,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		data[14] = avgFlowBandwidthReceived.getResult();
 		data[15] = avgFlowBandwidthSent.getN();
 		data[16] = avgFlowBandwidthReceived.getN();
-		
+
 		out.writeTuple(data);
 
 	}
@@ -360,11 +357,10 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		for (ASP asp : allASPs) {
 			for (NSP nsp : allNSPs) {
 				// Backbone links automatically take care of connecting
-				// themselves
-				// with the source and target networks.
-				// TODO: Magic initial bandwidth
+				// themselves with the source and target networks.
+				@SuppressWarnings("unused")
 				BackboneLink bb = new BackboneLink(asp.datacenter,
-						nsp.backbone, 1E8);
+						nsp.backbone, initialASPtoNSPBandwidth);
 			}
 		}
 
@@ -660,17 +656,16 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		this.aspGini.increment(aspGiniSample);
 
 	}
-	
+
 	private void measureCongestion() {
 		for (NSP nsp : allNSPs) {
 			for (Int2D loc : getAllLocations()) {
 				for (int aspID = 0; aspID < allASPs.length; aspID++)
 					if (nsp.edgeNetworks[loc.x][loc.y] != null)
-						aspCongestion.increment(nsp.edgeNetworks[loc.x][loc.y].congestion[aspID]);
+						aspCongestion
+								.increment(nsp.edgeNetworks[loc.x][loc.y].congestion[aspID]);
 			}
 		}
 	}
-	
-	
 
 }
