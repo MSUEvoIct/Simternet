@@ -70,6 +70,9 @@ public class ASP implements Steppable {
 
 		// Update bandwidth
 		bandwidth = Math.pow(quality, s.qualityToBandwidthExponent);
+		
+		// Operate Network
+		datacenter.step(state);
 
 	}
 

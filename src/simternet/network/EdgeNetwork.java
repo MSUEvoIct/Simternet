@@ -118,7 +118,8 @@ public class EdgeNetwork extends Network {
 
 	@Override
 	public void step(SimState state) {
-		super.step(state);
+		// Don't do normal routing, there are no egress networks from here!
+		//super.step(state);
 		netflowFinalProcess((Simternet) state);
 	}
 

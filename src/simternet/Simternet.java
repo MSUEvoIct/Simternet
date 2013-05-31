@@ -72,6 +72,10 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	public double appBudget;
 	public double appBudgetStdDev;
 
+	// Networking Variables
+	public double initialASPtoNSPBandwidth = 10E10;
+	public double initialNSPToEdgeBandwidth = 10E10;
+	
 	/*************************
 	 * Operational Variables *
 	 *************************/
