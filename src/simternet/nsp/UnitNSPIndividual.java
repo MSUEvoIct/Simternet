@@ -1,8 +1,8 @@
 package simternet.nsp;
 
-import ec.vector.FloatVectorIndividual;
+import ec.agency.NullIndividual;
 
-public class UnitNSPIndividual extends FloatVectorIndividual implements NSPIndividual {
+public class UnitNSPIndividual extends NullIndividual implements NSPIndividual {
 	private static final long serialVersionUID = 1L;
 
 	@Override

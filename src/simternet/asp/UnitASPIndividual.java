@@ -1,6 +1,6 @@
 package simternet.asp;
 
-import ec.vector.FloatVectorIndividual;
+import ec.agency.NullIndividual;
 
 /**
  * Used for testing purposes, these individuals should always make the simplest
@@ -10,7 +10,7 @@ import ec.vector.FloatVectorIndividual;
  * @author kkoning
  *
  */
-public class UnitASPIndividual extends FloatVectorIndividual implements ASPIndividual {
+public class UnitASPIndividual extends NullIndividual implements ASPIndividual {
 	private static final long serialVersionUID = 1L;
 
 	@Override

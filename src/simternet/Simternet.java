@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.math.stat.descriptive.SummaryStatistics;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
 
 import sim.engine.Schedule;
 import sim.engine.SimState;
@@ -109,13 +109,15 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	private static Lock outfileLock = new ReentrantLock();
 
 	// Tracking Variables.
-	SummaryStatistics edgePrice = new SummaryStatistics();
-	SummaryStatistics edgeSubscriptions = new SummaryStatistics();
-	SummaryStatistics edgeGini = new SummaryStatistics();
+	Mean edgePrice = new Mean();
+	Mean edgeSubscriptions = new Mean();
+	Mean edgeGini = new Mean();
 
-	SummaryStatistics aspPrice = new SummaryStatistics();
-	SummaryStatistics aspSubscriptions = new SummaryStatistics();
-	SummaryStatistics aspGini = new SummaryStatistics();
+	Mean aspPrice = new Mean();
+	Mean aspSubscriptions = new Mean();
+	Mean aspGini = new Mean();
+	Mean aspCongestion = new Mean();
+	
 
 	/**
 	 * Initializes the simulation with a default seed. A no-arg constructor is
@@ -199,7 +201,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		outfileLock.lock();
 		if (Simternet.out == null) {
 			String fileName = "Simternet.out.job" + job + ".tsv";
-			String[] colNames = new String[12];
+			String[] colNames = new String[13];
 			colNames[0] = "Generation";
 			colNames[1] = "aspInvestment";
 			colNames[2] = "aspProfit";
@@ -212,6 +214,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			colNames[9] = "aspPrice";
 			colNames[10] = "aspSubscriptions";
 			colNames[11] = "aspGini";
+			colNames[12] = "avgCongestion";
 			Simternet.out = new DataOutputFile(fileName,
 					colNames);
 		}
@@ -230,7 +233,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		}
 
 		// Output some data
-		Object[] data = new Object[12];
+		Object[] data = new Object[13];
 		data[0] = generation;
 
 		// ASP Total Investment
@@ -263,12 +266,13 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		data[5] = totalConsumerSurplus;
 
 		// We've already been keeping track of these...
-		data[6] = edgePrice.getMean();
-		data[7] = edgeSubscriptions.getMean();
-		data[8] = edgeGini.getMean();
-		data[9] = aspPrice.getMean();
-		data[10] = aspSubscriptions.getMean();
-		data[11] = aspGini.getMean();
+		data[6] = edgePrice.getResult();
+		data[7] = edgeSubscriptions.getResult();
+		data[8] = edgeGini.getResult();
+		data[9] = aspPrice.getResult();
+		data[10] = aspSubscriptions.getResult();
+		data[11] = aspGini.getResult();
+		data[12] = aspCongestion.getResult();
 
 		out.writeTuple(data);
 
@@ -514,6 +518,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 
 		measureAspPrices();
 		measureASPSubsAndGini();
+		measureCongestion();
 	}
 
 	/**
@@ -526,7 +531,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		for (Int2D loc : getAllLocations()) {
 			for (NSP nsp : allNSPs) {
 				if (nsp.edgeNetworks[loc.x][loc.y] != null) {
-					edgePrice.addValue(nsp.edgeNetworks[loc.x][loc.y].price);
+					edgePrice.increment(nsp.edgeNetworks[loc.x][loc.y].price);
 				}
 			}
 		}
@@ -577,7 +582,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 					double giniContribution = percent * percent;
 					nspGiniSample += giniContribution;
 				}
-				this.edgeGini.addValue(nspGiniSample);
+				this.edgeGini.increment(nspGiniSample);
 			}
 
 		}
@@ -585,7 +590,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		if ((totEdgeSubs / totPop) > 1)
 			System.out.println("Debug here");
 
-		edgeSubscriptions.addValue(totEdgeSubs / totPop);
+		edgeSubscriptions.increment(totEdgeSubs / totPop);
 	}
 
 	/**
@@ -596,7 +601,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	 */
 	private void measureAspPrices() {
 		for (ASP asp : allASPs) {
-			aspPrice.addValue(asp.price);
+			aspPrice.increment(asp.price);
 		}
 	}
 
@@ -636,9 +641,21 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			aspGiniSample += giniContribution;
 		}
 
-		aspSubscriptions.addValue(aspAllSubs / totalPop);
-		this.aspGini.addValue(aspGiniSample);
+		aspSubscriptions.increment(aspAllSubs / totalPop);
+		this.aspGini.increment(aspGiniSample);
 
 	}
+	
+	private void measureCongestion() {
+		for (NSP nsp : allNSPs) {
+			for (Int2D loc : getAllLocations()) {
+				for (int aspID = 0; aspID < allASPs.length; aspID++)
+					if (nsp.edgeNetworks[loc.x][loc.y] != null)
+						aspCongestion.increment(nsp.edgeNetworks[loc.x][loc.y].congestion[aspID]);
+			}
+		}
+	}
+	
+	
 
 }

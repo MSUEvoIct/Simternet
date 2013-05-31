@@ -1,7 +1,7 @@
 data <- read.table("Simternet.out.job0.tsv", header=TRUE)
 
 h <- 600
-w <- 600
+w <- 1200
 
 #### ASP Descriptive Statistics ####
 
@@ -28,12 +28,7 @@ dev.off()
 
 
 
-
-
-
 #### NSP Descriptive Statistics ####
-
-
 
 png(filename="Plot.Gen.nspProfit.png", height=h, width=w)
 plot(data$Generation,data$nspProfit_mean, xlab="Generation", ylab="Mean Profit (Fitness)", main = "Profitability of NSPs")
@@ -136,6 +131,14 @@ dev.off()
 png(filename="BoxPlot.Gen.consumerSurplus.png", height=h, width=w)
 boxplot(data$consumerSurplus ~ data$Generation, xlab="Generation", ylab="Mean Consumer Surplus", main = "Consumer Surplus")
 dev.off()
+
+
+
+
+#### Population Statistics ####
+
+popSizes <- read.table("popSizes.job0", header=TRUE)
+
 
 
 
