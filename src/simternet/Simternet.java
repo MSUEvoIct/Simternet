@@ -117,6 +117,8 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	Mean aspSubscriptions = new Mean();
 	Mean aspGini = new Mean();
 	Mean aspCongestion = new Mean();
+	public Mean avgFlowBandwidthSent = new Mean();
+	public Mean avgFlowBandwidthReceived = new Mean();
 	
 
 	/**
@@ -201,7 +203,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		outfileLock.lock();
 		if (Simternet.out == null) {
 			String fileName = "Simternet.out.job" + job + ".tsv";
-			String[] colNames = new String[13];
+			String[] colNames = new String[17];
 			colNames[0] = "Generation";
 			colNames[1] = "aspInvestment";
 			colNames[2] = "aspProfit";
@@ -214,7 +216,12 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			colNames[9] = "aspPrice";
 			colNames[10] = "aspSubscriptions";
 			colNames[11] = "aspGini";
-			colNames[12] = "avgCongestion";
+			colNames[12] = "PerASPAvgCongestion";	
+			colNames[13] = "FlowBWSent";
+			colNames[14] = "FlowBWReceived";
+			colNames[15] = "NumFlowsSent";
+			colNames[16] = "NumFlowsReceived";
+			
 			Simternet.out = new DataOutputFile(fileName,
 					colNames);
 		}
@@ -233,7 +240,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		}
 
 		// Output some data
-		Object[] data = new Object[13];
+		Object[] data = new Object[17];
 		data[0] = generation;
 
 		// ASP Total Investment
@@ -273,7 +280,11 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		data[10] = aspSubscriptions.getResult();
 		data[11] = aspGini.getResult();
 		data[12] = aspCongestion.getResult();
-
+		data[13] = avgFlowBandwidthSent.getResult();
+		data[14] = avgFlowBandwidthReceived.getResult();
+		data[15] = avgFlowBandwidthSent.getN();
+		data[16] = avgFlowBandwidthReceived.getN();
+		
 		out.writeTuple(data);
 
 	}

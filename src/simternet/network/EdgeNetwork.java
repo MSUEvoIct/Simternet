@@ -94,6 +94,9 @@ public class EdgeNetwork extends Network {
 			if (flow.bandwidth > maxObservedBandwidth[flow.aspID]) {
 				maxObservedBandwidth[flow.aspID] = flow.bandwidth;
 			}
+			// information for data output
+			owner.s.avgFlowBandwidthReceived.increment(flow.bandwidth);
+			
 		}
 
 		// convert to congestion metric
@@ -108,6 +111,9 @@ public class EdgeNetwork extends Network {
 			congestion[aspID] = congestion[aspID] * fracOldCongestion
 					+ fracNewCongestion * newCongestion;
 		}
+		
+		
+		
 	}
 
 	@Override
