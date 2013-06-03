@@ -35,7 +35,7 @@ public class Financials implements Serializable {
 
 	public void payExpense(double amount) {
 		sanityCheck(amount);
-		operatingExpenses -= amount;
+		operatingExpenses += amount;
 	}
 
 	public double getBalance() {
