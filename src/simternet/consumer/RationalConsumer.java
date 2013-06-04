@@ -110,7 +110,7 @@ public class RationalConsumer extends NullIndividual implements
 			double candidateSurplus = candidate.surplus();
 			double candidateDelta = topSurplus - candidateSurplus;
 			if (candidate.nspID == curNSPID){
-				double weight = 1-((candidateDelta-s.nspIncumbentAdditiveAdvantage)/candidateRange);
+				double weight = 1-(candidateDelta/candidateRange)+s.nspIncumbentAdditiveAdvantage;
 				if (weight > 0)
 					bucket.add(candidate, weight);
 			} else if (candidateSurplus >= minCandidateSurplus){
