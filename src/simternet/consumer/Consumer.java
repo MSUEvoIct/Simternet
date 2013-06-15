@@ -21,6 +21,8 @@ import simternet.nsp.NSP;
 public class Consumer implements Steppable {
 	private static final long serialVersionUID = 1L;
 
+	public static final byte NONSP = -1;
+	
 	Simternet s;
 	public byte id;
 	public ConsumerIndividual ind;

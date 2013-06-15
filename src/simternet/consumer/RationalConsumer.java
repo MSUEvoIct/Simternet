@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import simternet.Simternet;
+import simternet.WeightedIndex;
 import simternet.consumer.Consumer.AppBenefit;
 import simternet.consumer.Consumer.EdgeBenefit;
 import ec.agency.NullIndividual;
@@ -66,9 +67,8 @@ public class RationalConsumer extends NullIndividual implements
 				
 				if (edgeBenefits.size() > 0) {
 					// Sort by consumer surplus
-					EdgeBenefit topEdge = Collections.max(edgeBenefits,
+					Collections.sort(edgeBenefits, Collections.reverseOrder(
 							new Comparator<Consumer.EdgeBenefit>() {
-
 								@Override
 								public int compare(Consumer.EdgeBenefit o1,
 										Consumer.EdgeBenefit o2) {
@@ -78,52 +78,47 @@ public class RationalConsumer extends NullIndividual implements
 										return -1;
 									return 0;
 								}
-							});
-
-					// If we have a current network, get those benefits
-					EdgeBenefit currentBenefit = null;
+							}));
 					byte curNspID = consumer.nspUsed[x][y];
-					boolean considerOldNSP = false;
-					if (curNspID >= 0) {
-						currentBenefit = consumer.getEdgeBenefit(curNspID, x, y);
-						if (currentBenefit.surplus() > 0)
-							considerOldNSP = true;
-					}
-
-					
-					
-					// make the consumption decision
-					byte nspToUse = -1; // default no consumption
-					
-					if (considerOldNSP) {
-						// XXX FIXME HARD CODED
-						boolean keepOld = consumer.s.random.nextBoolean(0.5);
-						if (keepOld) {
-							nspToUse = curNspID;
-						} else {
-							nspToUse = topEdge.nspID;
-						}
-						
-					} else {
-						// make sure edge surplus is positive.
-						if (topEdge.surplus() > 0)
-							nspToUse = topEdge.nspID;
-					}
-					
-					
-					
-					
-					
-					
-					consumer.nspUsed[x][y] = nspToUse;					
-				} else {
-					consumer.nspUsed[x][y] = -1;  // no benefits, no use
+					consumer.nspUsed[x][y] = selectNSP(curNspID, edgeBenefits, s);
+				} else {  //There are no edge benefits
+					consumer.nspUsed[x][y] = Consumer.NONSP;
 				}
-				
-
-			}
-		}
-
+			} // y
+		} // x
 	}
-
+	
+	
+	protected byte selectNSP(byte curNSPID, List<EdgeBenefit> revSortedEdgeBenefits, Simternet s){
+		EdgeBenefit topCandidate = revSortedEdgeBenefits.get(0);
+		double topSurplus = topCandidate.surplus();
+		if (topSurplus < 0){ //Don't use any NSP if there is no positive surplus
+			return Consumer.NONSP;
+		}
+		if (revSortedEdgeBenefits.size() == 1){ //If there is only one candidate with positive surplus, pick it
+			return revSortedEdgeBenefits.get(0).nspID;
+		}
+		
+		//Otherwise, with a positive top surplus, weight all candidate edge networks
+		//based on their location within the candidate threshold (a percent of the top surplus)
+		//and select randomly from the weighted values.
+		double candidateRange = topSurplus * s.nspCandidateFracOfBestThreshold;
+		double minCandidateSurplus = topSurplus - candidateRange;
+		WeightedIndex<EdgeBenefit> bucket = new WeightedIndex<EdgeBenefit>();
+		for (byte k=0; k<revSortedEdgeBenefits.size(); k++){
+			EdgeBenefit candidate = revSortedEdgeBenefits.get(k);
+			double candidateSurplus = candidate.surplus();
+			double candidateDelta = topSurplus - candidateSurplus;
+			if (candidate.nspID == curNSPID){
+				double weight = 1-(candidateDelta/candidateRange)+s.nspIncumbentAdditiveAdvantage;
+				if (weight > 0)
+					bucket.add(candidate, weight);
+			} else if (candidateSurplus >= minCandidateSurplus){
+				double weight = 1-(candidateDelta/candidateRange);
+				bucket.add(candidate, weight);
+			} 
+		}
+		return bucket.get(s.random.nextDouble()*bucket.totalWeight()).nspID;
+	}
+	
 }

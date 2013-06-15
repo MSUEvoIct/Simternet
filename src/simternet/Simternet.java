@@ -70,6 +70,8 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	public double wtpExponent;
 	public double appBudget;
 	public double appBudgetStdDev;
+	public double nspCandidateFracOfBestThreshold;
+	public double nspIncumbentAdditiveAdvantage;
 
 	// Networking Variables
 	public double edgeInitialBandwidth;
@@ -181,6 +183,9 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		wtpExponent = pd.getFloat(pRoot.push("wtpExponent"), null);
 		appBudget = pd.getFloat(pRoot.push("appBudget"), null);
 		appBudgetStdDev = pd.getFloat(pRoot.push("appBudgetStdDev"), null);
+		nspCandidateFracOfBestThreshold = pd.getFloat(pRoot.push("nspCandidateFracOfBestThreshold"), null);
+		nspIncumbentAdditiveAdvantage = pd.getFloat(pRoot.push("nspIncumbentAdditiveAdvantage"), null);
+		
 
 		steps = pd.getInt(pRoot.push("steps"), null);
 
