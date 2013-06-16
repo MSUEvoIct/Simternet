@@ -95,7 +95,7 @@ public class ASP implements Steppable {
 		// Send data to customer network
 		// TODO: Scale by population size
 		NetFlow flow = new NetFlow(this.id, datacenter,
-				s.allNSPs[nspID].edgeNetworks[x][y], bandwidth);
+				s.allNSPs[nspID].edgeNetworks[x][y], bandwidth * population);
 		datacenter.originate(flow);
 
 		// Record revenue
