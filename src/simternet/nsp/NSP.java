@@ -87,7 +87,7 @@ public class NSP implements Steppable {
 	}
 
 	public double getASPTransitPrice(int aspID) {
-		if (aspTransitPrices == null)
+		if (aspTransitPrices != null)
 			return aspTransitPrices[aspID];
 		else
 			return aspTransitPrice;
