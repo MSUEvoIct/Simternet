@@ -75,7 +75,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 
 	// Networking Variables
 	public double edgeInitialBandwidth;
-	public double initialASPtoNSPBandwidth = 10E10;
+	public double defaultASPtoNSPBandwidth;
 
 	/*************************
 	 * Operational Variables *
@@ -124,6 +124,10 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	Mean aspCongestion = new Mean();
 	public Mean avgFlowBandwidthSent = new Mean();
 	public Mean avgFlowBandwidthReceived = new Mean();
+	
+	public Mean avgBackbonePrice = new Mean();
+	public Mean avgBackbonePurchaseQty = new Mean();
+	
 
 	/**
 	 * Initializes the simulation with a default seed. A no-arg constructor is
@@ -175,6 +179,9 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 
 		applicationFlowGrowthProportion = pd.getFloat(
 				pRoot.push("applicationFlowGrowthProportion"), null);
+		
+		defaultASPtoNSPBandwidth = pd.getFloat(
+				pRoot.push("defaultASPtoNSPBandwidth"), null);
 
 		// Consumer Variables
 		qualityExponent = pd.getFloat(pRoot.push("qualityExponent"), null);
@@ -210,7 +217,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		outfileLock.lock();
 		if (Simternet.out == null) {
 			String fileName = "Simternet.out.job" + job + ".tsv";
-			String[] colNames = new String[17];
+			String[] colNames = new String[19];
 			colNames[0] = "Generation";
 			colNames[1] = "aspInvestment";
 			colNames[2] = "aspProfit";
@@ -228,6 +235,8 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			colNames[14] = "FlowBWReceived";
 			colNames[15] = "NumFlowsSent";
 			colNames[16] = "NumFlowsReceived";
+			colNames[17] = "avgBackbonePrice";
+			colNames[18] = "avgBackbonePurchaseQty";
 
 			Simternet.out = new DataOutputFile(fileName, colNames);
 		}
@@ -246,7 +255,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		}
 
 		// Output some data
-		Object[] data = new Object[17];
+		Object[] data = new Object[19];
 		data[0] = generation;
 
 		// ASP Total Investment
@@ -290,7 +299,10 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		data[14] = avgFlowBandwidthReceived.getResult();
 		data[15] = avgFlowBandwidthSent.getN();
 		data[16] = avgFlowBandwidthReceived.getN();
+		data[17] = avgBackbonePrice.getResult();
+		data[18] = avgBackbonePurchaseQty.getResult();
 
+		
 		out.writeTuple(data);
 
 	}
@@ -365,7 +377,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 				// themselves with the source and target networks.
 				@SuppressWarnings("unused")
 				BackboneLink bb = new BackboneLink(asp.datacenter,
-						nsp.backbone, initialASPtoNSPBandwidth);
+						nsp.backbone, defaultASPtoNSPBandwidth);
 			}
 		}
 
