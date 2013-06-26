@@ -22,5 +22,10 @@ public class UnitASPIndividual extends NullIndividual implements ASPIndividual {
 	public double improveQuality(QualityStimulus qs) {
 		return 1;
 	}
+
+	@Override
+	public double buyBandwidth(BackbonePurchaseStimulus bps) {
+		return 1;
+	}
 	
 }
