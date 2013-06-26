@@ -13,6 +13,7 @@ public class TrivialNSPIndividual extends FloatVectorIndividual implements
 
 	static final int POS_EDGEPROBCONSTANT = 0;
 	static final int POS_EDGEPRICECONSTANT = 1;
+	static final int POS_BACKBONEPRICE = 2;
 
 	@Override
 	public boolean buildEdge(EdgeBuildingStimulus ebs) {
@@ -36,8 +37,7 @@ public class TrivialNSPIndividual extends FloatVectorIndividual implements
 
 	@Override
 	public double priceBackboneLink(BackbonePricingStimulus bps) {
-		// TODO Just use the unit price for now.
-		return 1;
+		return genome[POS_BACKBONEPRICE];
 	}
 
 }
