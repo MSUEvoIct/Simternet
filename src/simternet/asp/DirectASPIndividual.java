@@ -14,6 +14,7 @@ public class DirectASPIndividual extends FloatVectorIndividual implements
 
 	public static final int POS_PRICE = 0;
 	public static final int POS_QUALITY = 1;
+	public static final int POS_BWQTY = 2;
 	
 	
 	@Override
@@ -24,6 +25,12 @@ public class DirectASPIndividual extends FloatVectorIndividual implements
 	@Override
 	public double improveQuality(QualityStimulus qs) {
 		return genome[POS_QUALITY];
+	}
+
+	@Override
+	public double buyBandwidth(BackbonePurchaseStimulus bps) {
+		// TODO Auto-generated method stub
+		return genome[POS_BWQTY];
 	}
 
 }
