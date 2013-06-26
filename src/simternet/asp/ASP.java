@@ -7,6 +7,7 @@ import simternet.Simternet;
 import simternet.consumer.Consumer;
 import simternet.network.DataCenter;
 import simternet.network.NetFlow;
+import simternet.network.Network;
 
 public class ASP implements Steppable {
 	private static final long serialVersionUID = 1L;
@@ -70,6 +71,28 @@ public class ASP implements Steppable {
 
 		// Update bandwidth
 		bandwidth = Math.pow(quality, s.qualityToBandwidthExponent);
+		
+		// Buy backbone bandwidth from NSPs
+		for (int nspID = 0; nspID < s.allNSPs.length; nspID++) {
+			BackbonePurchaseStimulus bps = new BackbonePurchaseStimulus();
+			bps.nspID = nspID;
+			bps.price = s.allNSPs[nspID].getASPTransitPrice(this.id);
+			
+			double bwToPurchase = ind.buyBandwidth(bps);
+			Network nspBackbone = s.allNSPs[nspID].backbone;
+			
+			datacenter.setEgressBandwidth(nspBackbone, bwToPurchase);
+			
+			// Now record (both sides of) this transaction.
+			this.financials.payExpense(bwToPurchase*bps.price);
+			s.allNSPs[nspID].financials.earnRevenue(bwToPurchase*bps.price);
+			
+			// track this data for stats purposes
+			s.avgBackbonePrice.increment(bps.price);
+			s.avgBackbonePurchaseQty.increment(bwToPurchase);
+			
+		}
+		
 		
 		// Operate Network
 		datacenter.step(state);
