@@ -6,6 +6,7 @@ import java.util.List;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Int2D;
+import simternet.BankruptcyException;
 import simternet.Financials;
 import simternet.Simternet;
 import simternet.TraceConfig;
@@ -25,6 +26,7 @@ public class NSP implements Steppable {
 
 	// Financial condition of this NSP
 	public Financials financials = new Financials();
+	private boolean bankrupt = false;
 
 	// Bandwidth transit prices for other firms
 	boolean aspPriceDiscriminationAllowed;
@@ -137,7 +139,13 @@ public class NSP implements Steppable {
 	 * Dispose of all assets, exit market
 	 */
 	private void goBankrupt() {
-		// TODO: Complete
+		bankrupt = true;
+		
+		// delete all edge networks.
+		for (Int2D loc : s.getAllLocations()) {
+			edgeNetworks[loc.x][loc.y] = null; 
+		}
+			
 	}
 
 	public boolean hasNetworkAt(int x, int y) {
@@ -393,7 +401,11 @@ public class NSP implements Steppable {
 		if (edgeNetworks[x][y] != null) {
 			double cost = s.edgeOpCostFixed;
 			cost += s.edgeOpCostPerUser * getCustomers(x, y);
-			financials.payExpense(cost);
+			try {
+				financials.payExpense(cost);
+			} catch (BankruptcyException e) {
+				goBankrupt();
+			}
 		}
 	}
 
@@ -407,5 +419,5 @@ public class NSP implements Steppable {
 			price = Double.MIN_NORMAL;
 		edgeNetworks[x][y].price = price;
 	}
-
+	
 }

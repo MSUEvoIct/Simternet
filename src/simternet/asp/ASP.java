@@ -2,6 +2,7 @@ package simternet.asp;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
+import simternet.BankruptcyException;
 import simternet.Financials;
 import simternet.Simternet;
 import simternet.consumer.Consumer;
@@ -16,6 +17,7 @@ public class ASP implements Steppable {
 
 	// Financial condition of this ASP
 	public Financials financials = new Financials();
+	private boolean bankrupt = false;
 
 	/** Represents the investment made in the usefulness of the application */
 	double quality;
@@ -62,6 +64,10 @@ public class ASP implements Steppable {
 
 	@Override
 	public void step(SimState state) {
+		
+		if (bankrupt)
+			return;
+		
 		// Set quality
 		double qualToAdd = ind.improveQuality(new QualityStimulus(this));
 		this.improveQuality(qualToAdd);
@@ -82,12 +88,20 @@ public class ASP implements Steppable {
 			double bwToPurchasePerUser = ind.buyBandwidth(bps);
 			Network nspBackbone = s.allNSPs[nspID].backbone;
 			
-			datacenter.setEgressBandwidth(nspBackbone, bwToPurchasePerUser * numCustomers);
-			
 			// Now record (both sides of) this transaction.
 			double totalBandwidthBill = bwToPurchasePerUser*bps.price*numCustomers;
-			this.financials.payExpense(totalBandwidthBill);
+			
+			try {
+				this.financials.payExpense(totalBandwidthBill);
+			} catch (BankruptcyException e) {
+				goBankrupt();
+				return;
+			}
+			
 			s.allNSPs[nspID].financials.earnRevenue(totalBandwidthBill);
+
+			//  Actually set the bandwidth
+			datacenter.setEgressBandwidth(nspBackbone, bwToPurchasePerUser * numCustomers);
 			
 			// track this data for stats purposes
 			s.avgBackbonePrice.increment(bps.price);
@@ -127,6 +141,12 @@ public class ASP implements Steppable {
 		double totalRevenue = population * this.price;
 		this.financials.earnRevenue(totalRevenue);
 
+	}
+	
+	
+	private void goBankrupt() {
+		quality = 0;
+		bankrupt = true;
 	}
 
 }
