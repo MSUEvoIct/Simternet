@@ -393,12 +393,14 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 
 	protected NSP createNSP(NSPIndividual nspInd, byte nspID) {
 		NSP nsp = new NSP(this, nspInd, nspID);
+		nsp.financials.endowment = nspEndowment;
 		return nsp;
 	}
 
 	protected ASP createASP(ASPIndividual aspInd, byte aspID) {
 		ASP asp = new ASP(this, aspInd, aspID);
 		asp.specialization = this.random.nextDouble();
+		asp.financials.endowment = aspEndowment;
 		return asp;
 	}
 

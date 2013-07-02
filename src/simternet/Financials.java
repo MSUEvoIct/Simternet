@@ -19,6 +19,8 @@ public class Financials implements Serializable {
 
 	double operatingRevenue;
 	double operatingExpenses;
+	
+	double endowment;
 
 	public Financials() {
 	}
@@ -33,13 +35,15 @@ public class Financials implements Serializable {
 		operatingRevenue += amount;
 	}
 
-	public void payExpense(double amount) {
+	public void payExpense(double amount) throws BankruptcyException {
 		sanityCheck(amount);
 		operatingExpenses += amount;
+		if (getBalance() < 0)
+			throw new BankruptcyException();
 	}
 
 	public double getBalance() {
-		double amount = operatingRevenue - operatingExpenses - totalInvested;
+		double amount = endowment + operatingRevenue - operatingExpenses - totalInvested;
 		return amount;
 	}
 
