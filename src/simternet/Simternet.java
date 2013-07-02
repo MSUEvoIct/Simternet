@@ -72,6 +72,9 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	public double appBudgetStdDev;
 	public double nspCandidateFracOfBestThreshold;
 	public double nspIncumbentAdditiveAdvantage;
+	private boolean populationDirty = true; // Common & expensive
+	private double[][] population;
+	private double totalPopulation;
 
 	// Networking Variables
 	public double edgeInitialBandwidth;
@@ -193,6 +196,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		nspCandidateFracOfBestThreshold = pd.getFloat(pRoot.push("nspCandidateFracOfBestThreshold"), null);
 		nspIncumbentAdditiveAdvantage = pd.getFloat(pRoot.push("nspIncumbentAdditiveAdvantage"), null);
 		
+		
 
 		steps = pd.getInt(pRoot.push("steps"), null);
 
@@ -208,6 +212,10 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			throw new RuntimeException(e);
 		}
 
+
+		
+		
+		
 		initOutput();
 
 		beenSetup = true;
@@ -524,9 +532,14 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	}
 
 	public double getTotalPopulation(int x, int y) {
-		double totalPopulation = 0;
-		for (Consumer c : allConsumers)
-			totalPopulation += c.population[x][y];
+		if (populationDirty)
+			updatePopulationTotals();
+		return population[x][y];
+	}
+	
+	public double getTotalPopulation() {
+		if (populationDirty)
+			updatePopulationTotals();
 		return totalPopulation;
 	}
 
@@ -685,4 +698,20 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		}
 	}
 
+	private void updatePopulationTotals() {
+		if (population == null)
+			population = new double[landscapeSizeX][landscapeSizeY];
+		totalPopulation = 0;
+		for (Int2D loc : getAllLocations()) {
+			double locationPopulation = 0;
+			for (Consumer c : allConsumers) {
+				locationPopulation += c.population[loc.x][loc.y];
+			}
+			population[loc.x][loc.y] = locationPopulation;
+			totalPopulation += locationPopulation;
+		}
+
+	}
+	
+	
 }
