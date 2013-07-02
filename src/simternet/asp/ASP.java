@@ -78,18 +78,20 @@ public class ASP implements Steppable {
 			bps.nspID = nspID;
 			bps.price = s.allNSPs[nspID].getASPTransitPrice(this.id);
 			
-			double bwToPurchase = ind.buyBandwidth(bps);
+			double numCustomers = getCustomers(); // Cache
+			double bwToPurchasePerUser = ind.buyBandwidth(bps);
 			Network nspBackbone = s.allNSPs[nspID].backbone;
 			
-			datacenter.setEgressBandwidth(nspBackbone, bwToPurchase);
+			datacenter.setEgressBandwidth(nspBackbone, bwToPurchasePerUser * numCustomers);
 			
 			// Now record (both sides of) this transaction.
-			this.financials.payExpense(bwToPurchase*bps.price);
-			s.allNSPs[nspID].financials.earnRevenue(bwToPurchase*bps.price);
+			double totalBandwidthBill = bwToPurchasePerUser*bps.price*numCustomers;
+			this.financials.payExpense(totalBandwidthBill);
+			s.allNSPs[nspID].financials.earnRevenue(totalBandwidthBill);
 			
 			// track this data for stats purposes
 			s.avgBackbonePrice.increment(bps.price);
-			s.avgBackbonePurchaseQty.increment(bwToPurchase);
+			s.avgBackbonePurchaseQty.increment(bwToPurchasePerUser);
 			
 		}
 		
