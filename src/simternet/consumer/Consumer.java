@@ -75,7 +75,10 @@ public class Consumer implements Steppable {
 		public double surplus() {
 			double wtp = Math.pow(sumAppBenefits, wtpExponent);
 			double surplus = wtp - cost;
-
+			
+			if (Double.isNaN(surplus) || Double.isInfinite(surplus))
+				return 0;
+			
 			return surplus;
 		}
 	}
@@ -231,6 +234,9 @@ public class Consumer implements Steppable {
 					// Record surplus
 					EdgeBenefit eb = getEdgeBenefit(nspUsed, x, y);
 					this.totalSurplus += eb.surplus();
+					
+					if (this.totalSurplus == Double.NaN)
+						throw new RuntimeException("Consumer surplus is now NaN? Debug me");
 
 					// TODO: have consumers record price paid (* population)
 
