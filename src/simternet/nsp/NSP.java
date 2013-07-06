@@ -1,6 +1,8 @@
 package simternet.nsp;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import sim.engine.SimState;
@@ -23,6 +25,7 @@ public class NSP implements Steppable {
 	private static final double minAspTransitPrice = -1E9;
 
 	public byte id;
+	public Int2D loc;
 
 	// Financial condition of this NSP
 	public Financials financials = new Financials();
@@ -51,8 +54,12 @@ public class NSP implements Steppable {
 		this.s = simternet;
 		this.ind = ind;
 		this.id = nspID;
+		this.loc = new Int2D( // Random starting location
+				simternet.random.nextInt(simternet.landscapeSizeX),
+				simternet.random.nextInt(simternet.landscapeSizeY));
 		backbone = new Backbone(this);
 		edgeNetworks = new EdgeNetwork[s.landscapeSizeX][s.landscapeSizeY];
+
 	}
 
 	/**
@@ -140,12 +147,12 @@ public class NSP implements Steppable {
 	 */
 	private void goBankrupt() {
 		bankrupt = true;
-		
+
 		// delete all edge networks.
 		for (Int2D loc : s.getAllLocations()) {
-			edgeNetworks[loc.x][loc.y] = null; 
+			edgeNetworks[loc.x][loc.y] = null;
 		}
-			
+
 	}
 
 	public boolean hasNetworkAt(int x, int y) {
@@ -334,9 +341,23 @@ public class NSP implements Steppable {
 				ebs.location = loc;
 				ebs.numEdges = s.getNumEdges(loc.x, loc.y);
 				ebs.random = s.random;
+				ebs.distanceFromHome = loc.distance(this.loc);
 				stimuli.add(ebs);
 			}
 		}
+		// Sort by proximity to this NSP's location
+		Collections.sort(stimuli, new Comparator<EdgeBuildingStimulus>() {
+			public int compare(EdgeBuildingStimulus arg0,
+					EdgeBuildingStimulus arg1) {
+				// Which is closer?
+				if (arg0.distanceFromHome < arg1.distanceFromHome)
+					return -1;
+				else if (arg0.distanceFromHome > arg1.distanceFromHome)
+					return 1;
+				return 0;
+			}
+		});
+		
 		return stimuli;
 	}
 
@@ -419,5 +440,5 @@ public class NSP implements Steppable {
 			price = Double.MIN_NORMAL;
 		edgeNetworks[x][y].price = price;
 	}
-	
+
 }

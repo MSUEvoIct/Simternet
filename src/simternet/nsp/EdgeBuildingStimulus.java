@@ -5,8 +5,7 @@ import ec.util.MersenneTwisterFast;
 
 public class EdgeBuildingStimulus {
 	public Int2D location;
-	int numEdges;
-	MersenneTwisterFast random;
-
-	
+	public double distanceFromHome;
+	public int numEdges;
+	public MersenneTwisterFast random;
 }
