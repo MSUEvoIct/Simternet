@@ -82,7 +82,11 @@ public class ASP implements Steppable {
 		for (int nspID = 0; nspID < s.allNSPs.length; nspID++) {
 			BackbonePurchaseStimulus bps = new BackbonePurchaseStimulus();
 			bps.nspID = nspID;
-			bps.price = s.allNSPs[nspID].getASPTransitPrice(this.id);
+			if (s.policyPriceControlBackbone)
+				bps.price = s.policyPriceBackbone;
+			else
+				bps.price = s.allNSPs[nspID].getASPTransitPrice(this.id);
+			
 			
 			double numCustomers = getCustomers(); // Cache
 			double bwToPurchasePerUser = ind.buyBandwidth(bps);

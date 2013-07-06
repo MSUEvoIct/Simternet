@@ -76,6 +76,11 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	private double[][] population;
 	private double totalPopulation;
 
+	// Policy Variables
+	public boolean policyPriceControlBackbone = false; // default to false
+	public double policyPriceBackbone;
+	
+	
 	// Networking Variables
 	public double edgeInitialBandwidth;
 	public double defaultASPtoNSPBandwidth;
@@ -195,6 +200,11 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		appBudgetStdDev = pd.getFloat(pRoot.push("appBudgetStdDev"), null);
 		nspCandidateFracOfBestThreshold = pd.getFloat(pRoot.push("nspCandidateFracOfBestThreshold"), null);
 		nspIncumbentAdditiveAdvantage = pd.getFloat(pRoot.push("nspIncumbentAdditiveAdvantage"), null);
+		
+		
+		// Policy Variables
+		policyPriceBackbone = pd.getFloat(pRoot.push("policyPriceBackbone"), null);
+		policyPriceControlBackbone = pd.getBoolean(pRoot.push("policyPriceControlBackbone"), null, false);
 		
 		
 
