@@ -264,8 +264,10 @@ public class NSP implements Steppable {
 		// Possibly Build EdgeNetworks
 		for (EdgeBuildingStimulus ebs : makeEdgeBuildingStimuli()) {
 			boolean build = ind.buildEdge(ebs);
-			if (build)
+			if (build) {
 				buildNetwork(ebs.location.x, ebs.location.y);
+				break;
+			}
 		}
 
 		// Price the EdgeNetworks we've built
