@@ -168,6 +168,12 @@ public class Consumer implements Steppable {
 		}
 	}
 
+	/**
+	 * @param x
+	 * @param y
+	 * @param nspID
+	 * @return # of subscribers to NSP's edge at specified location
+	 */
 	public float getNSPSubscribers(int x, int y, byte nspID) {
 		if (nspUsed[x][y] == nspID)
 			return population[x][y];
@@ -175,6 +181,10 @@ public class Consumer implements Steppable {
 			return 0;
 	}
 
+	/**
+	 * @param nspID
+	 * @return # of subscribers to NSP at all locations
+	 */
 	public float getNSPSubscribers(byte nspID) {
 		float numCustomers = 0;
 		for (Int2D loc : s.getAllLocations()) {
@@ -183,6 +193,12 @@ public class Consumer implements Steppable {
 		return numCustomers;
 	}
 
+	/**
+	 * @param x
+	 * @param y
+	 * @param aspID
+	 * @return # of subscriptions so ASPs at specified location
+	 */
 	public float getASPSubscribers(int x, int y, byte aspID) {
 		// If there is no NSP at this location, there should be zero ASP
 		// subscriptions
@@ -199,6 +215,10 @@ public class Consumer implements Steppable {
 		return 0;
 	}
 
+	/**
+	 * @param aspID
+	 * @return # of ASP Subscribers at all locations
+	 */
 	public double getASPSubscribers(byte aspID) {
 		double numCustomers = 0;
 		for (Int2D loc : s.getAllLocations()) {
@@ -207,6 +227,15 @@ public class Consumer implements Steppable {
 		return numCustomers;
 	}
 
+	public double getASPNSPSubscribers(byte nspID, byte aspID) {
+		double numSubscribers = 0;
+		for (Int2D loc : s.getAllLocations()) {
+			if (nspUsed[loc.x][loc.y] == nspID)
+				numSubscribers += getASPSubscribers(loc.x,loc.y,aspID);
+		}
+		return numSubscribers;
+	}
+	
 	@Override
 	public String toString() {
 		return "Consumer" + id;
