@@ -37,9 +37,9 @@ public class Financials implements Serializable {
 
 	public void payExpense(double amount) throws BankruptcyException {
 		sanityCheck(amount);
-		operatingExpenses += amount;
-		if (getBalance() < 0)
+		if (getBalance() - amount < 0)
 			throw new BankruptcyException();
+		operatingExpenses += amount;
 	}
 
 	public double getBalance() {
