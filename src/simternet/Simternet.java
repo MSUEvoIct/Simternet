@@ -124,11 +124,11 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	// Tracking Variables.
 	Mean edgePrice = new Mean();
 	Mean edgeSubscriptions = new Mean();
-	Mean edgeGini = new Mean();
+	Mean edgeHHI = new Mean();
 
 	Mean aspPrice = new Mean();
 	Mean aspSubscriptions = new Mean();
-	Mean aspGini = new Mean();
+	Mean aspHHI = new Mean();
 	Mean aspCongestion = new Mean();
 	public Mean avgFlowBandwidthSent = new Mean();
 	public Mean avgFlowBandwidthReceived = new Mean();
@@ -244,10 +244,10 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			colNames[5] = "consumerSurplus";
 			colNames[6] = "edgePrice";
 			colNames[7] = "edgeSubscriptions";
-			colNames[8] = "edgeGini";
+			colNames[8] = "edgeHHI";
 			colNames[9] = "aspPrice";
 			colNames[10] = "aspSubscriptions";
-			colNames[11] = "aspGini";
+			colNames[11] = "aspHHI";
 			colNames[12] = "PerASPAvgCongestion";
 			colNames[13] = "FlowBWSent";
 			colNames[14] = "FlowBWReceived";
@@ -308,10 +308,10 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		// We've already been keeping track of these...
 		data[6] = edgePrice.getResult();
 		data[7] = edgeSubscriptions.getResult();
-		data[8] = edgeGini.getResult();
+		data[8] = edgeHHI.getResult();
 		data[9] = aspPrice.getResult();
 		data[10] = aspSubscriptions.getResult();
-		data[11] = aspGini.getResult();
+		data[11] = aspHHI.getResult();
 		data[12] = aspCongestion.getResult();
 		data[13] = avgFlowBandwidthSent.getResult();
 		data[14] = avgFlowBandwidthReceived.getResult();
@@ -567,10 +567,10 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 
 	private void doMeasurements() {
 		measureEdgePrices();
-		measureEdgeSubsAndGini();
+		measureEdgeSubsAndHHI();
 
 		measureAspPrices();
-		measureASPSubsAndGini();
+		measureASPSubsAndHHI();
 		measureCongestion();
 	}
 
@@ -594,7 +594,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	 * Measures the proportion of users subscribed to an edge network. Should
 	 * always be in the range [0..1)
 	 */
-	private void measureEdgeSubsAndGini() {
+	private void measureEdgeSubsAndHHI() {
 		double totPop = Double.MIN_NORMAL; // prevents /0 w/ negligible bias
 		double totEdgeSubs = 0;
 
@@ -635,7 +635,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 					double giniContribution = percent * percent;
 					nspGiniSample += giniContribution;
 				}
-				this.edgeGini.increment(nspGiniSample);
+				this.edgeHHI.increment(nspGiniSample);
 			}
 
 		}
@@ -663,7 +663,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	 * be a value in the range [0..numASPs), since there is no hard limit on the
 	 * number of ASPs that can be used, just a budget constraint.
 	 */
-	private void measureASPSubsAndGini() {
+	private void measureASPSubsAndHHI() {
 		/*
 		 * To calculate the average number of ASP subscriptions, we are going to
 		 * find the total number of ASP subscriptions and divide by the total
@@ -695,7 +695,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		}
 
 		aspSubscriptions.increment(aspAllSubs / totalPop);
-		this.aspGini.increment(aspGiniSample);
+		this.aspHHI.increment(aspGiniSample);
 
 	}
 
