@@ -105,14 +105,15 @@ public class EdgeNetwork extends Network {
 			double fracOldCongestion = 1 - s.congestionAdjustmentSpeed;
 			
 			double newCongestion = 0;
-			if (requestedBW[aspID] > 0)
+			if (requestedBW[aspID] > 0) {
 				newCongestion = 1 - (observedBW[aspID] / requestedBW[aspID]);
+				s.aspCongestion.increment(newCongestion);
+			}
 
 			congestion[aspID] = congestion[aspID] * fracOldCongestion
 					+ fracNewCongestion * newCongestion;
+			
 		}
-		
-		
 		
 	}
 

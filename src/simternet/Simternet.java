@@ -129,7 +129,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	Mean aspPrice = new Mean();
 	Mean aspSubscriptions = new Mean();
 	Mean aspHHI = new Mean();
-	Mean aspCongestion = new Mean();
+	public Mean aspCongestion = new Mean();
 	public Mean avgFlowBandwidthSent = new Mean();
 	public Mean avgFlowBandwidthReceived = new Mean();
 	
@@ -571,7 +571,6 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 
 		measureAspPrices();
 		measureASPSubsAndHHI();
-		measureCongestion();
 	}
 
 	/**
@@ -697,17 +696,6 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		aspSubscriptions.increment(aspAllSubs / totalPop);
 		this.aspHHI.increment(aspGiniSample);
 
-	}
-
-	private void measureCongestion() {
-		for (NSP nsp : allNSPs) {
-			for (Int2D loc : getAllLocations()) {
-				for (int aspID = 0; aspID < allASPs.length; aspID++)
-					if (nsp.edgeNetworks[loc.x][loc.y] != null)
-						aspCongestion
-								.increment(nsp.edgeNetworks[loc.x][loc.y].congestion[aspID]);
-			}
-		}
 	}
 
 	private void updatePopulationTotals() {
