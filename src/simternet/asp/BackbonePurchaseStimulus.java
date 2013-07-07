@@ -16,4 +16,7 @@ public class BackbonePurchaseStimulus {
 	/** Total # of customers intersection */
 	public double intersectionCustomers;
 	
+	/** Total population */
+	public double totalPopulation;
+	
 }

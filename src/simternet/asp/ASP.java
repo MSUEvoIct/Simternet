@@ -80,20 +80,28 @@ public class ASP implements Steppable {
 		
 		// Buy backbone bandwidth from NSPs
 		for (int nspID = 0; nspID < s.allNSPs.length; nspID++) {
+			
+			// Construct stimuli
 			BackbonePurchaseStimulus bps = new BackbonePurchaseStimulus();
 			bps.nspID = nspID;
+			
+			// If price controlled, hard code the price to what was configured
 			if (s.policyPriceControlBackbone)
 				bps.price = s.policyPriceBackbone;
 			else
 				bps.price = s.allNSPs[nspID].getASPTransitPrice(this.id);
 			
+			bps.aspCustomers = getCustomers();
+			bps.nspCustomers = s.allNSPs[nspID].getCustomers();
+			bps.intersectionCustomers = getCustomers(nspID);
 			
-			double numCustomers = getCustomers(); // Cache
-			double bwToPurchasePerUser = ind.buyBandwidth(bps);
+			// Submit stimuli, process
+			//
+			double bwToPurchase = ind.buyBandwidth(bps);
 			Network nspBackbone = s.allNSPs[nspID].backbone;
 			
 			// Now record (both sides of) this transaction.
-			double totalBandwidthBill = bwToPurchasePerUser*bps.price*numCustomers;
+			double totalBandwidthBill = bwToPurchase*bps.price;
 			
 			try {
 				this.financials.payExpense(totalBandwidthBill);
@@ -105,11 +113,11 @@ public class ASP implements Steppable {
 			s.allNSPs[nspID].financials.earnRevenue(totalBandwidthBill);
 
 			//  Actually set the bandwidth
-			datacenter.setEgressBandwidth(nspBackbone, bwToPurchasePerUser * numCustomers);
+			datacenter.setEgressBandwidth(nspBackbone, bwToPurchase);
 			
 			// track this data for stats purposes
 			s.avgBackbonePrice.increment(bps.price);
-			s.avgBackbonePurchaseQty.increment(bwToPurchasePerUser);
+			s.avgBackbonePurchaseQty.increment(bwToPurchase);
 			
 		}
 		
@@ -146,8 +154,15 @@ public class ASP implements Steppable {
 		this.financials.earnRevenue(totalRevenue);
 
 	}
-	
-	
+
+	public double getCustomers(int nspID) {
+		double numCustomers = 0;
+		for (Consumer c : s.allConsumers) {
+			numCustomers += c.getASPNSPSubscribers((byte) nspID, (byte) id);
+		}
+		return numCustomers;
+	}
+
 	private void goBankrupt() {
 		quality = 0;
 		bankrupt = true;
