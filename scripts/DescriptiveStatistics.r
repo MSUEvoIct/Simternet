@@ -79,6 +79,15 @@ png(filename="BoxPlot.Gen.networkBWReceived.png", height=h, width=w)
 boxplot(data$FlowBWReceived ~ data$Generation, xlab="Generation", ylab="Bandwidth", main = "Flow Bandwidth Received (Per Flow avg/sim)")
 dev.off()
 
+png(filename="BoxPlot.Gen.networkFlowsSent.png", height=h, width=w)
+boxplot(data$NumFlowsSent ~ data$Generation, xlab="Generation", ylab="# of Flows", main = "# of Flows Sent")
+dev.off()
+
+png(filename="BoxPlot.Gen.networkFlowsReceived.png", height=h, width=w)
+boxplot(data$FlowBWReceived ~ data$Generation, xlab="Generation", ylab="# of Flows", main = "# of Flows Received")
+dev.off()
+
+
 png(filename="BoxPlot.Gen.networkPerASPCongestion.png", height=h, width=w)
 boxplot(data$PerASPAvgCongestion * 100 ~ data$Generation, xlab="Generation", ylab="% Congestion", main = "ASP Congestion (All ASP/NSP/Edge/Step avg/sim)")
 dev.off()
