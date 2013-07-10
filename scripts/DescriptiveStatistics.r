@@ -14,6 +14,11 @@ png(filename="BoxPlot.Gen.aspInvestment.png", height=h, width=w)
 boxplot(data$aspInvestment ~ data$Generation, xlab="Generation", ylab="Mean Investment", main = "Investment of ASPs")
 dev.off()
 
+png(filename="BoxPlot.Gen.aspQuality.png", height=h, width=w)
+boxplot(data$aspQuality ~ data$Generation, xlab="Generation", ylab="Mean Quality", main = "Quality of ASPs")
+dev.off()
+
+
 png(filename="BoxPlot.Gen.aspPrice.png", height=h, width=w)
 boxplot(data$aspPrice ~ data$Generation, xlab="Generation", ylab="Mean Price", main = "Mean Prices for ASP Services")
 dev.off()
@@ -84,7 +89,7 @@ boxplot(data$NumFlowsSent ~ data$Generation, xlab="Generation", ylab="# of Flows
 dev.off()
 
 png(filename="BoxPlot.Gen.networkFlowsReceived.png", height=h, width=w)
-boxplot(data$FlowBWReceived ~ data$Generation, xlab="Generation", ylab="# of Flows", main = "# of Flows Received")
+boxplot(data$NumFlowsReceived ~ data$Generation, xlab="Generation", ylab="# of Flows", main = "# of Flows Received")
 dev.off()
 
 
