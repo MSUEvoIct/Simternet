@@ -116,6 +116,7 @@ public class DataCenter extends Network {
 		}
 
 		owner.s.avgFlowBandwidthSent.increment(flow.bandwidth);
+		owner.s.flowsSent++;
 
 		// Immediately route the flow to the proper output backbone link.
 		this.route(flow);

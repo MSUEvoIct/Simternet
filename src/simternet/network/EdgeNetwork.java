@@ -89,6 +89,7 @@ public class EdgeNetwork extends Network {
 		// grab/aggregate information from flows
 		List<NetFlow> flows = link.receiveFlows();
 		for (NetFlow flow : flows) {
+			owner.s.flowsReceived++;
 			requestedBW[flow.aspID] += flow.bandwidthRequested;
 			observedBW[flow.aspID] += flow.bandwidth;
 			if (flow.bandwidth > maxObservedBandwidth[flow.aspID]) {
