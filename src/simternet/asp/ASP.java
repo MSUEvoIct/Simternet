@@ -94,6 +94,7 @@ public class ASP implements Steppable {
 			bps.aspCustomers = getCustomers();
 			bps.nspCustomers = s.allNSPs[nspID].getCustomers();
 			bps.intersectionCustomers = getCustomers(nspID);
+			bps.totalPopulation = s.getTotalPopulation();
 			
 			// Submit stimuli, process
 			//
