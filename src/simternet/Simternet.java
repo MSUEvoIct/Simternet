@@ -129,12 +129,16 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	Mean aspPrice = new Mean();
 	Mean aspSubscriptions = new Mean();
 	Mean aspHHI = new Mean();
+	public Mean aspQuality = new Mean();
 	public Mean aspCongestion = new Mean();
 	public Mean avgFlowBandwidthSent = new Mean();
 	public Mean avgFlowBandwidthReceived = new Mean();
 	
 	public Mean avgBackbonePrice = new Mean();
 	public Mean avgBackbonePurchaseQty = new Mean();
+	
+	public long flowsSent = 0;
+	public long flowsReceived = 0;
 	
 
 	/**
@@ -235,7 +239,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		outfileLock.lock();
 		if (Simternet.out == null) {
 			String fileName = "Simternet.out.job" + job + ".tsv";
-			String[] colNames = new String[19];
+			String[] colNames = new String[20];
 			colNames[0] = "Generation";
 			colNames[1] = "aspInvestment";
 			colNames[2] = "aspProfit";
@@ -255,6 +259,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 			colNames[16] = "NumFlowsReceived";
 			colNames[17] = "avgBackbonePrice";
 			colNames[18] = "avgBackbonePurchaseQty";
+			colNames[19] = "aspQuality";
 
 			Simternet.out = new DataOutputFile(fileName, colNames);
 		}
@@ -268,12 +273,10 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		for (int step = 0; step < steps; step++) {
 			this.schedule.step(this);
 			doMeasurements();
-			// TODO: Does anything else need to be run besides the MASON
-			// schedule?
 		}
 
 		// Output some data
-		Object[] data = new Object[19];
+		Object[] data = new Object[20];
 		data[0] = generation;
 
 		// ASP Total Investment
@@ -315,10 +318,11 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		data[12] = aspCongestion.getResult();
 		data[13] = avgFlowBandwidthSent.getResult();
 		data[14] = avgFlowBandwidthReceived.getResult();
-		data[15] = avgFlowBandwidthSent.getN();
-		data[16] = avgFlowBandwidthReceived.getN();
+		data[15] = flowsSent;
+		data[16] = flowsReceived;
 		data[17] = avgBackbonePrice.getResult();
 		data[18] = avgBackbonePurchaseQty.getResult();
+		data[19] = aspQuality.getResult();
 
 		
 		out.writeTuple(data);
@@ -569,7 +573,7 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 		measureEdgePrices();
 		measureEdgeSubsAndHHI();
 
-		measureAspPrices();
+		measureAspPriceAndQuality();
 		measureASPSubsAndHHI();
 	}
 
@@ -651,9 +655,10 @@ public class Simternet extends SimState implements AgencyModel, Steppable {
 	 * this is an average of the <i>offers</i> A price will be included here
 	 * even if no consumers use the service.
 	 */
-	private void measureAspPrices() {
+	private void measureAspPriceAndQuality() {
 		for (ASP asp : allASPs) {
 			aspPrice.increment(asp.price);
+			aspQuality.increment(asp.getQuality());
 		}
 	}
 
