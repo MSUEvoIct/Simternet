@@ -70,10 +70,15 @@ public class ASP implements Steppable {
 		
 		// Set quality
 		double qualToAdd = ind.improveQuality(new QualityStimulus(this));
+		if (qualToAdd < 0)
+			qualToAdd = 0;
+		
 		this.improveQuality(qualToAdd);
 
 		// Set price
 		price = ind.setPrice(new PriceStimulus(this));
+		if (price < 0)
+			price = 0;
 
 		// Update bandwidth
 		bandwidth = Math.pow(quality, s.qualityToBandwidthExponent);
@@ -99,6 +104,9 @@ public class ASP implements Steppable {
 			// Submit stimuli, process
 			//
 			double bwToPurchase = ind.buyBandwidth(bps);
+			if (bwToPurchase < 0)
+				bwToPurchase = 0;
+			
 			Network nspBackbone = s.allNSPs[nspID].backbone;
 			
 			// Now record (both sides of) this transaction.
