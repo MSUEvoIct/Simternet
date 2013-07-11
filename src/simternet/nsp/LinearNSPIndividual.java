@@ -7,7 +7,7 @@ import ec.vector.FloatVectorIndividual;
  * @author kkoning
  * 
  */
-public class SimpleNSPIndividual extends FloatVectorIndividual implements
+public class LinearNSPIndividual extends FloatVectorIndividual implements
 		NSPIndividual {
 
 	static final int POS_EDGEPROBCONSTANT = 0;
