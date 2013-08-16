@@ -19,6 +19,7 @@ public class LinearASPIndividual extends FloatVectorIndividual implements
 	public static final int POS_BWQTY_NSPCUSTOMERS = 4;
 	public static final int POS_BWQTY_ASPCUSTOMERS = 5;
 	public static final int POS_BWQTY_INTERSECTIONCUSTOMERS = 6;
+	public static final int POS_BWQTY_NSP_PRICE = 7;
 
 	@Override
 	public double setPrice(PriceStimulus ps) {
@@ -36,11 +37,11 @@ public class LinearASPIndividual extends FloatVectorIndividual implements
 	@Override
 	public double buyBandwidth(BackbonePurchaseStimulus bps) {
 
-		double bandwidth = genome[POS_BWQTY_TOTALPOP] * bps.totalPopulation
+		double bandwidth = (genome[POS_BWQTY_TOTALPOP] * bps.totalPopulation
 				+ genome[POS_BWQTY_NSPCUSTOMERS] * bps.nspCustomers
 				+ genome[POS_BWQTY_ASPCUSTOMERS] * bps.aspCustomers
 				+ genome[POS_BWQTY_INTERSECTIONCUSTOMERS]
-				* bps.intersectionCustomers;
+				* bps.intersectionCustomers) * bps.price * (-Math.exp(genome[POS_BWQTY_NSP_PRICE])) ;
 		return bandwidth;
 	}
 }
