@@ -1,4 +1,4 @@
-package simternet.consumer;
+ package simternet.consumer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,7 +109,8 @@ public class Consumer implements Steppable {
 		double prefTerm = Math.pow(prefDiff, s.preferenceExponent);
 		double congest = 0;
 		if (nspID >= 0)
-			congest = s.allNSPs[nspID].edgeNetworks[x][y].congestion[aspID];
+//			if (s.allNSPs[nspID].edgeNetworks[x][y] != null)
+				congest = s.allNSPs[nspID].edgeNetworks[x][y].congestion[aspID];
 		double congestTerm = 1 - congest;
 
 		toReturn.aspID = aspID;
@@ -141,7 +142,9 @@ public class Consumer implements Steppable {
 
 		// Potentially one for each NSP at this location
 		for (byte nspID = 0; nspID < s.allNSPs.length; nspID++) {
-			EdgeBenefit eb = getEdgeBenefit(nspID, x, y);
+			EdgeBenefit eb = null;
+			if (s.allNSPs[nspID].edgeNetworks[x][y] != null)
+				eb = getEdgeBenefit(nspID, x, y);
 			if (eb != null)
 				toReturn.add(eb);
 		}
@@ -243,6 +246,17 @@ public class Consumer implements Steppable {
 
 	@Override
 	public void step(SimState state) {
+		// Need to unsubscribe from edge networks if the NSP went bankrupt and it's no longer there
+		for (Int2D loc : s.getAllLocations()) {
+			byte nspID = nspUsed[loc.x][loc.y];
+			if (nspID >= 0) {
+				if (s.allNSPs[nspID].edgeNetworks[loc.x][loc.y]== null ) {
+					nspUsed[loc.x][loc.y] = -1;
+				}
+				
+			}
+		}
+		
 		ind.manageApplications(this, s);
 		ind.manageNetworks(this, s);
 

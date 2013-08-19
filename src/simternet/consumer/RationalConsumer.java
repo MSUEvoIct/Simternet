@@ -95,6 +95,9 @@ public class RationalConsumer extends NullIndividual implements
 		if (topSurplus < 0){ //Don't use any NSP if there is no positive surplus
 			return Consumer.NONSP;
 		}
+		if (revSortedEdgeBenefits.size() == 0){ //If there are no NSPs in this list, can't pick any
+			return Consumer.NONSP;
+		}
 		if (revSortedEdgeBenefits.size() == 1){ //If there is only one candidate with positive surplus, pick it
 			return revSortedEdgeBenefits.get(0).nspID;
 		}
