@@ -11,26 +11,26 @@ import ec.vector.FloatVectorIndividual;
  */
 public class DirectASPIndividual extends FloatVectorIndividual implements
 		ASPIndividual {
+	private static final long serialVersionUID = 1L;
 
 	public static final int POS_PRICE = 0;
 	public static final int POS_QUALITY = 1;
 	public static final int POS_BWQTY_POPULATION = 2;
 	
-	
 	@Override
 	public double setPrice(PriceStimulus ps) {
-		return genome[POS_PRICE];
+		return Math.exp(genome[POS_PRICE]);
 	}
 
 	@Override
 	public double improveQuality(QualityStimulus qs) {
-		return genome[POS_QUALITY];
+		return Math.exp(genome[POS_QUALITY]);
 	}
 
 	@Override
 	public double buyBandwidth(BackbonePurchaseStimulus bps) {
-		// TODO Auto-generated method stub
-		return genome[POS_BWQTY_POPULATION] * bps.totalPopulation;
+		// Bandwidth is scaled by size of population
+		return Math.exp(genome[POS_BWQTY_POPULATION]) * bps.totalPopulation; 
 	}
 
 }
