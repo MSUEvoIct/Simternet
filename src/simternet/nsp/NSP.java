@@ -273,12 +273,16 @@ public class NSP implements Steppable {
 		// Price the EdgeNetworks we've built
 		for (EdgePricingStimulus eps : makeEdgePricingStimuli()) {
 			double price = ind.priceEdge(eps);
+			if (price < 0)
+				price = 0;
 			setEdgePrice(eps.location.x, eps.location.y, price);
 		}
 
 		// Price ASP BackboneLink connections
 		for (BackbonePricingStimulus bps : makeBackbonePricingStimuli()) {
 			double price = ind.priceBackboneLink(bps);
+			if (price < 0)
+				price = 0;
 			setASPTransitPrice(bps.aspID, price);
 		}
 
@@ -414,6 +418,9 @@ public class NSP implements Steppable {
 		for (int aspID = 0; aspID < s.allASPs.length; aspID++) {
 			BackbonePricingStimulus bps = new BackbonePricingStimulus();
 			bps.aspID = aspID;
+			bps.aspQuality = s.allASPs[aspID].getQuality();
+			bps.qualityValueExponent = s.qualityExponent;
+			
 			stimuli.add(bps);
 		}
 		return stimuli;

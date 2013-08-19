@@ -17,6 +17,9 @@ public class LinearNSPIndividual extends FloatVectorIndividual implements
 	static final int POS_EDGEPRICEEDGES = 3;
 	static final int POS_EDGEPRICE_PERCENT_POP = 4;
 	static final int POS_EDGEPRICE_PERCENT_SUBS = 5;
+	
+	static final int POS_BACKBONEPRICE_CONSTANT = 6;
+	static final int POS_BACKBONEPRICE_VALUETERM = 7;
 
 	@Override
 	public boolean buildEdge(EdgeBuildingStimulus ebs) {
@@ -46,8 +49,11 @@ public class LinearNSPIndividual extends FloatVectorIndividual implements
 
 	@Override
 	public double priceBackboneLink(BackbonePricingStimulus bps) {
-		// TODO Just use the unit price for now.
-		return 1;
+		
+		double value = Math.pow(bps.aspQuality, bps.qualityValueExponent);
+		double price = genome[POS_BACKBONEPRICE_CONSTANT] + genome[POS_BACKBONEPRICE_VALUETERM] * value;
+		
+		return price;
 	}
 
 }
