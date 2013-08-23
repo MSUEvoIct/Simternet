@@ -2,7 +2,6 @@ package simternet.asp;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import simternet.BankruptcyException;
 import simternet.Financials;
 import simternet.Simternet;
 import simternet.consumer.Consumer;
@@ -114,7 +113,7 @@ public class ASP implements Steppable {
 			
 			try {
 				this.financials.payExpense(totalBandwidthBill);
-			} catch (BankruptcyException e) {
+			} catch (Exception e) {
 				goBankrupt();
 				return;
 			}
